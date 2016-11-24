@@ -67,11 +67,11 @@ class LeapDataset:
                      [0, 0, 1]]))
 
                 matrix_rotate = numpy.asmatrix(numpy.array(
-                    [[cosang, sinang, 0],
-                     [-sinang, cosang, 0],
+                    [[cosang, - sinang, 0],
+                     [sinang, cosang, 0],
                      [0, 0, 1]]))
 
-                m = matrix_translantion @ matrix_rotate @ matrix_translantion_back;
+                m = matrix_translantion * matrix_rotate * matrix_translantion_back;
 
                 # Per ogni punto presente
                 for index in range(0, len(result)):
@@ -79,9 +79,9 @@ class LeapDataset:
                     result_temp = numpy.array([[0,0,1]])
                     result_temp[0][0]= result[index][0]
                     result_temp[0][1]= result[index][1]
-                    t =  result_temp[0]@ m
-                    result[index][0] = t[0,0]
-                    result[index][1] = t[0,1]
+                    t =  m * numpy.matrix(result_temp[0]).T
+                    result[index][0] = t[0]
+                    result[index][1] = t[1]
 
                 # Salva
                 numpy.savetxt(output_dir + name +'_{}.csv'.format(index_file), result, delimiter=',')
