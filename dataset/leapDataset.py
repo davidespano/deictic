@@ -51,33 +51,35 @@ class LeapDataset:
                 x_min = result[mins[0], 0]
                 y_min = result[mins[1], 1]
                 z_min = result[mins[2], 2]
-                den_x = (x_max - x_min)/2
-                den_y = (y_max - y_min)/2
-                den_z = (z_max - z_min)/2
-                # Per ogni punto presente
+                den_x = (x_max + x_min)/2
+                den_y = (y_max + y_min)/2
+                den_z = (z_max + z_min)/2
+
                 theta = radians(degree)
                 cosang, sinang = cos(theta), sin(theta)
+                matrix_translantion = numpy.asmatrix(numpy.array(
+                    [[1, 0, den_x],
+                     [0, 1, den_y],
+                     [0, 0, 1]]))
+                matrix_translantion_back = numpy.asmatrix(numpy.array(
+                    [[1, 0, -den_x],
+                     [0, 1, -den_y],
+                     [0, 0, 1]]))
+
+                matrix_rotate = numpy.asmatrix(numpy.array(
+                    [[cosang, sinang, 0],
+                     [-sinang, cosang, 0],
+                     [0, 0, 1]]))
+
+                m = matrix_translantion @ matrix_rotate @ matrix_translantion_back;
+
+                # Per ogni punto presente
                 for index in range(0, len(result)):
-                    matrix_translantion = numpy.asmatrix(numpy.array(
-                        [[1, 0, den_x],
-                        [0, 1, den_y],
-                        [0, 0, 1]]))
-                    matrix_translantion_back = numpy.asmatrix(numpy.array(
-                        [[1, 0, -den_x],
-                        [0, 1, -den_y],
-                        [0, 0, 1]]))
 
-                    matrix_rotate = numpy.asmatrix(numpy.array(
-                        [[cosang, -sinang, 0],
-                        [sinang, cosang, 0],
-                        [0,0,1]]))
-
-                    #m = matrix_translantion * matrix_rotate * matrix_translantion_back;
-                    m = matrix_rotate
                     result_temp = numpy.array([[0,0,1]])
                     result_temp[0][0]= result[index][0]
                     result_temp[0][1]= result[index][1]
-                    t =  result_temp[0]*m
+                    t =  result_temp[0]@ m
                     result[index][0] = t[0,0]
                     result[index][1] = t[0,1]
 
