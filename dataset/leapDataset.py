@@ -5,8 +5,19 @@ import scipy
 import matplotlib.pyplot as plt
 import random
 import os
+import re
 from math import sin, cos, radians
 from shutil import copyfile
+from enum import Enum
+
+random.seed(0)
+
+class Operator(Enum):
+    sequence = 1
+    iterative = 2
+    choice = 3
+    disabling = 4
+    parallel = 5
 
 class LeapDataset:
 
@@ -16,7 +27,7 @@ class LeapDataset:
     def getCsvDataset(self):
         return CsvDataset(self.dir)
 
-    def swap(self, output_dir, name):
+    def swap(self, output_dir, name, dimensions = 2):
         # Lettura file
         index_file = 0
         for filename in self.getCsvDataset():
@@ -25,11 +36,20 @@ class LeapDataset:
                 reader = csv.reader(f, delimiter=',')
                 vals = list(reader)
                 result = numpy.array(vals).astype('float')
-                # Swap x con y
-                for index in range(0, len(result)):
-                    temp = result[index][0]
-                    result[index][0] = result[index][1]
-                    result[index][1] = temp
+
+                if dimensions == 2:
+                    # Swap x con y
+                    for index in range(0, len(result)):
+                        temp = result[index][0]
+                        result[index][0] = result[index][1]
+                        result[index][1] = temp
+                elif dimensions == 3:
+                    # Swap x con z
+                    for index in range(0, len(result)):
+                        temp = result[index][0]
+                        result[index][0] = result[index][2]
+                        result[index][2] = temp
+
                 # Salva
                 numpy.savetxt(output_dir + name + '_{}.csv'.format(index_file), result, delimiter=',')
 
@@ -196,19 +216,44 @@ class LeapDataset:
         else:
             plt.legend(loc='upper right')
 
-    # Creazione sequenze
-    def sequence_merge(self,  second, dimensions = 2, scale = 1):
+    ### Creazione sequenze ###
+    # Sequence
+    def sequence_merge(self,  list_dataset, dimensions = 2, scale = 1):
         first_seq = self.read_dataset(dimensions, scale)
-        second_seq = second.read_dataset(dimensions, scale)
 
         sequences = []
-
+        # Per ogni file in first_seq
         for i in range(0, len(first_seq)):
-            for j in range(0, len(second_seq)):
-                sequences.append(numpy.concatenate((first_seq[i],  second_seq[j]), axis= 0))
+            seq = first_seq[i]
+            # Per ogni elemento presente nella lista
+            for file in list_dataset :
+                element = file.read_dataset(dimensions, scale)
+                random.seed()
+                num_rand = int(random.uniform(0, len(element)-1))
+                seq = numpy.concatenate((seq, element[num_rand]), axis=0)
+            # Salva nuova sequenza
+            sequences.append(seq)
 
         return sequences
 
+    # Iterative
+    def iterative_merge(self, iterazioni = 2, dimensions=2, scale=1):
+        first_seq = self.read_dataset(dimensions, scale)
+
+        sequences = []
+        # Per ogni file
+        for i in range(0, len(first_seq)):
+            seq = first_seq[i]
+            # Genera un numero casuale che indica il file con cui creare l'iterative
+            for j in range(0, iterazioni):
+                random.seed()
+                num_rand = int(random.uniform(0, len(first_seq)-1))
+                seq = numpy.concatenate((seq, first_seq[num_rand]), axis = 0)
+            sequences.append(seq)
+
+        return sequences
+
+    # Disabling
     def disabling_merge(self, second, third, dimensions=2, scale=1):
         first_seq = self.read_dataset(dimensions, scale)
         second_seq = second.read_dataset(dimensions, scale)
@@ -217,68 +262,93 @@ class LeapDataset:
         sequences = []
 
         for i in range(0, len(first_seq)):
-            for j in range(0, len(second_seq)):
-                for k in range(0, len(third_seq)):
-                    sequences.append(numpy.concatenate((first_seq[i], second_seq[j]), third_seq[k], axis=0))
+            random.seed()
+            j = int(random.uniform(0, len(second_seq)-1))
+            k = int(random.uniform(0, len(third_seq)-1))
+            sequences.append(numpy.concatenate((first_seq[i], second_seq[j], third_seq[k]), axis=0))
 
         return sequences
 
-    def parallel_merge(self, second, dimensions=2, scale=1, flag=False):
+    # Parallel
+    def parallel_merge(self, second, dimensions=2, scale=1, flag_trasl=False):
         first_seq = self.read_dataset(dimensions, scale)
         second_seq = second.read_dataset(dimensions, scale)
 
         sequences = []
 
-        if flag:
-            for i in range(0, len(first_seq)):
-                for j in range(0, len(second_seq)):
-                    merge = numpy.c_[first_seq[i], second_seq[j]]
-                    sequences.append(merge)
-        else:
-            random.seed()
-            for s_first in first_seq:
-                for s_second in second_seq:
-                    num_rand = int(random.uniform(1, len(s_first) / 3))
 
-                    merge = []
-                    # Parte iniziale
-                    for i in range(0, num_rand):
-                        merge.append(numpy.concatenate((s_first[i],  s_second[0]), axis=0))
-                    # Parte centrale
-                    for i in range(num_rand, len(s_first)):
-                        merge.append(numpy.concatenate((s_first[i], s_second[i - num_rand]), axis=0))
-                    # Parte finale
-                    for i in range(len(second_seq) - num_rand, len(second_seq)):
-                        merge.append(numpy.concatenate((s_first[len(s_first)-1], s_second[i]), axis=0))
+        for s_first in first_seq:
+            num_rand = 0
+            if flag_trasl:
+                random.seed()
+                num_rand = int(random.uniform(1, len(first_seq[0]) / 3))
 
-                    sequences.append(merge)
+            s_second = second_seq[int(random.uniform(0, len(second_seq)-1))]
+            merge = []
+
+            if len(s_first) <= len(second_seq):
+                # Parte iniziale
+                for i in range(0, num_rand):
+
+                    merge.append(numpy.concatenate((s_first[i],  s_second[0]), axis=0))
+                # Parte centrale
+                for i in range(num_rand, len(s_first)):
+                    merge.append(numpy.concatenate((s_first[i], s_second[i - num_rand]), axis=0))
+
+                # Parte finale
+                for i in range(len(s_first), len(second_seq)):
+                    merge.append(numpy.concatenate((s_first[len(s_first)-1], s_second[i]), axis=0))
+            else:
+                index = 0
+                # Parte iniziale
+                for i in range(0, num_rand):
+                    merge.append(numpy.concatenate((s_first[i], s_second[0]), axis=0))
+
+                # Parte centrale
+                for i in range(num_rand, len(s_first)):
+                    if i >= len(s_second):
+                        index = len(s_second)-1
+                    else:
+                        index = i
+
+                    merge.append(numpy.concatenate((s_first[i], s_second[index - num_rand]), axis=0))
+
+                # Parte finale
+                for i in range(len(second_seq) - num_rand, len(second_seq)):
+                    merge.append(numpy.concatenate((s_first[len(s_first) - 1], s_second[i]), axis=0))
+
+            sequences.append(merge)
 
         return sequences
 
-
     # Gesture Folder
-    def find_gesture_file(self, path, baseDir, name):
+    @staticmethod
+    def find_gesture_file(path, baseDir, name):
         # Cartella per la gesture
         if not os.path.exists(baseDir + 'original/' + name):
             os.makedirs(baseDir + 'original/' + name)
 
         index = 0
         # Per ogni sottodirectory
-        for folder in LeapDataset.get_immediate_subdirectories(self, path):
+        folders = LeapDataset.get_immediate_subdirectories(path)
+        folders = sorted(folders, key=lambda x: (int(re.sub('\D', '', x)), x))# Riordina cartelle
+        for folder in folders:
             # Per ogni file
             for file in os.listdir(path+folder):
-                if name in file:
+                if (name+'.csv') == file:
                     index = index + 1
                     copyfile(path+folder+'/'+file, baseDir+'original/'+name+'/'+name+'{}.csv'.format(index))
 
         return
     # Prende tutte le subdirectories di una data directory
-    def get_immediate_subdirectories(self, a_dir):
-        return [name for name in os.listdir(a_dir)
-            if os.path.isdir(os.path.join(a_dir, name))]
+    @staticmethod
+    def get_immediate_subdirectories(baseDir):
+        return [name for name in os.listdir(baseDir)
+            if os.path.isdir(os.path.join(baseDir, name))]
 
     # Replace Csv
-    def replace_csv(self, baseDir):
+    @staticmethod
+    def replace_csv(baseDir):
         for file in os.listdir(baseDir):
             with open('/'+baseDir+file) as fin, open('/'+baseDir+'fixed_'+file, 'w') as fout:
                 o = csv.writer(fout)
@@ -286,3 +356,21 @@ class LeapDataset:
                     o.writerow(line.split())
                 os.remove('/'+baseDir+file)
                 os.rename('/'+baseDir+'fixed_'+file, '/'+baseDir+file)
+
+    @staticmethod
+    def gen_random_name(nome, gestures):
+        num_rand_1 = int(random.uniform(0, len(nome) - 1))
+        index = -1
+
+        while LeapDataset.check(num_rand_1, nome, gestures) :
+            index = index + 1
+            num_rand_1 = index
+
+        return num_rand_1
+
+    @staticmethod
+    def check(num_rand_1, nome, gestures):
+        for i in range(0, len(gestures)):
+            if nome[num_rand_1] in gestures[i]:
+                return True
+        return False

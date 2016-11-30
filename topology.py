@@ -50,6 +50,7 @@ class HiddenMarkovModelTopology :
         model.add_transition(states[n_states - 1], model.end, 0.5)
 
         model.bake()
+
         return model
 
     @staticmethod

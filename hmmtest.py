@@ -3,129 +3,11 @@ from pomegranate import *
 from topology import *
 import matplotlib.pyplot as plt
 import random
+from gesture import *
+from test import *
 from enum import Enum
 
-random.seed(0)
-
-
-class Direction(Enum):
-    left = 3
-    right = 1
-    up = 2
-    down = 4
-    diagonal_up = 5
-    diagonal_down = 6
-
-class TypeTest(Enum):
-    rectangle = 1
-    triangle = 2
-
-
-#### Creazione HMM ####
-def create_swipe_emissions(n_states, direction= Direction.left, scale=1):
-    distributions = []
-    step = scale / n_states;
-    for i in range(0, n_states):
-        if direction == Direction.left:
-            a = scale - (i * step)
-            b = random.random() * scale
-        elif direction == Direction.right:
-            a = i * step
-            b = random.random() * scale
-        elif direction == Direction.up:
-            a = random.random() * scale
-            b = i * step
-        elif direction == Direction.down:
-            a = random.random() * scale
-            b = scale - (i * step)
-        elif direction == Direction.diagonal_up:
-            a = i * step
-            b = i * step
-        elif direction == Direction.diagonal_down:
-            a = scale - (i * step)
-            b = scale - (i * step)
-
-        gaussianX = NormalDistribution(a, scale * 0.1)
-        gaussianY = NormalDistribution(b, scale * 0.1)
-        distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
-    return distributions
-
-def create_complete_emissions(n_states, scale=1):
-    distributions = []
-    step = scale / n_states;
-    for i in range(0, n_states):
-        a = random.random() * scale
-        b = random.random() * scale
-        gaussianX = NormalDistribution(a, scale * 0.1)
-        gaussianY = NormalDistribution(b, scale * 0.1)
-        distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
-    return distributions
-
-def create_swipe_model(direction, n_states, name=None):
-    # create the hmm model
-    topology_factory = HiddenMarkovModelTopology()
-    emissions = create_swipe_emissions(n_states, direction, scale=100)
-    if name is None:
-        if direction == Direction.left:
-            name = 'left-swipe'
-        elif direction == Direction.right:
-            name = 'right-swipe'
-        elif direction == Direction.up:
-            name = 'up-swipe'
-        elif direction == Direction.down:
-            name = 'down-swipe'
-        elif direction == Direction.diagonal_up:
-            name = 'diagonal_up-swipe'
-        elif direction == Direction.diagonal_down:
-            name = 'diagonal_down-swipe'
-
-    swipe = topology_factory.forward(name, n_states, emissions)
-    return swipe
-
-def create_complete_model(n_states, name=None):
-    # Creazione hmm
-    topology_factory = HiddenMarkovModelTopology()
-    emissions = create_swipe_emissions(n_states, scale=100)
-    swipe = topology_factory.forward(name, n_states, emissions)
-    return swipe
-
-#### Training & Valutazione ####
-def leave_one_out(model, correct_dir, index):
-    # load dataset with correct examples and apply LOO technique
-    correct = LeapDataset(correct_dir)
-    one, sequences = correct.leave_one_out(index, dimensions=2, scale = 100)
-
-
-    # train the hmm
-    model.fit(sequences, use_pseudocount=True)
-
-    print('Leave one out log-probability: {}'.format(model.log_probability(one)))
-
-    return model
-
-
-def wrong_test(model, wrong_dir, dimensions=2):
-    wrong = LeapDataset(wrong_dir)
-
-    for filename in wrong.getCsvDataset():
-        sequence = wrong.read_file(filename, dimensions, scale=100)
-        print('{} log-probability: {}, normalised-log-probability {}'.format(
-            filename, model.log_probability(sequence),
-            model.log_probability(sequence) / len(sequence)
-        ))
-    plt.plot(sequence)
-    plt.show()
-
-def plot_sample(model, samples = 3):
-    fig = plt.figure();
-    plt.axis('equal')
-    for i in range(0, samples):
-        sample = model.sample()
-        print(model.log_probability(sample))
-        seq = numpy.array(sample).astype('float')
-        plt.plot(seq[:, 0], seq[:, 1], marker='.')
-    plt.show()
-
+#### Valutazione ####
 def viterbi_seq(model, dir):
     data = LeapDataset(dir)
     for filename in data.getCsvDataset():
@@ -133,6 +15,16 @@ def viterbi_seq(model, dir):
         logp, states = model.viterbi(sequence)
         print('{} log-probability: {}'.format(filename, logp))
         print('{} state sequence: {}'.format(filename, ' '.join(state.name for idx, state in states[1:])))
+
+def plot_sample(model, samples=3):
+    fig = plt.figure();
+    plt.axis('equal')
+    for i in range(0, samples):
+        sample = model.sample()
+        print(model.log_probability(sample))
+        seq = numpy.array(sample).astype('float')
+        plt.plot(seq[:, 0], seq[:, 1], marker='.')
+        plt.show()
 
 #### Test ####
 def test_1(baseDir, direction, n_states):
@@ -234,17 +126,16 @@ def test_iterative(baseDir, n_states):
         numpy.savetxt(baseDir + 'iterative/left/left-left-swipe{}.csv'.format(i), sequences[i], delimiter=',')
 
     left, seq_edges = HiddenMarkovModelTopology.iterative(left)
+    left.plot()
+    plt.show()
 
-    print(seq_edges)
 
     print('Solo destra')
     wrong_test(left, baseDir + 'down-trajectory/right/')
     print()
-
     print('Solo sinistra')
     wrong_test(left, baseDir + 'down-trajectory/left/')
     print()
-
     print('Due left')
     wrong_test(left, baseDir + 'iterative/left/')
     print()
@@ -266,8 +157,8 @@ def test_disabling(baseDir, n_states):
     it_seq, seq_edges = HiddenMarkovModelTopology.iterative(seq_lr, seq_edges)
     disabling4, seq_edges = HiddenMarkovModelTopology.disabling(it_seq, left2, seq_edges)
 
-    #it_seq.plot()
-    #plt.show()
+    disabling4.plot()
+    plt.show()
 
     for edge in seq_edges:
         print('edge ({}, {})'.format(edge[0].name, edge[1].name))
@@ -284,8 +175,8 @@ def test_parallel(baseDir, n_states):
     # definizione parallel
     parallel, seq_edges = HiddenMarkovModelTopology.parallel(left, right)
 
-    #parallel.plot();
-    #plt.show()
+    parallel.plot();
+    plt.show()
 
     # Creazione dataset
     #sequences = leftDataset.parallel_merge(rightDataset, dimensions=2, scale=1, flag=False)
@@ -301,126 +192,330 @@ def test_parallel(baseDir, n_states):
     #wrong_test(parallel, baseDir + 'parallel/left-right-dis-swipe/')
     #print(parallel.log_probability(parallel.sample()))
 
+
+### Dataset ###
+def create_operators_dataset(baseDir, operator, dimensions=2, scale=1):
+    nome = []
+    # Caret
+    nome.append('caret')
+    # Delete
+    nome.append('delete')
+    # Left
+    nome.append('left')
+    # Rectangle
+    nome.append('rectangle')
+    # Right
+    nome.append('right')
+    # Square Braket Left
+    nome.append('square-braket-left')
+    # Square Braket Right
+    nome.append('square-braket-right')
+    # Triangolo
+    nome.append('triangle')
+    # V
+    nome.append('v')
+    # X
+    nome.append('x')
+
+    gestures = []
+    for index in range(0, len(nome), 2):
+        random.seed()
+
+        # Choice
+        if (operator == Operator.choice):
+            operatore = 'choice'
+            #sequence = first.choice_
+
+        # Disabling : iterative + ground
+        elif (operator == Operator.disabling):
+            num_rand_1 = index
+            num_rand_2 = index + 1
+
+            first = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_1] + '/')
+            second = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_2] + '/')
+            filename = nome[num_rand_1] +'_'+ nome[num_rand_2]
+            # Crea sequenze
+            operatore = 'disabling'
+            sequences = first.disabling_merge(first, second, dimensions=dimensions, scale=scale)
+
+        # Iterative
+        elif (operator == Operator.iterative):
+            first = LeapDataset(baseDir + 'down-trajectory/' + nome[index] + '/')
+            filename = nome[index]
+
+            # Crea sequenze
+            operatore = 'iterative'
+            sequences = first.iterative_merge(iterazioni=int(random.uniform(1, 10)), dimensions=2, scale=1)
+
+        # Parallel
+        elif (operator == Operator.parallel):
+            num_rand_1 = index
+            num_rand_2 = index + 1
+
+            first = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_1] + '/')
+            second = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_2] + '/')
+            filename = nome[num_rand_1] +'_'+ nome[num_rand_2]
+
+            operatore = 'parallel'
+            sequences = first.parallel_merge(second, dimensions=dimensions, scale=scale, flag_trasl=False)
+
+        # Sequence
+        elif (operator == Operator.sequence):
+            num_rand_1 = index
+            num_rand_2 = index+1
+            first = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_1] + '/')
+            second = LeapDataset(baseDir + 'down-trajectory/' + nome[num_rand_2] + '/')
+            filename = nome[num_rand_1] + '_' + nome[num_rand_2]
+
+            operatore = 'sequence'
+            sequences = first.sequence_merge([second], dimensions=dimensions, scale=scale)
+
+        gestures.append(filename)
+        # Salva file
+        create_folder(baseDir, filename, operator = operatore, is_ground = False)
+        for i in range(0, len(sequences)):
+            numpy.savetxt(baseDir + operatore + '/' + filename + '/' + filename + '_{}.csv'.format(i), sequences[i],
+                          delimiter=',')
+
+
+### Prove ###
+def test_primitive(baseDir, n_states, direction, degree = 0):
+    dimensions = 2
+
+    # Forward
+    if direction == Direction.forward:
+        model = create_3d_swipe_model(direction = Direction.forward, n_states = n_states)
+        dimensions = 3
+    # Behind
+    elif direction == Direction.behind:
+        model = create_3d_swipe_model(direction=Direction.behind, n_states = n_states)
+        dimensions = 3
+    # Left, Right, Up, Down, Diagonal
+    else:
+        model = create_swipe_model(direction=direction, n_states=n_states)
+
+    print('Left')
+    wrong_test(model, baseDir + 'down-trajectory/left/', dimensions= dimensions)
+    print('Right')
+    wrong_test(model, baseDir + 'down-trajectory/right/', dimensions=dimensions)
+    print('Up')
+    wrong_test(model, baseDir + 'down-trajectory/up/', dimensions=dimensions)
+    print('Down')
+    wrong_test(model, baseDir + 'down-trajectory/down/', dimensions= dimensions)
+    print('Diagonal')
+    wrong_test(model, baseDir+'down-trajectory/diagonal_{}/'.format(degree), dimensions=dimensions)
+    print('Forward')
+    wrong_test(model, baseDir + 'down-trajectory/forward/', dimensions= dimensions)
+    print('Behind')
+    wrong_test(model, baseDir + 'down-trajectory/behind/', dimensions=dimensions)
+
+    # Plotta sample
+    plot_sample(model, 3)
+
 def test_leap(baseDir, n_states, typeTest):
 
     #### Test ####
     # Rectangle
     if(typeTest == TypeTest.rectangle):
-        # Creazione hmm primitive
-        left = create_swipe_model(Direction.left, n_states)
-        right = create_swipe_model(Direction.right, n_states)
-        up = create_swipe_model(Direction.up, n_states)
-        down = create_swipe_model(Direction.down, n_states)
-        # Training hmm primitive
-        leftDataset = LeapDataset(baseDir + 'down-trajectory/left/')
-        rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
-        upDataset = LeapDataset(baseDir + 'down-trajectory/up/')
-        downDataset = LeapDataset(baseDir + 'down-trajectory/down/')
-        left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-        right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
-        up.fit(upDataset.read_dataset(2, 100), use_pseudocount=True)
-        down.fit(downDataset.read_dataset(2, 100), use_pseudocount=True)
+        model = create_rectangle(baseDir, n_states)
 
-        # Creazione hmm gesture completa
-        rectangle_model, seq_edges = HiddenMarkovModelTopology.sequence([down, right, up, left])
-        # Prova
-        wrong_test(rectangle_model, baseDir + 'down-trajectory/rectangle/')
-        print()
-        wrong_test(rectangle_model, baseDir + 'down-trajectory/triangle/')
     # Triangle
-    if(typeTest == TypeTest.triangle):
-        # Creazione hmm Primitive
-        right = create_swipe_model(Direction.right, n_states)
-        up_45 = create_swipe_model(Direction.diagonal_up, n_states)
-        down_m_45 = create_swipe_model(Direction.diagonal_down, n_states)
-        # Training hmm primitive
-        rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
-        up_45Dataset = LeapDataset(baseDir + 'down-trajectory/diagonal_up_45/')
-        down_m_45Dataset = LeapDataset(baseDir + 'down-trajectory/diagonal_down_-45/')
-        right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
-        up_45.fit(up_45Dataset.read_dataset(2, 100), use_pseudocount=True)
-        down_m_45.fit(down_m_45Dataset.read_dataset(2, 100), use_pseudocount=True)
-        # Creazione hmm gesture completa
-        triangle_model, seq_edges = HiddenMarkovModelTopology.sequence([down_m_45, right, up_45])
+    elif(typeTest == TypeTest.triangle):
+        model = create_triangle(baseDir, n_states)
 
-        wrong_test(up_45, baseDir + 'down-trajectory/left/')
-        print()
-        wrong_test(up_45, baseDir + 'down-trajectory/right/')
-        print()
-        wrong_test(up_45, baseDir + 'down-trajectory/up/')
-        print()
-        wrong_test(up_45, baseDir + 'down-trajectory/down/')
-        # Prova
-        #wrong_test(triangle_model, baseDir + 'down-trajectory/triangle/')
-        print()
-        #wrong_test(triangle_model, baseDir + 'down-trajectory/rectangle/')
+    # Caret
+    elif typeTest == TypeTest.caret:
+        model = create_caret(baseDir, n_states)
 
-def create_primitive_dataset(baseDir, direction, degree = 0, sample = 20):
+    # V
+    elif typeTest == TypeTest.v:
+        model = create_v(baseDir, n_states)
 
-    # Creazione cartella che ospiterà i file
-    if direction == Direction.up:
-        dataset = LeapDataset(baseDir + 'original/right/')
-        nome = 'up'
-    elif direction == Direction.down:
-        dataset = LeapDataset(baseDir + 'original/left/')
-        nome = 'down'
-    elif direction == Direction.diagonal_up:
-        dataset = LeapDataset(baseDir + 'original/right/')
-        nome = 'diagonal_up_{}'.format(degree)
-    elif direction == Direction.diagonal_down:
-        dataset = LeapDataset(baseDir + 'original/left/')
-        nome = 'diagonal_down_{}'.format(degree)
+    # X
+    elif typeTest == typeTest.x:
+        model = create_x(baseDir, n_states)
 
-    create_folder(baseDir, nome)
+    # Square Bracket Left
+    elif typeTest == typeTest.square_braket_left:
+        model = create_square_braket_left(baseDir, n_states)
 
-    # Creazione dataset
-    # Up or Down
-    if direction == Direction.up or direction == Direction.down:
-        # Swap
-        dataset.swap(baseDir + 'original/' + nome + '/', nome)
-    # Diagonal
-    elif direction == Direction.diagonal_up or direction == Direction.diagonal_down:
-        # Crea file originali
-        dataset.rotate_lines(baseDir + 'original/' + nome + '/', nome, degree)
+    # Square Bracket Right
+    elif typeTest == typeTest.square_braket_right:
+        model = create_square_braket_right(baseDir, n_states)
 
-    dataset = LeapDataset(baseDir + 'original/' + nome + '/')
-    # Normalizzazione
-    #dataset.normalise(baseDir + 'normalised-trajectory/' + nome + '/', norm_axis=True)
-    #dataset = LeapDataset(baseDir + 'normalised-trajectory/' + nome + '/')
-    # DownSample
-    #dataset.down_sample(baseDir + 'down-trajectory/' + nome + '/', sample)
-    #dataset = LeapDataset(baseDir + 'down-trajectory/'+nome+'/')
+    # Delete
+    elif typeTest == typeTest.delete:
+        model = create_delete(baseDir, n_states)
 
-    # Plot
-    for filename in dataset.getCsvDataset():
-        sequence = dataset.read_file(filename, dimensions = 2, scale=100)
-        plt.axis("equal")
-        plt.plot(sequence[:,0], sequence[:,1])
-        plt.show()
+    # Star
+    elif typeTest == typeTest.star:
+        model = create_star(baseDir, n_states)
 
-def create_gesture_dataset(baseDir, path, sample = 20):
-    # Creazione cartelle
-    create_folder(baseDir, path)
-    # Replace
-    LeapDataset.replace_csv('', baseDir + 'original/'+path)
-    # Creazione dataset originale
-    dataset = LeapDataset(baseDir+'original/'+path)
-    # Normalizzazione
-    dataset.normalise(baseDir+'normalised-trajectory/'+path, norm_axis = True)
-    dataset = LeapDataset(baseDir+'normalised-trajectory/'+path)
-    # DownSample
-    dataset.down_sample(baseDir+'down-trajectory/'+path, sample)
+    # Plotta sample
+    plot_sample(model, 3)
 
+    # Prova
+    print('Caret')
+    wrong_test(model, baseDir + 'down-trajectory/caret/')
+    print()
+    print('Rectangle')
+    wrong_test(model, baseDir + 'down-trajectory/rectangle/')
+    print()
+    print('Triangle')
+    wrong_test(model, baseDir + 'down-trajectory/triangle/')
+    print()
+    print('V')
+    wrong_test(model, baseDir + 'down-trajectory/v/')
+    print()
+    print('X')
+    wrong_test(model, baseDir + 'down-trajectory/x/')
+    print('Square Bracket Left')
+    wrong_test(model, baseDir + 'down-trajectory/square-braket-left/')
+    print('Square Bracket Right')
+    wrong_test(model, baseDir + 'down-trajectory/square-braket-right/')
+    print('Delete')
+    wrong_test(model, baseDir + 'down-trajectory/delete/')
+    print('Star')
+    wrong_test(model, baseDir + 'down-trajectory/star/')
 
-def create_folder(baseDir, nome):
-    # Creazione cartelle
-    if not os.path.exists(baseDir + 'original/' + nome):
-        os.makedirs(baseDir + 'original/' + nome)
-    if not os.path.exists(baseDir + 'normalised-trajectory/' + nome):
-        os.makedirs(baseDir + 'normalised-trajectory/' + nome)
-    if not os.path.exists(baseDir + 'down-trajectory/' + nome):
-        os.makedirs(baseDir + 'down-trajectory/' + nome)
+def compare_models(baseDir, n_states):
+    #### Test ####
+    models = []
+    # Caret
+    model, seq = create_caret(baseDir, n_states)
+    models.append(model)
+    # Delete
+    model, seq = create_delete(baseDir, n_states)
+    models.append(model)
+    # Left
+    model = create_primitive_model(baseDir, n_states, direction = Direction.left)
+    models.append(model)
+    # Rectangle
+    model, seq = create_rectangle(baseDir, n_states)
+    models.append(model)
+    # Right
+    model = create_primitive_model(baseDir, n_states, direction = Direction.right)
+    models.append(model)
+    # Square Braket Left
+    model, seq = create_square_braket_left(baseDir, n_states)
+    models.append(model)
+    # Square Braket Right
+    model, seq = create_square_braket_right(baseDir, n_states)
+    models.append(model)
+    # Triangle
+    model, seq = create_triangle(baseDir, n_states)
+    models.append(model)
+    # V
+    model, seq = create_v(baseDir, n_states)
+    models.append(model)
+    # X
+    model, seq = create_x(baseDir, n_states)
+    models.append(model)
 
+    compare_all_models_test(models, baseDir+'down-trajectory/')
+
+    #sequence = triangle.sample()
+    #result = numpy.array(sequence).astype('float')
+    #plt.axis("equal")
+    #plt.plot(result[:, 0], result[:, 1])
+    #plt.show()
+
+def compare_composite_models(baseDir, n_states, operator, dimensions = 2):
+    # Determina operazione
+    models_complete = []
+    # Choice
+    if (operator == Operator.choice):
+        operatore = 'choice/'
+    # Disabling : iterative + ground
+    elif (operator == Operator.disabling):
+        # Crea sequenze
+        operatore = 'disabling/'
+    # Iterative
+    elif (operator == Operator.iterative):
+        # Crea sequenze
+        operatore = 'iterative/'
+    # Parallel
+    elif (operator == Operator.parallel):
+        operatore = 'parallel/'
+    # Sequence
+    elif (operator == Operator.sequence):
+        operatore = 'sequence/'
+
+    # Scorri file nella cartella
+    folders = LeapDataset.get_immediate_subdirectories(baseDir+'/'+operatore)
+    folders = sorted(folders)  # Riordina cartelle
+    for folder in folders:
+        names = folder.split('_')
+        models = []
+        for name in names:
+            if name == 'caret':
+                type = TypeTest.caret
+            elif name == 'delete':
+                type = TypeTest.delete
+            elif name == 'left':
+                type = TypeTest.left_swipe
+            elif name == 'rectangle':
+                type = TypeTest.rectangle
+            elif name == 'square-braket-left':
+                type = TypeTest.square_braket_left
+            elif name == 'square-braket-right':
+                type = TypeTest.square_braket_right
+            elif name == 'triangle':
+                type = TypeTest.triangle
+            elif name == 'v':
+                type = TypeTest.v
+            elif name == 'x':
+                type = TypeTest.x
+            elif name == 'right':
+                type = TypeTest.right_swipe
+
+            model, seq = create_gesture(type, baseDir, n_states)
+            models.append(model)
+
+        # Crea modello
+        if (operator == Operator.choice):
+            complete_model, seq = create_choice(models)
+            models_complete.append(complete_model)
+        # Disabling : iterative + ground
+        elif (operator == Operator.disabling):
+            iterative, seq = create_iterative(models[0])
+            complete_model, seq = create_disabling(iterative, models[1], seq)
+            models_complete.append(complete_model)
+        # Iterative
+        elif (operator == Operator.iterative):
+            complete_model, seq = create_iterative(models[0])
+            models_complete.append(complete_model)
+        # Parallel
+        elif (operator == Operator.parallel):
+            # Cambia nomi stati modello
+            for model in models:
+                for indice in range(0, len(model.states)):
+                    state = model.states[indice]
+                    state.name = model.name+'_'+state.name+'_{}'.format(indice)
+            complete_model, seq = create_parallel(models[0], models[1])
+            models_complete.append(complete_model)
+        # Sequence
+        elif (operator == Operator.sequence):
+            complete_model, seq = create_sequence(models)
+            models_complete.append(complete_model)
+
+    compare_all_models_test(models_complete, baseDir+'/'+operatore, dimensions = dimensions)
+
+def compare_models_hmm_gesture(baseDir, n_states, index = 1):
+    #### Test ####
+    models = []
+    models.append(create_hmm_gesture_complete(TypeTest.caret, baseDir, n_states*2, index))
+    models.append(create_hmm_gesture_complete(TypeTest.delete, baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete(TypeTest.left_swipe, baseDir, n_states, index))
+    models.append(create_hmm_gesture_complete(TypeTest.rectangle, baseDir, n_states*4, index))
+    models.append(create_hmm_gesture_complete(TypeTest.right_swipe, baseDir, n_states, index))
+    models.append(create_hmm_gesture_complete(TypeTest.square_braket_left, baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete(TypeTest.square_braket_right, baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete(TypeTest.triangle, baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete(TypeTest.v, baseDir, n_states*2, index))
+    models.append(create_hmm_gesture_complete(TypeTest.x, baseDir, n_states*3, index))
+
+    compare_all_models_test(models, baseDir+'down-trajectory/')
 
 #baseDir = '/Users/davide/Google Drive/Dottorato/Database/Leap/csv/'
 baseDir = '/home/alessandro/Scaricati/csv/'
@@ -435,31 +530,81 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 #test_parallel(baseDir, 4)
 
 #### Test Gesture Complete ####
-# Crea file csv originali gesture
-#LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'rectangle')
-#LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'triangle')
 
 # Crea file csv primitive
 # Up
 #create_primitive_dataset(baseDir, Direction.up)
 # Down
 #create_primitive_dataset(baseDir, Direction.down)
-# Diagonal Up
-create_primitive_dataset(baseDir, Direction.diagonal_up, 45)
-# Diagonal Down
-#create_primitive_dataset(baseDir, Direction.diagonal_down, -45)
+# Diagonal
+#create_primitive_dataset(baseDir, Direction.diagonal, -150)
+# Forward
+#create_primitive_dataset(baseDir, Direction.forward)
+# Behind
+#create_primitive_dataset(baseDir, Direction.behind)
+
+# Crea file csv originali gesture
+#LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'rectangle')
+#LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'triangle')
+#LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'caret')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'v')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'x')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'square-braket-left')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'square-braket-right')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'delete')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'star')
 
 # Crea file csv gesture
 # Rectangle
 #create_gesture_dataset(baseDir, 'rectangle/', 72)
 # Triangle
 #create_gesture_dataset(baseDir, 'triangle/', 54)
+# Caret
+#create_gesture_dataset(baseDir, 'caret/', 36)
+# V
+#create_gesture_dataset(baseDir, 'v/', 36)
+# X
+#create_gesture_dataset(baseDir, 'x/', 54)
+# Square Bracket Left
+#create_gesture_dataset(baseDir, 'square-braket-left/', 54)
+# Square Bracket Right
+#create_gesture_dataset(baseDir, 'square-braket-right/', 54)
+# Delete
+#create_gesture_dataset(baseDir, 'delete/', 54)
+# Star
+#create_gesture_dataset(baseDir, 'star/', 90)
 
-# Test
+# Test - con primitive
 #print('Rectangle')
-#test_leap(baseDir, 4, TypeTest.rectangle)
+#test_leap(baseDir, 8, TypeTest.rectangle) # Ok
 #print('Triangle')
-#test_leap(baseDir, 4, TypeTest.triangle)
+#test_leap(baseDir, 8, TypeTest.triangle) # Ok
+#print('Caret')
+#test_leap(baseDir, 8, TypeTest.caret) # Ok
+#print('X')
+#test_leap(baseDir, 8, TypeTest.x) # Ok
+#print('Square braket left')
+#test_leap(baseDir, 8, TypeTest.square_braket_left) # Ok
+#print('Square braket left')
+#test_leap(baseDir, 8, TypeTest.square_braket_left) # Ok
+#print('Square braket right')
+#test_leap(baseDir, 8, TypeTest.square_braket_right)# Ok
+#print('Delete')
+#test_leap(baseDir, 8, TypeTest.delete) # Ok anche se con square braket, x e rettangolo le differenze non sono nettissime (in ogni caso sono il doppio)
+#print('Star')
+#test_leap(baseDir, 8, TypeTest.star) # Ok
+# Test - senza primitive
 
+#print('V')
+#test_leap(baseDir, 8, TypeTest.v) # Si confonde un poco con il rettangolo!
+
+# Crea dataset gesture composte
+#create_operators_dataset(baseDir, Operator.parallel, dimensions=2, scale=1)
+#compare_composite_models(baseDir, 8, Operator.parallel, dimensions=4)
+
+# Crea modelli
+#compare_models(baseDir, 8)
+for i in range(0, 14):
+    compare_models_hmm_gesture(baseDir, 8, index = i)
 
 print('Fine')
