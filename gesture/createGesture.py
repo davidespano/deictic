@@ -57,13 +57,13 @@ def assign(typeTest):
     return nome
 
 # Training
-def training_leave_one_out(model, correct_dir, index):
+def training_leave_one_out(model, correct_dir, index, dimensions = 2):
     # load dataset with correct examples and apply LOO technique
     correct = LeapDataset(correct_dir)
     if(index >= len(correct.getCsvDataset().filenames)):
         index = len(correct.getCsvDataset().filenames)-1
 
-    one, sequences = correct.leave_one_out(index, dimensions=2, scale=100)
+    one, sequences = correct.leave_one_out(index, dimensions=dimensions, scale=100)
     # train the hmm
     model.fit(sequences, use_pseudocount=True)
     return model
@@ -453,20 +453,20 @@ def create_x(baseDir, n_states):
     return model, seq
 
 # Gesture complete
-def create_hmm_gesture_complete(typeTest, baseDir, n_states, index):
-    nome = assign(typeTest)
+def create_hmm_gesture_complete(nome, baseDir, n_states, index, dimensions = 2):
 
-    # dataset
-    folder = baseDir + 'down-trajectory/' + nome + '/'
+    # Dataset
+    folder = baseDir + nome + '/'
     # Creazione hmm
     topology_factory = HiddenMarkovModelTopology()
     emissions = create_gesture_emissions(n_states, scale=100)
     model = topology_factory.forward(nome, n_states, emissions)
     # training leave one out
-    model = training_leave_one_out(model, folder, index)
+    model = training_leave_one_out(model, folder, index, dimensions=dimensions)
     return model
 
-        # Primitive
+
+    # Primitive
 def create_primitive_model(baseDir, n_states, direction, degree = 0):
     # Left, Right, Up, Down
     if(direction == Direction.left):
@@ -498,8 +498,15 @@ def create_primitive_model(baseDir, n_states, direction, degree = 0):
 
 #### Dataset Gesture e Primitive ####
 def create_primitive_dataset(baseDir, direction, degree=0, sample=20):
+
+    if direction == Direction.left:
+        dataset = LeapDataset(baseDir + 'original/left/')
+        nome = 'left'
+    elif direction == Direction.right:
+        dataset = LeapDataset(baseDir + 'original/right/')
+        nome = 'right'
     # Creazione cartella che ospiterà i file
-    if direction == Direction.up:
+    elif direction == Direction.up:
         dataset = LeapDataset(baseDir + 'original/right/')
         nome = 'up'
     elif direction == Direction.down:
@@ -515,7 +522,7 @@ def create_primitive_dataset(baseDir, direction, degree=0, sample=20):
         dataset = LeapDataset(baseDir + 'original/left/')
         nome = 'behind'
 
-    create_folder(baseDir, nome)
+    #create_folder(baseDir, nome)
 
     # Creazione dataset
     # Up or Down
@@ -542,14 +549,14 @@ def create_primitive_dataset(baseDir, direction, degree=0, sample=20):
     # Plot
     for filename in dataset.getCsvDataset():
         sequence = dataset.read_file(filename, dimensions=2, scale=100)
-    #plt.axis("equal")
-    #plt.plot(sequence[:, 0], sequence[:, 1])
-    #plt.show()
+    plt.axis("equal")
+    plt.plot(sequence[:, 0], sequence[:, 1])
+    plt.show()
 
 def create_gesture_dataset(baseDir, path, sample=20):
     # Creazione cartelle
     create_folder(baseDir, path)
-    # # Creazione dataset originale
+    # Creazione dataset originale
     LeapDataset.replace_csv(baseDir + 'original/' + path)
     dataset = LeapDataset(baseDir + 'original/' + path)
     # Normalizzazione

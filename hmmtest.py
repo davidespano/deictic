@@ -23,6 +23,7 @@ def plot_sample(model, samples=3):
         sample = model.sample()
         print(model.log_probability(sample))
         seq = numpy.array(sample).astype('float')
+        plt.axis('equal')
         plt.plot(seq[:, 0], seq[:, 1], marker='.')
         plt.show()
 
@@ -194,7 +195,7 @@ def test_parallel(baseDir, n_states):
 
 
 ### Dataset ###
-def create_operators_dataset(baseDir, operator, dimensions=2, scale=1):
+def create_operators_dataset(baseDir, operator, dimensions=2, scale=1, iterazioni = 1):
     nome = []
     # Caret
     nome.append('caret')
@@ -218,7 +219,7 @@ def create_operators_dataset(baseDir, operator, dimensions=2, scale=1):
     nome.append('x')
 
     gestures = []
-    for index in range(0, len(nome), 2):
+    for index in range(0, len(nome), iterazioni):
         random.seed()
 
         # Choice
@@ -245,7 +246,7 @@ def create_operators_dataset(baseDir, operator, dimensions=2, scale=1):
 
             # Crea sequenze
             operatore = 'iterative'
-            sequences = first.iterative_merge(iterazioni=int(random.uniform(1, 10)), dimensions=2, scale=1)
+            sequences = first.iterative_merge(iterazioni=2, dimensions=2, scale=1)
 
         # Parallel
         elif (operator == Operator.parallel):
@@ -502,20 +503,57 @@ def compare_composite_models(baseDir, n_states, operator, dimensions = 2):
     compare_all_models_test(models_complete, baseDir+'/'+operatore, dimensions = dimensions)
 
 def compare_models_hmm_gesture(baseDir, n_states, index = 1):
+    baseDir = baseDir + 'down-trajectory/'
     #### Test ####
     models = []
-    models.append(create_hmm_gesture_complete(TypeTest.caret, baseDir, n_states*2, index))
-    models.append(create_hmm_gesture_complete(TypeTest.delete, baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete(TypeTest.left_swipe, baseDir, n_states, index))
-    models.append(create_hmm_gesture_complete(TypeTest.rectangle, baseDir, n_states*4, index))
-    models.append(create_hmm_gesture_complete(TypeTest.right_swipe, baseDir, n_states, index))
-    models.append(create_hmm_gesture_complete(TypeTest.square_braket_left, baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete(TypeTest.square_braket_right, baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete(TypeTest.triangle, baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete(TypeTest.v, baseDir, n_states*2, index))
-    models.append(create_hmm_gesture_complete(TypeTest.x, baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete('caret', baseDir, n_states*2, index))
+    models.append(create_hmm_gesture_complete('delete', baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete('left', baseDir, n_states, index))
+    models.append(create_hmm_gesture_complete('rectangle', baseDir, n_states*4, index))
+    models.append(create_hmm_gesture_complete('right', baseDir, n_states, index))
+    models.append(create_hmm_gesture_complete('square-braket-left', baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete('square-braket-right', baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete('triangle', baseDir, n_states*3, index))
+    models.append(create_hmm_gesture_complete('v', baseDir, n_states*2, index))
+    models.append(create_hmm_gesture_complete('x', baseDir, n_states*3, index))
 
-    compare_all_models_test(models, baseDir+'down-trajectory/')
+    compare_all_models_test_without_primitive(models, baseDir+'down-trajectory/', index = index)
+
+def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimensions = 2):
+    # Determina operazione
+    models_complete = []
+    # Choice
+    if (operator == Operator.choice):
+        operatore = 'choice/'
+    # Disabling : iterative + ground
+    elif (operator == Operator.disabling):
+        # Crea sequenze
+        operatore = 'disabling/'
+        n_states = n_states
+    # Iterative
+    elif (operator == Operator.iterative):
+        # Crea sequenze
+        operatore = 'iterative/'
+        n_states = n_states
+    # Parallel
+    elif (operator == Operator.parallel):
+        operatore = 'parallel/'
+        n_states = n_states
+    # Sequence
+    elif (operator == Operator.sequence):
+        operatore = 'sequence/'
+        n_states = n_states
+
+    baseDir = baseDir+'/'+operatore
+
+    # Prendi cartelle e crea gesture
+    folders = LeapDataset.get_immediate_subdirectories(baseDir)
+    folders = sorted(folders)  # Riordina cartelle
+    for folder in folders:
+        models_complete.append(create_hmm_gesture_complete(folder, baseDir, n_states, index, dimensions = dimensions))
+
+    # Compara tutti i modelli
+    compare_all_models_test_without_primitive(models_complete, baseDir+'/', dimensions = dimensions, index = index)
 
 #baseDir = '/Users/davide/Google Drive/Dottorato/Database/Leap/csv/'
 baseDir = '/home/alessandro/Scaricati/csv/'
@@ -532,12 +570,16 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 #### Test Gesture Complete ####
 
 # Crea file csv primitive
+# Left
+#create_primitive_dataset(baseDir, Direction.left)
+# Right
+#create_primitive_dataset(baseDir, Direction.right)
 # Up
 #create_primitive_dataset(baseDir, Direction.up)
 # Down
 #create_primitive_dataset(baseDir, Direction.down)
 # Diagonal
-#create_primitive_dataset(baseDir, Direction.diagonal, -150)
+#create_primitive_dataset(baseDir, Direction.diagonal, 45)
 # Forward
 #create_primitive_dataset(baseDir, Direction.forward)
 # Behind
@@ -574,6 +616,9 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 # Star
 #create_gesture_dataset(baseDir, 'star/', 90)
 
+# Crea dataset gesture composte
+#create_operators_dataset(baseDir, Operator.iterative, dimensions=2, scale=1)
+
 # Test - con primitive
 #print('Rectangle')
 #test_leap(baseDir, 8, TypeTest.rectangle) # Ok
@@ -598,13 +643,16 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 #print('V')
 #test_leap(baseDir, 8, TypeTest.v) # Si confonde un poco con il rettangolo!
 
-# Crea dataset gesture composte
-#create_operators_dataset(baseDir, Operator.parallel, dimensions=2, scale=1)
-#compare_composite_models(baseDir, 8, Operator.parallel, dimensions=4)
-
 # Crea modelli
-#compare_models(baseDir, 8)
-for i in range(0, 14):
-    compare_models_hmm_gesture(baseDir, 8, index = i)
+#compare_models(baseDir, 8) # Con primitive
+#for i in range(13, 14): # Senza primitive
+    #compare_models_hmm_gesture(baseDir, 8, index = i)
+#compare_composite_models(baseDir, 8, Operator.parallel, dimensions = 4) # Composte con primitive
+for i in range(0, 14): # Composte senza primitive
+    compare_composite_hmm_gesture(baseDir, Operator.parallel, 8, index = i, dimensions = 4)
+
+
+#model, seq = create_gesture(TypeTest.x, baseDir, 8)
+#plot_sample(model, 3)
 
 print('Fine')

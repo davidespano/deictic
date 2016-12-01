@@ -34,7 +34,7 @@ def compare_models_test(model_1, model_2, dir, dimensions = 2):
 
 
 # Senza primitive
-def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100, index = 0):
+def compare_all_models_test_without_primitive(models, baseDir, dimensions = 2, scale = 100, index = 0):
     # Matrice risultati
     results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
     index_gesture = -1
@@ -70,7 +70,7 @@ def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100, index 
         results[index_gesture][index_model] = results[index_gesture][index_model] + 1
 
     # Salva risultati
-    save_confusion_matrix(results, baseDir, models)
+    save_confusion_matrix(results, baseDir, models, index=index)
 
 # Compara tutti i modelli con tutte le gesture definite
 def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100):
