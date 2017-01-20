@@ -27,6 +27,43 @@ class LeapDataset:
     def getCsvDataset(self):
         return CsvDataset(self.dir)
 
+    def down_sample(self, output_dir, samples):
+        for filename in self.getCsvDataset():
+            with open(self.dir + filename, "r") as f:
+                reader = csv.reader(f, delimiter=',')
+                vals = list(reader)
+                result = numpy.array(vals).astype('float')
+                R = int(1.0 * result[:, 0].size / samples)
+                a = numpy.zeros((samples - 1, int(result[0, :].size)))
+
+                for i in range(0, samples - 1):
+                    start = i * R
+                    end = ((i + 1) * R)
+                    a[i, 0] = scipy.nanmean(result[start:end, 0])
+                    a[i, 1] = scipy.nanmean(result[start:end, 1])
+                    a[i, 2] = scipy.nanmean(result[start:end, 2])
+
+                numpy.savetxt(output_dir + filename, a, delimiter=',')
+
+    def trasl(self, output_dir, name, dimensions = 1):
+        index_file = 0
+        for filename in self.getCsvDataset():
+            index_file = index_file + 1
+            with open(self.dir + filename, "r") as f:
+                reader = csv.reader(f, delimiter=',')
+                vals = list(reader)
+                result = numpy.array(vals).astype('float')
+
+                #for index in range(0, len(result)):
+                    #if (dimensions == 1):
+                        #result[index][0] = 1
+                    #elif (dimensions == 2):
+                        #result[index][1] = 1
+                    #else:
+                        #result[index][2] = 1
+
+                numpy.savetxt(output_dir + name + '_{}.csv'.format(index_file), result, delimiter=',')
+
     def swap(self, output_dir, name, dimensions = 2):
         # Lettura file
         index_file = 0

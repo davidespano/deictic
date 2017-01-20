@@ -579,7 +579,7 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 # Down
 #create_primitive_dataset(baseDir, Direction.down)
 # Diagonal
-#create_primitive_dataset(baseDir, Direction.diagonal, 45)
+#create_primitive_dataset(baseDir, Direction.diagonal, -130)
 # Forward
 #create_primitive_dataset(baseDir, Direction.forward)
 # Behind
@@ -648,11 +648,111 @@ baseDir = '/home/alessandro/Scaricati/csv/'
 #for i in range(13, 14): # Senza primitive
     #compare_models_hmm_gesture(baseDir, 8, index = i)
 #compare_composite_models(baseDir, 8, Operator.parallel, dimensions = 4) # Composte con primitive
-for i in range(0, 14): # Composte senza primitive
-    compare_composite_hmm_gesture(baseDir, Operator.parallel, 8, index = i, dimensions = 4)
+#for i in range(0, 14): # Composte senza primitive
+    #compare_composite_hmm_gesture(baseDir, Operator.parallel, 8, index = i, dimensions = 4)
 
 
 #model, seq = create_gesture(TypeTest.x, baseDir, 8)
 #plot_sample(model, 3)
+
+
+# U
+# Down
+#down = LeapDataset(baseDir + 'down-trajectory/down/')
+#first = down.read_dataset(2, 1)
+# Right
+#right = LeapDataset(baseDir + 'down-trajectory/right/')
+#second = right.read_dataset(2, 1)
+# Up trasl x + 1
+#dataset = LeapDataset(baseDir + 'down-trajectory/up/')
+#nome = 'up_trasl'
+#dataset.trasl(baseDir+'down-trajectory/'+nome+'/', nome, dimensions=1)
+#up_trasl = LeapDataset(baseDir + 'down-trajectory/' + 'up_trasl' + '/')
+#third = up_trasl.read_dataset(2, 1)
+# Z
+# Right trasl_1
+#dataset = LeapDataset(baseDir + 'down-trajectory/right/')
+#nome = 'right_trasl'
+#dataset.trasl(baseDir+'down-trajectory/'+nome+'/', nome, dimensions=2)
+#right_trasl = LeapDataset(baseDir + 'down-trajectory/' + 'right_trasl' + '/')
+#first = right_trasl.read_dataset(2, 1)
+# Diagonal 70
+#diagonal_70 = LeapDataset(baseDir + 'down-trajectory/diagonal_70/')
+#second = diagonal_70.read_dataset(2, 1)
+# Right
+#right = LeapDataset(baseDir + 'down-trajectory/right/')
+#third = right.read_dataset(2, 1)
+#nome = 'u'
+#sequences = []
+#for i in range(0, len(first)):
+    #seq_first = first[i]
+    #random.seed()
+    #num_rand_1 = int(random.uniform(0, len(second)-1))
+    #seq_second = second[num_rand_1]
+    #num_rand_2 = int(random.uniform(0, len(third) - 1))
+    #seq_third = third[num_rand_2]
+    #seq = numpy.concatenate((seq_first, seq_second, seq_third), axis=0)
+    # Salva nuova sequenza
+    #sequences.append(seq)
+#for i in range(0, len(sequences)):
+        #numpy.savetxt(baseDir + 'down-trajectory/' + nome + '/' + nome +'{}.csv'.format(i), sequences[i], delimiter=',')
+
+
+
+
+
+def test_3():
+    # Create gesture
+    gestures = []
+    # Left
+    left, seq = create_gesture(TypeTest.left_swipe, baseDir, 6)
+    left.name = 'left'
+    gestures.append(left)
+    # Right
+    right, seq = create_gesture(TypeTest.right_swipe, baseDir, 6)
+    right.name = 'right'
+    gestures.append(right)
+    # Left Iterative
+    left_iterative, seq = create_iterative(left.copy())
+    left_iterative.name = 'iterative_left'
+    gestures.append(left_iterative)
+    # U
+    down = create_primitive_model(baseDir, 6, Direction.down)
+    up_trasl = create_primitive_model(baseDir, 6, Direction.up, trasl=True)
+    u, seq = HiddenMarkovModelTopology.sequence([down, right.copy(), up_trasl])
+    u.name = 'u'
+    gestures.append(u)
+    # V
+    v, seq = create_gesture(TypeTest.v, baseDir, 6)
+    v.name = 'v'
+    gestures.append(v)
+    # Z
+    right_trasl = create_primitive_model(baseDir, 6, Direction.right, trasl=True)
+    diagonal_70 = create_primitive_model(baseDir, 6, Direction.diagonal, degree=70)
+    z, seq = HiddenMarkovModelTopology.sequence([right_trasl, diagonal_70, right.copy()])
+    z.name = 'z'
+    gestures.append(z)
+    # Disabling Iterative Left + Z
+    disabling, seq = HiddenMarkovModelTopology.disabling(left.copy(), z)
+    disabling.name = 'disabling_left_z'
+    gestures.append(disabling)
+
+    compare_all_models_test(gestures, baseDir + 'test_2/')
+
+test_3()
+
+right, seq = create_gesture(TypeTest.right_swipe, baseDir, 6)
+right.name = 'right'
+down = create_primitive_model(baseDir, 6, Direction.down)
+up_trasl = create_primitive_model(baseDir, 6, Direction.up, trasl=True)
+u, seq = HiddenMarkovModelTopology.sequence([down, right, up_trasl])
+u.name = 'u'
+for i in range(0,10):
+    sequence = u.sample()
+    result = numpy.array(sequence).astype('float')
+    plt.axis("equal")
+    plt.plot(result[:, 0], result[:, 1])
+    plt.show()
+
 
 print('Fine')

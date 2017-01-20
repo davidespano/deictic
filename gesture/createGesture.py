@@ -467,14 +467,20 @@ def create_hmm_gesture_complete(nome, baseDir, n_states, index, dimensions = 2):
 
 
     # Primitive
-def create_primitive_model(baseDir, n_states, direction, degree = 0):
+def create_primitive_model(baseDir, n_states, direction, degree = 0, trasl = False):
     # Left, Right, Up, Down
     if(direction == Direction.left):
         dataset = LeapDataset(baseDir + 'down-trajectory/left/')
     elif(direction == Direction.right):
-        dataset = LeapDataset(baseDir + 'down-trajectory/right/')
+        if(not trasl):
+            dataset = LeapDataset(baseDir + 'down-trajectory/right/')
+        else:
+            dataset = LeapDataset(baseDir + 'down-trajectory/right_trasl/')
     elif(direction == Direction.up):
-        dataset = LeapDataset(baseDir + 'down-trajectory/up/')
+        if (not trasl):
+            dataset = LeapDataset(baseDir + 'down-trajectory/up/')
+        else:
+            dataset = LeapDataset(baseDir + 'down-trajectory/up_trasl/')
     elif(direction == Direction.down):
         dataset = LeapDataset(baseDir + 'down-trajectory/down/')
     # Diagonal
