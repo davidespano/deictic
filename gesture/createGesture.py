@@ -559,36 +559,5 @@ def create_primitive_dataset(baseDir, direction, degree=0, sample=20):
     plt.plot(sequence[:, 0], sequence[:, 1])
     plt.show()
 
-def create_gesture_dataset(baseDir, path, sample=20):
-    # Creazione cartelle
-    create_folder(baseDir, path)
-    # Creazione dataset originale
-    LeapDataset.replace_csv(baseDir + 'original/' + path)
-    dataset = LeapDataset(baseDir + 'original/' + path)
-    # Normalizzazione
-    dataset.normalise(baseDir + 'normalised-trajectory/' + path, norm_axis=True)
-    dataset = LeapDataset(baseDir + 'normalised-trajectory/' + path)
-    # DownSample
-    dataset.down_sample(baseDir + 'down-trajectory/' + path, sample)
 
-    dataset = LeapDataset(baseDir + 'down-trajectory/' + path + '/')
-    # Plot
-    for filename in dataset.getCsvDataset():
-        sequence = dataset.read_file(filename, dimensions=2, scale=100)
-        plt.axis("equal")
-        plt.plot(sequence[:, 0], sequence[:, 1])
-        plt.show()
 
-def create_folder(baseDir, nome, operator = '', is_ground = True):
-    if(is_ground == True):
-        # Creazione cartelle
-        if not os.path.exists(baseDir + 'original/' + nome):
-            os.makedirs(baseDir + 'original/' + nome)
-        if not os.path.exists(baseDir + 'normalised-trajectory/' + nome):
-            os.makedirs(baseDir + 'normalised-trajectory/' + nome)
-        if not os.path.exists(baseDir + 'down-trajectory/' + nome):
-            os.makedirs(baseDir + 'down-trajectory/' + nome)
-    else:
-        # Creazione cartelle per gesture composte
-        if not os.path.exists(baseDir + operator+'/'+nome):
-            os.makedirs(baseDir + operator+'/'+nome)
