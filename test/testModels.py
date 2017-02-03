@@ -18,7 +18,7 @@ def wrong_test(model, wrong_dir, dimensions=2):
         ))
 
 def compare_models_test(model_1, model_2, dir, dimensions = 2):
-    dataset = LeapDataset(dir)
+    dataset = ToolsDataset(dir)
 
     for filename in dataset.getCsvDataset():
         sequence = dataset.read_file(filename, dimensions, scale=100)
@@ -34,23 +34,23 @@ def compare_models_test(model_1, model_2, dir, dimensions = 2):
 
 
 # Senza primitive
-def compare_all_models_test_without_primitive(models, baseDir, dimensions = 2, scale = 100, index = 0):
+def compare_all_models_test_without_primitive(models, baseDir, results, dimensions = 2, scale = 100, index = 0):
     # Matrice risultati
-    results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
+    #results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
     index_gesture = -1
 
     # Prendi ogni gesture in models
     for model in models:
         index_gesture = index_gesture + 1
-        dataset = LeapDataset(baseDir + '/' + model.name + '/')
+        dataset = ToolsDataset(baseDir + '/' + model.name + '/')
 
         # Aggiusta index
         index_correct = index
         if index >= len(dataset.getCsvDataset().filenames):
             index_correct = len(dataset.getCsvDataset().filenames) - 1
         # Prendi la sequenza
-        correct = LeapDataset(baseDir + '/' + model.name + '/')
-        one, sequences = correct.leave_one_out(index_correct, dimensions=dimensions, scale=scale)
+        correct = ToolsDataset(baseDir + '/' + model.name + '/')
+        one, sequences = correct.leave_one_out_dataset(index_correct, dimensions=dimensions, scale=scale)
 
         # Matrice risultati
         max_norm_log_probability = -sys.maxsize
@@ -71,6 +71,7 @@ def compare_all_models_test_without_primitive(models, baseDir, dimensions = 2, s
 
     # Salva risultati
     save_confusion_matrix(results, baseDir, models, index=index)
+    return  results
 
 # Compara tutti i modelli con tutte le gesture definite
 def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100):
@@ -81,7 +82,7 @@ def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100):
     # Prendi ogni gesture in models
     for model in models:
         index_gesture = index_gesture + 1
-        dataset = LeapDataset(baseDir+model.name+'/')
+        dataset = ToolsDataset(baseDir+model.name+'/')
 
         # Compara i modelli con ogni file
         for filename in dataset.getCsvDataset():
@@ -111,6 +112,7 @@ def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100):
 
     # Salva risultati
     save_confusion_matrix(results, baseDir, models)
+    return  results
 
 # Salva risultati in un file csv
 def save_confusion_matrix(results, baseDir, models, index=-1):
@@ -128,7 +130,7 @@ def save_confusion_matrix(results, baseDir, models, index=-1):
 
     # Salva il tutto in un file
     if(index != -1):
-        numpy.savetxt(baseDir + '/results_{}.csv'.format(index), sequences, fmt="%d")
+        numpy.savetxt(baseDir + '/results_no_primitive.csv', sequences, fmt="%d")
     else:
         numpy.savetxt(baseDir + '/results.csv', sequences, fmt="%d")
 

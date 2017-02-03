@@ -2,15 +2,6 @@ from dataset import *
 from gesture import *
 from test import *
 
-# Plot a model gesture
-def plot_gesture(model):
-    for i in range(1, 3):
-        sequence = model.sample()
-        result = numpy.array(sequence).astype('float')
-        plt.axis("equal")
-        plt.plot(result[:, 0], result[:, 1])
-        plt.show()
-
 # Test compare gesture
 def compare_gesture(baseDir, results, n_states, index = 1):
 

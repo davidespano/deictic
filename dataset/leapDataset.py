@@ -5,10 +5,15 @@ import scipy
 import matplotlib.pyplot as plt
 import random
 import os
+import math
 import re
 from math import sin, cos, radians
 from shutil import copyfile
 from enum import Enum
+import numpy as np
+
+x = np.ones((1000, 1000)) * np.nan
+
 
 random.seed(0)
 
@@ -19,7 +24,7 @@ class Operator(Enum):
     disabling = 4
     parallel = 5
 
-class LeapDataset:
+class LeapDataset_2:
 
     def __init__(self, dir):
         self.dir = dir
@@ -45,30 +50,11 @@ class LeapDataset:
 
                 numpy.savetxt(output_dir + filename, a, delimiter=',')
 
-    def trasl(self, output_dir, name, dimensions = 1):
-        index_file = 0
-        for filename in self.getCsvDataset():
-            index_file = index_file + 1
-            with open(self.dir + filename, "r") as f:
-                reader = csv.reader(f, delimiter=',')
-                vals = list(reader)
-                result = numpy.array(vals).astype('float')
-
-                #for index in range(0, len(result)):
-                    #if (dimensions == 1):
-                        #result[index][0] = 1
-                    #elif (dimensions == 2):
-                        #result[index][1] = 1
-                    #else:
-                        #result[index][2] = 1
-
-                numpy.savetxt(output_dir + name + '_{}.csv'.format(index_file), result, delimiter=',')
-
     def swap(self, output_dir, name, dimensions = 2):
         # Lettura file
-        index_file = 0
         for filename in self.getCsvDataset():
-            index_file = index_file + 1
+            items = re.findall('\d*\D+', filename)# Nome file
+            # Lettura file
             with open(self.dir + filename, "r") as f:
                 reader = csv.reader(f, delimiter=',')
                 vals = list(reader)
@@ -88,7 +74,8 @@ class LeapDataset:
                         result[index][2] = temp
 
                 # Salva
-                numpy.savetxt(output_dir + name + '_{}.csv'.format(index_file), result, delimiter=',')
+                #numpy.savetxt(output_dir + name + '_{}.csv'.format(index_file), result, delimiter=',')
+                numpy.savetxt(output_dir + name + '_' + items[len(items)-1], result, delimiter=',')
 
     def rotate_lines(self, output_dir, name, degree = 0):
         # Lettura file
@@ -149,58 +136,61 @@ class LeapDataset:
                 reader = csv.reader(f, delimiter=',')
                 vals = list(reader)
                 result = numpy.array(vals).astype('float')
+
                 maxs = result.argmax(axis=0);
                 mins = result.argmin(axis=0);
-
+                # Max
                 x_max = result[maxs[0], 0]
                 y_max = result[maxs[1], 1]
                 z_max = result[maxs[2], 2]
-
+                # Min
                 x_min = result[mins[0], 0]
                 y_min = result[mins[1], 1]
                 z_min = result[mins[2], 2]
 
+                # X Y Z
                 if norm_axis:
                     den_x = x_max - x_min
                     den_y = y_max - y_min
                     den_z = z_max - z_min
 
-                    result[:, 0] = (result[:, 0] - x_min) / den_x
-                    result[:, 1] = (result[:, 1] - y_min) / den_y
-                    result[:, 2] = (result[:, 2] - z_min) / den_z
+                    result[:,0] = (result[:, 0] - x_min) / den_x
+                    result[:,1] = (result[:, 1] - y_min) / den_y
+                    result[:,2] = (result[:, 2] - z_min) / den_z
 
                     numpy.savetxt(output_dir + filename, result, delimiter=',')
 
-                else :
+                else:
                     den = max(x_max - x_min, y_max - y_min, z_max - z_min);
 
                     result[:, 0] = (result[:, 0] - x_min) / den
                     result[:, 1] = (result[:, 1] - y_min) / den
                     result[:, 2] = (result[:, 2] - z_min) / den
 
+                    # delta
+                    #for i in range(1, result[:, 0].size):
+                    #    result[i, 0] = result[i, 0] - result[i-1, 0]
+                    #    result[i, 1] = result[i, 1] - result[i-1, 1]
+
+                    # Time
+                    #result2 = result[:, 3]
+                    #for i in range(2, len(result2)):
+                    #numbers = []
+                    #for j in range(1, i):
+                    #numbers.append(result2[j])
+                    #mean = float(sum(numbers)) / max(len(numbers), 1)
+                    #dim = 1/(i-1)
+                    #s = 0
+                    #for j in range(0, i):
+                    #d = result2[i]-mean
+                    #p = math.pow(d, 2)
+                    #s = s + p
+                    #result_[i, 3] = math.sqrt(dim * s)
+
                     numpy.savetxt(output_dir + filename, result, delimiter=',')
-
-    def down_sample(self, output_dir, samples):
-        for filename in self.getCsvDataset():
-            with open(self.dir + filename, "r") as f:
-                reader = csv.reader(f, delimiter=',')
-                vals = list(reader)
-                result = numpy.array(vals).astype('float')
-                R = int(1.0 * result[:, 0].size / samples)
-                a = numpy.zeros((samples - 1, int(result[0, :].size)))
-
-                for i in range(0, samples - 1):
-                    start = i * R
-                    end = ((i + 1) * R)
-                    a[i, 0] = scipy.nanmean(result[start:end, 0])
-                    a[i, 1] = scipy.nanmean(result[start:end, 1])
-                    a[i, 2] = scipy.nanmean(result[start:end, 2])
-
-                numpy.savetxt(output_dir + filename, a, delimiter=',')
 
     def save_file_csv(self, path):
         # Save csv file
-
         return
 
     def read_dataset(self, dimensions = 2, scale = 1):
@@ -361,23 +351,25 @@ class LeapDataset:
     # Gesture Folder
     @staticmethod
     def find_gesture_file(path, baseDir, name):
-        # Cartella per la gesture
+        # Create Original Folder
         if not os.path.exists(baseDir + 'original/' + name):
             os.makedirs(baseDir + 'original/' + name)
 
+        # Copy files from original dataset to original folder
         index = 0
-        # Per ogni sottodirectory
+        # For each folders
         folders = LeapDataset.get_immediate_subdirectories(path)
-        folders = sorted(folders, key=lambda x: (int(re.sub('\D', '', x)), x))# Riordina cartelle
+        folders = sorted(folders, key=lambda x: (str(re.sub('\D', '', x)), x))# Riordina cartelle
         for folder in folders:
-            # Per ogni file
             for file in os.listdir(path+folder):
                 if (name+'.csv') == file:
                     index = index + 1
-                    copyfile(path+folder+'/'+file, baseDir+'original/'+name+'/'+name+'{}.csv'.format(index))
+                    #copyfile(path+folder+'/'+file, baseDir+'original/'+name+'/'+name+'{}.csv'.format(index))
+                    copyfile(path+folder+'/'+file, baseDir+'original/'+name+'/'+name+'_' + folder+'.csv')
 
         return
-    # Prende tutte le subdirectories di una data directory
+
+    # Get all subdirectories from the choosen directory
     @staticmethod
     def get_immediate_subdirectories(baseDir):
         return [name for name in os.listdir(baseDir)
@@ -411,3 +403,70 @@ class LeapDataset:
             if nome[num_rand_1] in gestures[i]:
                 return True
         return False
+
+    # Create the folder for origina, normalize and down-trajectory
+    @staticmethod
+    def create_folder(baseDir, nome, operator = '', is_ground = True):
+        if(is_ground == True):
+            # Creazione cartelle
+            if not os.path.exists(baseDir + 'original/' + nome):
+                os.makedirs(baseDir + 'original/' + nome)
+            if not os.path.exists(baseDir + 'normalised-trajectory/' + nome):
+                os.makedirs(baseDir + 'normalised-trajectory/' + nome)
+            if not os.path.exists(baseDir + 'down-trajectory/' + nome):
+                os.makedirs(baseDir + 'down-trajectory/' + nome)
+        else:
+            # Creazione cartelle per gesture composte
+            if not os.path.exists(baseDir + operator+'/'+nome):
+                os.makedirs(baseDir + operator+'/'+nome)
+
+    # Plot dataset
+    @staticmethod
+    def plot_samples(baseDir, path):
+        dataset = LeapDataset(baseDir + 'down-trajectory/' + path + '/')
+        lenght = len(dataset.getCsvDataset().filenames)
+        delta = 1#(int)(lenght/3)
+
+        for i in range(1, lenght, delta):
+            sequence = dataset.read_file(dataset.getCsvDataset().filenames[i], dimensions=2, scale=100)
+            plt.axis("equal")
+            plt.plot(sequence[:, 0], sequence[:, 1])
+            plt.show()
+
+    def create_original_files(path, baseDir):#, gesture_name):
+        index_user = 0
+
+        # Get all folders
+        folders = ToolsDataset.get_subdirectories(path)
+        folders = sorted(folders, key=lambda x: (int(re.sub('\D', '', x)), x))# Orders folders
+
+        # For each folder
+        for folder in folders:
+            index_user = index_user + 1 # User Index
+
+            # For each tipology (fast, medium and slow)
+            subfolders =  ToolsDataset.get_subdirectories(path+'/'+folder)
+            subfolders = sorted(subfolders, key=lambda x: (str(re.sub('\D', '', x)), x))# Orders subfolders
+            for subfolder in subfolders:
+
+                # Get files
+                files = os.listdir(path + folder +'/' + subfolder)
+                files = sorted(files, key=lambda x: (int(re.sub('\D', '', x)), x))# Orders files
+                for file in files:
+
+                    #if(file != gesture_name):
+                    # Index file and filename
+                    items = re.findall('\d*\D+', file)
+                    index_file = items[len(items)-1].split('.')
+
+                    # Cartella per la gesture
+                    if not os.path.exists('/home/alessandro/Scaricati/xml/' + items[0]):
+                        os.makedirs('/home/alessandro/Scaricati/xml/' + items[0])
+
+                    # Copia contenuto
+                    copyfile(path+folder+'/'+subfolder+'/'+file,
+                             '/home/alessandro/Scaricati/xml/'+items[0]+'/'+'{}'.format(index_user)+'_'+subfolder+'_'+items[0]
+                             +'_'+items[1]+'.xml')
+                    #ToolsDataset.xml_to_csv(path + folder + '/' + subfolder + '/' + file, baseDir + 'original/' + items[0] + '/' + items[0]+'_{}_'.format(index_user)+subfolder +
+                    #                        '_{}.csv'.format(index_file[0]), '/home/alessandro/Scaricati/xml_logs_rep/conversion.xslt')
+        return

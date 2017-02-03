@@ -273,7 +273,7 @@ def create_operators_dataset(baseDir, operator, dimensions=2, scale=1, iterazion
 
         gestures.append(filename)
         # Salva file
-        create_folder(baseDir, filename, operator = operatore, is_ground = False)
+        LeapDataset.create_folder(baseDir, filename, operator = operatore, is_ground = False)
         for i in range(0, len(sequences)):
             numpy.savetxt(baseDir + operatore + '/' + filename + '/' + filename + '_{}.csv'.format(i), sequences[i],
                           delimiter=',')
@@ -379,48 +379,6 @@ def test_leap(baseDir, n_states, typeTest):
     print('Star')
     wrong_test(model, baseDir + 'down-trajectory/star/')
 
-def compare_models(baseDir, n_states):
-    #### Test ####
-    models = []
-    # Caret
-    model, seq = create_caret(baseDir, n_states)
-    models.append(model)
-    # Delete
-    model, seq = create_delete(baseDir, n_states)
-    models.append(model)
-    # Left
-    model = create_primitive_model(baseDir, n_states, direction = Direction.left)
-    models.append(model)
-    # Rectangle
-    model, seq = create_rectangle(baseDir, n_states)
-    models.append(model)
-    # Right
-    model = create_primitive_model(baseDir, n_states, direction = Direction.right)
-    models.append(model)
-    # Square Braket Left
-    model, seq = create_square_braket_left(baseDir, n_states)
-    models.append(model)
-    # Square Braket Right
-    model, seq = create_square_braket_right(baseDir, n_states)
-    models.append(model)
-    # Triangle
-    model, seq = create_triangle(baseDir, n_states)
-    models.append(model)
-    # V
-    model, seq = create_v(baseDir, n_states)
-    models.append(model)
-    # X
-    model, seq = create_x(baseDir, n_states)
-    models.append(model)
-
-    compare_all_models_test(models, baseDir+'down-trajectory/')
-
-    #sequence = triangle.sample()
-    #result = numpy.array(sequence).astype('float')
-    #plt.axis("equal")
-    #plt.plot(result[:, 0], result[:, 1])
-    #plt.show()
-
 def compare_composite_models(baseDir, n_states, operator, dimensions = 2):
     # Determina operazione
     models_complete = []
@@ -502,23 +460,6 @@ def compare_composite_models(baseDir, n_states, operator, dimensions = 2):
 
     compare_all_models_test(models_complete, baseDir+'/'+operatore, dimensions = dimensions)
 
-def compare_models_hmm_gesture(baseDir, n_states, index = 1):
-    baseDir = baseDir + 'down-trajectory/'
-    #### Test ####
-    models = []
-    models.append(create_hmm_gesture_complete('caret', baseDir, n_states*2, index))
-    models.append(create_hmm_gesture_complete('delete', baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete('left', baseDir, n_states, index))
-    models.append(create_hmm_gesture_complete('rectangle', baseDir, n_states*4, index))
-    models.append(create_hmm_gesture_complete('right', baseDir, n_states, index))
-    models.append(create_hmm_gesture_complete('square-braket-left', baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete('square-braket-right', baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete('triangle', baseDir, n_states*3, index))
-    models.append(create_hmm_gesture_complete('v', baseDir, n_states*2, index))
-    models.append(create_hmm_gesture_complete('x', baseDir, n_states*3, index))
-
-    compare_all_models_test_without_primitive(models, baseDir+'down-trajectory/', index = index)
-
 def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimensions = 2):
     # Determina operazione
     models_complete = []
@@ -556,7 +497,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
     compare_all_models_test_without_primitive(models_complete, baseDir+'/', dimensions = dimensions, index = index)
 
 #baseDir = '/Users/davide/Google Drive/Dottorato/Database/Leap/csv/'
-baseDir = '/home/alessandro/Scaricati/csv/'
+#baseDir = '/home/alessandro/Scaricati/csv/'
 #test_1(baseDir, Direction.left, 4)
 #test_1(baseDir, Direction.right, 4)
 
