@@ -6,8 +6,9 @@ import random
 from enum import Enum
 from gesture import *
 
-
-# Sequence
+######### Modelled Composite Gesture #########
+## create_sequence
+# Links the input hmms for recognizing a sequence
 def create_sequence(models):
     name = ''
     seq = []
@@ -17,19 +18,20 @@ def create_sequence(models):
             name = model.name
         else:
             name = name+'_'+model.name
-    # Crea modello
+
     sequence, seq_edges = HiddenMarkovModelTopology.sequence(seq);
     sequence.name = name
     return sequence, seq_edges
 
-# Iterative
+## Iterative
+# Links the input hmms for recognizing an iteration
 def create_iterative(model):
-    # Crea modello
     iterative, seq_edges = HiddenMarkovModelTopology.iterative(model)
     iterative.name = model.name
     return iterative, seq_edges
 
-# Choice
+## Choice
+# Links the input hmms to build choice operator
 def create_choice(models):
     # Componenti
     seq = []
@@ -40,14 +42,16 @@ def create_choice(models):
     choice, seq_edges = HiddenMarkovModelTopology.choice(seq)
     return choice, seq_edges
 
-# Disabling
+## Disabling
+# Links the input hmms to build disabling operator
 def create_disabling(first_model, second_model, seq_first):
     # Crea modello
     disabling, seq_edges = HiddenMarkovModelTopology.disabling(first_model, second_model, seq_first)
     disabling.name = first_model.name + '_' + second_model.name
     return disabling, seq_edges
 
-# Parallel
+## Parallel
+# Links the input hmms to build parallel operator
 def create_parallel(first_model, second_model):
     # Crea modello
     parallel, seq_edges = HiddenMarkovModelTopology.parallel(first_model, second_model);
