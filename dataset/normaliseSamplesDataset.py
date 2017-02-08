@@ -1,4 +1,3 @@
-from .csv import *
 import csv
 import numpy
 import scipy
@@ -17,7 +16,7 @@ class NormaliseSamples:
 
     # Get all csv files from directory
     def getCsvDataset(self):
-        return CsvDataset(self.dir)
+        return DatasetIterator(self.dir)
 
 ######### Pre-processing original files dataset #########
 
@@ -190,3 +189,13 @@ class NormaliseSamples:
 
                 # Save file
                 numpy.savetxt(output_dir + filename, a, delimiter=',')
+
+    @staticmethod
+    def create_folder(baseDir, gesture_name):
+        # Folders
+        if not os.path.exists(baseDir + 'original/' + gesture_name):
+            os.makedirs(baseDir + 'original/' + gesture_name)
+        if not os.path.exists(baseDir + 'normalised-trajectory/' + gesture_name):
+            os.makedirs(baseDir + 'normalised-trajectory/' + gesture_name)
+        if not os.path.exists(baseDir + 'down-trajectory/' + gesture_name):
+            os.makedirs(baseDir + 'down-trajectory/' + gesture_name)

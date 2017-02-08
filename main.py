@@ -2,6 +2,14 @@ from dataset import *
 from gesture import *
 from test import *
 
+
+# Get_SubDirectories
+# Get all subdirectories from the choosen directory
+@staticmethod
+def get_subdirectories(baseDir):
+    return [name for name in os.listdir(baseDir)
+            if os.path.isdir(os.path.join(baseDir, name))]
+
 # Test compare gesture
 def compare_gesture(baseDir, results, n_states, index = 1):
 

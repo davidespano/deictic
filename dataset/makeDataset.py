@@ -2,6 +2,7 @@ from gesture import *
 from dataset import *
 import os
 
+"""
 ## make_gesture_dataset
 # Makes dataset (original, normalize and down-trajectory) for the input gesture
 def make_gesture_dataset(baseDir, gestureName, type = TypeFile.csv,  sample = 20):
@@ -82,3 +83,5 @@ def make_primitive_dataset(datasetDir, baseDir, direction, degree=0, sample=20):
     ToolsDataset.make_gesture_dataset(baseDir, name)
 
     return
+
+"""

@@ -8,7 +8,7 @@ import sys
 from gesture import *
 
 def wrong_test(model, wrong_dir, dimensions=2):
-    wrong = ToolsDataset(wrong_dir)
+    wrong = DatasetIterator(wrong_dir)
 
     for filename in wrong.getCsvDataset():
         sequence = wrong.read_file(filename, dimensions, scale=100)
@@ -18,7 +18,7 @@ def wrong_test(model, wrong_dir, dimensions=2):
         ))
 
 def compare_models_test(model_1, model_2, dir, dimensions = 2):
-    dataset = ToolsDataset(dir)
+    dataset = DatasetIterator(dir)
 
     for filename in dataset.getCsvDataset():
         sequence = dataset.read_file(filename, dimensions, scale=100)
@@ -42,14 +42,14 @@ def compare_all_models_test_without_primitive(models, baseDir, results, dimensio
     # Prendi ogni gesture in models
     for model in models:
         index_gesture = index_gesture + 1
-        dataset = ToolsDataset(baseDir + '/' + model.name + '/')
+        dataset = DatasetIterator(baseDir + '/' + model.name + '/')
 
         # Aggiusta index
         index_correct = index
         if index >= len(dataset.getCsvDataset().filenames):
             index_correct = len(dataset.getCsvDataset().filenames) - 1
         # Prendi la sequenza
-        correct = ToolsDataset(baseDir + '/' + model.name + '/')
+        correct = DatasetIterator(baseDir + '/' + model.name + '/')
         one, sequences = correct.leave_one_out_dataset(index_correct, dimensions=dimensions, scale=scale)
 
         # Matrice risultati
@@ -82,7 +82,7 @@ def compare_all_models_test(models, baseDir, dimensions = 2, scale = 100):
     # Prendi ogni gesture in models
     for model in models:
         index_gesture = index_gesture + 1
-        dataset = ToolsDataset(baseDir+model.name+'/')
+        dataset = DatasetIterator(baseDir + model.name + '/')
 
         # Compara i modelli con ogni file
         for filename in dataset.getCsvDataset():
