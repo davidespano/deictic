@@ -2,15 +2,8 @@ from .csv import *
 import csv
 import numpy
 import scipy
-import matplotlib.pyplot as plt
-import random
-import os
-import math
 import re
 from math import sin, cos, radians
-from shutil import copyfile
-from enum import Enum
-import numpy as np
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).

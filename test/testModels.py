@@ -8,7 +8,7 @@ import sys
 from gesture import *
 
 def wrong_test(model, wrong_dir, dimensions=2):
-    wrong = LeapDataset(wrong_dir)
+    wrong = ToolsDataset(wrong_dir)
 
     for filename in wrong.getCsvDataset():
         sequence = wrong.read_file(filename, dimensions, scale=100)
