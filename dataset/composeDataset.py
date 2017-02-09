@@ -1,4 +1,4 @@
-from .csv import *
+
 import csv
 import numpy
 import scipy
@@ -19,7 +19,7 @@ class composeDataset:
 
     # Return all directory's csv files
     def getCsvDataset(self):
-        return CsvDataset(self.dir)
+        return DatasetIterator(self.dir)
 
 ######### Composing Files #########
     ## Sequence

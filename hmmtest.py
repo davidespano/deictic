@@ -10,7 +10,7 @@ from enum import Enum
 #### Valutazione ####
 def viterbi_seq(model, dir):
     data = LeapDataset(dir)
-    for filename in data.getCsvDataset():
+    for filename in data.getDatasetIterator():
         sequence = data.read_file(filename, dimensions=2, scale=100)
         logp, states = model.viterbi(sequence)
         print('{} log-probability: {}'.format(filename, logp))

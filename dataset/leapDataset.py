@@ -1,4 +1,4 @@
-from .csv import *
+from .datasetIterator import *
 import csv
 import numpy
 import scipy
@@ -30,7 +30,7 @@ class LeapDataset_2:
         self.dir = dir
 
     def getCsvDataset(self):
-        return CsvDataset(self.dir)
+        return DatasetIterator(self.dir)
 
     def down_sample(self, output_dir, samples):
         for filename in self.getCsvDataset():
@@ -424,11 +424,11 @@ class LeapDataset_2:
     @staticmethod
     def plot_samples(baseDir, path):
         dataset = LeapDataset(baseDir + 'down-trajectory/' + path + '/')
-        lenght = len(dataset.getCsvDataset().filenames)
+        lenght = len(dataset.getDatasetIterator().filenames)
         delta = 1#(int)(lenght/3)
 
         for i in range(1, lenght, delta):
-            sequence = dataset.read_file(dataset.getCsvDataset().filenames[i], dimensions=2, scale=100)
+            sequence = dataset.read_file(dataset.getDatasetIterator().filenames[i], dimensions=2, scale=100)
             plt.axis("equal")
             plt.plot(sequence[:, 0], sequence[:, 1])
             plt.show()
