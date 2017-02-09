@@ -3,10 +3,89 @@ import numpy
 import scipy
 import re
 from math import sin, cos, radians
+from .csvDataset import *
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
 ###
+
+class ScaleDatasetTransform(DatasetTransform):
+    def __init__(self, scale=100, cols=[0,1]):
+        super()
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+
+        if  isinstance(scale, int):
+            self.scale = []
+            for i in range(0, len(cols)):
+                self.scale.append(scale)
+        if isinstance(scale, list):
+            self.scale = scale
+
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        for i in range(0, len(self.cols)):
+            seq_index = self.cols[i]
+            sequence[:, seq_index] = sequence[:, seq_index] * self.scale[i]
+
+        return sequence
+
+class CenteringTransform(DatasetTransform):
+    def __init__(self, cols=[0, 1]):
+        super()
+        if not isinstance(cols, list) or len(cols) > 3 or len(cols) < 2:
+            return TypeError
+        self.cols = cols
+
+    def transform(self, sequence):
+        maxs = numpy.amax(sequence[:, self.cols], axis=0)
+        mins = numpy.amin(sequence[:, self.cols], axis=0)
+
+        for i in range(0, len(self.cols)):
+            vmax = maxs[i]
+            vmin = mins[i]
+
+            sequence[:, self.cols[i]] = sequence[:, self.cols[i]] - 0.5 * (vmin + vmax)
+
+        return sequence
+
+
+
+class NormaliseLengthTransform(DatasetTransform):
+    def __init__(self, axisMode=True, cols=[0,1]):
+        super()
+        if not isinstance(axisMode, bool):
+            return TypeError
+        self.axisMode = axisMode
+
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+
+    def transform(self, sequence):
+
+        maxs = numpy.amax(sequence[:, self.cols], axis=0)
+        mins = numpy.amin(sequence[:, self.cols], axis=0)
+
+        den = max(maxs-mins)
+
+        for i in range(0, len(self.cols)):
+            vmax = maxs[i]
+            vmin = mins[i]
+
+            if self.axisMode:
+                den = vmax - vmin
+
+            sequence[:, self.cols[i]] = sequence[:, self.cols[i]]  / den
+
+        return sequence
+
+
+
 
 class NormaliseSamples:
 
