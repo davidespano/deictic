@@ -35,10 +35,9 @@ class CsvDataset:
     """
     Class for dataset reading and plotting
     """
-    def __init__(self, dir, dimensions = 2, scale=1):
+    def __init__(self, dir):
         self.dir = dir
-        self.dimensions = dimensions;
-        self.scale = scale;
+        self.compositeTransform = CompositeTransform()
 
     def getDatasetIterator(self):
         """ Returns an iterator on all csv files in a dataset """
@@ -69,7 +68,7 @@ class CsvDataset:
 
         Returns
         --------
-        vals : list
+        result : list
             the list of samples
 
         """
@@ -77,14 +76,19 @@ class CsvDataset:
             reader = csv.reader(f, delimiter=',')
             vals = list(reader)
             result = numpy.array(vals).astype('float')
-            if self.dimensions == 2:
-                seq = numpy.column_stack((result[:, 0] * self.scale, result[:, 1] * self.scale))
-            if self.dimensions == 3:
-                seq = numpy.column_stack((result[:, 0] * self.scale, result[:, 1] * self.scale, result[:, 2] * self.scale))
-            if self.dimensions == 4:
-                seq = numpy.column_stack(
-                    (result[:, 0] * self.scale, result[:, 1] * self.scale, result[:, 2] * self.scale, result[:, 3] * self.scale))
-            return seq
+            return result
+
+    def addTransform(self, transform):
+        self.compositeTransform.addTranform(transform)
+
+    def applyTransforms(self, outputDir):
+        if not os.path.exists(outputDir ):
+            os.makedirs(outputDir)
+        for file in self.getDatasetIterator():
+            sequence = self.read_file(file)
+            sequence = self.compositeTransform.transform(sequence)
+            numpy.savetxt(outputDir + file, sequence, delimiter=',')
+
 
     def leave_one_out(self, leave_index = 0):
         """ Selects one of the files in the dataset as test and uses the other ones for training
@@ -122,8 +126,32 @@ class CsvDataset:
                     ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
                 else:
                     plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
+                plt.axis('equal')
+                plt.show()
         if dimensions == 3:
             ax.legend()
         else:
             plt.legend(loc='upper right')
+        plt.show()
 
+
+class DatasetTransform:
+
+    def transform(self, sequence):
+        return sequence
+
+class CompositeTransform(DatasetTransform):
+
+    def __init__(self):
+        self.transforms = []
+
+
+    def addTranform(self, transform):
+        if isinstance(transform, DatasetTransform):
+            self.transforms.append(transform)
+
+    def transform(self, sequence):
+        current = sequence
+        for t in self.transforms:
+            current = t.transform(current)
+        return current

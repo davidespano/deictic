@@ -91,7 +91,7 @@ def primitive_dataset(datasetDir, baseDir):
 datasetDir = '/home/alessandro/Scaricati/gestures/'
 baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 2
+mode = 3
 
 if mode == 1:
     inputDir = baseDir + 'original/1dollar-dataset/'
@@ -104,4 +104,22 @@ if mode == 2:
     outputDir = baseDir + 'deictic/unica-dataset/raw'
     converter = UnicaConverter()
     converter.create_deictic_dataset(inputDir, outputDir)
+
+if mode == 3:
+    inputDir = baseDir + 'deictic/unica-dataset/raw/left/'
+    outputDir = baseDir + 'deictic/unica-dataset/scaled/left/'
+    dataset = CsvDataset(inputDir)
+    transform1 = ScaleDatasetTransform(scale=1)
+    transform2 = NormaliseLengthTransform(axisMode=False)
+    transform3 = CenteringTransform()
+    dataset.addTransform(transform2)
+    #dataset.addTransform(transform1)
+    dataset.addTransform(transform3)
+    dataset.applyTransforms(outputDir)
+
+
+    dataset = CsvDataset(outputDir)
+    dataset.plot()
+
+
 
