@@ -6,6 +6,7 @@ import re
 from copy import copy, deepcopy
 from math import sin, cos, radians
 from .csvDataset import *
+from .geometry import *
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
@@ -82,7 +83,7 @@ class NormaliseLengthTransform(DatasetTransform):
             if self.axisMode:
                 den = vmax - vmin
 
-            sequence[:, self.cols[i]] = sequence[:, self.cols[i]]  / den
+            sequence[:, self.cols[i]] = sequence[:, self.cols[i]] / den
 
         return sequence
 
@@ -169,9 +170,69 @@ class Sampling(DatasetTransform):
         element = (round(len(sequence)/self.scale))
         #sequence = sequence[0:len(sequence):element]
         a = scipy.signal.resample(sequence, self.scale+2)
-        sequence = a[1:-1,]
+        sequence = a[1:,]
 
         return sequence
+
+class ResampleInSpaceTransform(DatasetTransform):
+    def __init__(self, samples=20, cols=[0,1]):
+        if not isinstance(samples, int):
+            return TypeError
+        self.samples = samples
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+        srcPts = numpy.copy(sequence).tolist()
+        length = Geometry2D.pathLength(sequence)
+        size = len(srcPts)
+        step = length/ (self.samples -1)
+
+        resampled = numpy.zeros([self.samples + 1,2])
+
+        resampled[0, 0] = srcPts[0][self.cols[0]]
+        resampled[0, 1] = srcPts[0][self.cols[1]]
+
+        D = 0.0
+        j = 1
+        i = 1
+        while i < len(srcPts):
+            pt1x = srcPts[i - 1][self.cols[0]]
+            pt1y = srcPts[i - 1][self.cols[1]]
+            pt2x = srcPts[i][self.cols[0]]
+            pt2y = srcPts[i][self.cols[1]]
+
+            d = Geometry2D.distance(pt1x, pt1y, pt2x, pt2y) # distance in space
+
+            if (D + d) >= step: # has enough space been traversed in the last step?
+                qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
+                qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
+
+                resampled[j, 0] = qx
+                resampled[j, 1] = qy
+                j+=1
+
+
+                srcPts.insert(i, [qx, qy]) # insert 'q' at position i in points s.t. 'q' will be the next i
+
+                D = 0.0
+            else:
+                D+= d
+            i +=1
+
+        if D > 0.0:
+            size = len(srcPts)
+            resampled[j,0] = srcPts[size -1][self.cols[0]]
+            resampled[j,1] = srcPts[size -1][self.cols[1]]
+
+        return resampled
+
+
+
+
 
 class NormaliseSamples:
 

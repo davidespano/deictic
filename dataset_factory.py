@@ -91,7 +91,7 @@ def primitive_dataset(datasetDir, baseDir):
 datasetDir = '/home/alessandro/Scaricati/gestures/'
 baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 3
+mode = 4
 
 if mode == 1:
     inputDir = baseDir + 'original/1dollar-dataset/'
@@ -120,6 +120,26 @@ if mode == 3:
 
     dataset = CsvDataset(outputDir)
     dataset.plot()
+
+if mode == 4:
+    inputDir = baseDir + 'deictic/1dollar-dataset/raw/rectangle/'
+    outputDir = baseDir + 'deictic/1dollar-dataset/resampled/rectangle/'
+    dataset = CsvDataset(inputDir)
+
+    transform1 = ResampleInSpaceTransform()
+
+    dataset.plot(sampleName='1_fast_rectangle_01.csv')
+    dataset.addTransform(transform1)
+    transform2 = NormaliseLengthTransform(axisMode=False)
+    transform3 = CenteringTransform()
+    #dataset.addTransform(transform2)
+    #dataset.addTransform(transform3)
+    dataset.applyTransforms(outputDir)
+
+    dataset = CsvDataset(outputDir)
+    dataset.plot(sampleName='1_fast_rectangle_01.csv')
+
+
 
 
 

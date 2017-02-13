@@ -108,7 +108,7 @@ class CsvDataset:
 
     # Plot
     # Plots input dataset's files
-    def plot(self, dimensions = 2):
+    def plot(self, dimensions = 2, sampleName = None):
         fig = plt.figure();
         ax = None
         if dimensions == 3:
@@ -118,20 +118,22 @@ class CsvDataset:
             plt.axis('equal')
 
         for filename in self.getDatasetIterator():
-            with open(self.dir + filename, "r") as f:
-                reader = csv.reader(f, delimiter=',')
-                vals = list(reader)
-                result = numpy.array(vals).astype('float')
-                if dimensions == 3:
-                    ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
-                else:
-                    plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
-                plt.axis('equal')
-                plt.show()
+            if sampleName == None or filename == sampleName:
+                with open(self.dir + filename, "r") as f:
+                    reader = csv.reader(f, delimiter=',')
+                    vals = list(reader)
+                    result = numpy.array(vals).astype('float')
+                    if dimensions == 3:
+                        ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
+                    else:
+                        plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
         if dimensions == 3:
             ax.legend()
         else:
             plt.legend(loc='upper right')
+
+        if sampleName != None:
+            plt.title(sampleName)
         plt.show()
 
 
