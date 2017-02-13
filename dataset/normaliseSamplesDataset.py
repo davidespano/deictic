@@ -1,7 +1,9 @@
 import csv
 import numpy
 import scipy
+import scipy.signal
 import re
+from copy import copy, deepcopy
 from math import sin, cos, radians
 from .csvDataset import *
 
@@ -85,7 +87,91 @@ class NormaliseLengthTransform(DatasetTransform):
         return sequence
 
 
+class SwapTransform(DatasetTransform):
+    def __init__(self, cols=[[0,1],[1,0]]):
+        super()
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
 
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        sequence_temp = deepcopy(sequence)
+        for i in range(0, len(self.cols)):
+            seq_index = self.cols[i][0]
+            seq_swap = self.cols[i][1]
+            sequence[:, seq_index] = sequence_temp[:,seq_swap]
+
+        return  sequence
+
+class RotateTransform(DatasetTransform):
+    def __init__(self, traslationMode = False, cols=[0,1], theta=0):
+        super()
+        if not isinstance(traslationMode, bool):
+            return TypeError
+        self.traslationMode = bool
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+        if not isinstance(theta, int):
+            return TypeError
+        self.theta = theta
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        # Initialization matrix rotate
+        theta = numpy.radians(self.theta)
+        c, s = numpy.cos(theta), numpy.sin(theta)
+        R = numpy.matrix('{} {} {}; {} {} {}; {} {} {}'.format(c,-s,0,s,c,0,0,0,1))
+        matrix = deepcopy(R)
+
+        if self.traslationMode == True:
+            maxs = numpy.amax(sequence[:, self.cols], axis=0)
+            mins = numpy.amin(sequence[:, self.cols], axis=0)
+            den = max(maxs-mins)
+            # Initialization matrix translation and traslation back
+            n = len(self.cols)
+            matrix_translantion = numpy.zeros((n,n))
+            matrix_translantion_back = numpy.zeros((n,n))
+            i,j = numpy.indices(matrix_translantion.shape)
+            matrix_translantion[i == j] = 1
+            matrix_translantion_back[i == j] = 1
+            for i in range(0, len(self.cols)):
+                matrix_translantion[i, len(self.cols)] = den
+                matrix_translantion_back[i, len(self.cols)] = -den
+            matrix = matrix_translantion * R * matrix_translantion_back
+
+        for index in range(0, len(sequence)):
+             result_temp = numpy.array([[1,1,1]])
+             for j in range(0, len(self.cols)):
+                 result_temp[0][self.cols[j]]= sequence[index][self.cols[j]]
+             t =  matrix * numpy.matrix(result_temp).T
+             for j in range(0, len(self.cols)):
+                 sequence[index][self.cols[j]]= t[self.cols[j]]
+
+        return  sequence
+
+class Sampling(DatasetTransform):
+    def __init__(self, scale=100):
+        super()
+        if not isinstance(scale, int):
+            return TypeError
+        self.scale = scale
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        element = (round(len(sequence)/self.scale))
+        #sequence = sequence[0:len(sequence):element]
+        a = scipy.signal.resample(sequence, self.scale+2)
+        sequence = a[1:-1,]
+
+        return sequence
 
 class NormaliseSamples:
 
