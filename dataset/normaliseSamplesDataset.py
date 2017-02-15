@@ -37,6 +37,7 @@ class ScaleDatasetTransform(DatasetTransform):
 
         return sequence
 
+
 class CenteringTransform(DatasetTransform):
     def __init__(self, cols=[0, 1]):
         super()
@@ -184,6 +185,7 @@ class ResampleInSpaceTransform(DatasetTransform):
         self.cols = cols
 
     def transform(self, sequence):
+        # adapted from WobbrockLib
         if not isinstance(sequence, numpy.ndarray):
             raise TypeError
         srcPts = numpy.copy(sequence).tolist()
@@ -191,10 +193,10 @@ class ResampleInSpaceTransform(DatasetTransform):
         size = len(srcPts)
         step = length/ (self.samples -1)
 
-        resampled = numpy.zeros([self.samples + 1,2])
+        resampled = []
 
-        resampled[0, 0] = srcPts[0][self.cols[0]]
-        resampled[0, 1] = srcPts[0][self.cols[1]]
+
+        resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]]])
 
         D = 0.0
         j = 1
@@ -211,9 +213,8 @@ class ResampleInSpaceTransform(DatasetTransform):
                 qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
                 qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
 
-                resampled[j, 0] = qx
-                resampled[j, 1] = qy
-                j+=1
+                resampled.append([qx, qy])
+
 
 
                 srcPts.insert(i, [qx, qy]) # insert 'q' at position i in points s.t. 'q' will be the next i
@@ -225,10 +226,9 @@ class ResampleInSpaceTransform(DatasetTransform):
 
         if D > 0.0:
             size = len(srcPts)
-            resampled[j,0] = srcPts[size -1][self.cols[0]]
-            resampled[j,1] = srcPts[size -1][self.cols[1]]
+            resampled.append([srcPts[size -1][self.cols[0]], srcPts[size -1][self.cols[1]]])
 
-        return resampled
+        return numpy.array(resampled)
 
 
 
