@@ -2,77 +2,73 @@ from dataset import *
 from gesture import *
 from test import *
 
-
-# Get_SubDirectories
-# Get all subdirectories from the choosen directory
-@staticmethod
-def get_subdirectories(baseDir):
-    return [name for name in os.listdir(baseDir)
-            if os.path.isdir(os.path.join(baseDir, name))]
-
-# Test compare gesture
-def compare_gesture(baseDir, results, n_states, index = 1):
-
-    baseDir = baseDir + 'normalised-trajectory/'
-    #### Test ####
+# Test
+def c_deictic(primitiveDir, gestureDir, n_states):
     models = []
-    models.append(create_hmm_gesture(baseDir, 'caret', n_states*2, index))
-    #models.append(create_hmm_gesture('delete', baseDir, n_states*3, index))
-    #models.append(create_hmm_gesture('left', baseDir, n_states, index))
-    models.append(create_hmm_gesture(baseDir, 'rectangle', n_states*4, index))
-    #models.append(create_hmm_gesture('right', baseDir, n_states, index))
-    models.append(create_hmm_gesture(baseDir,'square-braket-left', n_states*3, index))
-    models.append(create_hmm_gesture(baseDir,'square-braket-right', n_states*3, index))
-    models.append(create_hmm_gesture(baseDir,'triangle', n_states*3, index))
-    models.append(create_hmm_gesture(baseDir,'v', n_states*2, index))
-    models.append(create_hmm_gesture(baseDir,'x', n_states*3, index))
 
-    return compare_all_models_test_without_primitive(models, baseDir, results, index = index)
+    models.append(create_arrow(primitiveDir, n_states)[0])
+    models.append(create_caret(primitiveDir, n_states)[0])
+    models.append(create_delete(primitiveDir, n_states)[0])
+    models.append(create_rectangle(primitiveDir, n_states)[0])
+    models.append(create_square_braket_left(primitiveDir, n_states)[0])
+    models.append(create_square_braket_right(primitiveDir, n_states)[0])
+    models.append(create_star(primitiveDir, n_states)[0])
+    models.append(create_triangle(primitiveDir, n_states)[0])
+    models.append(create_v(primitiveDir, n_states)[0])
+    models.append(create_x(primitiveDir, n_states)[0])
 
-# Test Compare Modelled Gesture
-def compare_modelled_gestures(primitiveDir, gestureDir, n_states):
-    #### Test ####
-    models = []
-    # Caret
-    caret, seq = create_caret(primitiveDir, n_states)
-    models.append(caret)
-    # Delete
-    delete, seq = create_delete(primitiveDir, n_states)
-    models.append(delete)
-    # Left
-    left = primitive_model(primitiveDir, n_states, direction = Primitive.left)
-    models.append(left)
-    # Rectangle
-    rectangle, seq = create_rectangle(primitiveDir, n_states)
-    models.append(rectangle)
-    # Right
-    right = primitive_model(primitiveDir, n_states, direction = Primitive.right)
-    models.append(right)
-    # Square Braket Left
-    sq_braket_left, seq = create_square_braket_left(primitiveDir, n_states)
-    models.append(sq_braket_left)
-    # Square Braket Right
-    sq_braket_right, seq = create_square_braket_right(primitiveDir, n_states)
-    models.append(sq_braket_right)
-    # Triangle
-    triangle, seq = create_triangle(primitiveDir, n_states)
-    models.append(triangle)
-    # V
-    v, seq = create_v(primitiveDir, n_states)
-    models.append(v)
-    # X
-    #x, seq = create_x(primitiveDir, n_states)
-    #models.append(x)
-
-    #for model in models:
-    #    print(model.name)
-    #    plot_gesture(model)
+    #models.append(primitive_model(primitiveDir, n_states, Primitive.right))
+    #models.append(primitive_model(primitiveDir, n_states, Primitive.left))
 
     # Compare
-    return compare_all_models_test(models, gestureDir+'down-trajectory/')
+    return compares_deictic_models(models, gestureDir)
 
-baseDir = '/home/alessandro/Scaricati/dataset/leap_motion_unica/'
-primitiveDir = '/home/alessandro/Scaricati/dataset/leap_motion_unica/'
-#results = numpy.zeros((8, 8), dtype=numpy.int)
-results = compare_modelled_gestures(primitiveDir, baseDir, n_states=8)
+# Test ad-hoc hidden markov models
+def c_ad_hoc_hmm(gestureDir, list_gesture, dimensions=2, scale=100):
+
+    # Results
+    results = numpy.zeros((len(list_gesture), len(list_gesture)))
+    list_dataset = []
+    for gesture in list_gesture:
+        list_dataset.append(CsvDataset(gestureDir+gesture[0]+'/'))
+
+    # Training
+    len_sequence = len(list_dataset[0].read_dataset())
+    for index in range(0, 1):# len_sequence):
+        list_testing = []
+        # Create hmm gesture, training and testing sequences
+        models = []
+        index_dataset = 0
+        for gesture in list_gesture:
+            # Gets traning and testing sequences
+            te_seq , tr_seq = list_dataset[index_dataset].leave_one_out(index)
+            # Create and training hmm
+            models.append(create_hmm_gesture(gesture[0], tr_seq, gesture[1], scale=scale))
+            # Test list
+            list_testing.append(te_seq)
+            # Index dataset
+            index_dataset = index_dataset+1
+
+        # Testing
+        results = compares_adhoc_models(models, list_testing, gestureDir, results)
+
+    return results
+
+
+
+# Main
+gestureDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/'
+primitiveDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/unica-dataset/resampled/'
+n_states = 3 # Numero stati
+
+# Deictic
+#results = c_deictic(primitiveDir, gestureDir, n_states)
+# Adhoc hmm
+list_gesture = {("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
+        ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete", n_states*4), ("star", n_states*4),
+        ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
+        ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)}
+results = c_ad_hoc_hmm(gestureDir, list_gesture)
+
+# Print results
 print(results)

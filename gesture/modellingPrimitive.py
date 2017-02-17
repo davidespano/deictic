@@ -18,61 +18,40 @@ class Primitive(Enum):
     behind = 7
 
 ######### Model ##########
-## topology_model
-# Defines the topology and the hmm model
-def create_model(direction: object, n_states: object, name: object) -> object:
-    # create the hmm model
-    topology_factory = HiddenMarkovModelTopology() # Topology
-    emissions = primitive_emissions(n_states, direction, scale=100) # Emissions
-    return topology_factory.forward(name, n_states, emissions)
-
 ## model_primitive
 # Creates and returns the hmm model for the specified primitive
-def primitive_model(baseDir, n_states, direction, degree = 0):
-    # Left, Right, Up, Down
-    baseDir = baseDir + 'down-trajectory/'
-
+def primitive_model(baseDir, n_states, direction, theta = 0):
     # Left
     if(direction == Primitive.left):
         name = 'left'
     # Right
     elif(direction == Primitive.right):
         name = 'right'
-    # Up
-    elif(direction == Primitive.up):
-        name = 'up'
-    # Down
-    elif(direction == Primitive.down):
-        name = 'down'
     # Diagonal
-    elif (direction == Primitive.diagonal):
-        name = 'diagonal_{}'.format(degree)
-    # 3D
-    elif direction == Primitive.forward or direction == Primitive.behind:
-        # Forward
-        if direction == Primitive.forward:
-            name = 'forward'
-        # Behind
-        else:
-            name = 'behind'
-            #model = create_swipe_model(direction, n_states)
-            #model.fit(dataset.read_dataset(3, 100), use_pseudocount=True)
+    else:
+        name = str(theta)
 
     # Get dataset
-    dataset = ToolsDataset(baseDir + name + '/')
+    dataset = CsvDataset(baseDir + name + '/')
     # Create model
-    model = create_model(direction, n_states, name)
+    model = create_model(direction, name, n_states)
     # Training
-    model.fit(dataset.read_dataset(2, 100), use_pseudocount=True)
+    model.fit(dataset.read_dataset(), use_pseudocount=True)
 
     return model
 
-
+## topology_model
+# Defines the topology and the hmm model
+def create_model(direction, name, n_states=8):
+    # create the hmm model
+    topology_factory = HiddenMarkovModelTopology() # Topology
+    emissions = primitive_emissions(direction, n_states, scale=100) # Emissions
+    return (topology_factory.forward(name, n_states, emissions))
 
 ######### Emissions #########
 ## model_emissions
 # Creates the distributions of the primitive hmm model
-def primitive_emissions(n_states, direction, dimension = 2,  scale = 1):
+def primitive_emissions(direction, n_states, dimension = 2,  scale = 1):
     distributions = []
     step = scale / n_states;
     # Random value for the normal distribution

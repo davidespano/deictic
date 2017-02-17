@@ -51,7 +51,7 @@ class Dollar1Converter:
         return
 
     def create_deictic_dataset(self, inputBase, outputBase):
-        sub = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
+        sub = ['arrow', 'caret', 'check', 'circle', 'delete', 'left_curly_brace', 'left_sq_bracket',
                'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star',
                'triangle', 'v', 'x']
         xsltPath = inputBase + '/' + 'conversion.xslt'

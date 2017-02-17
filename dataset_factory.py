@@ -1,97 +1,90 @@
 from dataset import *
 from gesture import *
 
+mode = 4
+
 ######### Gesture #########
-# Creates leap motion unica dataset (Normalise and Sample)
-def leapmotion_dataset(baseDir):
-    # Crea file csv gesture
-    # Rectangle
-    DatasetIterator.create_gesture_dataset(baseDir, 'rectangle', 72)
-    # Triangle
-    DatasetIterator.create_gesture_dataset(baseDir, 'triangle', 54)
-    # Caret
-    DatasetIterator.create_gesture_dataset(baseDir, 'caret', 36)
-    # V
-    DatasetIterator.create_gesture_dataset(baseDir, 'v', 36)
-    # X
-    DatasetIterator.create_gesture_dataset(baseDir, 'x', 54)
-    # Square Bracket Left
-    DatasetIterator.create_gesture_dataset(baseDir, 'square-braket-left', 54)
-    # Square Bracket Right
-    DatasetIterator.create_gesture_dataset(baseDir, 'square-braket-right', 54)
-    # Delete
-    DatasetIterator.create_gesture_dataset(baseDir, 'delete', 54)
-    #  Star
-    DatasetIterator.create_gesture_dataset(baseDir, 'star', 90)
-    # Left
-    DatasetIterator.create_gesture_dataset(baseDir, 'left', 20)
-    # Right
-    DatasetIterator.create_gesture_dataset(baseDir, 'right', 20)
+# Creates unica dataset
+def dataset_gesture_factory(list, inputDir, outputDir):
 
+    for gesture in list:
+        input_dir = inputDir+gesture[0]+'/'
+        output_dir = outputDir+gesture[0]+'/'
+        dataset = CsvDataset(input_dir)
+
+        # Transform
+        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform2 = ScaleDatasetTransform(scale=100)
+        transform3 = CenteringTransform()
+        transform4 = ResampleInSpaceTransform(samples=gesture[1])
+        # Apply transforms
+        dataset.addTransform(transform1)
+        dataset.addTransform(transform2)
+        dataset.addTransform(transform3)
+        dataset.addTransform(transform4)
+
+        dataset.applyTransforms(output_dir)
+
+        #dataset = CsvDataset(output_dir)
+        #dataset.plot()
     return
-
-# Makes one dollar dataset (Normalise and Sample)
-def onedollar_dataset(baseDir):
-    # Arrow
-    DatasetIterator.create_gesture_dataset(baseDir, 'arrow/', 72)
-    # Caret
-    DatasetIterator.create_gesture_dataset(baseDir, 'caret/', 36)
-    # Check
-    DatasetIterator.create_gesture_dataset(baseDir, 'check/', 36)
-    # Circle
-    DatasetIterator.create_gesture_dataset(baseDir, 'circle/', 72)
-    # Delete
-    DatasetIterator.create_gesture_dataset(baseDir, 'delete_mark/', 54)
-    # Left curly brace
-    DatasetIterator.create_gesture_dataset(baseDir, 'left_curly_brace/', 36)
-    # Right curly brace
-    DatasetIterator.create_gesture_dataset(baseDir, 'right_curly_brace/', 36)
-    # Left square bracket
-    DatasetIterator.create_gesture_dataset(baseDir, 'left_sq_bracket/', 54)
-    # Right square bracket
-    DatasetIterator.create_gesture_dataset(baseDir, 'right_sq_bracket/', 54)
-    # Pigtail
-    DatasetIterator.create_gesture_dataset(baseDir, 'pigtail/', 36)
-    # Question mark
-    DatasetIterator.create_gesture_dataset(baseDir, 'question_mark/', 90)
-    # Rectangle
-    DatasetIterator.create_gesture_dataset(baseDir, 'rectangle/', 72)
-    # Star
-    DatasetIterator.create_gesture_dataset(baseDir, 'star/', 90)
-    # Triangle
-    DatasetIterator.create_gesture_dataset(baseDir, 'triangle/', 54)
-    # V
-    DatasetIterator.create_gesture_dataset(baseDir, 'v/', 36)
-    # X
-    DatasetIterator.create_gesture_dataset(baseDir, 'x/', 54)
 
 ######### Primitive #########
-# Makes primitive dataset (from right and left movements)
-def primitive_dataset(datasetDir, baseDir):
-    # Up
-    make_primitive_dataset(datasetDir, baseDir, Primitive.up)
-    # Down
-    make_primitive_dataset(datasetDir, baseDir, Primitive.down)
-    # Diagonal
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, -145) # - 145
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, -135) # - 135
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, -130) # - 130
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, -60) # - 60
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, -45) # - 45
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, 135) # 135
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, 60) # 60
-    make_primitive_dataset(datasetDir, baseDir, Primitive.diagonal, 45) # 45
-    # Forward
-    make_primitive_dataset(datasetDir, baseDir, Primitive.forward)
-    # Behind
-    make_primitive_dataset(datasetDir, baseDir, Primitive.behind)
+# Makes primitive dataset (from right movement)
+def dataset_primitive_factory(list_gestures, inputDir, outputDir, samples=20):
+
+    for primitive in list_gestures:
+        output_dir = outputDir+(str(primitive))+'/'
+        dataset = CsvDataset(inputDir)
+
+        # Transforms
+        #transform1 = ScaleDatasetTransform(scale=1)
+        transform1 = RotateTransform(traslationMode=False, cols=[0,1], theta=primitive)
+        transform2 = CenteringTransform()
+        transform3 = NormaliseLengthTransform(axisMode=False)
+        transform4 = ScaleDatasetTransform(scale=100)
+        transform5 = ResampleInSpaceTransform(samples = samples)
+
+        # Apply transforms
+        dataset.addTransform(transform1)
+        dataset.addTransform(transform2)
+        dataset.addTransform(transform3)
+        dataset.addTransform(transform4)
+        dataset.addTransform(transform5)
+
+        dataset.applyTransforms(output_dir)
+
+        #dataset = CsvDataset(output_dir)
+        #print(str(primitive))
+        #dataset.plot()
 
     return
 
-datasetDir = '/home/alessandro/Scaricati/gestures/'
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 4
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+
+# Unica
+list = {("rectangle", 80), ("triangle", 60), ("caret", 40), ("v",40), ("x", 60),
+        ("square-braket-left", 60), ("square-braket-right", 60), ("delete", 60),
+        ("star", 100)
+        }#("left", 20), ("right", 20)
+#dataset_gesture_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
+
+# 1Dollar
+list = {("rectangle", 80), ("triangle",60), ("caret",40), ("v",40), ("x",60),
+        ("left_sq_bracket",60), ("right_sq_bracket",60), ("delete_mark", 60), ("star", 100), ("arrow",80),
+        ("check",40), ("circle", 80), ("left_curly_brace",120), ("right_curly_brace", 120),
+        ("pigtail", 80), ("question_mark", 80)}
+dataset_gesture_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
+
+# Primitive
+list = {340, 320, 270, 240, 200, 150, 145, 140, 135, 130, 120, 110, 90, 70, 60, 45, 40, 20,
+        -340, -320, -250, -240, -200, -145, -140, -135, -130, -120, -110, -90, -70, -60, -45, -40, -20}
+
+#dataset_primitive_factory(list, baseDir+'deictic/unica-dataset/raw/right/', baseDir+'deictic/unica-dataset/resampled/')
+
+mode = 0
 
 if mode == 1:
     inputDir = baseDir + 'original/1dollar-dataset/'
@@ -109,14 +102,16 @@ if mode == 3:
     inputDir = baseDir + 'deictic/unica-dataset/raw/left/'
     outputDir = baseDir + 'deictic/unica-dataset/scaled/left/'
     dataset = CsvDataset(inputDir)
-    transform1 = ScaleDatasetTransform(scale=1)
-    transform2 = NormaliseLengthTransform(axisMode=False)
-    transform3 = CenteringTransform()
-    dataset.addTransform(transform2)
-    #dataset.addTransform(transform1)
-    dataset.addTransform(transform3)
+    #
+    #transform1 = ScaleDatasetTransform(scale=1)
+    #transform2 = NormaliseLengthTransform(axisMode=False)
+    #transform3 = CenteringTransform()
+    transform1 = ResampleInSpaceTransform()
+    #
+    dataset.addTransform(transform1)
+    #dataset.addTransform(transform2)
+    #dataset.addTransform(transform3)
     dataset.applyTransforms(outputDir)
-
 
     dataset = CsvDataset(outputDir)
     dataset.plot()
@@ -138,6 +133,45 @@ if mode == 4:
 
     dataset = CsvDataset(outputDir)
     dataset.plot(sampleName='1_fast_rectangle_01.csv')
+
+# Diagonal
+if mode == 5:
+    inputDir = baseDir + '/deictic/unica-dataset/raw/right/'
+    outputDir = baseDir + '/deictic/unica-dataset/scaled/up/'
+    dataset = CsvDataset(inputDir)
+    # Transforms
+    transform1 = ScaleDatasetTransform(scale=1)
+    transform2 = NormaliseLengthTransform(axisMode=False)
+    transform3 = CenteringTransform()
+    trasnform4 = RotateTransform(traslationMode=False, cols=[0,1], theta=90)
+    # Apply transforms
+    dataset.addTransform(transform3)
+    dataset.addTransform(trasnform4)
+    dataset.addTransform(transform2)
+    dataset.applyTransforms(outputDir)
+
+    dataset = CsvDataset(outputDir)
+    dataset.plot()
+
+# Samples
+if mode == 6:
+    inputDir = baseDir + '/deictic/unica-dataset/raw/right/'
+    outputDir = baseDir + '/deictic/unica-dataset/scaled/right/'
+    dataset = CsvDataset(inputDir)
+    # Transforms
+    transform1 = ScaleDatasetTransform(scale=1)
+    transform2 = NormaliseLengthTransform(axisMode=False)
+    transform3 = CenteringTransform()
+    transform4 = Sampling(scale=20)
+    # Apply transforms
+    dataset.addTransform(transform4)
+    dataset.addTransform(transform2)
+    dataset.addTransform(transform3)
+    dataset.applyTransforms(outputDir)
+
+    dataset = CsvDataset(outputDir)
+    dataset.plot()
+
 
 
 

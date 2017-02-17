@@ -57,8 +57,6 @@ class CenteringTransform(DatasetTransform):
 
         return sequence
 
-
-
 class NormaliseLengthTransform(DatasetTransform):
     def __init__(self, axisMode=True, cols=[0,1]):
         super()
@@ -245,38 +243,6 @@ class NormaliseSamples:
         return DatasetIterator(self.dir)
 
 ######### Pre-processing original files dataset #########
-
-    ## Swap
-    # Is used to make up and down csv files from right and left csv files.
-    def swap(self, output_dir, name, dimensions = 2):
-
-        for filename in self.getCsvDataset():
-            items = re.findall('\d*\D+', filename)# filename
-
-            # Read file
-            with open(self.dir + filename, "r") as f:
-                reader = csv.reader(f, delimiter=',')
-                vals = list(reader)
-                result = numpy.array(vals).astype('float') # This array contains all file's data
-
-                # X and Y
-                if dimensions == 2:
-                    # Swap x with y
-                    for index in range(0, len(result)):
-                        temp = result[index][0]
-                        result[index][0] = result[index][1]
-                        result[index][1] = temp
-                # X, Y and Z
-                elif dimensions == 3:
-                    # Swap x with z
-                    for index in range(0, len(result)):
-                        temp = result[index][0]
-                        result[index][0] = result[index][2]
-                        result[index][2] = temp
-
-                # Save file
-                numpy.savetxt(output_dir + name + '_' + items[len(items)-1], result, delimiter=',')
-
     ## Rotate Lines
     # Is used to make diagonal csv files from rotating right and left files.
     def rotate_lines(self, output_dir, name, degree = 0):
