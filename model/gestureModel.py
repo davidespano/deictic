@@ -24,10 +24,10 @@ class GestureExp:
     def __or__(self, other):
         return CompositeExp(self, other, OpEnum.Choice)
 
-    def __get_path(self, path, current):
+    def get_path(self, path, current):
         return None
 
-    def __get_points(self, points):
+    def get_points(self, points):
         return None
 
     def is_composite(self):
@@ -37,7 +37,7 @@ class GestureExp:
 
     def plot(self):
         pathList = list()
-        self.__get_path(pathList, Point(0, 0))
+        self.get_path(pathList, Point(0, 0))
         fig = plt.figure()
         ax = fig.add_subplot(111)
         codes, verts = zip(*pathList)
@@ -52,7 +52,7 @@ class GestureExp:
 
     def to_point_sequence(self):
         pointList = list()
-        self.__get_points(pointList)
+        self.get_points(pointList)
         return numpy.array(pointList)
 
 
@@ -82,15 +82,15 @@ class CompositeExp(GestureExp):
     def is_composite(self):
         return True
 
-    def __get_path(self, path, current):
-        self.left.__get_path(path, current)
-        return self.right.__get_path(path, current)
+    def get_path(self, path, current):
+        self.left.get_path(path, current)
+        return self.right.get_path(path, current)
 
-    def __get_points(self, points):
+    def get_points(self, points):
         if not self.left is None:
-            self.left.__get_points(points)
+            self.left.get_points(points)
         if not self.right is None:
-            self.right.__get_points(points)
+            self.right.get_points(points)
 
 
 
@@ -102,12 +102,12 @@ class Point(GestureExp):
     def __str__(self):
         return "P({0},{1})".format(str(self.x), str(self.y))
 
-    def __get_path(self, path, current):
+    def get_path(self, path, current):
         current.x = self.x
         current.y = self.y
         return path.append((mpath.Path.MOVETO, (self.x, self.y)))
 
-    def __get_points(self, points):
+    def get_points(self, points):
         points.append([self.x, self.y, self])
 
 
@@ -119,12 +119,12 @@ class Line(GestureExp):
     def __str__(self):
         return "l({0},{1})".format(str(self.dx), str(self.dy))
 
-    def __get_path(self, path, current):
+    def get_path(self, path, current):
         current.x += self.dx
         current.y += self.dy
         return path.append((mpath.Path.LINETO, (current.x, current.y)))
 
-    def __get_points(self, points):
+    def get_points(self, points):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
@@ -139,7 +139,7 @@ class Arc(GestureExp):
     def __str__(self):
         return "a({0},{1})".format(self.dx, self.dy)
 
-    def __get_path(self, path, current):
+    def get_path(self, path, current):
         if self.cw:
             if self.dx * self.dy <= 0:
                 current.x += self.dx
@@ -160,7 +160,7 @@ class Arc(GestureExp):
                 current.y += self.dy
         return path.append((mpath.Path.CURVE3, (current.x, current.y)))
 
-    def __get_points(self, points):
+    def get_points(self, points):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
@@ -169,23 +169,33 @@ class ModelPreprocessor:
 
     def __init__(self, exp):
         self.exp = exp
-        self.transform = CompositeTransform()
+        self.transforms = CompositeTransform()
 
     def preprocess(self):
         points = self.exp.to_point_sequence()
-        transformed = self.transform.transform(points)
+        transformed = self.transforms.transform(points)
 
+        x = 0
+        y = 0
         # update the expression terms
         for i in range(0,len(points)):
             if isinstance(points[i][2], Point):
-                points[i][2].x = transformed[i][0]
-                points[i][2].y = transformed[i][1]
+                points[i][2].x = transformed[i][0] - x
+                points[i][2].y = transformed[i][1] - y
+                x = transformed[i][0]
+                y = transformed[i][1]
+
             elif isinstance(points[i][2], Line):
-                points[i][2].dx = transformed[i][0]
-                points[i][2].dy = transformed[i][1]
+                points[i][2].dx = transformed[i][0] - x
+                points[i][2].dy = transformed[i][1] - y
+                x = transformed[i][0]
+                y = transformed[i][1]
+
             elif isinstance(points[i][2], Arc):
-                points[i][2].dx = transformed[i][0]
-                points[i][2].dy = transformed[i][1]
+                points[i][2].dx = transformed[i][0] - x
+                points[i][2].dy = transformed[i][1] - y
+                x = transformed[i][0]
+                y = transformed[i][1]
 
 
 
@@ -213,4 +223,13 @@ gesture_models = [
 
 
 for gesture in gesture_models:
+    processor = ModelPreprocessor(gesture)
+    transform1 = CenteringTransform()
+    transform2 = NormaliseLengthTransform(axisMode=True)
+    transform3 = ScaleDatasetTransform(scale=100)
+    processor.transforms.addTranform(transform1)
+    processor.transforms.addTranform(transform2)
+    processor.transforms.addTranform(transform3)
+    print(gesture)
+    processor.preprocess()
     gesture.plot()
