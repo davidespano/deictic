@@ -51,7 +51,7 @@ def create_hmm_gesture(baseDir, name, index_file, n_states = 8, dimensions = 2):
 
 ## plot_gesture
 # Plots the model input examples.
-@staticmethod
+#@staticmethod
 # Plot a model gesture
 def plot_gesture(model):
     for i in range(1, 3):

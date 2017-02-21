@@ -122,13 +122,12 @@ if mode == 3:
     dataset.plot()
 
 if mode == 4:
-    inputDir = baseDir + 'deictic/1dollar-dataset/raw/rectangle/'
-    outputDir = baseDir + 'deictic/1dollar-dataset/resampled/rectangle/'
+    inputDir = baseDir + 'deictic/unica-dataset/raw/right/'
+    outputDir = baseDir + 'deictic/unica-dataset/resampled/right/'
     dataset = CsvDataset(inputDir)
 
     transform1 = ResampleInSpaceTransform()
 
-    dataset.plot(sampleName='1_fast_rectangle_01.csv')
     dataset.addTransform(transform1)
     transform2 = NormaliseLengthTransform(axisMode=False)
     transform3 = CenteringTransform()
@@ -137,7 +136,12 @@ if mode == 4:
     dataset.applyTransforms(outputDir)
 
     dataset = CsvDataset(outputDir)
-    dataset.plot(sampleName='1_fast_rectangle_01.csv')
+    dataset.plot(sampleName='claudio_right.csv')
+
+if mode == 5:
+    inputDir = baseDir + 'deictic/1dollar-dataset/raw/left_curly_brace/'
+    dataset = CsvDataset(inputDir)
+    dataset.plot(singleMode=True)
 
 
 

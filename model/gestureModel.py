@@ -7,6 +7,9 @@ import numpy
 from dataset import *
 
 
+# TODO handle iterative definitions
+# TODO handle disabling
+
 class OpEnum(Enum):
     Sequence = 0
     Parallel = 1
@@ -164,72 +167,3 @@ class Arc(GestureExp):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
-
-class ModelPreprocessor:
-
-    def __init__(self, exp):
-        self.exp = exp
-        self.transforms = CompositeTransform()
-
-    def preprocess(self):
-        points = self.exp.to_point_sequence()
-        transformed = self.transforms.transform(points)
-
-        x = 0
-        y = 0
-        # update the expression terms
-        for i in range(0,len(points)):
-            if isinstance(points[i][2], Point):
-                points[i][2].x = transformed[i][0] - x
-                points[i][2].y = transformed[i][1] - y
-                x = transformed[i][0]
-                y = transformed[i][1]
-
-            elif isinstance(points[i][2], Line):
-                points[i][2].dx = transformed[i][0] - x
-                points[i][2].dy = transformed[i][1] - y
-                x = transformed[i][0]
-                y = transformed[i][1]
-
-            elif isinstance(points[i][2], Arc):
-                points[i][2].dx = transformed[i][0] - x
-                points[i][2].dy = transformed[i][1] - y
-                x = transformed[i][0]
-                y = transformed[i][1]
-
-
-
-
-gesture_models = [
-    #Point(0,0) + Line(-2,-3) + Line(4,0)+ Line(-2,3), # triangle
-    #Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3), # X
-    #Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0), # rectangle
-    #Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False), # circle
-    #Point(0,0) + Line(2, -2) + Line(4,6), # check
-    #Point(0,0) + Line(2,3) + Line(2,-3), # caret
-    #Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3), # question mark
-    #Point(0,0) + Line(6,4) + Line(-3,0) + Line(4,1) + Line(-1, -3), # arrow
-    #Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0), # left square bracket
-    #Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0), # right square bracket
-    #Point(0,0) + Line(2,-3) + Line(2,3), # V
-    #Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), # delete
-    #Point(0,0) + Arc(-2,-2, cw=False) + Line(0,-3) + Arc(-1,-1) + Arc(1,-1) + Line(0,-3) + Arc(2,-2,cw=False), # left curly brace
-    #Point(0,0) + Arc(2,-2) + Line(0,-3) + Arc(1,-1, cw=False) + Arc(-1,-1, cw=False) + Line(0,-3) + Arc(-2,-2),  # right curly brace
-    #Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3), # star
-    Point(0,0) + Arc(6,6, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(6, -6, cw=False) # pigtail
-]
-
-
-
-
-for gesture in gesture_models:
-    processor = ModelPreprocessor(gesture)
-    transform1 = CenteringTransform()
-    transform2 = NormaliseLengthTransform(axisMode=True)
-    transform3 = ScaleDatasetTransform(scale=100)
-    processor.transforms.addTranform(transform1)
-    processor.transforms.addTranform(transform2)
-    processor.transforms.addTranform(transform3)
-    print(gesture)
-    processor.preprocess()
-    gesture.plot()
