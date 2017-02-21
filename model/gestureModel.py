@@ -11,9 +11,19 @@ from dataset import *
 # TODO handle disabling
 
 class OpEnum(Enum):
-    Sequence = 0
-    Parallel = 1
-    Choice = 2
+    Undef = -1
+    Point = 0
+    Line = 1
+    Arc = 2
+    Sequence = 3
+    Choice = 4
+    Disabling = 5
+    Iterative = 6
+    Parallel = 7
+
+    @staticmethod
+    def isGround(opEnum):
+        return opEnum == OpEnum.Point or opEnum == OpEnum.Line or opEnum == OpEnum.Arc
 
 class GestureExp:
     __metaclass__ = ABCMeta
@@ -27,6 +37,15 @@ class GestureExp:
     def __or__(self, other):
         return CompositeExp(self, other, OpEnum.Choice)
 
+    def __ior__(self, other):
+        return CompositeExp(self, other, OpEnum.Disabling)
+
+    def __invert__(self):
+        return IterativeExp(self)
+
+
+
+
     def get_path(self, path, current):
         return None
 
@@ -35,7 +54,6 @@ class GestureExp:
 
     def is_composite(self):
         return False
-
 
 
     def plot(self):
@@ -75,8 +93,10 @@ class CompositeExp(GestureExp):
             op = "+"
         elif  self.op == OpEnum.Parallel:
             op = "*"
-        elif self.op == OpEnum.Parallel:
+        elif self.op == OpEnum.Choice:
             op = "|"
+        elif self.op == OpEnum.Disabling:
+            op = '|='
         if self.parent is None or self.parent.op == self.op :
             return "{0} {1} {2}".format(str(self.left), op, str(self.right))
         else:
@@ -95,6 +115,26 @@ class CompositeExp(GestureExp):
         if not self.right is None:
             self.right.get_points(points)
 
+
+class IterativeExp(GestureExp):
+    def __init__(self, exp):
+        self.exp
+
+    def is_composite(self):
+        return True;
+
+    def __str__(self):
+        return "~{0}".format(str(self.exp))
+
+    def get_path(self, path, current):
+        if not self.exp is None:
+            return self.exp.get_path(path, current)
+        return None
+
+    def get_points(self, points):
+        if not self.exp is None:
+            return self.exp.get_points(points)
+        return None
 
 
 class Point(GestureExp):
