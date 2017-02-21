@@ -1,5 +1,5 @@
 from enum import Enum
-from dataset import CompositeTransform
+from dataset import *
 from model import *
 from topology import *
 
@@ -21,6 +21,7 @@ class ClassifierFactory:
 
 
     def createClassifier(self, exp):
+        # center and normalise the ideal model definition
         processor = ModelPreprocessor(exp)
         transform1 = CenteringTransform()
         transform2 = NormaliseLengthTransform(axisMode=True)
@@ -39,7 +40,7 @@ class ClassifierFactory:
         if isinstance(exp, Point):
             startPoint[0] = exp.x
             startPoint[1] = exp.y
-            return ExpEnum.Point, None
+            return OpEnum.Point, None
 
         if isinstance(exp, Line):
             alpha = math.acos(Geometry2D.getCosineFromSides(exp.dx, exp.dy)) # rotation with respect to left-to-right line
@@ -80,21 +81,22 @@ class ClassifierFactory:
             startPoint[0] += exp.dx * self.scale
             startPoint[1] += exp.dy * self.scale
 
-            return ExpEnum.Line, [(hmm, None)]
+            return OpEnum.Line, [(hmm, None)]
 
         # -----------------------------------------------
         #       composite terms
         # -----------------------------------------------
         if isinstance(exp, CompositeExp):
-            # TODO handle the starting point according to the operator semantics
+            oldPoint = [startPoint[0], startPoint[1]]
             expTypeLeft,  hmmLeft  = self.parseExpression(exp.left, startPoint)
+            self.updateStartPoint(startPoint, oldPoint, exp.op)
             expTypeRight, hmmRight = self.parseExpression(exp.right, startPoint)
 
-            expType = ExpEnum.fromOpEnum(exp.op)
+            expType = exp.op
 
             if (expTypeRight == expType and expType == expTypeLeft) \
-                    or ExpEnum.isGround(expTypeLeft) \
-                    or ExpEnum.isGround(expTypeRight):
+                    or OpEnum.isGround(expTypeLeft) \
+                    or OpEnum.isGround(expTypeRight):
                 # we can combine the lists without creating the hmm yet
                 if hmmLeft is None: # point on the left operand
                     return expType, hmmRight
@@ -108,7 +110,18 @@ class ClassifierFactory:
                 rightOperand, seq_edge_right = self.createHMM(str(exp.right), expTypeRight, hmmRight)
                 return expType, [(leftOperand, seq_edge_left), (rightOperand, seq_edge_right)]
 
-        return  None
+        if isinstance(exp, IterativeExp):
+            expType, hmm = self.parseExpression(exp.exp, startPoint)
+            operand, seq_edge = self.createHMM(str(exp.exp), expType, hmm)
+            return expType, [(hmm, seq_edge)]
+
+        return None
+
+    def updateStartPoint(self, startPoint, oldPoint, op):
+        # for parallel and choice, the starting point has to go back to the old position
+        if op == OpEnum.Parallel or op == OpEnum.Choice:
+            startPoint[0] = oldPoint[0]
+            startPoint[1] = oldPoint[1]
 
 
     def createCleanLine(self, name, alpha, step, n_states):
@@ -134,25 +147,25 @@ class ClassifierFactory:
             edges.append(edge)
             models.append(model)
 
-        if operator == ExpEnum.Sequence: # create a sequence
+        if operator == OpEnum.Sequence: # create a sequence
             sequence, seq_edges = HiddenMarkovModelTopology.sequence(operands = models, gt_edges= edges);
             sequence.name = name
             return sequence, seq_edges
 
-        if operator == ExpEnum.Parallel: # create a parallel gesture
-            parallel = models[0]
+        if operator == OpEnum.Parallel: # create a parallel gesture
+            parallel = OpEnum[0]
 
             for i in range(1, len(models)):
                 parallel, edges = HiddenMarkovModelTopology.parallel(parallel, models[i], edges)
             parallel.name = name
             return parallel, edges
 
-        if operator == ExpEnum.Choice: # create a choice
+        if operator == OpEnum.Choice: # create a choice
             choice, seq_edges = HiddenMarkovModelTopology.choice(operands=models, gt_edges=edges);
             choice.name = name
             return choice, seq_edges
 
-        if operator == ExpEnum.Disabling: # create a disabling
+        if operator == OpEnum.Disabling: # create a disabling
             disabling = models[0]
 
             for i in range(1, len(models)):
@@ -160,7 +173,10 @@ class ClassifierFactory:
             disabling.name = name
             return disabling, edges
 
-        # TODO add iterative definition
+        if operator == OpEnum.Iterative:
+            model = models[0]
+            iterative, edges = HiddenMarkovModelTopology.iterative(model, edges)
+            return iterative, edges
 
         return None
 
@@ -196,29 +212,3 @@ class ModelPreprocessor:
                 points[i][2].dy = transformed[i][1] - y
                 x = transformed[i][0]
                 y = transformed[i][1]
-
-
-class ExpEnum(Enum):
-    Undef = -1
-    Point = 0
-    Line = 1
-    Arc = 2
-    Sequence = 3
-    Choice = 4
-    Disabling = 5
-    Iterative = 6
-    Parallel = 7
-
-    @staticmethod
-    def fromOpEnum(opEnum):
-        if opEnum == OpEnum.Sequence:
-            return ExpEnum.Sequence
-        if opEnum == OpEnum.Parallel:
-            return ExpEnum.Parallel
-        if opEnum == OpEnum.Choice:
-            return ExpEnum.Choice
-        return ExpEnum.Undef
-
-    @staticmethod
-    def isGround(opEnum):
-        return opEnum == ExpEnum.Point or opEnum == ExpEnum.Line or opEnum == ExpEnum.Arc
