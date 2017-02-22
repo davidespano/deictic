@@ -23,21 +23,23 @@ def deictic_test_unistroke(primitiveDir, gestureDir, n_states):
     models = []
 
     #models.append(create_arrow(primitiveDir, n_states)[0])
-    #models.append(create_caret(primitiveDir, n_states)[0])
-    #models.append(create_delete(primitiveDir, n_states)[0])
-    #models.append(create_rectangle(primitiveDir, n_states)[0])
-    #models.append(create_square_braket_left(primitiveDir, n_states)[0])
-    #models.append(create_square_braket_right(primitiveDir, n_states)[0])
-    #models.append(create_star(primitiveDir, n_states)[0])
+    models.append(create_caret(primitiveDir, n_states)[0])
+    models.append(create_delete(primitiveDir, n_states)[0])
+    models.append(create_rectangle(primitiveDir, n_states)[0])
+    models.append(create_square_braket_left(primitiveDir, n_states)[0])
+    models.append(create_square_braket_right(primitiveDir, n_states)[0])
+    models.append(create_star(primitiveDir, n_states)[0])
     models.append(create_triangle(primitiveDir, n_states)[0])
-    #models.append(create_v(primitiveDir, n_states)[0])
-    #models.append(create_x(primitiveDir, n_states)[0])
+    models.append(create_v(primitiveDir, n_states)[0])
+    models.append(create_x(primitiveDir, n_states)[0])
 
     #models.append(primitive_model(primitiveDir, n_states, Primitive.right))
     #models.append(primitive_model(primitiveDir, n_states, Primitive.left))
 
     # Compare
-    return compares_deictic_models(models, gestureDir)
+    names = {'arrow', 'caret', 'delete_mark', 'rectangle', 'left_sq_bracket',
+             'right_sq_bracket', 'star', 'triangle', 'v', 'x'}
+    return compares_deictic_models(models, gestureDir, names)
 
 # Test ad-hoc hidden markov models
 def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
@@ -75,14 +77,16 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 # Main
 gestureDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/mdollar-dataset/resampled/'
 primitiveDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/unica-dataset/raw/right/'
-n_states = 5 # Numero stati
+n_states = 8 # Numero stati
 
-mode = 1
+mode = 0
 
 ## Deictic
 # Unistroke
 if mode == 0:
-    results = deictic_test(primitiveDir, gestureDir, n_states)
+    primitiveDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/unica-dataset/resampled/'
+    gestureDir = '/home/alessandro/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/'
+    results = deictic_test_unistroke(primitiveDir, gestureDir, n_states)
 
 # Multistroke
 if mode == 1:
