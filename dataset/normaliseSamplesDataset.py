@@ -19,7 +19,7 @@ class ScaleDatasetTransform(DatasetTransform):
             return TypeError
         self.cols = cols
 
-        if  isinstance(scale, int):
+        if  isinstance(scale, float) or isinstance(scale, int):
             self.scale = []
             for i in range(0, len(cols)):
                 self.scale.append(scale)
@@ -55,6 +55,25 @@ class CenteringTransform(DatasetTransform):
 
             sequence[:, self.cols[i]] = sequence[:, self.cols[i]] - 0.5 * (vmin + vmax)
 
+        return sequence
+
+class TranslateTransform(DatasetTransform):
+
+    def __init__(self, cols=[0,1], t=[0,0]):
+        super()
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+
+        if not isinstance(t, list) or len(t) != 2 :
+            return TypeError
+        self.t = t
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+        for i in range(0, len(self.cols)):
+            sequence[:, self.cols[i]] = sequence[:, self.cols[i]] + self.t[i]
         return sequence
 
 class NormaliseLengthTransform(DatasetTransform):
@@ -107,7 +126,11 @@ class SwapTransform(DatasetTransform):
         return  sequence
 
 class RotateTransform(DatasetTransform):
-    def __init__(self, traslationMode = False, cols=[0,1], theta=0):
+
+    degrees = 1
+    radians = 2
+
+    def __init__(self, traslationMode = False, cols=[0,1], theta=0, centre = [0,0], unit= degrees):
         super()
         if not isinstance(traslationMode, bool):
             return TypeError
@@ -115,21 +138,31 @@ class RotateTransform(DatasetTransform):
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
-        if not isinstance(theta, int):
+        if not isinstance(theta, float) and not isinstance(theta, int):
             return TypeError
         self.theta = theta
+        if not isinstance(centre, list) or len(centre) != 2 :
+            return TypeError
+        self.centre = centre
+
+        if unit != RotateTransform.degrees and unit != RotateTransform.radians:
+            return TypeError
+        self.unit = unit
 
     def transform(self, sequence):
         if not isinstance(sequence, numpy.ndarray):
             raise TypeError
 
         # Initialization matrix rotate
-        theta = numpy.radians(self.theta)
+        if self.unit == RotateTransform.degrees:
+            theta = numpy.radians(self.theta)
+        else:
+            theta = self.theta
         c, s = numpy.cos(theta), numpy.sin(theta)
         R = numpy.matrix('{} {} {}; {} {} {}; {} {} {}'.format(c,-s,0,s,c,0,0,0,1))
         matrix = deepcopy(R)
 
-        if self.traslationMode == True:
+        if self.traslationMode == True: # shortcut for rotating around the centre of the box.
             maxs = numpy.amax(sequence[:, self.cols], axis=0)
             mins = numpy.amin(sequence[:, self.cols], axis=0)
             den = max(maxs-mins)
@@ -138,22 +171,39 @@ class RotateTransform(DatasetTransform):
             matrix_translantion = numpy.zeros((n,n))
             matrix_translantion_back = numpy.zeros((n,n))
             i,j = numpy.indices(matrix_translantion.shape)
+
+            self.centre[0] = den
+            self.centre[1] = den
+
+        if self.centre[0] != 0 and self.centre[1] != 0: # the rotation centre is not the origin
+            matrix_translantion[0, 2] = self.centre[0]
+            matrix_translantion_back[0, 2] = - self.centre[0]
+            matrix_translantion[1, 2] = self.centre[1]
+            matrix_translantion_back[1, 2] = - self.centre[1]
             matrix_translantion[i == j] = 1
             matrix_translantion_back[i == j] = 1
-            for i in range(0, len(self.cols)):
-                matrix_translantion[i, len(self.cols)] = den
-                matrix_translantion_back[i, len(self.cols)] = -den
+
+            # we compute the rotation around a generic center with a translation, rotation and a translation back
             matrix = matrix_translantion * R * matrix_translantion_back
 
-        for index in range(0, len(sequence)):
-             result_temp = numpy.array([[1,1,1]])
-             for j in range(0, len(self.cols)):
-                 result_temp[0][self.cols[j]]= sequence[index][self.cols[j]]
-             t =  matrix * numpy.matrix(result_temp).T
-             for j in range(0, len(self.cols)):
-                 sequence[index][self.cols[j]]= t[self.cols[j]]
+        tmp = numpy.zeros((len(sequence), 3))
+        tmp[:, 0] = sequence[:, self.cols[0]]
+        tmp[:, 1] = sequence[:, self.cols[1]]
+        tmp[:, 2] = 1
 
-        return  sequence
+        tmp =  matrix * numpy.matrix(tmp).T
+
+        return tmp.T[:,:2]
+
+        #for index in range(0, len(sequence)):
+        #     result_temp = numpy.array([[1,1,1]])
+        #     for j in range(0, len(self.cols)):
+        #         result_temp[0][self.cols[j]]= sequence[index][self.cols[j]]
+        #     t =  matrix * numpy.matrix(result_temp).T
+        #     for j in range(0, len(self.cols)):
+        #         sequence[index][self.cols[j]]= t[self.cols[j]]
+
+        #return  sequence
 
 class Sampling(DatasetTransform):
     def __init__(self, scale=100):
@@ -243,6 +293,38 @@ class NormaliseSamples:
         return DatasetIterator(self.dir)
 
 ######### Pre-processing original files dataset #########
+
+    ## Swap
+    # Is used to make up and down csv files from right and left csv files.
+    def swap(self, output_dir, name, dimensions = 2):
+
+        for filename in self.getCsvDataset():
+            items = re.findall('\d*\D+', filename)# filename
+
+            # Read file
+            with open(self.dir + filename, "r") as f:
+                reader = csv.reader(f, delimiter=',')
+                vals = list(reader)
+                result = numpy.array(vals).astype('float') # This array contains all file's data
+
+                # X and Y
+                if dimensions == 2:
+                    # Swap x with y
+                    for index in range(0, len(result)):
+                        temp = result[index][0]
+                        result[index][0] = result[index][1]
+                        result[index][1] = temp
+                # X, Y and Z
+                elif dimensions == 3:
+                    # Swap x with z
+                    for index in range(0, len(result)):
+                        temp = result[index][0]
+                        result[index][0] = result[index][2]
+                        result[index][2] = temp
+
+                # Save file
+                numpy.savetxt(output_dir + name + '_' + items[len(items)-1], result, delimiter=',')
+
     ## Rotate Lines
     # Is used to make diagonal csv files from rotating right and left files.
     def rotate_lines(self, output_dir, name, degree = 0):

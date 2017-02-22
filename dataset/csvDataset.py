@@ -81,13 +81,18 @@ class CsvDataset:
     def addTransform(self, transform):
         self.compositeTransform.addTranform(transform)
 
-    def applyTransforms(self, outputDir):
-        if not os.path.exists(outputDir ):
+    def applyTransforms(self, outputDir=None):
+        sequences = []
+        if not outputDir is None and not os.path.exists(outputDir):
             os.makedirs(outputDir)
         for file in self.getDatasetIterator():
             sequence = self.read_file(file)
             sequence = self.compositeTransform.transform(sequence)
-            numpy.savetxt(outputDir + file, sequence, delimiter=',')
+            sequences.append(sequence)
+            if not outputDir is None:
+                numpy.savetxt(outputDir + file, sequence, delimiter=',')
+
+        return sequences
 
 
     def leave_one_out(self, leave_index = 0):
@@ -108,7 +113,7 @@ class CsvDataset:
 
     # Plot
     # Plots input dataset's files
-    def plot(self, dimensions = 2, sampleName = None):
+    def plot(self, dimensions = 2, sampleName = None, singleMode = False):
         fig = plt.figure();
         ax = None
         if dimensions == 3:
@@ -127,6 +132,8 @@ class CsvDataset:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
                     else:
                         plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
+                    if singleMode:
+                        plt.show()
         if dimensions == 3:
             ax.legend()
         else:
@@ -134,7 +141,8 @@ class CsvDataset:
 
         if sampleName != None:
             plt.title(sampleName)
-        plt.show()
+        if not singleMode:
+            plt.show()
 
 
 class DatasetTransform:
