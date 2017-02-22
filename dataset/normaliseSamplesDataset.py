@@ -223,6 +223,37 @@ class Sampling(DatasetTransform):
 
         return sequence
 
+class ResampleInSpaceTransformMultiStroke(DatasetTransform):
+    def __init__(self, samples=20, cols=[0,1], strokes=None, index_stroke = -1):
+        if not isinstance(samples, int):
+            return TypeError
+        self.samples = samples
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+        if not isinstance(strokes, int):
+            return TypeError
+        self.strokes = strokes
+        if not isinstance(index_stroke, int):
+            return TypeError
+        self.index_stroke = index_stroke
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+        srcPts = numpy.copy(sequence).tolist()
+        resampled = []
+
+        for index in range(0, self.strokes):
+            sequence = [x for x in srcPts if x[-1] == index+1]
+            # Resampled
+            if(len(sequence) > 1):
+                sequence = ResampleInSpaceTransform.transform(self, numpy.array(sequence))
+            for seq in sequence:
+                resampled.append(seq)
+
+        return resampled
+
 class ResampleInSpaceTransform(DatasetTransform):
     def __init__(self, samples=20, cols=[0,1]):
         if not isinstance(samples, int):
@@ -257,7 +288,7 @@ class ResampleInSpaceTransform(DatasetTransform):
 
             d = Geometry2D.distance(pt1x, pt1y, pt2x, pt2y) # distance in space
 
-            if (D + d) >= step: # has enough space been traversed in the last step?
+            if (D + d) >= step and d > 0: # has enough space been traversed in the last step?
                 qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
                 qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
 

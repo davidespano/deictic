@@ -82,7 +82,7 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
-def compares_deictic_models(models, baseDir, dimension=2):
+def compares_deictic_models(models, baseDir, names):
     # Namefile
     filename = baseDir+'deictic_results.csv'
 
@@ -91,8 +91,8 @@ def compares_deictic_models(models, baseDir, dimension=2):
 
     # Get all gesture's dataset
     list_dataset = []
-    for model in models:
-        list_dataset.append(CsvDataset(baseDir+model.name+'/'))
+    for name in names:
+        list_dataset.append(CsvDataset(baseDir+name+'/'))
     #index_file = 0
 
     # For each gesture's dataset

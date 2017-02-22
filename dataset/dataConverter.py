@@ -1,6 +1,8 @@
 import os
+import glob
 import csv
 from lxml import etree
+from shutil import copyfile
 from .csvDataset import DatasetIterator
 
 class UnicaConverter:
@@ -51,7 +53,7 @@ class Dollar1Converter:
         return
 
     def create_deictic_dataset(self, inputBase, outputBase):
-        sub = ['arrow', 'caret', 'check', 'circle', 'delete', 'left_curly_brace', 'left_sq_bracket',
+        sub = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
                'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star',
                'triangle', 'v', 'x']
         xsltPath = inputBase + '/' + 'conversion.xslt'
@@ -59,3 +61,28 @@ class Dollar1Converter:
             if not os.path.exists(outputBase + '/' + name):
                 os.makedirs(outputBase + '/' + name)
             self.xml_to_csv(inputBase + '/' + name, outputBase + '/' + name, xsltPath)
+
+class DollarMConverter:
+    def order_files(self, inputBase, outputBase):
+        # Folders
+        folders = [name for name in os.listdir(inputBase) if os.path.isdir(os.path.join(inputBase, name))]
+        # for each folder
+        for folder in folders:
+            # and for each file
+            os.chdir(inputBase+'/'+folder)
+            for file in glob.glob("*.xml"):
+                name = file.split('-')
+                if not os.path.exists(outputBase + name[3]):
+                    os.makedirs(outputBase + name[3])
+                copyfile(inputBase+'/'+folder+'/'+file, outputBase+name[3]+'/'+file)
+
+    def create_deictic_dataset(self, inputBase, outputBase):
+        sub = ["arrowhead", "asterisk", "D", "exclamation_point",
+               "five_point_star", "H", "half_note", "I", "line", "N", "null",
+               "P", "pitchfork", "six_point_star", "T", "X"]
+
+        xsltPath = inputBase + 'conversion.xslt'
+        for name in sub:
+            if not os.path.exists(outputBase + '/' + name):
+                os.makedirs(outputBase+'/'+name)
+            Dollar1Converter.xml_to_csv(self, inputBase + '/' + name, outputBase + '/' + name, xsltPath)

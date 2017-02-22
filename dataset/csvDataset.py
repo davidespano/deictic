@@ -95,21 +95,33 @@ class CsvDataset:
         return sequences
 
 
-    def leave_one_out(self, leave_index = 0):
+    def leave_one_out(self, conditionFilename=None, leave_index = -1):
         """ Selects one of the files in the dataset as test and uses the other ones for training
 
         Parameters
         ----------
+        conditionFilename: fun
+            function for defining test and train set
         leave_index: int
             index of the test file
         """
 
-        # Gets all files
-        sequences = self.read_dataset()
-        # Removes file at the specified index
-        leave = sequences.pop(leave_index)
+        if(conditionFilename):
+            # Two list
+            training_list = []
+            testing_list = []
+            for filename in self.getDatasetIterator():
+                if conditionFilename(filename):# If true append the file to testing list
+                    testing_list.append(filename)
+                else:
+                    training_list.append(filename)# If false append the file to training list
+        else:
+            # Gets all files
+            training_list = self.read_dataset()
+            # Removes file at the specified index
+            testing_list = training_list.pop(leave_index)
 
-        return leave, sequences
+        return testing_list, training_list
 
     # Plot
     # Plots input dataset's files
