@@ -8,7 +8,8 @@ class ClassifierFactory:
         self.line = None
         self.arc = None
         self.scale = 100
-        self.spu = 8  # samples per unit
+        self.states = 6
+        self.spu = 30  # samples per unit
         self.seq_edges = []
 
     def setArcSamplesPath(self, path):
@@ -28,6 +29,7 @@ class ClassifierFactory:
         processor.transforms.addTranform(transform1)
         processor.transforms.addTranform(transform2)
         processor.preprocess()
+        #exp.plot()
         startPoint = [0,0]
         expType, operands = self.parseExpression(exp, startPoint)
         return self.createHMM(str(exp), expType, operands)
@@ -48,27 +50,29 @@ class ClassifierFactory:
                 alpha = -alpha
             distance = Geometry2D.distance(0,0, exp.dx, exp.dy)
             samples = round(distance * self.spu)
+            n_states = round(distance * self.states)
 
             dataset = CsvDataset(self.line) # reads the raw data
 
             # applying transforms for fitting the expression
-            transform1 = CenteringTransform() # centering the line
-            transform2 = NormaliseLengthTransform(axisMode=False) # normalise the length
-            transform3 = TranslateTransform(t=[0.5,0]) # put the first sample in the origin, the line goes left-to-right
-            transform4 = RotateTransform(theta=alpha, unit=RotateTransform.radians) # rotate the samples for getting the right slope
-            transform6 = ScaleDatasetTransform(scale=distance * self.scale) # adjust the size
-            transform7 = ResampleInSpaceTransform(samples=samples) # resampling
-            transform8 = TranslateTransform(t=[startPoint[0], startPoint[1]]) # position the segment at its starting point
+            centering = CenteringTransform() # centering the line
+            normalise = NormaliseLengthTransform(axisMode=False) # normalise the length
+            origin = TranslateTransform(t=[0.5,0]) # put the first sample in the origin, the line goes left-to-right
+            rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians) # rotate the samples for getting the right slope
+            scale = ScaleDatasetTransform(scale=distance * self.scale) # adjust the size
+            resample = ResampleInSpaceTransform(samples=samples) # resampling
+            translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale]) # position the segment at its starting point
 
-            dataset.addTransform(transform2)
-            dataset.addTransform(transform1)
-            dataset.addTransform(transform3)
-            dataset.addTransform(transform4)
-            dataset.addTransform(transform6)
-            dataset.addTransform(transform7)
-            dataset.addTransform(transform8)
+            dataset.addTransform(centering)
+            dataset.addTransform(normalise)
+            dataset.addTransform(origin)
+            dataset.addTransform(scale)
+            dataset.addTransform(rotate)
+            dataset.addTransform(resample)
+            dataset.addTransform(translate)
 
-            hmm = self.createCleanLine(str(exp), alpha, distance * self.scale / samples, samples)  # creates empty HMM
+
+            hmm = self.createCleanLine(str(exp), alpha, distance * self.scale / samples, n_states)  # creates empty HMM
             samples = dataset.applyTransforms()
             if d:
                 plt.axis("equal")
@@ -78,8 +82,8 @@ class ClassifierFactory:
                 plt.show()
             hmm.fit(dataset.applyTransforms(), use_pseudocount=True) # trains it with the transformed samples
 
-            startPoint[0] += exp.dx * self.scale
-            startPoint[1] += exp.dy * self.scale
+            startPoint[0] += exp.dx
+            startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
 
@@ -196,8 +200,8 @@ class ModelPreprocessor:
         # update the expression terms
         for i in range(0,len(points)):
             if isinstance(points[i][2], Point):
-                points[i][2].x = transformed[i][0] - x
-                points[i][2].y = transformed[i][1] - y
+                points[i][2].x = transformed[i][0]
+                points[i][2].y = transformed[i][1]
                 x = transformed[i][0]
                 y = transformed[i][1]
 

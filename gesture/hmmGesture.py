@@ -41,5 +41,5 @@ def plot_gesture(model):
         sequence = model.sample()
         result = numpy.array(sequence).astype('float')
         plt.axis("equal")
-        plt.plot(result[:, 0], result[:, 1])
+        plt.plot(result[:, 0], result[:, 1], marker=".")
         plt.show()
