@@ -6,14 +6,18 @@ from topology import *
 class ClassifierFactory:
     def __init__(self):
         self.line = None
-        self.arc = None
+        self.arc_cw = None
+        self.arc_ccw = None
         self.scale = 100
         self.states = 6
         self.spu = 30  # samples per unit
         self.seq_edges = []
 
-    def setArcSamplesPath(self, path):
-        self.arc = path
+    def setClockwiseArcSamplesPath(self, path):
+        self.arc_cw = path
+
+    def setCounterClockwiseArcSamplesPath(self, path):
+        self.arc_ccw = path
 
     def setLineSamplesPath(self, path):
         self.line = path
@@ -54,38 +58,55 @@ class ClassifierFactory:
 
             dataset = CsvDataset(self.line) # reads the raw data
 
-            # applying transforms for fitting the expression
-            centering = CenteringTransform() # centering the line
-            normalise = NormaliseLengthTransform(axisMode=False) # normalise the length
-            origin = TranslateTransform(t=[0.5,0]) # put the first sample in the origin, the line goes left-to-right
-            rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians) # rotate the samples for getting the right slope
-            scale = ScaleDatasetTransform(scale=distance * self.scale) # adjust the size
-            resample = ResampleInSpaceTransform(samples=samples) # resampling
-            translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale]) # position the segment at its starting point
-
-            dataset.addTransform(centering)
-            dataset.addTransform(normalise)
-            dataset.addTransform(origin)
-            dataset.addTransform(scale)
-            dataset.addTransform(rotate)
-            dataset.addTransform(resample)
-            dataset.addTransform(translate)
-
+            self.transformPrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
 
             hmm = self.createCleanLine(str(exp), alpha, distance * self.scale / samples, n_states)  # creates empty HMM
             samples = dataset.applyTransforms()
             if d:
-                plt.axis("equal")
-                for sample in samples:
-                    plt.plot(sample[:, 0], sample[:, 1],  marker='.')
-                plt.title(str(exp))
-                plt.show()
-            hmm.fit(dataset.applyTransforms(), use_pseudocount=True) # trains it with the transformed samples
+                self.debugPlot(samples, exp)
+            hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
+
+        if isinstance(exp, Arc):
+            # TODO fix this
+            if exp.dx >= 0:
+                if exp.dy >= 0:
+                    alpha = 0;
+                else:
+                    alpha = 0;
+            else:
+                if exp.dy >= 0:
+                    alpha = 0;
+                else:
+                    alpha = 0;
+
+            distance = Geometry2D.distance(0, 0, exp.dx, exp.dy)
+            samples = round(distance * self.spu)
+            n_states = round(distance * self.states)
+
+            if exp.cw:
+                dataset = CsvDataset(self.arc_cw)
+            else:
+                dataset = CsvDataset(self.arc_ccw)
+
+            self.transformPrimitive(dataset, distance, alpha, startPoint, samples)
+
+            hmm = self.createCleanArc(str(exp), alpha, distance * self.scale / samples, n_states, exp.cw)
+
+            samples = dataset.applyTransforms()
+            if d:
+                self.debugPlot(samples, exp)
+            hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
+
+            startPoint[0] += exp.dx
+            startPoint[1] += exp.dy
+
+            return OpEnum.Arc, [(hmm, None)]
+
 
         # -----------------------------------------------
         #       composite terms
@@ -121,6 +142,26 @@ class ClassifierFactory:
 
         return None
 
+    def transformPrimitive(self, dataset, distance, alpha, startPoint, samples):
+        # applying transforms for fitting the expression
+        centering = CenteringTransform()  # centering the line
+        normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
+        origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
+        rotate = RotateTransform(theta=alpha,
+                                 unit=RotateTransform.radians)  # rotate the samples for getting the right slope
+        scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
+        resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        translate = TranslateTransform(
+            t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
+
+        dataset.addTransform(centering)
+        dataset.addTransform(normalise)
+        dataset.addTransform(origin)
+        dataset.addTransform(scale)
+        dataset.addTransform(rotate)
+        dataset.addTransform(resample)
+        dataset.addTransform(translate)
+
     def updateStartPoint(self, startPoint, oldPoint, op):
         # for parallel and choice, the starting point has to go back to the old position
         if op == OpEnum.Parallel or op == OpEnum.Choice:
@@ -143,6 +184,39 @@ class ClassifierFactory:
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
 
         return topology_factory.forward(name, n_states, distributions)
+
+    def createCleanArc(self, name, alpha, n_states, cw):
+        topology_factory = HiddenMarkovModelTopology()  # Topology
+        distributions = []
+
+        step = 0.5 * math.pi / n_states
+
+        beta = 0
+        for i in range(0, n_states):
+            a = cos(alpha + beta)
+            b = sin(alpha + beta)
+
+            gaussianX = NormalDistribution(a, self.scale * 0.01)
+            gaussianY = NormalDistribution(b, self.scale * 0.01)
+            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+
+            if cw:
+                beta -= step
+            else:
+                beta += step
+
+        return topology_factory.forward(name, n_states, distributions)
+
+
+
+        return None
+
+    def debugPlot(self, samples, exp):
+        plt.axis("equal")
+        for sample in samples:
+            plt.plot(sample[:, 0], sample[:, 1], marker='.')
+        plt.title(str(exp))
+        plt.show()
 
     def createHMM(self, name, operator, operands):
         edges = []
