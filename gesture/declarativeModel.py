@@ -10,7 +10,7 @@ class ClassifierFactory:
         self.arc_ccw = None
         self.scale = 100
         self.states = 6
-        self.spu = 30  # samples per unit
+        self.spu = 40  # samples per unit
         self.seq_edges = []
 
     def setClockwiseArcSamplesPath(self, path):
@@ -21,9 +21,6 @@ class ClassifierFactory:
 
     def setLineSamplesPath(self, path):
         self.line = path
-
-
-
 
     def createClassifier(self, exp):
         # center and normalise the ideal model definition
@@ -72,19 +69,47 @@ class ClassifierFactory:
             return OpEnum.Line, [(hmm, None)]
 
         if isinstance(exp, Arc):
-            # TODO fix this
-            if exp.dx >= 0:
-                if exp.dy >= 0:
-                    alpha = 0;
+            if exp.cw:
+                if exp.dx >= 0:
+                    if exp.dy >= 0:
+                        alpha = 0.5 * math.pi
+                        center = [-0.5, 0]
+                        gamma = 0
+                    else:
+                        alpha = 0;
+                        center = [0,-0.5]
+                        gamma = 1.5 * math.pi
                 else:
-                    alpha = 0;
-            else:
-                if exp.dy >= 0:
-                    alpha = 0;
-                else:
-                    alpha = 0;
+                    if exp.dy >= 0:
+                        alpha = math.pi;
+                        center = [0, 0.5]
+                        gamma = math.pi
+                    else:
+                        alpha = -0.5 * math.pi
+                        center = [-0.5, 0]
+                        gamma = 0.5 * math.pi
 
-            distance = Geometry2D.distance(0, 0, exp.dx, exp.dy)
+            else:
+                if exp.dx >= 0:
+                    if exp.dy >= 0:             #1
+                        alpha = -0.5 * math.pi
+                        center = [0, 0.5]
+                        gamma = 1.5 * math.pi
+                    else:                       #2
+                        alpha = math.pi;
+                        center = [0.5, 0]
+                        gamma = math.pi
+                else:
+                    if exp.dy >= 0:             #3
+                        alpha = 0;
+                        center = [-0.5, 0]
+                        gamma = 0
+                    else:
+                        alpha = 0.5 * math.pi
+                        center = [0, -0.5]
+                        gamma = 0.5 * math.pi
+
+            distance = abs(0.5 * math.pi * exp.dx)
             samples = round(distance * self.spu)
             n_states = round(distance * self.states)
 
@@ -93,9 +118,9 @@ class ClassifierFactory:
             else:
                 dataset = CsvDataset(self.arc_ccw)
 
-            self.transformPrimitive(dataset, distance, alpha, startPoint, samples)
+            self.trasformArcPrimitive(dataset, abs(exp.dx), alpha, center, startPoint, samples)
 
-            hmm = self.createCleanArc(str(exp), alpha, distance * self.scale / samples, n_states, exp.cw)
+            hmm = self.createCleanArc(str(exp), alpha, abs(exp.dx) * self.scale, n_states, exp.cw)
 
             samples = dataset.applyTransforms()
             if d:
@@ -142,6 +167,30 @@ class ClassifierFactory:
 
         return None
 
+    def trasformArcPrimitive(self, dataset, radius, alpha, center, startPoint, samples):
+        # applying transforms for fitting
+        centering = CenteringTransform()  # centering the line
+        normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
+        origin = TranslateTransform(t=[0.5, 0.5])
+        rotate = RotateTransform(theta=alpha,
+                                 unit=RotateTransform.radians)
+        centerTranslate = TranslateTransform(t=[center[0] * self.scale, center[1] * self.scale])
+        scale = ScaleDatasetTransform(scale=self.scale * radius)  # adjust the size
+        resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        translate = TranslateTransform(
+            t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
+
+        dataset.addTransform(centering)
+        dataset.addTransform(normalise)
+        dataset.addTransform(origin)
+        dataset.addTransform(scale)
+        dataset.addTransform(rotate)
+        dataset.addTransform(centerTranslate)
+        dataset.addTransform(resample)
+        dataset.addTransform(translate)
+        return None
+
+
     def transformPrimitive(self, dataset, distance, alpha, startPoint, samples):
         # applying transforms for fitting the expression
         centering = CenteringTransform()  # centering the line
@@ -185,7 +234,7 @@ class ClassifierFactory:
 
         return topology_factory.forward(name, n_states, distributions)
 
-    def createCleanArc(self, name, alpha, n_states, cw):
+    def createCleanArc(self, name, alpha, radius, n_states, cw):
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
@@ -193,11 +242,13 @@ class ClassifierFactory:
 
         beta = 0
         for i in range(0, n_states):
-            a = cos(alpha + beta)
-            b = sin(alpha + beta)
+            a = cos(alpha + beta) * radius
+            b = sin(alpha + beta) * radius
 
             gaussianX = NormalDistribution(a, self.scale * 0.01)
             gaussianY = NormalDistribution(b, self.scale * 0.01)
+            #gaussianX = NormalDistribution(a,  0.01)
+            #gaussianY = NormalDistribution(b,  0.01)
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
 
             if cw:
