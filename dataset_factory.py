@@ -72,10 +72,10 @@ def dataset_primitive_factory(list_gestures, inputDir, outputDir, samples=20):
     return
 
 
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 3
+mode = 14
 n_sample = 20
 
 # Unica
@@ -156,8 +156,8 @@ if mode == 13:
     dataset.plot()
 
 if mode == 14:
-    inputDir = baseDir + 'deictic/unica-dataset/raw/right/'
-    outputDir = baseDir + 'deictic/unica-dataset/resampled/right/'
+    inputDir = baseDir + 'deictic/unica-dataset/raw/arc4CounterClockWise/'
+    outputDir = baseDir + 'deictic/unica-dataset/resampled/arc4CounterClockWise/'
     dataset = CsvDataset(inputDir)
 
     transform1 = ResampleInSpaceTransform()
@@ -165,12 +165,12 @@ if mode == 14:
     dataset.addTransform(transform1)
     transform2 = NormaliseLengthTransform(axisMode=False)
     transform3 = CenteringTransform()
-    #dataset.addTransform(transform2)
-    #dataset.addTransform(transform3)
+    dataset.addTransform(transform2)
+    dataset.addTransform(transform3)
     dataset.applyTransforms(outputDir)
 
     dataset = CsvDataset(outputDir)
-    dataset.plot(sampleName='claudio_right.csv')
+    dataset.plot()
 
 if mode == 15:
     inputDir = baseDir + 'deictic/1dollar-dataset/raw/left_curly_brace/'
