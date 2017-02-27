@@ -7,9 +7,6 @@ import numpy
 from dataset import *
 
 
-# TODO handle iterative definitions
-# TODO handle disabling
-
 class OpEnum(Enum):
     Undef = -1
     Point = 0
