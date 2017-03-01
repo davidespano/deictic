@@ -9,8 +9,8 @@ class ClassifierFactory:
         self.arc_cw = None
         self.arc_ccw = None
         self.scale = 100
-        self.states = 12
-        self.spu = 50  # samples per unit
+        self.states = 6
+        self.spu = 20  # samples per unit
         self.seq_edges = []
 
     def setClockwiseArcSamplesPath(self, path):
@@ -30,7 +30,7 @@ class ClassifierFactory:
         processor.transforms.addTranform(transform1)
         processor.transforms.addTranform(transform2)
         processor.preprocess()
-        exp.plot()
+        #exp.plot()
         startPoint = [0,0]
         expType, operands = self.parseExpression(exp, startPoint)
         return self.createHMM(str(exp), expType, operands)
@@ -61,7 +61,7 @@ class ClassifierFactory:
             samples = dataset.applyTransforms()
             if d:
                 self.debugPlot(samples, exp)
-            #hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -128,7 +128,7 @@ class ClassifierFactory:
             samples = dataset.applyTransforms()
             if d:
                 self.debugPlot(samples, exp)
-            #hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -226,17 +226,16 @@ class ClassifierFactory:
         distributions = []
 
 
-        step_x = dx / (samples - 1)
-        step_y = dy / (samples - 1)
+        step_x = dx / max(samples - 1, 1)
+        step_y = dy / max(samples - 1, 1)
 
         for i in range(0, samples ):
             a = (startPoint[0] + (i * step_x)) * scale
             b = (startPoint[1] + (i * step_y)) * scale
 
-            # gaussianX = NormalDistribution(a, self.scale * 0.01)
-            # gaussianY = NormalDistribution(b, self.scale * 0.01)
-            gaussianX = NormalDistribution(a, 0.01)
-            gaussianY = NormalDistribution(b, 0.01)
+            gaussianX = NormalDistribution(a, self.scale * 0.01)
+            gaussianY = NormalDistribution(b, self.scale * 0.01)
+
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
 
         return topology_factory.forward(name, samples, distributions)
@@ -245,23 +244,23 @@ class ClassifierFactory:
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
-        step = 0.5 * math.pi / (n_states - 1)
+        step = 0.5 * math.pi / max(n_states - 1, 1)
 
         beta = 0
         alpha = 0
+
+        # TODO this may be better coded
         if exp.cw:
             if exp.dy > 0:
                 if exp.dx > 0:
-                    alpha = 0.5 * math.pi
-                else:
-                    alpha = math.pi
-            else:
-                if exp.dx > 0:
                     alpha = 0
                 else:
+                    alpha = 0.5 * math.pi
+            else:
+                if exp.dx > 0:
                     alpha = 1.5 * math.pi
-
-            beta = alpha + math.pi
+                else:
+                    alpha =  math.pi
         else:
             if exp.dy > 0:
                 if exp.dx > 0:
@@ -274,18 +273,16 @@ class ClassifierFactory:
                 else:
                     alpha = 1.5 * math.pi
 
-            beta = alpha + math.pi
+        beta = alpha + math.pi
 
-        print("clean Arc {0} {1}".format(exp.dx, exp.dy))
+
         for i in range(0, n_states):
-
             a = (cos(beta) + cos(alpha)) * abs(exp.dx) + startPoint[0]
             b = (sin(beta) + sin(alpha)) * abs(exp.dy) + startPoint[1]
 
-            gaussianX = NormalDistribution(a * scale, 0.01)
-            gaussianY = NormalDistribution(b * scale, 0.01)
+            gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
+            gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
 
-            print("{0} {1}".format(cos(beta),sin(beta)))
 
             if exp.cw:
                 beta -= step
@@ -296,50 +293,6 @@ class ClassifierFactory:
 
         return topology_factory.forward(name, n_states, distributions)
 
-
-    def createCleanArc(self, name, startPoint, alpha, radiusX, radiusY, n_states, cw):
-        topology_factory = HiddenMarkovModelTopology()  # Topology
-        distributions = []
-
-        step = 0.5 * math.pi / (n_states -1)
-
-        beta = 0
-        #if cw:
-        #    beta = 0.5 * math.pi
-        #else:
-        #    beta = 0
-
-        for i in range(0, n_states):
-
-            a = cos(alpha + beta) * radiusX
-            b = sin(alpha + beta) * radiusY
-
-            if not cw:
-                a += cos(alpha) * radiusX
-                b += sin(alpha) * radiusY
-
-            a += startPoint[0]
-            b += startPoint[1]
-
-
-
-
-            #gaussianX = NormalDistribution(a, self.scale * 0.01)
-            #gaussianY = NormalDistribution(b, self.scale * 0.01)
-            gaussianX = NormalDistribution(a * self.scale,  0.01)
-            gaussianY = NormalDistribution(b * self.scale,  0.01)
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
-
-            if cw:
-                beta -= step
-            else:
-                beta += step
-
-        return topology_factory.forward(name, n_states, distributions)
-
-
-
-        return None
 
     def debugPlot(self, samples, exp):
         plt.axis("equal")
