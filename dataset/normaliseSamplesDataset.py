@@ -134,7 +134,7 @@ class RotateTransform(DatasetTransform):
         super()
         if not isinstance(traslationMode, bool):
             return TypeError
-        self.traslationMode = bool
+        self.traslationMode = traslationMode
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
@@ -144,7 +144,6 @@ class RotateTransform(DatasetTransform):
         if not isinstance(centre, list) or len(centre) != 2 :
             return TypeError
         self.centre = centre
-
         if unit != RotateTransform.degrees and unit != RotateTransform.radians:
             return TypeError
         self.unit = unit
@@ -162,15 +161,16 @@ class RotateTransform(DatasetTransform):
         R = numpy.matrix('{} {} {}; {} {} {}; {} {} {}'.format(c,-s,0,s,c,0,0,0,1))
         matrix = deepcopy(R)
 
+        # Initialization matrix translation and traslation back
+        n = len(self.cols)+1
+        matrix_translantion = numpy.zeros((n,n))
+        matrix_translantion_back = numpy.zeros((n,n))
+        i,j = numpy.indices(matrix_translantion.shape)
+
         if self.traslationMode == True: # shortcut for rotating around the centre of the box.
             maxs = numpy.amax(sequence[:, self.cols], axis=0)
             mins = numpy.amin(sequence[:, self.cols], axis=0)
             den = max(maxs-mins)
-            # Initialization matrix translation and traslation back
-            n = len(self.cols)
-            matrix_translantion = numpy.zeros((n,n))
-            matrix_translantion_back = numpy.zeros((n,n))
-            i,j = numpy.indices(matrix_translantion.shape)
 
             self.centre[0] = den
             self.centre[1] = den
@@ -193,17 +193,73 @@ class RotateTransform(DatasetTransform):
 
         tmp =  matrix * numpy.matrix(tmp).T
 
-        return tmp.T[:,:2]
+        tmp = tmp.T[:,:2]
+        sequence[:,self.cols[0]] = numpy.squeeze(numpy.asarray(tmp[:,0]))
+        sequence[:,self.cols[1]] = numpy.squeeze(numpy.asarray(tmp[:,1]))
 
-        #for index in range(0, len(sequence)):
-        #     result_temp = numpy.array([[1,1,1]])
-        #     for j in range(0, len(self.cols)):
-        #         result_temp[0][self.cols[j]]= sequence[index][self.cols[j]]
-        #     t =  matrix * numpy.matrix(result_temp).T
-        #     for j in range(0, len(self.cols)):
-        #         sequence[index][self.cols[j]]= t[self.cols[j]]
+        return sequence
 
-        #return  sequence
+
+class RotateCenterTransform(DatasetTransform):
+    degrees = 1
+    radians = 2
+    def __init__(self, traslationMode = False, cols=[0,1], theta=0, centre = [0,0], unit= degrees):
+        super()
+        if not isinstance(traslationMode, bool):
+            return TypeError
+        self.traslationMode = traslationMode
+        if not isinstance(cols, list):
+            return TypeError
+        self.cols = cols
+        if not isinstance(theta, float) and not isinstance(theta, int):
+            return TypeError
+        self.theta = theta
+        if not isinstance(centre, list) or len(centre) != 2 :
+            return TypeError
+        self.centre = centre
+
+        if unit != RotateTransform.degrees and unit != RotateTransform.radians:
+            return TypeError
+        self.unit = unit
+
+    def transform(self, sequence):
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+            # First point
+        px = sequence[0, self.cols[0]]
+        py = sequence[0, self.cols[1]]
+        # Centroid
+        centroid_x, centroid_y = Geometry2D.Centroid(sequence)
+        # Degree
+        deltaX = px - centroid_x
+        deltaY = py - centroid_y
+
+        # if(deltaX == 0):
+        #     if(deltaY > 0):
+        #         angleInDegrees =  90
+        #     else:
+        #         angleInDegrees =  -90
+        # else:
+        #     angleInDegrees = numpy.arctan(deltaY/deltaX) * 180 / numpy.pi
+
+        d = abs(Geometry2D.distance(centroid_x, centroid_y, px, py))
+        v = [centroid_x + d, centroid_y]
+        u = [px - centroid_x, py - centroid_y]
+        d1 = abs(Geometry2D.distance(0, 0, v[0], v[1]))
+        d2 = abs(Geometry2D.distance(0, 0, u[0], u[1]))
+
+
+
+        angleInDegrees = numpy.arccos(numpy.dot(u, v)/ (d1*d2))
+
+
+        self.theta = int(-angleInDegrees)
+        self.unit = RotateTransform.radians
+        self.centre = [centroid_x, centroid_y]
+        self.traslationMode = False
+        return RotateTransform.transform(self, sequence)
+
 
 class Sampling(DatasetTransform):
     def __init__(self, scale=100):
@@ -494,13 +550,3 @@ class NormaliseSamples:
 
                 # Save file
                 numpy.savetxt(output_dir + filename, a, delimiter=',')
-
-    @staticmethod
-    def create_folder(baseDir, gesture_name):
-        # Folders
-        if not os.path.exists(baseDir + 'original/' + gesture_name):
-            os.makedirs(baseDir + 'original/' + gesture_name)
-        if not os.path.exists(baseDir + 'normalised-trajectory/' + gesture_name):
-            os.makedirs(baseDir + 'normalised-trajectory/' + gesture_name)
-        if not os.path.exists(baseDir + 'down-trajectory/' + gesture_name):
-            os.makedirs(baseDir + 'down-trajectory/' + gesture_name)

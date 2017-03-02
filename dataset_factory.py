@@ -1,8 +1,7 @@
 from dataset import *
 from gesture import *
 
-### Multistroke
-def dataset_multistroke_factory(list, inputDir, outputDir):
+def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 
     for gesture in list:
         input_dir = inputDir+gesture[0]+'/'
@@ -14,31 +13,10 @@ def dataset_multistroke_factory(list, inputDir, outputDir):
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         transform4 = RotateCenterTransform(traslationMode=True)
-        transform5 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes = gesture[2])
-        # Apply transforms
-        dataset.addTransform(transform1)
-        dataset.addTransform(transform2)
-        dataset.addTransform(transform3)
-        dataset.addTransform(transform4)
-        dataset.addTransform(transform5)
-
-        dataset.applyTransforms(output_dir)
-    return
-
-# Unistroke
-def dataset_unistroke_factory(list, inputDir, outputDir):
-
-    for gesture in list:
-        input_dir = inputDir+gesture[0]+'/'
-        output_dir = outputDir+gesture[0]+'/'
-        dataset = CsvDataset(input_dir)
-
-        # Transform
-        transform1 = NormaliseLengthTransform(axisMode=True)
-        transform2 = ScaleDatasetTransform(scale=100)
-        transform3 = CenteringTransform()
-        transform4 = RotateCenterTransform(traslationMode=True)
-        transform5 = ResampleInSpaceTransform(samples=gesture[1])
+        if unistroke_mode:
+            transform5 = ResampleInSpaceTransform(samples=gesture[1])
+        else:
+            transform5 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes = gesture[2])
         # Apply transforms
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
@@ -88,7 +66,7 @@ if mode == 1:
             ("square-braket-left", 3*n_sample), ("square-braket-right", 3*n_sample), ("delete", 3*n_sample),
             ("star", 5*n_sample)
             }#, ("left", n_sample), ("right", n_sample)
-    dataset_unistroke_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
+    dataset_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
 
 # 1Dollar
 if mode == 2:
@@ -98,7 +76,7 @@ if mode == 2:
             ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
             ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)
             }
-    dataset_unistroke_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
+    dataset_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
 
 # MDollar
 if mode == 3:
@@ -109,7 +87,7 @@ if mode == 3:
             ("P", n_sample, 2), ("pitchfork", n_sample, 2), ("six_point_star", n_sample, 2),
             ("T", n_sample, 2), ("X", n_sample, 2)
             }#("line", n_sample, 1)
-    dataset_multistroke_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/')
+    dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
 
 # Primitive

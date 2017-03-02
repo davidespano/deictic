@@ -32,6 +32,21 @@ class Geometry2D:
         r = math.sqrt(x * x + y * y)
         return x / r
 
+    ##########################################################
+    # Compute the centroid of the given points. The centroid is defined as the
+    # average x and average y values, i.e., (x_bar, y_bar).
+    @staticmethod
+    def Centroid(sequence, cols=[0,1]):
+        xsum = 0;
+        ysum = 0;
 
+        #
+        for index in range(0, len(sequence)):
+            xsum = xsum + sequence[index, cols[0]]
+            ysum = ysum + sequence[index, cols[1]]
+
+        a = xsum/len(sequence)
+        b = ysum/len(sequence)
+        return a, b
 
 

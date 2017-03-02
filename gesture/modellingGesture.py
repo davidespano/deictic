@@ -55,7 +55,7 @@ def create_delete(baseDir, n_states):
     # Link models
     model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
     # Model name
-    model.name = 'delete'
+    model.name = 'delete_mark'
     return model, seq
 
 ## Rectangle

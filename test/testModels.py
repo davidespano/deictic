@@ -82,7 +82,7 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
-def compares_deictic_models(models, baseDir, names):
+def compares_deictic_models(models, baseDir, names, plot=False):
     # Namefile
     filename = baseDir+'deictic_results.csv'
 
@@ -91,8 +91,8 @@ def compares_deictic_models(models, baseDir, names):
 
     # Get all gesture's dataset
     list_dataset = []
-    for name in names:
-        list_dataset.append(CsvDataset(baseDir+name+'/'))
+    for name in names:#for model in models:
+        list_dataset.append(CsvDataset(baseDir+name+'/'))#model.name+'/'))
     #index_file = 0
 
     # For each gesture's dataset
@@ -103,18 +103,21 @@ def compares_deictic_models(models, baseDir, names):
         # Max probability, index gestureindex model
         max_norm_log_probability = -sys.maxsize
         index_model = -1
+        index_file = 0
 
         # For each sequence
         for sequence in sequences:
             #print(' ')
             #index_file = index_file+1
 
-            plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
-            plt.title(list_dataset[index_dataset])
+            if plot:
+                plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
+                plt.title(list_dataset[index_dataset])
             # for each model
             for i in range(0, len(models)):
-                c = numpy.array(models[i].sample()).astype('float')
-                plt.plot(c[:, 0], c[:, 1], label=models[i].name, marker='.')
+                if plot:
+                    c = numpy.array(models[i].sample()).astype('float')
+                    plt.plot(c[:, 0], c[:, 1], label=models[i].name, marker='.')
 
                 # Calcola la log probability della sequenza e la sua normalizzata
                 log_probability = models[i].log_probability(sequence)
@@ -132,7 +135,8 @@ def compares_deictic_models(models, baseDir, names):
             # Aggiorno matrice risultati
             results[index_dataset][index_model] = results[index_dataset][index_model] + 1
 
-            plt.show()
+            if plot:
+                plt.show()
 
     # Salva risultati
     save_confusion_matrix(results, filename, models)

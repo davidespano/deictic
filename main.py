@@ -116,10 +116,10 @@ if mode == 0:
         (Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0), 'right_sq_bracket'), # right square bracket
         (Point(0,0) + Line(2,-3) + Line(2,3), 'v'), # V
         (Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), 'delete_mark'), # delete
-        (Point(0,0) + Arc(-2,-2, cw=False) + Line(0,-3) + Arc(-1,-1) + Arc(1,-1) + Line(0,-3) + Arc(2,-2,cw=False), "left_curly_brace"), # left curly brace
+        (Point(0,0) + Arc(-2,-2, cw=False) + Line(0,-3) + Arc(-1,-1)  + Arc(1,-1) + Line(0,-3) + Arc(2,-2,cw=False), "left_curly_brace"), # left curly brace
         (Point(0,0) + Arc(2,-2) + Line(0,-3) + Arc(1,-1, cw=False) + Arc(-1,-1, cw=False) + Line(0,-3) + Arc(-2,-2), "right_curly_brace"),  # right curly brace
         (Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3), 'star'), # star
-        (Point(0,0) + Arc(6,6, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(6, -6, cw=False), "pigtail") # pigtail
+        (Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False), "pigtail") # pigtail
     ]
     results = deictic_test(primitiveDir, gestureDir, gesture_models, n_states, plot=False)
 

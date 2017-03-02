@@ -23,7 +23,8 @@ gesture_models = [
 
 #(Point(0,0) + Arc(3,-3) + Arc(-3,-3) + Arc(-3,3) + Arc(3,3), 'circle'), # circle
 
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
