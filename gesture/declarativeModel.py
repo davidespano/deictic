@@ -113,7 +113,7 @@ class ClassifierFactory:
 
             distance = abs(0.5 * math.pi * exp.dx)
             samples = round(distance * self.spu)
-            n_states = round(distance * self.states)
+            n_states = round(distance * self.states + 0.5)
 
             if exp.cw:
                 dataset = CsvDataset(self.arc_cw)
