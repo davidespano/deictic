@@ -254,7 +254,7 @@ class RotateCenterTransform(DatasetTransform):
         angleInDegrees = numpy.arccos(numpy.dot(u, v)/ (d1*d2))
 
 
-        self.theta = int(-angleInDegrees)
+        self.theta = -angleInDegrees
         self.unit = RotateTransform.radians
         self.centre = [centroid_x, centroid_y]
         self.traslationMode = False
@@ -326,7 +326,7 @@ class ResampleInSpaceTransform(DatasetTransform):
         srcPts = numpy.copy(sequence).tolist()
         length = Geometry2D.pathLength(sequence)
         size = len(srcPts)
-        step = length/(self.samples -1)
+        step = length/ max(self.samples -1, 1)
 
         resampled = []
 
