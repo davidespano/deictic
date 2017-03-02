@@ -29,8 +29,8 @@ class ClassifierFactory:
         transform2 = NormaliseLengthTransform(axisMode=True)
         transform3 = RotateCenterTransform(traslationMode=True)####
         processor.transforms.addTranform(transform1)
+        #processor.transforms.addTranform(transform3)####
         processor.transforms.addTranform(transform2)
-        processor.transforms.addTranform(transform3)####
         processor.preprocess()
         #exp.plot()
         startPoint = [0,0]
