@@ -13,12 +13,14 @@ def dataset_multistroke_factory(list, inputDir, outputDir):
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        transform4 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes = gesture[2])
+        transform4 = RotateCenterTransform(traslationMode=True)
+        transform5 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes = gesture[2])
         # Apply transforms
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
         dataset.addTransform(transform3)
         dataset.addTransform(transform4)
+        dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
     return
@@ -35,12 +37,14 @@ def dataset_unistroke_factory(list, inputDir, outputDir):
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        transform4 = ResampleInSpaceTransform(samples=gesture[1])
+        transform4 = RotateCenterTransform(traslationMode=True)
+        transform5 = ResampleInSpaceTransform(samples=gesture[1])
         # Apply transforms
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
         dataset.addTransform(transform3)
         dataset.addTransform(transform4)
+        dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
     return
@@ -72,22 +76,23 @@ def dataset_primitive_factory(list_gestures, inputDir, outputDir, samples=20):
     return
 
 
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 14
-n_sample = 20
+mode = 2
+n_sample = 40
 
 # Unica
 if mode == 1:
     list = {("rectangle", 4*n_sample), ("triangle", 3*n_sample), ("caret", 2*n_sample), ("v", 2*n_sample), ("x", 3*n_sample),
             ("square-braket-left", 3*n_sample), ("square-braket-right", 3*n_sample), ("delete", 3*n_sample),
             ("star", 5*n_sample)
-            }#("left", n_sample), ("right", n_sample)
+            }#, ("left", n_sample), ("right", n_sample)
     dataset_unistroke_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
 
 # 1Dollar
 if mode == 2:
+    # name and n_samples
     list = {("arrow", 4*n_sample), ("caret", 2*n_sample), ("circle", 4*n_sample), ("check", 2*n_sample), ("delete_mark", 3*n_sample),
             ("left_curly_brace", 6*n_sample), ("left_sq_bracket", 3*n_sample), ("pigtail", 4*n_sample), ("question_mark", 4*n_sample),
             ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
@@ -98,12 +103,12 @@ if mode == 2:
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
-    list = {("arrowhead", 4*n_sample, 2), ("asterisk", 2*n_sample, 3), ("D", 4*n_sample, 2), ("exclamation_point", 2*n_sample, 2),
-            ("five_point_star", 3*n_sample, 1), ("H", 6*n_sample, 3), ("half_note", 3*n_sample, 2),
-            ("I", 4*n_sample, 3), ("line", 4*n_sample, 1), ("N", 4*n_sample, 3), ("null", 6*n_sample, 2),
-            ("P", 3*n_sample, 2), ("pitchfork", 5*n_sample, 2), ("six_point_star", 3*n_sample, 2),
-            ("T", 2*n_sample, 2), ("X", 3*n_sample, 2)
-            }
+    list = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3), ("D", n_sample, 2), ("exclamation_point", n_sample, 2),
+            ("five_point_star", n_sample, 1), ("H", n_sample, 3), ("half_note", n_sample, 2),
+            ("I", n_sample, 3), ("N", n_sample, 3), ("null", n_sample, 2),
+            ("P", n_sample, 2), ("pitchfork", n_sample, 2), ("six_point_star", n_sample, 2),
+            ("T", n_sample, 2), ("X", n_sample, 2)
+            }#("line", n_sample, 1)
     dataset_multistroke_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/')
 
 
@@ -156,8 +161,8 @@ if mode == 13:
     dataset.plot()
 
 if mode == 14:
-    inputDir = baseDir + 'deictic/unica-dataset/raw/arc4CounterClockWise/'
-    outputDir = baseDir + 'deictic/unica-dataset/resampled/arc4CounterClockWise/'
+    inputDir = baseDir + 'deictic/unica-dataset/raw/right/'
+    outputDir = baseDir + 'deictic/unica-dataset/resampled/right/'
     dataset = CsvDataset(inputDir)
 
     transform1 = ResampleInSpaceTransform()
@@ -165,12 +170,12 @@ if mode == 14:
     dataset.addTransform(transform1)
     transform2 = NormaliseLengthTransform(axisMode=False)
     transform3 = CenteringTransform()
-    dataset.addTransform(transform2)
-    dataset.addTransform(transform3)
+    #dataset.addTransform(transform2)
+    #dataset.addTransform(transform3)
     dataset.applyTransforms(outputDir)
 
     dataset = CsvDataset(outputDir)
-    dataset.plot()
+    dataset.plot(sampleName='claudio_right.csv')
 
 if mode == 15:
     inputDir = baseDir + 'deictic/1dollar-dataset/raw/left_curly_brace/'
