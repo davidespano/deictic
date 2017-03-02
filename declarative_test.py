@@ -3,7 +3,7 @@ from model import *
 from test import *
 
 gesture_models = [
-    (Point(0,0) + Line(-2,-3) + Line(4,0)+ Line(-2,3), 'triangle'), # triangle
+    (Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4), 'triangle'), # triangle
     (Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3), 'x'), # X
     (Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0), 'rectangle'), # rectangle
     (Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False), 'circle'), # circle
@@ -15,16 +15,16 @@ gesture_models = [
     (Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0), 'right_sq_bracket'), # right square bracket
     (Point(0,0) + Line(2,-3) + Line(2,3), 'v'), # V
     (Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), 'delete_mark'), # delete
-    (Point(0,0) + Arc(-2,-2, cw=False) + Line(0,-3) + Arc(-1,-1)  + Arc(1,-1) + Line(0,-3) + Arc(2,-2,cw=False), "left_curly_brace"), # left curly brace
-    (Point(0,0) + Arc(2,-2) + Line(0,-3) + Arc(1,-1, cw=False) + Arc(-1,-1, cw=False) + Line(0,-3) + Arc(-2,-2), "right_curly_brace"),  # right curly brace
+    (Point(0,0) + Arc(-5,-5, cw=False) + Line(0,-6) + Arc(-3,-3)  + Arc(3,-3) + Line(0,-6) + Arc(5,-5,cw=False), "left_curly_brace"), # left curly brace
+    (Point(0,0) + Arc(5,-5) + Line(0,-6) + Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Line(0,-6) + Arc(-5,-5), "right_curly_brace"),  # right curly brace
     (Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3), 'star'), # star
     (Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False), "pigtail") # pigtail
 ]
 
 #(Point(0,0) + Arc(3,-3) + Arc(-3,-3) + Arc(-3,3) + Arc(3,3), 'circle'), # circle
 
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -60,7 +60,7 @@ if mode == 4:
 
 
 if mode == 3:
-    dataset = CsvDataset(testDir + "left_curly_brace/")
+    dataset = CsvDataset(testDir + "triangle/")
     #dataset.plot()
     dataset.plot(singleMode=True)
 
