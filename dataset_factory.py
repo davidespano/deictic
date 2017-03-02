@@ -12,7 +12,7 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        transform4 = RotateCenterTransform(traslationMode=True)
+        #transform4 = RotateCenterTransform(traslationMode=True)
         if unistroke_mode:
             transform5 = ResampleInSpaceTransform(samples=gesture[1])
         else:
@@ -21,33 +21,7 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
         dataset.addTransform(transform3)
-        dataset.addTransform(transform4)
-        dataset.addTransform(transform5)
-
-        dataset.applyTransforms(output_dir)
-    return
-
-######### Primitive #########
-# Makes primitive dataset (from right movement)
-def dataset_primitive_factory(list_gestures, inputDir, outputDir, samples=20):
-
-    for primitive in list_gestures:
-        output_dir = outputDir+(str(primitive))+'/'
-        dataset = CsvDataset(inputDir)
-
-        # Transforms
-        #transform1 = ScaleDatasetTransform(scale=1)
-        transform1 = RotateTransform(traslationMode=False, cols=[0,1], theta=primitive)
-        transform2 = CenteringTransform()
-        transform3 = NormaliseLengthTransform(axisMode=False)
-        transform4 = ScaleDatasetTransform(scale=100)
-        transform5 = ResampleInSpaceTransform(samples = samples)
-
-        # Apply transforms
-        dataset.addTransform(transform1)
-        dataset.addTransform(transform2)
-        dataset.addTransform(transform3)
-        dataset.addTransform(transform4)
+        #dataset.addTransform(transform4)
         dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
@@ -57,7 +31,7 @@ def dataset_primitive_factory(list_gestures, inputDir, outputDir, samples=20):
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 2
+mode = 3
 n_sample = 40
 
 # Unica
@@ -88,14 +62,6 @@ if mode == 3:
             ("T", n_sample, 2), ("X", n_sample, 2)
             }#("line", n_sample, 1)
     dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
-
-
-# Primitive
-if mode == 4:
-    list = {340, 320, 270, 240, 200, 150, 145, 140, 135, 130, 120, 110, 90, 70, 60, 45, 40, 20,
-            -340, -320, -250, -240, -200, -145, -140, -135, -130, -120, -110, -90, -70, -60, -45, -40, -20}
-
-    dataset_primitive_factory(list, baseDir+'deictic/unica-dataset/raw/right/', baseDir+'deictic/unica-dataset/resampled/')
 
 ## Original
 # Unica

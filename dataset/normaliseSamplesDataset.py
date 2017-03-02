@@ -326,7 +326,7 @@ class ResampleInSpaceTransform(DatasetTransform):
         srcPts = numpy.copy(sequence).tolist()
         length = Geometry2D.pathLength(sequence)
         size = len(srcPts)
-        step = length/ (self.samples -1)
+        step = length/(self.samples -1)
 
         resampled = []
 
