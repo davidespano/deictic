@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~05" Subject="94" InputType="finger" Speed="MEDIUM" NumPts="12">
+	<Stroke index="1">
+		<Point X="115" Y="19" T="1302122007639" Pressure="128" />
+		<Point X="115" Y="75" T="1302122007639" Pressure="128" />
+		<Point X="115" Y="82" T="1302122007655" Pressure="128" />
+		<Point X="115" Y="87" T="1302122007671" Pressure="128" />
+		<Point X="115" Y="90" T="1302122007671" Pressure="128" />
+		<Point X="115" Y="94" T="1302122007686" Pressure="128" />
+		<Point X="115" Y="94" T="1302122007702" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="109" Y="140" T="1302122008139" Pressure="128" />
+		<Point X="109" Y="140" T="1302122008139" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="109" Y="140" T="1302122008139" Pressure="128" />
+		<Point X="109" Y="140" T="1302122008139" Pressure="128" />
+		<Point X="109" Y="140" T="1302122008139" Pressure="128" />
+	</Stroke>
+</Gesture>

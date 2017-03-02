@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="X~04" Subject="75" InputType="finger" Speed="SLOW" NumPts="30">
+	<Stroke index="1">
+		<Point X="164" Y="22" T="1302549842625" Pressure="128" />
+		<Point X="103" Y="81" T="1302549842640" Pressure="128" />
+		<Point X="95" Y="89" T="1302549842640" Pressure="128" />
+		<Point X="86" Y="96" T="1302549842655" Pressure="128" />
+		<Point X="79" Y="104" T="1302549842671" Pressure="128" />
+		<Point X="73" Y="109" T="1302549842671" Pressure="128" />
+		<Point X="67" Y="114" T="1302549842687" Pressure="128" />
+		<Point X="62" Y="117" T="1302549842702" Pressure="128" />
+		<Point X="62" Y="117" T="1302549842718" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="51" Y="39" T="1302549843170" Pressure="128" />
+		<Point X="103" Y="69" T="1302549843171" Pressure="128" />
+		<Point X="109" Y="74" T="1302549843186" Pressure="128" />
+		<Point X="116" Y="79" T="1302549843201" Pressure="128" />
+		<Point X="122" Y="84" T="1302549843201" Pressure="128" />
+		<Point X="127" Y="89" T="1302549843217" Pressure="128" />
+		<Point X="134" Y="94" T="1302549843233" Pressure="128" />
+		<Point X="140" Y="99" T="1302549843248" Pressure="128" />
+		<Point X="146" Y="104" T="1302549843248" Pressure="128" />
+		<Point X="151" Y="109" T="1302549843264" Pressure="128" />
+		<Point X="156" Y="114" T="1302549843279" Pressure="128" />
+		<Point X="161" Y="119" T="1302549843279" Pressure="128" />
+		<Point X="165" Y="124" T="1302549843295" Pressure="128" />
+		<Point X="169" Y="127" T="1302549843311" Pressure="128" />
+		<Point X="172" Y="130" T="1302549843326" Pressure="128" />
+		<Point X="175" Y="134" T="1302549843326" Pressure="128" />
+		<Point X="177" Y="136" T="1302549843342" Pressure="128" />
+		<Point X="179" Y="139" T="1302549843357" Pressure="128" />
+		<Point X="181" Y="140" T="1302549843357" Pressure="128" />
+		<Point X="181" Y="141" T="1302549843373" Pressure="128" />
+		<Point X="181" Y="141" T="1302549843404" Pressure="128" />
+	</Stroke>
+</Gesture>

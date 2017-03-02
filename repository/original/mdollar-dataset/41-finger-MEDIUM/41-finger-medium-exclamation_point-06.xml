@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~06" Subject="41" InputType="finger" Speed="MEDIUM" NumPts="29">
+	<Stroke index="1">
+		<Point X="100" Y="17" T="1302211923378" Pressure="128" />
+		<Point X="96" Y="57" T="1302211923378" Pressure="128" />
+		<Point X="96" Y="59" T="1302211923394" Pressure="128" />
+		<Point X="96" Y="63" T="1302211923410" Pressure="128" />
+		<Point X="97" Y="65" T="1302211923410" Pressure="128" />
+		<Point X="97" Y="68" T="1302211923425" Pressure="128" />
+		<Point X="98" Y="72" T="1302211923441" Pressure="128" />
+		<Point X="98" Y="74" T="1302211923440" Pressure="128" />
+		<Point X="100" Y="77" T="1302211923456" Pressure="128" />
+		<Point X="100" Y="80" T="1302211923472" Pressure="128" />
+		<Point X="100" Y="83" T="1302211923488" Pressure="128" />
+		<Point X="100" Y="85" T="1302211923488" Pressure="128" />
+		<Point X="100" Y="87" T="1302211923503" Pressure="128" />
+		<Point X="100" Y="90" T="1302211923519" Pressure="128" />
+		<Point X="100" Y="92" T="1302211923518" Pressure="128" />
+		<Point X="101" Y="95" T="1302211923534" Pressure="128" />
+		<Point X="101" Y="97" T="1302211923550" Pressure="128" />
+		<Point X="101" Y="99" T="1302211923566" Pressure="128" />
+		<Point X="101" Y="102" T="1302211923566" Pressure="128" />
+		<Point X="101" Y="103" T="1302211923581" Pressure="128" />
+		<Point X="101" Y="105" T="1302211923597" Pressure="128" />
+		<Point X="101" Y="107" T="1302211923597" Pressure="128" />
+		<Point X="101" Y="109" T="1302211923628" Pressure="128" />
+		<Point X="101" Y="109" T="1302211923659" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="103" Y="147" T="1302211924034" Pressure="128" />
+		<Point X="103" Y="147" T="1302211924034" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="103" Y="147" T="1302211924034" Pressure="128" />
+		<Point X="103" Y="147" T="1302211924034" Pressure="128" />
+		<Point X="103" Y="147" T="1302211924034" Pressure="128" />
+	</Stroke>
+</Gesture>

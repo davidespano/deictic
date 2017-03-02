@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="I~10" Subject="58" InputType="finger" Speed="FAST" NumPts="29">
+	<Stroke index="1">
+		<Point X="78" Y="35" T="1302028459079" Pressure="128" />
+		<Point X="147" Y="23" T="1302028459094" Pressure="128" />
+		<Point X="155" Y="22" T="1302028459094" Pressure="128" />
+		<Point X="163" Y="22" T="1302028459110" Pressure="128" />
+		<Point X="170" Y="21" T="1302028459110" Pressure="128" />
+		<Point X="177" Y="21" T="1302028459126" Pressure="128" />
+		<Point X="177" Y="21" T="1302028459157" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="140" Y="30" T="1302028459594" Pressure="128" />
+		<Point X="142" Y="82" T="1302028459594" Pressure="128" />
+		<Point X="142" Y="88" T="1302028459609" Pressure="128" />
+		<Point X="143" Y="95" T="1302028459625" Pressure="128" />
+		<Point X="144" Y="100" T="1302028459625" Pressure="128" />
+		<Point X="144" Y="106" T="1302028459640" Pressure="128" />
+		<Point X="145" Y="112" T="1302028459656" Pressure="128" />
+		<Point X="145" Y="117" T="1302028459656" Pressure="128" />
+		<Point X="145" Y="122" T="1302028459672" Pressure="128" />
+		<Point X="145" Y="128" T="1302028459687" Pressure="128" />
+		<Point X="145" Y="132" T="1302028459703" Pressure="128" />
+		<Point X="145" Y="132" T="1302028459718" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="90" Y="150" T="1302028460108" Pressure="128" />
+		<Point X="158" Y="135" T="1302028460108" Pressure="128" />
+		<Point X="168" Y="132" T="1302028460124" Pressure="128" />
+		<Point X="177" Y="130" T="1302028460124" Pressure="128" />
+		<Point X="185" Y="130" T="1302028460140" Pressure="128" />
+		<Point X="193" Y="127" T="1302028460155" Pressure="128" />
+		<Point X="200" Y="125" T="1302028460155" Pressure="128" />
+		<Point X="207" Y="125" T="1302028460171" Pressure="128" />
+		<Point X="213" Y="125" T="1302028460186" Pressure="128" />
+		<Point X="213" Y="125" T="1302028460202" Pressure="128" />
+	</Stroke>
+</Gesture>

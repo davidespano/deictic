@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="D~09" Subject="66" InputType="finger" Speed="FAST" NumPts="30">
+	<Stroke index="1">
+		<Point X="63" Y="38" T="1301677543576" Pressure="128" />
+		<Point X="66" Y="94" T="1301677543576" Pressure="128" />
+		<Point X="66" Y="100" T="1301677543592" Pressure="128" />
+		<Point X="66" Y="107" T="1301677543592" Pressure="128" />
+		<Point X="66" Y="112" T="1301677543608" Pressure="128" />
+		<Point X="66" Y="115" T="1301677543623" Pressure="128" />
+		<Point X="66" Y="119" T="1301677543623" Pressure="128" />
+		<Point X="66" Y="119" T="1301677543654" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="42" Y="50" T="1301677544013" Pressure="128" />
+		<Point X="94" Y="47" T="1301677544029" Pressure="128" />
+		<Point X="99" Y="50" T="1301677544029" Pressure="128" />
+		<Point X="103" Y="54" T="1301677544044" Pressure="128" />
+		<Point X="106" Y="58" T="1301677544045" Pressure="128" />
+		<Point X="108" Y="62" T="1301677544060" Pressure="128" />
+		<Point X="110" Y="67" T="1301677544076" Pressure="128" />
+		<Point X="111" Y="73" T="1301677544091" Pressure="128" />
+		<Point X="111" Y="78" T="1301677544091" Pressure="128" />
+		<Point X="110" Y="85" T="1301677544107" Pressure="128" />
+		<Point X="107" Y="92" T="1301677544122" Pressure="128" />
+		<Point X="104" Y="97" T="1301677544123" Pressure="128" />
+		<Point X="100" Y="102" T="1301677544138" Pressure="128" />
+		<Point X="96" Y="108" T="1301677544154" Pressure="128" />
+		<Point X="92" Y="113" T="1301677544169" Pressure="128" />
+		<Point X="86" Y="117" T="1301677544169" Pressure="128" />
+		<Point X="81" Y="122" T="1301677544185" Pressure="128" />
+		<Point X="76" Y="124" T="1301677544200" Pressure="128" />
+		<Point X="72" Y="127" T="1301677544201" Pressure="128" />
+		<Point X="67" Y="128" T="1301677544216" Pressure="128" />
+		<Point X="64" Y="130" T="1301677544232" Pressure="128" />
+		<Point X="64" Y="130" T="1301677544247" Pressure="128" />
+	</Stroke>
+</Gesture>

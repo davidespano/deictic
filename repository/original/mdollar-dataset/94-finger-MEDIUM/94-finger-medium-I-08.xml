@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="I~08" Subject="94" InputType="finger" Speed="MEDIUM" NumPts="22">
+	<Stroke index="1">
+		<Point X="120" Y="47" T="1302122185963" Pressure="128" />
+		<Point X="119" Y="105" T="1302122185963" Pressure="128" />
+		<Point X="120" Y="110" T="1302122185979" Pressure="128" />
+		<Point X="120" Y="115" T="1302122185995" Pressure="128" />
+		<Point X="120" Y="115" T="1302122186010" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="62" Y="35" T="1302122186338" Pressure="128" />
+		<Point X="126" Y="42" T="1302122186338" Pressure="128" />
+		<Point X="134" Y="42" T="1302122186353" Pressure="128" />
+		<Point X="141" Y="42" T="1302122186369" Pressure="128" />
+		<Point X="147" Y="43" T="1302122186369" Pressure="128" />
+		<Point X="152" Y="43" T="1302122186385" Pressure="128" />
+		<Point X="156" Y="43" T="1302122186400" Pressure="128" />
+		<Point X="156" Y="43" T="1302122186416" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="78" Y="115" T="1302122186821" Pressure="128" />
+		<Point X="142" Y="109" T="1302122186821" Pressure="128" />
+		<Point X="149" Y="108" T="1302122186837" Pressure="128" />
+		<Point X="154" Y="107" T="1302122186837" Pressure="128" />
+		<Point X="160" Y="107" T="1302122186853" Pressure="128" />
+		<Point X="165" Y="107" T="1302122186868" Pressure="128" />
+		<Point X="167" Y="105" T="1302122186884" Pressure="128" />
+		<Point X="169" Y="105" T="1302122186884" Pressure="128" />
+		<Point X="169" Y="105" T="1302122186915" Pressure="128" />
+	</Stroke>
+</Gesture>

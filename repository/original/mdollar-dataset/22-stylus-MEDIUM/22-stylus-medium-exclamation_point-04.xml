@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~04" Subject="22" InputType="stylus" Speed="MEDIUM" NumPts="30">
+	<Stroke index="1">
+		<Point X="83" Y="34" T="1302288323232" Pressure="128" />
+		<Point X="89" Y="18" T="1302288323232" Pressure="128" />
+		<Point X="93" Y="13" T="1302288323232" Pressure="128" />
+		<Point X="91" Y="18" T="1302288323232" Pressure="128" />
+		<Point X="89" Y="26" T="1302288323247" Pressure="128" />
+		<Point X="88" Y="31" T="1302288323247" Pressure="128" />
+		<Point X="87" Y="36" T="1302288323263" Pressure="128" />
+		<Point X="85" Y="42" T="1302288323263" Pressure="128" />
+		<Point X="84" Y="48" T="1302288323263" Pressure="128" />
+		<Point X="83" Y="54" T="1302288323279" Pressure="128" />
+		<Point X="82" Y="61" T="1302288323294" Pressure="128" />
+		<Point X="81" Y="68" T="1302288323294" Pressure="128" />
+		<Point X="81" Y="74" T="1302288323294" Pressure="128" />
+		<Point X="80" Y="81" T="1302288323310" Pressure="128" />
+		<Point X="79" Y="87" T="1302288323310" Pressure="128" />
+		<Point X="78" Y="93" T="1302288323325" Pressure="128" />
+		<Point X="77" Y="98" T="1302288323341" Pressure="128" />
+		<Point X="76" Y="102" T="1302288323341" Pressure="128" />
+		<Point X="75" Y="106" T="1302288323341" Pressure="128" />
+		<Point X="74" Y="109" T="1302288323357" Pressure="128" />
+		<Point X="73" Y="112" T="1302288323372" Pressure="128" />
+		<Point X="72" Y="114" T="1302288323372" Pressure="128" />
+		<Point X="71" Y="116" T="1302288323372" Pressure="128" />
+		<Point X="70" Y="117" T="1302288323388" Pressure="128" />
+		<Point X="69" Y="119" T="1302288323388" Pressure="128" />
+		<Point X="67" Y="120" T="1302288323403" Pressure="128" />
+		<Point X="67" Y="120" T="1302288323419" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="66" Y="153" T="1302288323778" Pressure="128" />
+		<Point X="64" Y="153" T="1302288323778" Pressure="128" />
+		<Point X="64" Y="153" T="1302288323778" Pressure="128" />
+	</Stroke>
+</Gesture>

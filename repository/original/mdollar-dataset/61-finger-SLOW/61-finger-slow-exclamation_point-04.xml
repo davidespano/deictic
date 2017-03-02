@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~04" Subject="61" InputType="finger" Speed="SLOW" NumPts="29">
+	<Stroke index="1">
+		<Point X="116" Y="10" T="1302114846733" Pressure="128" />
+		<Point X="115" Y="47" T="1302114846733" Pressure="128" />
+		<Point X="115" Y="50" T="1302114846749" Pressure="128" />
+		<Point X="115" Y="52" T="1302114846749" Pressure="128" />
+		<Point X="116" Y="55" T="1302114846764" Pressure="128" />
+		<Point X="116" Y="57" T="1302114846780" Pressure="128" />
+		<Point X="116" Y="59" T="1302114846780" Pressure="128" />
+		<Point X="116" Y="62" T="1302114846796" Pressure="128" />
+		<Point X="116" Y="64" T="1302114846811" Pressure="128" />
+		<Point X="116" Y="67" T="1302114846827" Pressure="128" />
+		<Point X="116" Y="69" T="1302114846827" Pressure="128" />
+		<Point X="116" Y="72" T="1302114846842" Pressure="128" />
+		<Point X="116" Y="74" T="1302114846858" Pressure="128" />
+		<Point X="117" Y="77" T="1302114846858" Pressure="128" />
+		<Point X="117" Y="78" T="1302114846874" Pressure="128" />
+		<Point X="117" Y="80" T="1302114846889" Pressure="128" />
+		<Point X="117" Y="82" T="1302114846905" Pressure="128" />
+		<Point X="117" Y="83" T="1302114846905" Pressure="128" />
+		<Point X="117" Y="85" T="1302114846920" Pressure="128" />
+		<Point X="117" Y="87" T="1302114846936" Pressure="128" />
+		<Point X="117" Y="88" T="1302114846936" Pressure="128" />
+		<Point X="117" Y="90" T="1302114846967" Pressure="128" />
+		<Point X="117" Y="92" T="1302114846983" Pressure="128" />
+		<Point X="117" Y="92" T="1302114847092" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="116" Y="137" T="1302114847888" Pressure="128" />
+		<Point X="116" Y="137" T="1302114847888" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="116" Y="137" T="1302114847888" Pressure="128" />
+		<Point X="116" Y="137" T="1302114847888" Pressure="128" />
+		<Point X="116" Y="137" T="1302114847888" Pressure="128" />
+	</Stroke>
+</Gesture>

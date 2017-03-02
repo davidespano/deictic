@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="asterisk~02" Subject="22" InputType="stylus" Speed="FAST" NumPts="63">
+	<Stroke index="1">
+		<Point X="84" Y="25" T="1302288906267" Pressure="128" />
+		<Point X="88" Y="21" T="1302288906267" Pressure="128" />
+		<Point X="89" Y="37" T="1302288906267" Pressure="128" />
+		<Point X="89" Y="49" T="1302288906267" Pressure="128" />
+		<Point X="89" Y="55" T="1302288906283" Pressure="128" />
+		<Point X="89" Y="62" T="1302288906283" Pressure="128" />
+		<Point X="90" Y="69" T="1302288906298" Pressure="128" />
+		<Point X="90" Y="76" T="1302288906298" Pressure="128" />
+		<Point X="90" Y="82" T="1302288906314" Pressure="128" />
+		<Point X="90" Y="88" T="1302288906314" Pressure="128" />
+		<Point X="91" Y="94" T="1302288906330" Pressure="128" />
+		<Point X="91" Y="100" T="1302288906330" Pressure="128" />
+		<Point X="91" Y="106" T="1302288906345" Pressure="128" />
+		<Point X="91" Y="111" T="1302288906345" Pressure="128" />
+		<Point X="91" Y="116" T="1302288906361" Pressure="128" />
+		<Point X="92" Y="120" T="1302288906361" Pressure="128" />
+		<Point X="92" Y="124" T="1302288906376" Pressure="128" />
+		<Point X="92" Y="127" T="1302288906376" Pressure="128" />
+		<Point X="92" Y="129" T="1302288906376" Pressure="128" />
+		<Point X="92" Y="131" T="1302288906392" Pressure="128" />
+		<Point X="91" Y="132" T="1302288906408" Pressure="128" />
+		<Point X="91" Y="131" T="1302288906423" Pressure="128" />
+		<Point X="91" Y="130" T="1302288906423" Pressure="128" />
+		<Point X="90" Y="128" T="1302288906423" Pressure="128" />
+		<Point X="89" Y="127" T="1302288906439" Pressure="128" />
+		<Point X="89" Y="127" T="1302288906439" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="46" Y="58" T="1302288906798" Pressure="128" />
+		<Point X="45" Y="49" T="1302288906798" Pressure="128" />
+		<Point X="58" Y="56" T="1302288906798" Pressure="128" />
+		<Point X="68" Y="62" T="1302288906813" Pressure="128" />
+		<Point X="73" Y="65" T="1302288906813" Pressure="128" />
+		<Point X="79" Y="68" T="1302288906813" Pressure="128" />
+		<Point X="84" Y="72" T="1302288906829" Pressure="128" />
+		<Point X="90" Y="75" T="1302288906844" Pressure="128" />
+		<Point X="96" Y="78" T="1302288906844" Pressure="128" />
+		<Point X="101" Y="81" T="1302288906844" Pressure="128" />
+		<Point X="107" Y="84" T="1302288906860" Pressure="128" />
+		<Point X="112" Y="86" T="1302288906860" Pressure="128" />
+		<Point X="117" Y="89" T="1302288906876" Pressure="128" />
+		<Point X="121" Y="91" T="1302288906891" Pressure="128" />
+		<Point X="125" Y="93" T="1302288906891" Pressure="128" />
+		<Point X="128" Y="95" T="1302288906891" Pressure="128" />
+		<Point X="131" Y="97" T="1302288906907" Pressure="128" />
+		<Point X="132" Y="98" T="1302288906907" Pressure="128" />
+		<Point X="134" Y="100" T="1302288906922" Pressure="128" />
+		<Point X="135" Y="101" T="1302288906922" Pressure="128" />
+		<Point X="135" Y="102" T="1302288906938" Pressure="128" />
+		<Point X="135" Y="103" T="1302288906954" Pressure="128" />
+		<Point X="134" Y="103" T="1302288906969" Pressure="128" />
+		<Point X="133" Y="103" T="1302288906969" Pressure="128" />
+		<Point X="132" Y="102" T="1302288906969" Pressure="128" />
+		<Point X="131" Y="101" T="1302288906985" Pressure="128" />
+		<Point X="129" Y="100" T="1302288907000" Pressure="128" />
+		<Point X="128" Y="99" T="1302288907000" Pressure="128" />
+		<Point X="128" Y="99" T="1302288907000" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="126" Y="39" T="1302288907390" Pressure="128" />
+		<Point X="126" Y="35" T="1302288907390" Pressure="128" />
+		<Point X="116" Y="46" T="1302288907390" Pressure="128" />
+		<Point X="49" Y="114" T="1302288907390" Pressure="128" />
+		<Point X="48" Y="117" T="1302288907390" Pressure="128" />
+		<Point X="49" Y="117" T="1302288907422" Pressure="128" />
+		<Point X="50" Y="116" T="1302288907421" Pressure="128" />
+		<Point X="50" Y="116" T="1302288907437" Pressure="128" />
+	</Stroke>
+</Gesture>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="N~10" Subject="75" InputType="finger" Speed="FAST" NumPts="29">
+	<Stroke index="1">
+		<Point X="77" Y="34" T="1302551129627" Pressure="128" />
+		<Point X="73" Y="104" T="1302551129642" Pressure="128" />
+		<Point X="75" Y="112" T="1302551129642" Pressure="128" />
+		<Point X="75" Y="119" T="1302551129658" Pressure="128" />
+		<Point X="75" Y="126" T="1302551129673" Pressure="128" />
+		<Point X="76" Y="132" T="1302551129673" Pressure="128" />
+		<Point X="76" Y="132" T="1302551129704" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="80" Y="47" T="1302551130172" Pressure="128" />
+		<Point X="123" Y="106" T="1302551130172" Pressure="128" />
+		<Point X="128" Y="112" T="1302551130172" Pressure="128" />
+		<Point X="133" Y="118" T="1302551130188" Pressure="128" />
+		<Point X="137" Y="123" T="1302551130204" Pressure="128" />
+		<Point X="141" Y="128" T="1302551130204" Pressure="128" />
+		<Point X="145" Y="133" T="1302551130219" Pressure="128" />
+		<Point X="147" Y="136" T="1302551130235" Pressure="128" />
+		<Point X="150" Y="139" T="1302551130250" Pressure="128" />
+		<Point X="150" Y="139" T="1302551130282" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="150" Y="33" T="1302551130672" Pressure="128" />
+		<Point X="153" Y="93" T="1302551130672" Pressure="128" />
+		<Point X="153" Y="101" T="1302551130672" Pressure="128" />
+		<Point X="154" Y="107" T="1302551130687" Pressure="128" />
+		<Point X="154" Y="114" T="1302551130703" Pressure="128" />
+		<Point X="154" Y="121" T="1302551130718" Pressure="128" />
+		<Point X="154" Y="126" T="1302551130718" Pressure="128" />
+		<Point X="154" Y="131" T="1302551130734" Pressure="128" />
+		<Point X="154" Y="134" T="1302551130750" Pressure="128" />
+		<Point X="154" Y="138" T="1302551130750" Pressure="128" />
+		<Point X="154" Y="141" T="1302551130765" Pressure="128" />
+		<Point X="154" Y="141" T="1302551130796" Pressure="128" />
+	</Stroke>
+</Gesture>

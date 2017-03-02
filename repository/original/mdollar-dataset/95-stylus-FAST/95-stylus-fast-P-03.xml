@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="P~03" Subject="95" InputType="stylus" Speed="FAST" NumPts="30">
+	<Stroke index="1">
+		<Point X="102" Y="36" T="1302554318477" Pressure="128" />
+		<Point X="105" Y="116" T="1302554318477" Pressure="128" />
+		<Point X="105" Y="119" T="1302554318477" Pressure="128" />
+		<Point X="105" Y="120" T="1302554318492" Pressure="128" />
+		<Point X="106" Y="121" T="1302554318492" Pressure="128" />
+		<Point X="106" Y="121" T="1302554318508" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="112" Y="40" T="1302554318773" Pressure="128" />
+		<Point X="134" Y="36" T="1302554318773" Pressure="128" />
+		<Point X="141" Y="34" T="1302554318789" Pressure="128" />
+		<Point X="144" Y="34" T="1302554318789" Pressure="128" />
+		<Point X="147" Y="35" T="1302554318804" Pressure="128" />
+		<Point X="150" Y="35" T="1302554318804" Pressure="128" />
+		<Point X="152" Y="37" T="1302554318820" Pressure="128" />
+		<Point X="154" Y="39" T="1302554318820" Pressure="128" />
+		<Point X="156" Y="42" T="1302554318836" Pressure="128" />
+		<Point X="156" Y="45" T="1302554318836" Pressure="128" />
+		<Point X="157" Y="48" T="1302554318836" Pressure="128" />
+		<Point X="156" Y="52" T="1302554318851" Pressure="128" />
+		<Point X="155" Y="55" T="1302554318867" Pressure="128" />
+		<Point X="152" Y="59" T="1302554318867" Pressure="128" />
+		<Point X="149" Y="62" T="1302554318882" Pressure="128" />
+		<Point X="145" Y="65" T="1302554318882" Pressure="128" />
+		<Point X="141" Y="67" T="1302554318882" Pressure="128" />
+		<Point X="137" Y="69" T="1302554318898" Pressure="128" />
+		<Point X="132" Y="71" T="1302554318898" Pressure="128" />
+		<Point X="128" Y="72" T="1302554318914" Pressure="128" />
+		<Point X="125" Y="72" T="1302554318914" Pressure="128" />
+		<Point X="122" Y="73" T="1302554318929" Pressure="128" />
+		<Point X="121" Y="73" T="1302554318945" Pressure="128" />
+		<Point X="121" Y="73" T="1302554318945" Pressure="128" />
+	</Stroke>
+</Gesture>

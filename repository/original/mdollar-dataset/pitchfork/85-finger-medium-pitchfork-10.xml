@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="pitchfork~10" Subject="85" InputType="finger" Speed="MEDIUM" NumPts="70">
+	<Stroke index="1">
+		<Point X="81" Y="20" T="1302283556145" Pressure="128" />
+		<Point X="100" Y="48" T="1302283556145" Pressure="128" />
+		<Point X="102" Y="49" T="1302283556161" Pressure="128" />
+		<Point X="104" Y="50" T="1302283556161" Pressure="128" />
+		<Point X="106" Y="51" T="1302283556176" Pressure="128" />
+		<Point X="108" Y="53" T="1302283556192" Pressure="128" />
+		<Point X="111" Y="53" T="1302283556208" Pressure="128" />
+		<Point X="115" Y="53" T="1302283556208" Pressure="128" />
+		<Point X="116" Y="53" T="1302283556223" Pressure="128" />
+		<Point X="118" Y="53" T="1302283556239" Pressure="128" />
+		<Point X="121" Y="53" T="1302283556239" Pressure="128" />
+		<Point X="123" Y="53" T="1302283556254" Pressure="128" />
+		<Point X="125" Y="53" T="1302283556270" Pressure="128" />
+		<Point X="127" Y="53" T="1302283556286" Pressure="128" />
+		<Point X="130" Y="51" T="1302283556286" Pressure="128" />
+		<Point X="132" Y="50" T="1302283556301" Pressure="128" />
+		<Point X="134" Y="48" T="1302283556317" Pressure="128" />
+		<Point X="137" Y="48" T="1302283556317" Pressure="128" />
+		<Point X="140" Y="45" T="1302283556332" Pressure="128" />
+		<Point X="142" Y="43" T="1302283556348" Pressure="128" />
+		<Point X="144" Y="43" T="1302283556364" Pressure="128" />
+		<Point X="146" Y="40" T="1302283556364" Pressure="128" />
+		<Point X="148" Y="38" T="1302283556379" Pressure="128" />
+		<Point X="150" Y="36" T="1302283556395" Pressure="128" />
+		<Point X="152" Y="35" T="1302283556395" Pressure="128" />
+		<Point X="154" Y="33" T="1302283556410" Pressure="128" />
+		<Point X="155" Y="31" T="1302283556426" Pressure="128" />
+		<Point X="156" Y="28" T="1302283556427" Pressure="128" />
+		<Point X="158" Y="28" T="1302283556442" Pressure="128" />
+		<Point X="158" Y="25" T="1302283556457" Pressure="128" />
+		<Point X="159" Y="23" T="1302283556473" Pressure="128" />
+		<Point X="160" Y="21" T="1302283556473" Pressure="128" />
+		<Point X="160" Y="19" T="1302283556488" Pressure="128" />
+		<Point X="161" Y="18" T="1302283556504" Pressure="128" />
+		<Point X="161" Y="16" T="1302283556504" Pressure="128" />
+		<Point X="161" Y="14" T="1302283556520" Pressure="128" />
+		<Point X="162" Y="13" T="1302283556535" Pressure="128" />
+		<Point X="162" Y="13" T="1302283556551" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="115" Y="145" T="1302283558033" Pressure="128" />
+		<Point X="113" Y="103" T="1302283558033" Pressure="128" />
+		<Point X="113" Y="98" T="1302283558048" Pressure="128" />
+		<Point X="113" Y="94" T="1302283558064" Pressure="128" />
+		<Point X="113" Y="91" T="1302283558064" Pressure="128" />
+		<Point X="115" Y="88" T="1302283558080" Pressure="128" />
+		<Point X="115" Y="84" T="1302283558095" Pressure="128" />
+		<Point X="115" Y="81" T="1302283558095" Pressure="128" />
+		<Point X="115" Y="78" T="1302283558111" Pressure="128" />
+		<Point X="115" Y="74" T="1302283558126" Pressure="128" />
+		<Point X="115" Y="70" T="1302283558142" Pressure="128" />
+		<Point X="115" Y="68" T="1302283558142" Pressure="128" />
+		<Point X="115" Y="63" T="1302283558158" Pressure="128" />
+		<Point X="115" Y="60" T="1302283558173" Pressure="128" />
+		<Point X="115" Y="58" T="1302283558173" Pressure="128" />
+		<Point X="115" Y="53" T="1302283558189" Pressure="128" />
+		<Point X="115" Y="50" T="1302283558204" Pressure="128" />
+		<Point X="115" Y="46" T="1302283558220" Pressure="128" />
+		<Point X="115" Y="43" T="1302283558220" Pressure="128" />
+		<Point X="115" Y="40" T="1302283558236" Pressure="128" />
+		<Point X="115" Y="36" T="1302283558251" Pressure="128" />
+		<Point X="115" Y="33" T="1302283558251" Pressure="128" />
+		<Point X="115" Y="29" T="1302283558267" Pressure="128" />
+		<Point X="115" Y="26" T="1302283558282" Pressure="128" />
+		<Point X="115" Y="23" T="1302283558298" Pressure="128" />
+		<Point X="115" Y="21" T="1302283558298" Pressure="128" />
+		<Point X="116" Y="19" T="1302283558314" Pressure="128" />
+		<Point X="116" Y="16" T="1302283558329" Pressure="128" />
+		<Point X="116" Y="15" T="1302283558329" Pressure="128" />
+		<Point X="117" Y="13" T="1302283558345" Pressure="128" />
+		<Point X="117" Y="11" T="1302283558360" Pressure="128" />
+		<Point X="117" Y="11" T="1302283558376" Pressure="128" />
+	</Stroke>
+</Gesture>

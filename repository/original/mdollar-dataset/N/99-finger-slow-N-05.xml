@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="N~05" Subject="99" InputType="finger" Speed="SLOW" NumPts="96">
+	<Stroke index="1">
+		<Point X="80" Y="27" T="1302294711417" Pressure="128" />
+		<Point X="82" Y="69" T="1302294711418" Pressure="128" />
+		<Point X="82" Y="72" T="1302294711433" Pressure="128" />
+		<Point X="82" Y="76" T="1302294711449" Pressure="128" />
+		<Point X="83" Y="78" T="1302294711449" Pressure="128" />
+		<Point X="83" Y="81" T="1302294711464" Pressure="128" />
+		<Point X="83" Y="84" T="1302294711480" Pressure="128" />
+		<Point X="83" Y="87" T="1302294711495" Pressure="128" />
+		<Point X="83" Y="91" T="1302294711495" Pressure="128" />
+		<Point X="84" Y="93" T="1302294711511" Pressure="128" />
+		<Point X="84" Y="96" T="1302294711527" Pressure="128" />
+		<Point X="85" Y="98" T="1302294711527" Pressure="128" />
+		<Point X="85" Y="102" T="1302294711542" Pressure="128" />
+		<Point X="85" Y="106" T="1302294711558" Pressure="128" />
+		<Point X="85" Y="108" T="1302294711573" Pressure="128" />
+		<Point X="85" Y="111" T="1302294711573" Pressure="128" />
+		<Point X="85" Y="113" T="1302294711589" Pressure="128" />
+		<Point X="85" Y="116" T="1302294711605" Pressure="128" />
+		<Point X="85" Y="118" T="1302294711605" Pressure="128" />
+		<Point X="85" Y="121" T="1302294711620" Pressure="128" />
+		<Point X="85" Y="122" T="1302294711636" Pressure="128" />
+		<Point X="85" Y="124" T="1302294711651" Pressure="128" />
+		<Point X="85" Y="126" T="1302294711651" Pressure="128" />
+		<Point X="85" Y="128" T="1302294711667" Pressure="128" />
+		<Point X="86" Y="131" T="1302294711683" Pressure="128" />
+		<Point X="86" Y="132" T="1302294711698" Pressure="128" />
+		<Point X="86" Y="134" T="1302294711714" Pressure="128" />
+		<Point X="86" Y="136" T="1302294711729" Pressure="128" />
+		<Point X="86" Y="137" T="1302294711761" Pressure="128" />
+		<Point X="86" Y="137" T="1302294711776" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="164" Y="27" T="1302294712493" Pressure="128" />
+		<Point X="163" Y="64" T="1302294712509" Pressure="128" />
+		<Point X="164" Y="67" T="1302294712509" Pressure="128" />
+		<Point X="164" Y="71" T="1302294712525" Pressure="128" />
+		<Point X="164" Y="72" T="1302294712541" Pressure="128" />
+		<Point X="164" Y="76" T="1302294712541" Pressure="128" />
+		<Point X="164" Y="78" T="1302294712556" Pressure="128" />
+		<Point X="164" Y="81" T="1302294712572" Pressure="128" />
+		<Point X="164" Y="83" T="1302294712572" Pressure="128" />
+		<Point X="164" Y="86" T="1302294712587" Pressure="128" />
+		<Point X="164" Y="89" T="1302294712603" Pressure="128" />
+		<Point X="165" Y="92" T="1302294712619" Pressure="128" />
+		<Point X="165" Y="94" T="1302294712619" Pressure="128" />
+		<Point X="165" Y="97" T="1302294712634" Pressure="128" />
+		<Point X="165" Y="101" T="1302294712650" Pressure="128" />
+		<Point X="165" Y="102" T="1302294712650" Pressure="128" />
+		<Point X="165" Y="106" T="1302294712665" Pressure="128" />
+		<Point X="165" Y="108" T="1302294712681" Pressure="128" />
+		<Point X="166" Y="111" T="1302294712697" Pressure="128" />
+		<Point X="166" Y="113" T="1302294712697" Pressure="128" />
+		<Point X="166" Y="116" T="1302294712712" Pressure="128" />
+		<Point X="166" Y="117" T="1302294712728" Pressure="128" />
+		<Point X="166" Y="119" T="1302294712728" Pressure="128" />
+		<Point X="166" Y="121" T="1302294712743" Pressure="128" />
+		<Point X="166" Y="123" T="1302294712759" Pressure="128" />
+		<Point X="166" Y="126" T="1302294712775" Pressure="128" />
+		<Point X="166" Y="127" T="1302294712775" Pressure="128" />
+		<Point X="166" Y="131" T="1302294712790" Pressure="128" />
+		<Point X="166" Y="134" T="1302294712806" Pressure="128" />
+		<Point X="166" Y="136" T="1302294712821" Pressure="128" />
+		<Point X="166" Y="138" T="1302294712837" Pressure="128" />
+		<Point X="166" Y="139" T="1302294712853" Pressure="128" />
+		<Point X="166" Y="139" T="1302294712868" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="78" Y="36" T="1302294713539" Pressure="128" />
+		<Point X="118" Y="77" T="1302294713539" Pressure="128" />
+		<Point X="121" Y="81" T="1302294713539" Pressure="128" />
+		<Point X="123" Y="83" T="1302294713555" Pressure="128" />
+		<Point X="126" Y="86" T="1302294713570" Pressure="128" />
+		<Point X="128" Y="89" T="1302294713586" Pressure="128" />
+		<Point X="131" Y="92" T="1302294713586" Pressure="128" />
+		<Point X="133" Y="96" T="1302294713601" Pressure="128" />
+		<Point X="135" Y="98" T="1302294713617" Pressure="128" />
+		<Point X="138" Y="101" T="1302294713617" Pressure="128" />
+		<Point X="140" Y="102" T="1302294713633" Pressure="128" />
+		<Point X="142" Y="106" T="1302294713648" Pressure="128" />
+		<Point X="144" Y="108" T="1302294713664" Pressure="128" />
+		<Point X="146" Y="111" T="1302294713664" Pressure="128" />
+		<Point X="148" Y="113" T="1302294713679" Pressure="128" />
+		<Point X="150" Y="116" T="1302294713695" Pressure="128" />
+		<Point X="152" Y="117" T="1302294713695" Pressure="128" />
+		<Point X="153" Y="118" T="1302294713711" Pressure="128" />
+		<Point X="155" Y="121" T="1302294713726" Pressure="128" />
+		<Point X="156" Y="122" T="1302294713742" Pressure="128" />
+		<Point X="157" Y="124" T="1302294713742" Pressure="128" />
+		<Point X="158" Y="126" T="1302294713757" Pressure="128" />
+		<Point X="159" Y="128" T="1302294713773" Pressure="128" />
+		<Point X="160" Y="129" T="1302294713804" Pressure="128" />
+		<Point X="161" Y="131" T="1302294713820" Pressure="128" />
+		<Point X="161" Y="132" T="1302294713851" Pressure="128" />
+		<Point X="162" Y="133" T="1302294713882" Pressure="128" />
+		<Point X="162" Y="134" T="1302294713945" Pressure="128" />
+		<Point X="163" Y="136" T="1302294713991" Pressure="128" />
+		<Point X="164" Y="138" T="1302294714007" Pressure="128" />
+		<Point X="165" Y="139" T="1302294714038" Pressure="128" />
+		<Point X="166" Y="141" T="1302294714054" Pressure="128" />
+		<Point X="166" Y="141" T="1302294714085" Pressure="128" />
+	</Stroke>
+</Gesture>

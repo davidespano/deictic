@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="half_note~03" Subject="73" InputType="finger" Speed="FAST" NumPts="63">
+	<Stroke index="1">
+		<Point X="99" Y="83" T="1302187707288" Pressure="128" />
+		<Point X="71" Y="113" T="1302187707288" Pressure="128" />
+		<Point X="71" Y="114" T="1302187707303" Pressure="128" />
+		<Point X="70" Y="116" T="1302187707319" Pressure="128" />
+		<Point X="70" Y="118" T="1302187707319" Pressure="128" />
+		<Point X="69" Y="119" T="1302187707334" Pressure="128" />
+		<Point X="69" Y="121" T="1302187707350" Pressure="128" />
+		<Point X="69" Y="122" T="1302187707350" Pressure="128" />
+		<Point X="69" Y="123" T="1302187707366" Pressure="128" />
+		<Point X="70" Y="126" T="1302187707381" Pressure="128" />
+		<Point X="71" Y="128" T="1302187707412" Pressure="128" />
+		<Point X="72" Y="131" T="1302187707428" Pressure="128" />
+		<Point X="73" Y="131" T="1302187707428" Pressure="128" />
+		<Point X="75" Y="133" T="1302187707459" Pressure="128" />
+		<Point X="77" Y="134" T="1302187707475" Pressure="128" />
+		<Point X="78" Y="136" T="1302187707475" Pressure="128" />
+		<Point X="80" Y="136" T="1302187707490" Pressure="128" />
+		<Point X="81" Y="136" T="1302187707506" Pressure="128" />
+		<Point X="84" Y="137" T="1302187707506" Pressure="128" />
+		<Point X="86" Y="137" T="1302187707522" Pressure="128" />
+		<Point X="88" Y="138" T="1302187707537" Pressure="128" />
+		<Point X="105" Y="134" T="1302187707631" Pressure="128" />
+		<Point X="107" Y="133" T="1302187707631" Pressure="128" />
+		<Point X="108" Y="132" T="1302187707646" Pressure="128" />
+		<Point X="110" Y="131" T="1302187707662" Pressure="128" />
+		<Point X="112" Y="129" T="1302187707662" Pressure="128" />
+		<Point X="113" Y="127" T="1302187707678" Pressure="128" />
+		<Point X="115" Y="126" T="1302187707693" Pressure="128" />
+		<Point X="116" Y="124" T="1302187707709" Pressure="128" />
+		<Point X="117" Y="122" T="1302187707709" Pressure="128" />
+		<Point X="118" Y="121" T="1302187707724" Pressure="128" />
+		<Point X="119" Y="118" T="1302187707740" Pressure="128" />
+		<Point X="119" Y="117" T="1302187707740" Pressure="128" />
+		<Point X="120" Y="116" T="1302187707756" Pressure="128" />
+		<Point X="121" Y="113" T="1302187707771" Pressure="128" />
+		<Point X="121" Y="112" T="1302187707787" Pressure="128" />
+		<Point X="122" Y="111" T="1302187707787" Pressure="128" />
+		<Point X="122" Y="107" T="1302187707818" Pressure="128" />
+		<Point X="123" Y="106" T="1302187707818" Pressure="128" />
+		<Point X="123" Y="101" T="1302187707849" Pressure="128" />
+		<Point X="123" Y="98" T="1302187707880" Pressure="128" />
+		<Point X="123" Y="97" T="1302187707896" Pressure="128" />
+		<Point X="123" Y="96" T="1302187707927" Pressure="128" />
+		<Point X="122" Y="94" T="1302187707943" Pressure="128" />
+		<Point X="122" Y="93" T="1302187707990" Pressure="128" />
+		<Point X="122" Y="93" T="1302187708036" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="115" Y="22" T="1302187710486" Pressure="128" />
+		<Point X="115" Y="54" T="1302187710486" Pressure="128" />
+		<Point X="115" Y="56" T="1302187710486" Pressure="128" />
+		<Point X="115" Y="57" T="1302187710501" Pressure="128" />
+		<Point X="115" Y="58" T="1302187710517" Pressure="128" />
+		<Point X="115" Y="61" T="1302187710532" Pressure="128" />
+		<Point X="115" Y="62" T="1302187710548" Pressure="128" />
+		<Point X="115" Y="64" T="1302187710564" Pressure="128" />
+		<Point X="115" Y="66" T="1302187710564" Pressure="128" />
+		<Point X="115" Y="67" T="1302187710579" Pressure="128" />
+		<Point X="115" Y="69" T="1302187710595" Pressure="128" />
+		<Point X="115" Y="71" T="1302187710610" Pressure="128" />
+		<Point X="116" Y="73" T="1302187710626" Pressure="128" />
+		<Point X="116" Y="76" T="1302187710642" Pressure="128" />
+		<Point X="116" Y="77" T="1302187710673" Pressure="128" />
+		<Point X="116" Y="78" T="1302187710688" Pressure="128" />
+		<Point X="116" Y="78" T="1302187710876" Pressure="128" />
+	</Stroke>
+</Gesture>

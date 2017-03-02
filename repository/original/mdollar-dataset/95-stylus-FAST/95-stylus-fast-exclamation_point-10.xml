@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~10" Subject="95" InputType="stylus" Speed="FAST" NumPts="17">
+	<Stroke index="1">
+		<Point X="124" Y="9" T="1302554631741" Pressure="128" />
+		<Point X="122" Y="34" T="1302554631741" Pressure="128" />
+		<Point X="122" Y="42" T="1302554631741" Pressure="128" />
+		<Point X="121" Y="46" T="1302554631741" Pressure="128" />
+		<Point X="121" Y="51" T="1302554631757" Pressure="128" />
+		<Point X="121" Y="55" T="1302554631757" Pressure="128" />
+		<Point X="121" Y="59" T="1302554631772" Pressure="128" />
+		<Point X="121" Y="62" T="1302554631788" Pressure="128" />
+		<Point X="121" Y="65" T="1302554631788" Pressure="128" />
+		<Point X="121" Y="68" T="1302554631788" Pressure="128" />
+		<Point X="122" Y="70" T="1302554631803" Pressure="128" />
+		<Point X="122" Y="71" T="1302554631803" Pressure="128" />
+		<Point X="122" Y="72" T="1302554631819" Pressure="128" />
+		<Point X="122" Y="72" T="1302554631819" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="122" Y="103" T="1302554632084" Pressure="128" />
+		<Point X="121" Y="105" T="1302554632084" Pressure="128" />
+		<Point X="121" Y="105" T="1302554632084" Pressure="128" />
+	</Stroke>
+</Gesture>

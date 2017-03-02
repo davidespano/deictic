@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="H~10" Subject="77" InputType="finger" Speed="FAST" NumPts="30">
+	<Stroke index="1">
+		<Point X="48" Y="26" T="1301687442248" Pressure="128" />
+		<Point X="53" Y="76" T="1301687442248" Pressure="128" />
+		<Point X="54" Y="79" T="1301687442264" Pressure="128" />
+		<Point X="54" Y="83" T="1301687442280" Pressure="128" />
+		<Point X="54" Y="87" T="1301687442280" Pressure="128" />
+		<Point X="55" Y="91" T="1301687442295" Pressure="128" />
+		<Point X="55" Y="93" T="1301687442311" Pressure="128" />
+		<Point X="56" Y="96" T="1301687442310" Pressure="128" />
+		<Point X="56" Y="99" T="1301687442326" Pressure="128" />
+		<Point X="56" Y="99" T="1301687442358" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="49" Y="76" T="1301687442794" Pressure="128" />
+		<Point X="92" Y="74" T="1301687442794" Pressure="128" />
+		<Point X="96" Y="74" T="1301687442810" Pressure="128" />
+		<Point X="99" Y="74" T="1301687442826" Pressure="128" />
+		<Point X="102" Y="74" T="1301687442826" Pressure="128" />
+		<Point X="104" Y="74" T="1301687442841" Pressure="128" />
+		<Point X="104" Y="74" T="1301687442857" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="104" Y="32" T="1301687443294" Pressure="128" />
+		<Point X="102" Y="77" T="1301687443294" Pressure="128" />
+		<Point X="102" Y="81" T="1301687443309" Pressure="128" />
+		<Point X="103" Y="86" T="1301687443325" Pressure="128" />
+		<Point X="104" Y="89" T="1301687443325" Pressure="128" />
+		<Point X="104" Y="93" T="1301687443340" Pressure="128" />
+		<Point X="104" Y="97" T="1301687443356" Pressure="128" />
+		<Point X="104" Y="101" T="1301687443356" Pressure="128" />
+		<Point X="105" Y="102" T="1301687443372" Pressure="128" />
+		<Point X="105" Y="106" T="1301687443387" Pressure="128" />
+		<Point X="105" Y="107" T="1301687443403" Pressure="128" />
+		<Point X="105" Y="109" T="1301687443403" Pressure="128" />
+		<Point X="105" Y="109" T="1301687443434" Pressure="128" />
+	</Stroke>
+</Gesture>

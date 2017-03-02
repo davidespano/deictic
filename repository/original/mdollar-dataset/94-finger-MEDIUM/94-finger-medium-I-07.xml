@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="I~07" Subject="94" InputType="finger" Speed="MEDIUM" NumPts="29">
+	<Stroke index="1">
+		<Point X="127" Y="30" T="1302122133376" Pressure="128" />
+		<Point X="127" Y="85" T="1302122133376" Pressure="128" />
+		<Point X="127" Y="92" T="1302122133376" Pressure="128" />
+		<Point X="127" Y="97" T="1302122133391" Pressure="128" />
+		<Point X="127" Y="102" T="1302122133407" Pressure="128" />
+		<Point X="127" Y="107" T="1302122133407" Pressure="128" />
+		<Point X="127" Y="110" T="1302122133422" Pressure="128" />
+		<Point X="127" Y="113" T="1302122133438" Pressure="128" />
+		<Point X="127" Y="113" T="1302122133454" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="71" Y="22" T="1302122133859" Pressure="128" />
+		<Point X="132" Y="22" T="1302122133859" Pressure="128" />
+		<Point X="138" Y="22" T="1302122133875" Pressure="128" />
+		<Point X="144" Y="22" T="1302122133875" Pressure="128" />
+		<Point X="149" Y="20" T="1302122133890" Pressure="128" />
+		<Point X="152" Y="20" T="1302122133906" Pressure="128" />
+		<Point X="155" Y="20" T="1302122133922" Pressure="128" />
+		<Point X="158" Y="19" T="1302122133922" Pressure="128" />
+		<Point X="160" Y="19" T="1302122133937" Pressure="128" />
+		<Point X="160" Y="19" T="1302122133953" Pressure="128" />
+	</Stroke>
+	<Stroke index="3">
+		<Point X="68" Y="129" T="1302122134436" Pressure="128" />
+		<Point X="138" Y="118" T="1302122134436" Pressure="128" />
+		<Point X="146" Y="118" T="1302122134452" Pressure="128" />
+		<Point X="154" Y="117" T="1302122134453" Pressure="128" />
+		<Point X="159" Y="117" T="1302122134468" Pressure="128" />
+		<Point X="165" Y="117" T="1302122134483" Pressure="128" />
+		<Point X="168" Y="115" T="1302122134499" Pressure="128" />
+		<Point X="171" Y="115" T="1302122134499" Pressure="128" />
+		<Point X="172" Y="115" T="1302122134514" Pressure="128" />
+		<Point X="172" Y="115" T="1302122134531" Pressure="128" />
+	</Stroke>
+</Gesture>

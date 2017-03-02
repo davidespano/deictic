@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="X~06" Subject="77" InputType="finger" Speed="FAST" NumPts="30">
+	<Stroke index="1">
+		<Point X="69" Y="24" T="1301687255173" Pressure="128" />
+		<Point X="112" Y="73" T="1301687255173" Pressure="128" />
+		<Point X="116" Y="78" T="1301687255173" Pressure="128" />
+		<Point X="120" Y="82" T="1301687255188" Pressure="128" />
+		<Point X="125" Y="86" T="1301687255204" Pressure="128" />
+		<Point X="127" Y="91" T="1301687255204" Pressure="128" />
+		<Point X="131" Y="94" T="1301687255220" Pressure="128" />
+		<Point X="134" Y="98" T="1301687255235" Pressure="128" />
+		<Point X="137" Y="102" T="1301687255251" Pressure="128" />
+		<Point X="139" Y="106" T="1301687255251" Pressure="128" />
+		<Point X="139" Y="106" T="1301687255282" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="127" Y="26" T="1301687255828" Pressure="128" />
+		<Point X="96" Y="71" T="1301687255844" Pressure="128" />
+		<Point X="93" Y="74" T="1301687255844" Pressure="128" />
+		<Point X="91" Y="78" T="1301687255859" Pressure="128" />
+		<Point X="88" Y="81" T="1301687255860" Pressure="128" />
+		<Point X="86" Y="84" T="1301687255875" Pressure="128" />
+		<Point X="84" Y="87" T="1301687255890" Pressure="128" />
+		<Point X="82" Y="91" T="1301687255906" Pressure="128" />
+		<Point X="80" Y="93" T="1301687255906" Pressure="128" />
+		<Point X="79" Y="96" T="1301687255922" Pressure="128" />
+		<Point X="77" Y="97" T="1301687255937" Pressure="128" />
+		<Point X="76" Y="101" T="1301687255937" Pressure="128" />
+		<Point X="75" Y="102" T="1301687255953" Pressure="128" />
+		<Point X="73" Y="104" T="1301687255968" Pressure="128" />
+		<Point X="72" Y="106" T="1301687255984" Pressure="128" />
+		<Point X="71" Y="107" T="1301687255984" Pressure="128" />
+		<Point X="70" Y="108" T="1301687256000" Pressure="128" />
+		<Point X="70" Y="111" T="1301687256015" Pressure="128" />
+		<Point X="70" Y="111" T="1301687256031" Pressure="128" />
+	</Stroke>
+</Gesture>

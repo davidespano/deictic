@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="T~01" Subject="75" InputType="finger" Speed="MEDIUM" NumPts="17">
+	<Stroke index="1">
+		<Point X="65" Y="27" T="1302550235449" Pressure="128" />
+		<Point X="119" Y="29" T="1302550235449" Pressure="128" />
+		<Point X="125" Y="28" T="1302550235464" Pressure="128" />
+		<Point X="131" Y="28" T="1302550235464" Pressure="128" />
+		<Point X="137" Y="27" T="1302550235480" Pressure="128" />
+		<Point X="142" Y="27" T="1302550235495" Pressure="128" />
+		<Point X="146" Y="26" T="1302550235511" Pressure="128" />
+		<Point X="146" Y="26" T="1302550235527" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="115" Y="43" T="1302550236088" Pressure="128" />
+		<Point X="115" Y="101" T="1302550236088" Pressure="128" />
+		<Point X="116" Y="108" T="1302550236088" Pressure="128" />
+		<Point X="116" Y="114" T="1302550236104" Pressure="128" />
+		<Point X="116" Y="121" T="1302550236119" Pressure="128" />
+		<Point X="117" Y="126" T="1302550236120" Pressure="128" />
+		<Point X="117" Y="131" T="1302550236135" Pressure="128" />
+		<Point X="118" Y="134" T="1302550236151" Pressure="128" />
+		<Point X="118" Y="134" T="1302550236166" Pressure="128" />
+	</Stroke>
+</Gesture>

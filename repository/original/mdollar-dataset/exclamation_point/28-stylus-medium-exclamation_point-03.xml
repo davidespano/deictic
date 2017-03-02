@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Gesture Name="exclamation_point~03" Subject="28" InputType="stylus" Speed="MEDIUM" NumPts="23">
+	<Stroke index="1">
+		<Point X="123" Y="15" T="1302298263412" Pressure="128" />
+		<Point X="124" Y="36" T="1302298263412" Pressure="128" />
+		<Point X="125" Y="43" T="1302298263428" Pressure="128" />
+		<Point X="125" Y="46" T="1302298263428" Pressure="128" />
+		<Point X="125" Y="50" T="1302298263443" Pressure="128" />
+		<Point X="125" Y="54" T="1302298263459" Pressure="128" />
+		<Point X="125" Y="58" T="1302298263459" Pressure="128" />
+		<Point X="125" Y="61" T="1302298263459" Pressure="128" />
+		<Point X="125" Y="65" T="1302298263474" Pressure="128" />
+		<Point X="125" Y="69" T="1302298263474" Pressure="128" />
+		<Point X="125" Y="72" T="1302298263490" Pressure="128" />
+		<Point X="125" Y="75" T="1302298263490" Pressure="128" />
+		<Point X="125" Y="77" T="1302298263490" Pressure="128" />
+		<Point X="125" Y="80" T="1302298263506" Pressure="128" />
+		<Point X="125" Y="82" T="1302298263521" Pressure="128" />
+		<Point X="125" Y="83" T="1302298263537" Pressure="128" />
+		<Point X="125" Y="85" T="1302298263537" Pressure="128" />
+		<Point X="126" Y="86" T="1302298263537" Pressure="128" />
+		<Point X="126" Y="87" T="1302298263552" Pressure="128" />
+		<Point X="126" Y="87" T="1302298263568" Pressure="128" />
+	</Stroke>
+	<Stroke index="2">
+		<Point X="122" Y="116" T="1302298264738" Pressure="128" />
+		<Point X="124" Y="117" T="1302298264738" Pressure="128" />
+		<Point X="124" Y="117" T="1302298264738" Pressure="128" />
+	</Stroke>
+</Gesture>
