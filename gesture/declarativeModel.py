@@ -10,7 +10,7 @@ class ClassifierFactory:
         self.arc_ccw = None
         self.scale = 100
         self.states = 6
-        self.spu = 40  # samples per unit
+        self.spu = 20 # samples per unit
         self.seq_edges = []
 
     def setClockwiseArcSamplesPath(self, path):
@@ -51,13 +51,13 @@ class ClassifierFactory:
                 alpha = -alpha
             distance = Geometry2D.distance(0,0, exp.dx, exp.dy)
             samples = round(distance * self.spu)
-            n_states = round(distance * self.states)
+            n_states = round(distance * self.states + 0.5)
 
             dataset = CsvDataset(self.line) # reads the raw data
 
             self.transformPrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
 
-            hmm = self.createCleanLine(str(exp), alpha, distance * self.scale / samples, n_states)  # creates empty HMM
+            hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
             samples = dataset.applyTransforms()
             if d:
                 self.debugPlot(samples, exp)
@@ -73,40 +73,40 @@ class ClassifierFactory:
                 if exp.dx >= 0:
                     if exp.dy >= 0:
                         alpha = 0.5 * math.pi
-                        center = [-0.5, 0]
+                        center = [1, 0]
                         gamma = 0
                     else:
                         alpha = 0;
-                        center = [0,-0.5]
+                        center = [0,-1]
                         gamma = 1.5 * math.pi
                 else:
                     if exp.dy >= 0:
                         alpha = math.pi;
-                        center = [0, 0.5]
+                        center = [0, 1]
                         gamma = math.pi
                     else:
                         alpha = -0.5 * math.pi
-                        center = [-0.5, 0]
+                        center = [-1, 0]
                         gamma = 0.5 * math.pi
 
             else:
                 if exp.dx >= 0:
                     if exp.dy >= 0:             #1
                         alpha = -0.5 * math.pi
-                        center = [0, 0.5]
+                        center = [0, 1]
                         gamma = 1.5 * math.pi
                     else:                       #2
                         alpha = math.pi;
-                        center = [0.5, 0]
+                        center = [1, 0]
                         gamma = math.pi
                 else:
                     if exp.dy >= 0:             #3
                         alpha = 0;
-                        center = [-0.5, 0]
+                        center = [-1, 0]
                         gamma = 0
                     else:
                         alpha = 0.5 * math.pi
-                        center = [0, -0.5]
+                        center = [0, -1]
                         gamma = 0.5 * math.pi
 
             distance = abs(0.5 * math.pi * exp.dx)
@@ -118,9 +118,12 @@ class ClassifierFactory:
             else:
                 dataset = CsvDataset(self.arc_ccw)
 
-            self.trasformArcPrimitive(dataset, abs(exp.dx), alpha, center, startPoint, samples)
+            translate = [startPoint[0] + center[0], startPoint[1] + center[1]]
+            self.trasformArcPrimitive(dataset, startPoint, exp.dx, exp.dy, alpha, center, samples)
 
-            hmm = self.createCleanArc(str(exp), alpha, abs(exp.dx) * self.scale, n_states, exp.cw)
+
+            #hmm = self.createCleanArc(str(exp), startPoint, alpha, abs(exp.dx), abs(exp.dy), n_states, exp.cw)
+            hmm = self.createCleanArc2(str(exp), startPoint, exp, self.scale, n_states)
 
             samples = dataset.applyTransforms()
             if d:
@@ -167,27 +170,27 @@ class ClassifierFactory:
 
         return None
 
-    def trasformArcPrimitive(self, dataset, radius, alpha, center, startPoint, samples):
+    def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
         # applying transforms for fitting
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
         origin = TranslateTransform(t=[0.5, 0.5])
-        rotate = RotateTransform(theta=alpha,
-                                 unit=RotateTransform.radians)
-        centerTranslate = TranslateTransform(t=[center[0] * self.scale, center[1] * self.scale])
-        scale = ScaleDatasetTransform(scale=self.scale * radius)  # adjust the size
+        rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)
+        centerTranslate = TranslateTransform(t=[center[0], center[1]])
+        radiusScale = ScaleDatasetTransform(scale=[abs(radiusX), abs(radiusY)])
+        startPointTranslate = TranslateTransform(t=startPoint)
+        scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
         resample = ResampleInSpaceTransform(samples=samples)  # resampling
-        translate = TranslateTransform(
-            t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
 
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
-        dataset.addTransform(scale)
         dataset.addTransform(rotate)
         dataset.addTransform(centerTranslate)
+        dataset.addTransform(radiusScale)
+        dataset.addTransform(startPointTranslate)
+        dataset.addTransform(scale)
         dataset.addTransform(resample)
-        dataset.addTransform(translate)
         return None
 
 
@@ -218,49 +221,78 @@ class ClassifierFactory:
             startPoint[1] = oldPoint[1]
 
 
-    def createCleanLine(self, name, alpha, step, n_states):
+    def createCleanLine(self, name, startPoint, dx, dy, scale, samples):
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
-        step_x = step * cos(alpha)
-        step_y = step * sin(alpha)
-        for i in range(0, n_states):
-            a = i * step_x
-            b = i * step_y
+
+        step_x = dx / max(samples - 1, 1)
+        step_y = dy / max(samples - 1, 1)
+
+        for i in range(0, samples ):
+            a = (startPoint[0] + (i * step_x)) * scale
+            b = (startPoint[1] + (i * step_y)) * scale
 
             gaussianX = NormalDistribution(a, self.scale * 0.01)
             gaussianY = NormalDistribution(b, self.scale * 0.01)
+
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
 
-        return topology_factory.forward(name, n_states, distributions)
+        return topology_factory.forward(name, samples, distributions)
 
-    def createCleanArc(self, name, alpha, radius, n_states, cw):
+    def createCleanArc2(self, name, startPoint, exp, scale, n_states):
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
-        step = 0.5 * math.pi / n_states
+        step = 0.5 * math.pi / max(n_states - 1, 1)
 
         beta = 0
+        alpha = 0
+
+        # TODO this may be better coded
+        if exp.cw:
+            if exp.dy > 0:
+                if exp.dx > 0:
+                    alpha = 0
+                else:
+                    alpha = 0.5 * math.pi
+            else:
+                if exp.dx > 0:
+                    alpha = 1.5 * math.pi
+                else:
+                    alpha =  math.pi
+        else:
+            if exp.dy > 0:
+                if exp.dx > 0:
+                    alpha = 0.5 * math.pi
+                else:
+                    alpha = math.pi
+            else:
+                if exp.dx > 0:
+                    alpha = 0
+                else:
+                    alpha = 1.5 * math.pi
+
+        beta = alpha + math.pi
+
+
         for i in range(0, n_states):
-            a = cos(alpha + beta) * radius
-            b = sin(alpha + beta) * radius
+            a = (cos(beta) + cos(alpha)) * abs(exp.dx) + startPoint[0]
+            b = (sin(beta) + sin(alpha)) * abs(exp.dy) + startPoint[1]
 
-            gaussianX = NormalDistribution(a, self.scale * 0.01)
-            gaussianY = NormalDistribution(b, self.scale * 0.01)
-            #gaussianX = NormalDistribution(a,  0.01)
-            #gaussianY = NormalDistribution(b,  0.01)
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+            gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
+            gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
 
-            if cw:
+
+            if exp.cw:
                 beta -= step
             else:
                 beta += step
 
+            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+
         return topology_factory.forward(name, n_states, distributions)
 
-
-
-        return None
 
     def debugPlot(self, samples, exp):
         plt.axis("equal")
