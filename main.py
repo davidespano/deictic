@@ -96,20 +96,20 @@ baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/reposit
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
-testDir = baseDir + "deictic/mdollar-dataset/raw/"
+testDir = baseDir + "deictic/mdollar-dataset/resampled/"
 
 gesture_models = [
     ((Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)), 'arrowhead'),  # arrowhead
     ((Point(0, 4) + Line(0, -4) + Point(-1, 2) + Line(5, 0) + Point(4, 4) + Line(0, -4)), 'H'),  # H
     ((Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4)), 'N'),  # N
     ((Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)), 'I'),  # I
-    ((Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(1, -1, cw=True) + Point(1, 3) + Arc(-1, -1, cw=True)), 'P'),  # P
+    ((Point(0, 0) + Line(0, -4) + Point(0, 0) + Arc(1, -1, cw=True) + Arc(-1, -1, cw=True)), 'P'),  # P
     ((Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4) ), 'T'),  # T
-    ((Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)), 'five_point_star'), # five point star
+    #((Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)), 'five_point_star'), # five point star
     ((Point(0, 0.5) + Line(2, 2) + Line(2, -2) + Line(-4, 0) + Point(0, 2) + Line(4, 0) + Line(-2, -2) + Line(-2, 2)), 'six_point_star'),  # six point star
     ((Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(2, -2, cw=True) + Point(2, 2) + Arc(-2, -2, cw=True)), 'D'),  # D
     ((Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4)), 'asterisk'),  # asterisk
-    ((Point(0, 5) + Line(0, 2)+ Point(0, 1) + Line(0, 1) ), 'exclamation_point'),  # exclamatoin point
+    ((Point(0, 20) + Line(0, -19)+ Point(0, 1) + Line(0, -1) ), 'exclamation_point'),  # exclamatoin point
     # Line - crash
     # ( (Point(0,0)+Line(4,0) + Point(4,0)+Line(10,0)), 'line'),
     # Null - 0%
@@ -118,7 +118,7 @@ gesture_models = [
 
     # ( ( Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4)), 'pitchfork'),# pitchfork
     # ( ( Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False)), 'half_note'),# half note
-    # ( (Point(0,0)+Line(4,4) + Point(4,0)+Line(-4,4)), 'X')# X
+    #( (Point(0,0)+Line(4,4) + Point(4,0)+Line(-4,4)), 'X')# X
 ]
 
 
@@ -144,15 +144,21 @@ if mode == 24:
     #t = Point(0,0) + Line(4,0) + Point(2,0) + Line(0, -4)
     #t = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
     # t.plot()
-    gesture_models[9][0].plot()
+    gesture_models[4][0].plot()
     factory = ClassifierFactory()
     factory.setLineSamplesPath(trainingDir)
     factory.setClockwiseArcSamplesPath(arcClockWiseDir)
     factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-    model, edges = factory.createClassifier(gesture_models[9][0])
+    model, edges = factory.createClassifier(gesture_models[4][0])
     plot_gesture(model)
 
 if mode == 25:
-    dataset = CsvDataset(testDir + "T/")
+    dataset = CsvDataset(testDir + "exclamation_point/")
     #dataset.plot()
     dataset.plot(singleMode=True)
+
+if mode == 26:
+    d = NormalDistribution(2.0, 0.5)
+    samples = [d.sample() for i in range(10000)]
+    plt.hist(samples, edgecolor='c', color='c', bins=50)
+    plt.show()
