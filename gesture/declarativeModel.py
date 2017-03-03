@@ -39,6 +39,7 @@ class ClassifierFactory:
         self.strokeList = []
         self.stroke = -1
         self.parseStrokes(exp)
+        self.stroke = -1
         expType, operands = self.parseExpression(exp, startPoint)
         return self.createHMM(str(exp), expType, operands)
 
@@ -203,12 +204,14 @@ class ClassifierFactory:
 
     def addStrokeIdDistribution(self, hmm):
         #print(hmm)
-        for state in hmm.states:
+        step = 0.5 / len(hmm.states) +1
+
+        for i in range(0, len(hmm.states)):
+            state = hmm.states[i]
             if not state.distribution is None:
                 x = state.distribution.distributions[0]
                 y = state.distribution.distributions[1]
-                #s = DiscreteDistribution({2: 1.0, 1: 0.0})
-                s = NormalDistribution(self.stroke + 1.0, 1.0)
+                s = NormalDistribution(self.stroke + 1.0, (i +1) * step)
                 state.distribution = IndependentComponentsDistribution([x, y, s])
 
 
@@ -348,7 +351,6 @@ class ClassifierFactory:
 
             gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
             gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
-            strokeDist = self.createStrokeDiscreteDistribution()
 
 
             if exp.cw:
