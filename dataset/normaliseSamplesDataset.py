@@ -305,6 +305,7 @@ class ResampleInSpaceTransformMultiStroke(DatasetTransform):
 
         for index in range(0, self.strokes):
             sequence = [x for x in srcPts if x[-1] == index+1]
+            self.stroke = index + 1
             # Resampled
             if(len(sequence) > 1):
                 sequence = ResampleInSpaceTransform.transform(self, numpy.array(sequence))
@@ -321,6 +322,7 @@ class ResampleInSpaceTransform(DatasetTransform):
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
+        self.stroke = None
 
     def transform(self, sequence):
         # adapted from WobbrockLib
@@ -333,8 +335,10 @@ class ResampleInSpaceTransform(DatasetTransform):
 
         resampled = []
 
-
-        resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]]])
+        if self.stroke is None:
+            resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]]])
+        else:
+            resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]], self.stroke])
 
         D = 0.0
         j = 1
@@ -351,11 +355,13 @@ class ResampleInSpaceTransform(DatasetTransform):
                 qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
                 qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
 
-                resampled.append([qx, qy])
-
-
+                if self.stroke is None:
+                    resampled.append([qx, qy])
+                else:
+                    resampled.append([qx, qy, self.stroke])
 
                 srcPts.insert(i, [qx, qy]) # insert 'q' at position i in points s.t. 'q' will be the next i
+
 
                 D = 0.0
             else:
@@ -364,7 +370,10 @@ class ResampleInSpaceTransform(DatasetTransform):
 
         if D > 0.0:
             size = len(srcPts)
-            resampled.append([srcPts[size -1][self.cols[0]], srcPts[size -1][self.cols[1]]])
+            if self.stroke is None:
+                resampled.append([srcPts[size -1][0], srcPts[size -1][1]])
+            else:
+                resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
 
         return numpy.array(resampled)
 
