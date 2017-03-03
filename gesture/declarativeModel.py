@@ -10,8 +10,10 @@ class ClassifierFactory:
         self.arc_ccw = None
         self.scale = 100
         self.states = 6
-        self.spu = 40 # samples per unit
+        self.spu = 20 # samples per unit
         self.seq_edges = []
+        self.stroke = -1
+        self.strokeList = []
 
     def setClockwiseArcSamplesPath(self, path):
         self.arc_cw = path
@@ -34,8 +36,22 @@ class ClassifierFactory:
         processor.preprocess()
         #exp.plot()
         startPoint = [0,0]
+        self.strokeList = []
+        self.stroke = -1
+        self.parseStrokes(exp)
         expType, operands = self.parseExpression(exp, startPoint)
         return self.createHMM(str(exp), expType, operands)
+
+    def parseStrokes(self, exp):
+        if isinstance(exp, Point):
+            self.stroke += 1
+            self.strokeList.append(str(self.stroke + 1))
+
+        if isinstance(exp, CompositeExp):
+            if not exp.left is None:
+                self.parseStrokes(exp.left)
+            if not exp.right is None:
+                self.parseStrokes(exp.right)
 
     def parseExpression(self, exp, startPoint, d = False):
 
@@ -43,6 +59,7 @@ class ClassifierFactory:
         #       ground terms
         # -----------------------------------------------
         if isinstance(exp, Point):
+            self.stroke += 1
             startPoint[0] = exp.x
             startPoint[1] = exp.y
             return OpEnum.Point, None
@@ -61,9 +78,16 @@ class ClassifierFactory:
 
             hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
             samples = dataset.applyTransforms()
+
+            #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
+
             if d:
                 self.debugPlot(samples, exp)
             hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
+
+            self.addStrokeIdDistribution(hmm)
+
+            s = hmm.sample()
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -125,12 +149,17 @@ class ClassifierFactory:
 
 
             #hmm = self.createCleanArc(str(exp), startPoint, alpha, abs(exp.dx), abs(exp.dy), n_states, exp.cw)
-            hmm = self.createCleanArc2(str(exp), startPoint, exp, self.scale, n_states)
+            hmm = self.createCleanArc(str(exp), startPoint, exp, self.scale, n_states)
 
             samples = dataset.applyTransforms()
+
+            #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
+
             if d:
                 self.debugPlot(samples, exp)
             hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
+
+            self.addStrokeIdDistribution(hmm)
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -171,6 +200,18 @@ class ClassifierFactory:
             return expType, [(hmm, seq_edge)]
 
         return None
+
+    def addStrokeIdDistribution(self, hmm):
+        #print(hmm)
+        for state in hmm.states:
+            if not state.distribution is None:
+                x = state.distribution.distributions[0]
+                y = state.distribution.distributions[1]
+                #s = DiscreteDistribution({2: 1.0, 1: 0.0})
+                s = NormalDistribution(self.stroke + 1.0, 1.0)
+                state.distribution = IndependentComponentsDistribution([x, y, s])
+
+
 
     def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
         # applying transforms for fitting
@@ -222,6 +263,27 @@ class ClassifierFactory:
             startPoint[0] = oldPoint[0]
             startPoint[1] = oldPoint[1]
 
+    def addStrokeId(self, samples):
+        # TODO this part wastes a lot of memory
+        new_samples = []
+        if len(self.strokeList) > 1:
+            for i in range(0, len(samples)):
+                sample = samples[i]
+                new_sample = []
+                for j in range (0, len(sample)):
+                    new_sample.append(numpy.append(sample[j], self.stroke + 1))
+                new_samples.append(new_sample)
+            return new_samples
+        return samples
+
+    def createStrokeDiscreteDistribution(self):
+        d = {}
+        for i in range(0, len(self.strokeList)):
+            p = 0
+            if i == self.stroke:
+                p = 1
+            d[self.strokeList[i]] = p
+        return DiscreteDistribution(d)
 
     def createCleanLine(self, name, startPoint, dx, dy, scale, samples):
         topology_factory = HiddenMarkovModelTopology()  # Topology
@@ -238,11 +300,13 @@ class ClassifierFactory:
             gaussianX = NormalDistribution(a, self.scale * 0.01)
             gaussianY = NormalDistribution(b, self.scale * 0.01)
 
+
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+
 
         return topology_factory.forward(name, samples, distributions)
 
-    def createCleanArc2(self, name, startPoint, exp, scale, n_states):
+    def createCleanArc(self, name, startPoint, exp, scale, n_states):
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
@@ -284,6 +348,7 @@ class ClassifierFactory:
 
             gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
             gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
+            strokeDist = self.createStrokeDiscreteDistribution()
 
 
             if exp.cw:
@@ -291,7 +356,9 @@ class ClassifierFactory:
             else:
                 beta += step
 
+
             distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+
 
         return topology_factory.forward(name, n_states, distributions)
 
