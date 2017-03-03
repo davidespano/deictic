@@ -9,7 +9,10 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         dataset = CsvDataset(input_dir)
 
         # Transform
-        transform1 = NormaliseLengthTransform(axisMode=True)
+        if unistroke_mode:
+            transform1 = NormaliseLengthTransform(axisMode=True)
+        else:
+            transform1 = NormaliseLengthTransform(axisMode=gesture[3])
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         #transform4 = RotateCenterTransform(traslationMode=True)
@@ -28,8 +31,8 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
     return
 
 
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
 mode = 3
 n_sample = 40
@@ -55,11 +58,11 @@ if mode == 2:
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
-    list = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3), ("D", n_sample, 2), ("exclamation_point", n_sample, 2),
-            ("five_point_star", n_sample, 1), ("H", n_sample, 3), ("half_note", n_sample, 2),
-            ("I", n_sample, 3), ("N", n_sample, 3), ("null", n_sample, 2),
-            ("P", n_sample, 2), ("pitchfork", n_sample, 2), ("six_point_star", n_sample, 2),
-            ("T", n_sample, 2), ("X", n_sample, 2)
+    list = {("arrowhead", n_sample, 2, True), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
+            ("five_point_star", n_sample, 1, True), ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
+            ("I", n_sample, 3, True), ("N", n_sample, 3, True), ("null", n_sample, 2, True),
+            ("P", n_sample, 2, True), ("pitchfork", n_sample, 2, True), ("six_point_star", n_sample, 2, True),
+            ("T", n_sample, 2, True), ("X", n_sample, 2, True)
             }#("line", n_sample, 1)
     dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
@@ -78,7 +81,7 @@ if mode == 11:
     converter.create_deictic_dataset(inputDir, outputDir)
 # MDollar
 if mode == 12:
-    inputDir = baseDir + 'original/mdollar-dataset/'
+    inputDir = baseDir + 'original/mdollar-dataset'
     outputDir = baseDir + 'deictic/mdollar-dataset/raw'
     converter = DollarMConverter()
     converter.order_files(inputDir, inputDir)

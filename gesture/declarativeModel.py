@@ -10,7 +10,7 @@ class ClassifierFactory:
         self.arc_ccw = None
         self.scale = 100
         self.states = 6
-        self.spu = 20 # samples per unit
+        self.spu = 40 # samples per unit
         self.seq_edges = []
 
     def setClockwiseArcSamplesPath(self, path):

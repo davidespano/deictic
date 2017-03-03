@@ -94,6 +94,9 @@ class NormaliseLengthTransform(DatasetTransform):
 
         den = max(maxs-mins)
 
+        if 0 in maxs-mins:
+            self.axisMode = False
+
         for i in range(0, len(self.cols)):
             vmax = maxs[i]
             vmin = mins[i]

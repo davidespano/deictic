@@ -17,7 +17,7 @@ def deictic_test(gestureDir, gesture_models, n_states=6, n_samples=20, plot=Fals
         factory.setLineSamplesPath(trainingDir)
         factory.setClockwiseArcSamplesPath(arcClockWiseDir)
         factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-        factory.spu = n_states
+        factory.states = n_states
         factory.spu = n_samples
 
         model, edges = factory.createClassifier(gesture[0])
@@ -87,70 +87,46 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 
 # Main
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-n_states = 8 # Numero stati
+n_states = 6 # Numero stati
 n_samples = 40
 mode = 1
 
-## Deictic
-if mode == 0:
-    gestureDir = baseDir+'deictic/1dollar-dataset/resampled/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
+arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
+arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
+testDir = baseDir + "deictic/mdollar-dataset/raw/"
 
-    gesture_models = [
-        (Point(0,0) + Line(-2,-3) + Line(4,0)+ Line(-2,3), 'triangle'), # triangle
-        (Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3), 'x'), # X
-        (Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0), 'rectangle'), # rectangle
-        (Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False), 'circle'), # circle
-        (Point(0,0) + Line(2, -2) + Line(4,6), 'check'), # check
-        (Point(0,0) + Line(2,3) + Line(2,-3), 'caret'), # caret
-        (Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3), 'question_mark'), # question mark
-        (Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4), 'arrow'),
-        (Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0), 'left_sq_bracket'), # left square bracket
-        (Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0), 'right_sq_bracket'), # right square bracket
-        (Point(0,0) + Line(2,-3) + Line(2,3), 'v'), # V
-        (Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), 'delete_mark'), # delete
-        (Point(0,0) + Arc(-2,-2, cw=False) + Line(0,-3) + Arc(-1,-1)  + Arc(1,-1) + Line(0,-3) + Arc(2,-2,cw=False), "left_curly_brace"), # left curly brace
-        (Point(0,0) + Arc(2,-2) + Line(0,-3) + Arc(1,-1, cw=False) + Arc(-1,-1, cw=False) + Line(0,-3) + Arc(-2,-2), "right_curly_brace"),  # right curly brace
-        (Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3), 'star'), # star
-        (Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False), "pigtail") # pigtail
-    ]
-    results = deictic_test(gestureDir, gesture_models, n_states=n_states, n_samples=n_samples, plot=False)
-    #results = deictic_test_unistroke(primitiveDir, gestureDir, n_states)
+gesture_models = [
+    ((Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)), 'arrowhead'),  # arrowhead
+    ((Point(0, 4) + Line(0, -4) + Point(-1, 2) + Line(5, 0) + Point(4, 4) + Line(0, -4)), 'H'),  # H
+    ((Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4)), 'N'),  # N
+    ((Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)), 'I'),  # I
+    ((Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(1, -1, cw=True) + Point(1, 3) + Arc(-1, -1, cw=True)), 'P'),  # P
+    ((Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4) ), 'T'),  # T
+    ((Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)), 'five_point_star'), # five point star
+    ((Point(0, 0.5) + Line(2, 2) + Line(2, -2) + Line(-4, 0) + Point(0, 2) + Line(4, 0) + Line(-2, -2) + Line(-2, 2)), 'six_point_star'),  # six point star
+    ((Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(2, -2, cw=True) + Point(2, 2) + Arc(-2, -2, cw=True)), 'D'),  # D
+    ((Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4)), 'asterisk'),  # asterisk
+    ((Point(0, 5) + Line(0, 2)+ Point(0, 1) + Line(0, 1) ), 'exclamation_point'),  # exclamatoin point
+    # Line - crash
+    # ( (Point(0,0)+Line(4,0) + Point(4,0)+Line(10,0)), 'line'),
+    # Null - 0%
+    # ( ( Point(-4,-4)+Line(8,8) +
+    #    Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)), 'null'),
 
-# Multistroke
-if mode == -1:
-    gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
+    # ( ( Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4)), 'pitchfork'),# pitchfork
+    # ( ( Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False)), 'half_note'),# half note
+    # ( (Point(0,0)+Line(4,4) + Point(4,0)+Line(-4,4)), 'X')# X
+]
 
-    gesture_models = [
-        # Pitchfork
-        ( (Point(0,0)+Line(2,3) + Line(2,-3)+Line(-4,2) + Line(4,0)+Line(-4, -2)), 'five_point_star'),
-    ]
-    #gesture_models[0][0].plot()
-    results = deictic_test(gestureDir, gesture_models, n_states, plot=True)
+
+
 if mode == 1:
     gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
 
-    gesture_models = [
-        ( (Point(0,0)+Line(6,0) + Point(4,2)+Line(2,-2) + Line(-2,-2)), 'arrowhead'),# arrowhead
-        ( ( Point(0,4)+Line(0,-4) + Point(-1,2)+Line(5,0) + Point(4,4)+Line(0,-4) ), 'H'),# H
-        ( (Point(0,4)+Line(0,-4) + Point(0,4)+Line(4,-4) + Point(4,4)+Line(0,-4)), 'N' ),# N
-        ( (Point(0,4)+Line(4,0) + Point(2,4)+Line(0,-4) + Point(0,0)+Line(4,0)), 'I'),# I
-        ( ( Point(0,0)+Line(0,4) + Point(0,4)+Arc(1,-1, cw=True) + Point(1,3)+Arc(-1,-1, cw=True)), 'P'),# P
-        ( (Point(0,0)+Line(4,0) + Point(2,0)+Line(0,-4)), 'T' ),# T
-        ( (Point(0,0)+Line(2,4) + Line(2,-4)+Line(-4,2) + Line(4,0)+Line(-4, -2)), 'five_point_star'), # five point star
-        ( (Point(0,0.5)+Line(2,2)+Line(2,-2)+Line(-4,0) + Point(0,2)+Line(4,0)+Line(-2,-2)+Line(-2,2)), 'six_point_star'),# six point star
-        ( ( Point(0,0)+Line(0,4) + Point(0,4)+Arc(2,-2, cw=True) + Point(2,2)+Arc(-2,-2, cw=True)), 'D'),# D
-        ( (Point(0,0)+Line(0,4) + Point(2,0)+Line(-4,4) + Point(-2,0)+Line(4,4) ), 'asterisk'), # asterisk
-        ( (Point(0,0)+Line(0.1,0.1) + Point(0,1)+Line(0,3)), 'exclamation_point'), # exclamatoin point
-        # Line - crash
-        #( (Point(0,0)+Line(4,0) + Point(4,0)+Line(10,0)), 'line'),
-        # Null - 0%
-        #( ( Point(-4,-4)+Line(8,8) +
-        #    Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)), 'null'),
 
-        #( ( Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4)), 'pitchfork'),# pitchfork
-        #( ( Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False)), 'half_note'),# half note
-        #( (Point(0,0)+Line(4,4) + Point(4,0)+Line(-4,4)), 'X')# X
-    ]
 
     #gesture_models[0][0].plot()
     results = deictic_test(gestureDir, gesture_models, n_states, plot=False)
@@ -163,3 +139,20 @@ if mode == 2:
             ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
             ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
     #results = adhoc_test(gestureDir, list_gesture)
+
+if mode == 24:
+    #t = Point(0,0) + Line(4,0) + Point(2,0) + Line(0, -4)
+    #t = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
+    # t.plot()
+    gesture_models[9][0].plot()
+    factory = ClassifierFactory()
+    factory.setLineSamplesPath(trainingDir)
+    factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+    factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+    model, edges = factory.createClassifier(gesture_models[9][0])
+    plot_gesture(model)
+
+if mode == 25:
+    dataset = CsvDataset(testDir + "T/")
+    #dataset.plot()
+    dataset.plot(singleMode=True)

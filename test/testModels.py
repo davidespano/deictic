@@ -97,6 +97,9 @@ def compares_deictic_models(models, baseDir, names, plot=False):
 
     # For each gesture's dataset
     for index_dataset in range(0, len(list_dataset)):
+
+        print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
+
         # Get all sequence files
         sequences = list_dataset[index_dataset].read_dataset()
 

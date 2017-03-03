@@ -40,6 +40,8 @@ class HiddenMarkovModelTopology :
     def forward(self, name="forward-model", n_states = 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
 
+
+
         states = self.__fix_parameters(name, n_states, emissions, state_names, model);
         for i in range(0, n_states - 1):
             model.add_transition(states[i], states[i], 0.5)
