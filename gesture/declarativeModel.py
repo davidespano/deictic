@@ -212,7 +212,7 @@ class ClassifierFactory:
                 x = state.distribution.distributions[0]
                 y = state.distribution.distributions[1]
                 s = NormalDistribution(self.stroke + 1.0, (i +1) * step)
-                state.distribution = IndependentComponentsDistribution([x, y, s])
+                state.distribution = IndependentComponentsDistribution([x, y, s], weights = [1,1, 1000])
 
 
 
