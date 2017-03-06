@@ -54,14 +54,6 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
         # Prendi ogni gesture in models
         for i in range(0, len(models)):
-            # Aggiusta index
-            #index_correct = index
-            #if index >= len(dataset.getCsvDataset().filenames):
-            #index_correct = len(dataset.getCsvDataset().filenames) - 1
-
-            # Prendi la sequenza
-            #correct = DatasetIterator(baseDir + '/' + model.name + '/')
-            #one, sequences = correct.leave_one_out_dataset(index_correct, dimensions=dimensions, scale=scale)
 
             # Per ogni modello
             # Calcola la log probability della sequenza e la sua normalizzata
@@ -83,6 +75,7 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
 def compares_deictic_models(models, baseDir, names, plot=False):
+
     # Namefile
     filename = baseDir+'deictic_results.csv'
 
@@ -91,9 +84,8 @@ def compares_deictic_models(models, baseDir, names, plot=False):
 
     # Get all gesture's dataset
     list_dataset = []
-    for name in names:#for model in models:
-        list_dataset.append(CsvDataset(baseDir+name+'/'))#model.name+'/'))
-    #index_file = 0
+    for name in names:
+        list_dataset.append(CsvDataset(baseDir+name+'/'))
 
     # For each gesture's dataset
     for index_dataset in range(0, len(list_dataset)):
@@ -106,13 +98,9 @@ def compares_deictic_models(models, baseDir, names, plot=False):
         # Max probability, index gestureindex model
         max_norm_log_probability = -sys.maxsize
         index_model = -1
-        index_file = 0
 
         # For each sequence
         for sequence in sequences:
-            #print(' ')
-            #index_file = index_file+1
-
             if plot:
                 plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
                 plt.title(list_dataset[index_dataset])
@@ -122,7 +110,7 @@ def compares_deictic_models(models, baseDir, names, plot=False):
                     c = numpy.array(models[i].sample()).astype('float')
                     plt.plot(c[:, 0], c[:, 1], label=models[i].name, marker='.')
 
-                # Calcola la log probability della sequenza e la sua normalizzata
+                # Computes sequence's log-probability and normalized
                 log_probability = models[i].log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
 
@@ -130,62 +118,34 @@ def compares_deictic_models(models, baseDir, names, plot=False):
                 #print('{} - {} log-probability: {}, normalised-log-probability {}'.format(index_file,
                 #    models[i].name, log_probability, norm_log_probability))
 
-                # Determino qual è la gesture con la probabilità più alta
+                # Check which is the best result
                 if(norm_log_probability > max_norm_log_probability):
                     max_norm_log_probability = norm_log_probability
                     index_model = i
 
             # Aggiorno matrice risultati
-            results[index_dataset][index_model] = results[index_dataset][index_model] + 1
+            results[index_dataset][index_model] += 1 #results[index_dataset][index_model] + 1
 
             if plot:
                 plt.show()
 
     # Salva risultati
-    save_confusion_matrix(results, filename, models)
+    save_confusion_matrix(results, filename, names)
     return results
 
-# Salva risultati in un file csv
-def save_confusion_matrix(results, filename, models):
-    sequences = []
+# Saves results into csv file
+def save_confusion_matrix(results, filename, names):
 
     with open(filename,'wb') as file:
-#        np.savetxt(f,x,fmt='%.5f')
-        ### Save results ###
-        i = models[0].name
-        x = [model.name for model in models]
+        with open(filename,'wb') as file:
         # Headers row
-        numpy.savetxt(file, x, delimiter=',', fmt='%s')
+        numpy.savetxt(file, names,  delimiter=',', newline=" ", fmt='%s')
 
         # Data
         for i in range(0, len(results)):
             # Header col
-            #numpy.savetxt(filename, models[i].name, delimiter=',')
+            numpy.savetxt(filename, names[i], delimiter=',', fmt='%s')
             # Results
-            numpy.savetxt(filename, results[i], delimiter=',')
+            numpy.savetxt(filename, str(results[i]), delimiter=',', fmt='%s')
 
-
-
-
-    # Salva headers riga
-    #headers = ["" for x in range(len(models))]
-    #for i in range(0, len(models)):
-    #    headers[i] = models[i].name
-    #numpy.savetxt(baseDir + '/deictic_results.csv', headers, fmt="%s")
-
-    # Salva matrice risultati + header colonna
-    #for i in range(0, len(results)):
-    #    sequences.append(results[i])#numpy.concatenate((headers[i], results[i]), axis=0))
-    # Salva il tutto in un file
-    #if(index != -1):
-    #    numpy.savetxt(baseDir + '/adhoc_hmms.csv_results', sequences, fmt="%d")
-    #else:
-    #    numpy.savetxt(baseDir + '/deictic_results.csv', sequences, fmt="%d")
-
-# Verifica se una certa gesture debba essere valutata o no
-def check_folder_model(folder, models):
-    for model in models:
-        if folder == model.name:
-            return True
-
-    return False
+    # Send email

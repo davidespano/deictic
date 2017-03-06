@@ -1,5 +1,81 @@
 from dataset import *
 from gesture import *
+import random
+
+random.seed()
+def synthetic_dataset_factory(inputBase, outputBase, names, iter):
+    # Get all gesture's dataset
+    list_dataset = []
+    for name in names:
+        list_dataset.append(CsvDataset(inputBase+name+'/'))
+
+    for index in range(0, iter):
+
+        num_rand_1 = int(random.uniform(0, len(list_dataset)-1))#
+        num_rand_2 = int(random.uniform(0, len(list_dataset)-1))#
+        if(num_rand_1 == num_rand_2):#
+            num_rand_2 = (num_rand_2 + 1) % len(list_dataset)-1#
+
+        # Choice
+        #if (operator == Operator.choice):
+        #    operator = 'choice'
+
+        # Iterative
+        operator = 1
+        if (operator == 1):
+            filename = 'iterative_'+names[num_rand_1]
+            if not os.path.exists(outputBase + '/' + filename):
+                os.makedirs(outputBase+'/' + filename)
+            # Crea sequenze
+            MergeIterativeDataset.create_iterative_dataset(list_dataset[num_rand_1], outputBase+'/'+filename+'/'+filename)
+            print('dataset ' + filename + ' created')
+
+        # Disabling : iterative + ground
+        operator = 0
+        if (operator == 0):
+            # Crea sequenze
+            filename = 'disabling_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            if not os.path.exists(outputBase + filename):
+                os.makedirs(outputBase + filename)
+            MergeDisablingDataset.create_disabling_dataset([CsvDataset(outputBase+'iterative_'+names[num_rand_1]+'/'), list_dataset[num_rand_2]],
+                                                           outputBase+filename+'/'+filename)
+            print('dataset ' + filename + ' created')
+
+
+        # Parallel
+        operator = 2
+        if (operator == 2):
+            list = []
+            list.append(list_dataset[num_rand_1])
+            list.append(list_dataset[num_rand_2])
+            filename = 'parallel_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            if not os.path.exists(outputBase + filename):
+                os.makedirs(outputBase + filename)
+            #filename = ''
+            #for i in range(0, int(random.uniform(1, len(list_dataset)))):
+            #    num_rand = int(random.uniform(0, len(list_dataset)-1))
+            #    filename = 'parallel_'+filename + '_' + names[num_rand]
+            #    list.append(list_dataset[num_rand])
+            # Make sequences
+            MergeParallelDataset.create_parallel_dataset(list, outputBase+filename+'/'+filename, flag_trasl=False)
+            print('dataset ' + filename + ' created')
+
+        # Sequence
+        operator = 3
+        if (operator == 3):
+            list = []
+            filename = 'sequence_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            list.append(list_dataset[num_rand_1])
+            list.append(list_dataset[num_rand_2])
+            if not os.path.exists(outputBase + filename):
+                os.makedirs(outputBase + filename)
+            #for i in range(0, int(random.uniform(1, len(list_dataset)))):
+            #    num_rand = int(random.uniform(0, len(list_dataset)-1))
+            #    filename = 'sequence_'+filename + '_' + names[num_rand]
+            #    list.append(list_dataset[num_rand])
+            MergeSequenceDataset.create_sequence_dataset(list, outputBase+filename+'/'+filename)
+            print('dataset ' + filename + ' created')
+
 
 def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 
@@ -31,10 +107,10 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
     return
 
 
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 3
+mode = 5
 n_sample = 40
 
 # Unica
@@ -66,6 +142,21 @@ if mode == 3:
             }#("line", n_sample, 1)
     dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
+# Sinthetic Database 1Dollar
+if mode == 4:
+    list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
+            'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
+            'v', 'x']
+    synthetic_dataset_factory(baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/resampled/',
+                              list, iter=16)#int(random.uniform(0, len(list)-1)))
+
+if mode == 5:
+    # Sinthetic Database MDollar
+    list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
+            'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
+    synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/resampled/',
+                              list, iter=16)#int(random.uniform(1, len(list)-1)))
+
 ## Original
 # Unica
 if mode == 10:
@@ -86,88 +177,6 @@ if mode == 12:
     converter = DollarMConverter()
     converter.order_files(inputDir, inputDir)
     converter.create_deictic_dataset(inputDir, outputDir)
-
-
-# Prove
-if mode == 13:
-    inputDir = baseDir + 'deictic/unica-dataset/raw/left/'
-    outputDir = baseDir + 'deictic/unica-dataset/scaled/left/'
-    dataset = CsvDataset(inputDir)
-    #
-    #transform1 = ScaleDatasetTransform(scale=1)
-    #transform2 = NormaliseLengthTransform(axisMode=False)
-    #transform3 = CenteringTransform()
-    transform1 = ResampleInSpaceTransform()
-    #
-    dataset.addTransform(transform1)
-    #dataset.addTransform(transform2)
-    #dataset.addTransform(transform3)
-    dataset.applyTransforms(outputDir)
-
-    dataset = CsvDataset(outputDir)
-    dataset.plot()
-
-if mode == 14:
-    inputDir = baseDir + 'deictic/unica-dataset/raw/right/'
-    outputDir = baseDir + 'deictic/unica-dataset/resampled/right/'
-    dataset = CsvDataset(inputDir)
-
-    transform1 = ResampleInSpaceTransform()
-
-    dataset.addTransform(transform1)
-    transform2 = NormaliseLengthTransform(axisMode=False)
-    transform3 = CenteringTransform()
-    #dataset.addTransform(transform2)
-    #dataset.addTransform(transform3)
-    dataset.applyTransforms(outputDir)
-
-    dataset = CsvDataset(outputDir)
-    dataset.plot(sampleName='claudio_right.csv')
-
-if mode == 15:
-    inputDir = baseDir + 'deictic/1dollar-dataset/raw/left_curly_brace/'
-    dataset = CsvDataset(inputDir)
-    dataset.plot(singleMode=True)
-
-# Diagonal
-if mode == 16:
-    inputDir = baseDir + '/deictic/unica-dataset/raw/right/'
-    outputDir = baseDir + '/deictic/unica-dataset/scaled/up/'
-    dataset = CsvDataset(inputDir)
-    # Transforms
-    transform1 = ScaleDatasetTransform(scale=1)
-    transform2 = NormaliseLengthTransform(axisMode=False)
-    transform3 = CenteringTransform()
-    trasnform4 = RotateTransform(traslationMode=False, cols=[0,1], theta=90)
-    # Apply transforms
-    dataset.addTransform(transform3)
-    dataset.addTransform(trasnform4)
-    dataset.addTransform(transform2)
-    dataset.applyTransforms(outputDir)
-
-    dataset = CsvDataset(outputDir)
-    dataset.plot()
-
-# Samples
-if mode == 18:
-    inputDir = baseDir + '/deictic/unica-dataset/raw/right/'
-    outputDir = baseDir + '/deictic/unica-dataset/scaled/right/'
-    dataset = CsvDataset(inputDir)
-    # Transforms
-    transform1 = ScaleDatasetTransform(scale=1)
-    transform2 = NormaliseLengthTransform(axisMode=False)
-    transform3 = CenteringTransform()
-    transform4 = Sampling(scale=20)
-    # Apply transforms
-    dataset.addTransform(transform4)
-    dataset.addTransform(transform2)
-    dataset.addTransform(transform3)
-    dataset.applyTransforms(outputDir)
-
-    dataset = CsvDataset(outputDir)
-    dataset.plot()
-
-
 
 
 

@@ -86,7 +86,6 @@ class CsvDataset:
         if not outputDir is None and not os.path.exists(outputDir):
             os.makedirs(outputDir)
         for file in self.getDatasetIterator():
-            #print(file)
             sequence = self.read_file(file)
             sequence = self.compositeTransform.transform(sequence)
             sequences.append(sequence)
