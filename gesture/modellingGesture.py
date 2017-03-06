@@ -1,230 +1,169 @@
-from dataset import *
-from gesture import *
-from topology import *
+from model import *
+
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
+arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
+arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
+testDir = baseDir + "deictic/mdollar-dataset/resampled/"
+
+class GestureFactory:
+    @staticmethod
+    def factory(gesture):
+        factory = ClassifierFactory()
+        factory.setLineSamplesPath(trainingDir)
+        factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+        factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+        factory.states = n_states
+        factory.spu = n_samples
+        model, edges = factory.createClassifier(gesture)
+        return  model
+
+# Take a gesture type and return its complete model
+class OneDollarModels:
+
+    class TypeGesture(Enum):
+        triangle = 0
+        X = 1
+        Rectangle = 2
+        Circle = 3
+        Check = 4
+        Caret = 5
+        QuestionMark = 6
+        LeftSquareBracket = 7
+        RightSquareBracket = 8
+        V = 9
+        Delete = 10
+        LeftCurlyBrace = 11
+        RightCurlyBrace = 12
+        Star = 13
+        Pigtail = 14
+
+    # triangle
+    @staticmethod
+    def triangle():
+        return GestureFactory.factory(Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4))
+    # x
+    @staticmethod
+    def x():
+        return GestureFactory.factory(Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3))
+    # rectangle
+    @staticmethod
+    def rectangle():
+        return GestureFactory.factory(Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0))
+    # circle
+    @staticmethod
+    def circle():
+        return GestureFactory.factory(Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False))
+    # check
+    @staticmethod
+    def check():
+        return GestureFactory.factory(Point(0,0) + Line(2,3) + Line(2,-3))
+    # caret
+    @staticmethod
+    def caret():
+        return GestureFactory.factory(Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3))
+    # question mark
+    @staticmethod
+    def question_mark():
+        return GestureFactory.factory(Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4))
+    # left square bracket
+    @staticmethod
+    def left_square_bracket():
+        return GestureFactory.factory(Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0))
+    # right square bracket
+    @staticmethod
+    def right_square_bracket():
+        return GestureFactory.factory(Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0))
+    # v
+    @staticmethod
+    def v():
+        return GestureFactory.factory(Point(0,0) + Line(2,-3) + Line(2,3))
+    # delete
+    @staticmethod
+    def delete():
+        return GestureFactory.factory(Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3))
+    # left curly brace
+    @staticmethod
+    def left_curly_brace():
+        return GestureFactory.factory(Point(0,0) + Arc(-5,-5, cw=False) + Line(0,-6) + Arc(-3,-3)  + Arc(3,-3) + Line(0,-6) + Arc(5,-5,cw=False))
+    # right curly brace
+    @staticmethod
+    def right_curly_brace():
+        return GestureFactory.factory(Point(0,0) + Arc(5,-5) + Line(0,-6) + Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Line(0,-6) + Arc(-5,-5))
+    # star
+    @staticmethod
+    def star():
+        return GestureFactory.factory(Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3))
+    # pigtail
+    @staticmethod
+    def pigtail():
+        return GestureFactory.factory(Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False))
+
+# Take a gesture type and return its complete model
+class MDollarModels:
+
+    class TypeGesture(Enum):
+        Arrowhead = 0
+        H = 1
+        N = 2
+        I = 3
+        P = 4
+        T = 5
+        SixPointStar = 6
+        D = 7
+        Asterisk = 8
+        ExclamationPoint = 9
+        Null = 10
+        Pitchfork = 11
+        half_note = 12
+        X = 13
+
+    @staticMethod
+    def getModel():
+
+    # arrowhead
+    def arrowhead():
+        return GestureFactory.factory(Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2))
+    # h
+    def h():
+        return GestureFactory.factory(Point(0, 4) + Line(0, -4) + Point(-1, 2) + Line(5, 0) + Point(4, 4) + Line(0, -4))
+    # n
+    def n():
+        return GestureFactory.factory(Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
+    # i
+    def i():
+        return GestureFactory.factory(Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0))
+    # p
+    def p():
+        return GestureFactory.factory(Point(0, 0) + Line(0, -4) + Point(0, 0) + Arc(1, -1, cw=True) + Arc(-1, -1, cw=True))
+    # t
+    def t():
+        return GestureFactory.factory(Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4))
+    # six point star
+    def six_point_star():
+        return GestureFactory.factory(Point(0, 0.5) + Line(2, 2) + Line(2, -2) + Line(-4, 0) + Point(0, 2) + Line(4, 0) + Line(-2, -2) + Line(-2, 2))
+    # d
+    def d():
+        return GestureFactory.factory(Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(2, -2, cw=True) + Point(2, 2) + Arc(-2, -2, cw=True))
+    # asterisk
+    def asterisk():
+        return GestureFactory.factory(Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4))
+    # exclamation_point
+    def exclamation_point():
+        return GestureFactory.factory(Point(0, 20) + Line(0, -19)+ Point(0, 1) + Line(0, -1))
+    # null
+    def null():
+        return GestureFactory.factory(Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) +
+                                      Arc(-3,3, cw=False) + Point(4,1) + Line(-8, -8))
+    # pitchfork
+    def pitchfork():
+        return GestureFactory.factory(Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4))
+    # half note
+    def half_note():
+        return  GestureFactory.factory(Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False))
+    # x
+    def x():
+        return GestureFactory.factory(Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3))
 
 
-## Multistroke
-######### Modelled Gesture #########
-## Arrow
-#
-def create_arrow(primitiveDir, n_states):
-    # Primitive hmms
-    first = primitive_model(primitiveDir, n_states, direction=Primitive.diagonal, theta = 40)
-    second = primitive_model(primitiveDir, n_states, direction=Primitive.diagonal, theta = -160)
-    third = primitive_model(primitiveDir, n_states, direction=Primitive.diagonal, theta= 20)
-    fourth = primitive_model(primitiveDir, n_states, direction=Primitive.diagonal, theta= -110)
 
-    # Translation emission
-    translationDistribution(second, [0, 20])
-    translationDistribution(third, [0, 20])
-    translationDistribution(fourth, [30, 0])
-
-    # Link models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third, fourth])
-    # Model name
-    model.name = 'arrow'
-    return model, seq
-
-
-## Caret
-# diagonal 60° + diagonal -60°
-def create_caret(baseDir, n_states):
-    # Primitive hmms
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = 60)
-    second = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = -60)
-
-    # Translation emission
-    translationDistribution(second, [50, 0])
-
-    # Link models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second])
-    # Model name
-    model.name = 'caret'
-    return model, seq
-
-## Delete
-# diagonal -45° + left + diagonal 45°
-def create_delete(baseDir, n_states):
-    # Primitive hmms
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=-45)
-    second = primitive_model(baseDir, n_states, direction=Primitive.left)
-    third = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=45)
-
-    translationDistribution(second, [0, -50])
-
-    # Link models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
-    # Model name
-    model.name = 'delete_mark'
-    return model, seq
-
-## Rectangle
-# left + right + up + down
-def create_rectangle(baseDir, n_states):
-    # Primitive hmms
-    first = primitive_model(baseDir, n_states, direction=Primitive.down, theta=270)
-    second = primitive_model(baseDir, n_states, direction=Primitive.right)
-    third = primitive_model(baseDir, n_states, direction=Primitive.up, theta=90)
-    fourth = primitive_model(baseDir, n_states, direction=Primitive.left)
-
-    # Fix emission first
-    translationDistribution(first, [-50, 0])
-    translationDistribution(second, [0, -50])
-    translationDistribution(third, [50, 0])
-    translationDistribution(fourth, [0, 50])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third, fourth])
-    # Model name
-    model.name = 'rectangle'
-    return model, seq
-
-## Square Braket Left
-# left + down + right
-def create_square_braket_left(baseDir, n_states):
-    # Primitive hmms
-    first = primitive_model(baseDir, n_states, direction=Primitive.left)
-    second = primitive_model(baseDir, n_states, direction=Primitive.down, theta=270)
-    third = primitive_model(baseDir, n_states, direction=Primitive.right)
-
-    translationDistribution(first, [0, 40])
-    translationDistribution(second, [-40, 0])
-    translationDistribution(third, [0, -40])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
-    # Model name
-    model.name = 'left_sq_bracket'
-    return model, seq
-
-## Square Braket Right
-# right + down + left
-def create_square_braket_right(baseDir, n_states):
-    # Creazione hmm primitive
-    first = primitive_model(baseDir, n_states, direction=Primitive.right)
-    second = primitive_model(baseDir, n_states, direction=Primitive.down, theta=270)
-    third = primitive_model(baseDir, n_states, direction=Primitive.left)
-
-    translationDistribution(first, [0, 40])
-    translationDistribution(second, [40, 0])
-    translationDistribution(third, [0, -40])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
-    # Model name
-    model.name = 'right_sq_bracket'
-    return model, seq
-
-## Star
-# diagonal 60° + diagonal -60° + diagonal 150° + right + diagonal -150°
-def create_star(baseDir, n_states):
-    # Creazione hmm Primitive
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=70)
-    second = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=-70)
-    third = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=150)
-    fourth = primitive_model(baseDir, n_states, direction=Primitive.right)
-    fifth = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta=-150)
-
-    translationDistribution(first, [-20, 0])
-    translationDistribution(second, [20, 0])
-    translationDistribution(third, [10, -20])
-    translationDistribution(fifth, [0, -20])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third, fourth, fifth])
-    # Model name
-    model.name = 'star'
-    return model, seq
-
-## Triangle
-# diagonal -135° + right + diagonal 135°
-def create_triangle(baseDir, n_states):
-    # Creazione hmm Primitive
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = -120)
-    second = primitive_model(baseDir, n_states, direction=Primitive.right)
-    third = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = 120)
-
-    translationDistribution(first, [-30, 0])
-    translationDistribution(second, [0, -40])
-    translationDistribution(third, [30, 0])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
-    # Model name
-    model.name = 'triangle'
-    return model, seq
-
-## V
-# diagonal -60° + diagonal 60°
-def create_v(baseDir, n_states):
-    # Creazione primitive
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = -60)
-    second = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = 60)
-
-    translationDistribution(second, [50, 0])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second])
-    # Model name
-    model.name = 'v'
-    return model, seq
-
-## X
-# diagonal -45° + up + diagonal -135°
-def create_x(baseDir, n_states):
-    # Primitives
-    first = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = -45)
-    second = primitive_model(baseDir, n_states, direction=Primitive.up, theta = 90)
-    third = primitive_model(baseDir, n_states, direction=Primitive.diagonal, theta = -145)
-
-    translationDistribution(second, [50, 0])
-
-    # Links models
-    model, seq = HiddenMarkovModelTopology.sequence([first, second, third])
-    # Model name
-    model.name = 'x'
-    return model, seq
-
-
-## TranslationDistribution
-#
-def translationDistribution2(model, cols=[0,1]):
-    # Translation matrix
-    n = len(cols)+1
-    i,j = numpy.indices(matrix_translantion.shape)
-    matrix_translantion[i == j] = 1
-    matrix_translantion = numpy.zeros((n,n))
-    for i in range(0, len(cols)):
-        matrix_translantion[i, i, len(cols)] = cols[i]
-
-    # Fix emission with translation
-    for i in range(0, len(model.states)):
-        state = model.states[i]
-        if state != model.start and state != model.end:
-            state.distribution = state.distribution * matrix_translantion
-
-    return model
-
-def translationDistribution(model, cols=[0,1]):
-    # Translation matrix
-    n = len(cols)+1
-    matrix_translantion = numpy.zeros((n,n))
-    i,j = numpy.indices(matrix_translantion.shape)
-    matrix_translantion[i == j] = 1
-    for i in range(0, len(cols)):
-        matrix_translantion[i, len(cols)] = cols[i]
-
-    # Fix emission with translation
-    for index in range(0, len(model.states)):
-        state = model.states[index]
-        if state != model.start and state != model.end:
-            emission = state.distribution
-            # Changes x values
-            x = emission.distributions[0].parameters[0] + cols[0]
-            # Changes y values
-            y = emission.distributions[1].parameters[0] + cols[1]
-            # Makes new distribution
-            gaussianX = NormalDistribution(x, emission.distributions[0].parameters[1])
-            gaussianY = NormalDistribution(y, emission.distributions[1].parameters[1])
-            state.distribution = IndependentComponentsDistribution([gaussianX, gaussianY])
-    return model
