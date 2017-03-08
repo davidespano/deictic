@@ -228,7 +228,7 @@ class HiddenMarkovModelTopology :
                              e2.distributions[1].copy()]);
 
                         # creo lo stato parallelo e lo aggiungo alla hmm
-                        s1s2 = State(e1e2, s1.name + ", " + s2.name)
+                        s1s2 = State(e1e2, s1.name + ", " + s2.name + ' {0}{1}'.format(i,j))
                         par.add_state(s1s2)
                         stateMatrix[i].append(s1s2)
 

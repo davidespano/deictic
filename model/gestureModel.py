@@ -58,15 +58,20 @@ class GestureExp:
         self.get_path(pathList, Point(0, 0))
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        codes, verts = zip(*pathList)
-        path = mpath.Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor='None', lw=2)
-        ax.add_patch(patch)
-        x, y = zip(*path.vertices)
-        line, = ax.plot(x, y, 'go-')
+        ax.grid(True)
+        ax.set_xticks(numpy.arange(-50, 50, 1))
+        ax.set_yticks(numpy.arange(-50, 50, 1))
+        #codes, verts = zip(*pathList)
+        #path = mpath.Path(verts, codes)
+        #patch = patches.PathPatch(path, facecolor='None', lw=3)
+        for patch in pathList:
+            ax.add_patch(patch)
+        ax.set_axisbelow(True)
+        #x, y = zip(*path.vertices)
+        #line, = ax.plot(x, y, 'go-')
         plt.axis('equal')
         plt.show()
-        return path
+        #return path
 
     def to_point_sequence(self):
         pointList = list()
@@ -115,7 +120,7 @@ class CompositeExp(GestureExp):
 
 class IterativeExp(GestureExp):
     def __init__(self, exp):
-        self.exp
+        self.exp = exp
 
     def is_composite(self):
         return True;
@@ -143,9 +148,14 @@ class Point(GestureExp):
         return "P({0},{1})".format(str(self.x), str(self.y))
 
     def get_path(self, path, current):
+        path.append(patches.Ellipse(
+            xy=(self.x, self.y),
+            width=0.3, height=0.3, lw=3.0,
+            edgecolor='black', facecolor='black'))
         current.x = self.x
         current.y = self.y
-        return path.append((mpath.Path.MOVETO, (self.x, self.y)))
+        return path
+        #return path.append((mpath.Path.MOVETO, (self.x, self.y)))
 
     def get_points(self, points):
         points.append([self.x, self.y, self])
@@ -160,9 +170,16 @@ class Line(GestureExp):
         return "l({0},{1})".format(str(self.dx), str(self.dy))
 
     def get_path(self, path, current):
+        path.append(patches.FancyArrowPatch(
+            (current.x, current.y),
+            (current.x + self.dx, current.y + self.dy),
+            arrowstyle='-|>',
+            edgecolor='black', facecolor='black', mutation_scale = 20,
+            lw=3.0))
         current.x += self.dx
         current.y += self.dy
-        return path.append((mpath.Path.LINETO, (current.x, current.y)))
+        return path
+        #return path.append((mpath.Path.LINETO, (current.x, current.y)))
 
     def get_points(self, points):
         last = points[-1]
@@ -181,24 +198,44 @@ class Arc(GestureExp):
 
     def get_path(self, path, current):
         if self.cw:
-            if self.dx * self.dy <= 0:
-                current.x += self.dx
-                path.append((mpath.Path.CURVE3, (current.x, current.y)))
-                current.y += self.dy
-            else:
-                current.y += self.dy
-                path.append((mpath.Path.CURVE3, (current.x, current.y)))
-                current.x += self.dx
+            path.append(patches.FancyArrowPatch(
+                (current.x + self.dx, current.y + self.dy),
+                (current.x, current.y),
+                arrowstyle='<|-',
+                edgecolor='black', facecolor='black', mutation_scale=20,
+                lw=3.0,
+                connectionstyle='arc3, rad=0.5'))
+
         else:
-            if self.dx * self.dy <= 0:
-                current.y += self.dy
-                path.append((mpath.Path.CURVE3, (current.x, current.y)))
-                current.x += self.dx
-            else:
-                current.x += self.dx
-                path.append((mpath.Path.CURVE3, (current.x, current.y)))
-                current.y += self.dy
-        return path.append((mpath.Path.CURVE3, (current.x, current.y)))
+            path.append(patches.FancyArrowPatch(
+                (current.x, current.y),
+                (current.x + self.dx, current.y + self.dy),
+                arrowstyle='-|>',
+                edgecolor='black', facecolor='black', mutation_scale=20,
+                lw=3.0,
+                connectionstyle='arc3, rad=0.5'))
+        current.x += self.dx
+        current.y += self.dy
+        return path
+        #if self.cw:
+        #    if self.dx * self.dy <= 0:
+        #        current.x += self.dx
+        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
+        #        current.y += self.dy
+        #    else:
+        #        current.y += self.dy
+        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
+        #        current.x += self.dx
+        #else:
+        #    if self.dx * self.dy <= 0:
+        #        current.y += self.dy
+        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
+        #        current.x += self.dx
+        #    else:
+        #        current.x += self.dx
+        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
+        #        current.y += self.dy
+        #return path.append((mpath.Path.CURVE3, (current.x, current.y)))
 
     def get_points(self, points):
         last = points[-1]

@@ -130,22 +130,22 @@ def compares_deictic_models(models, baseDir, names, plot=False):
                 plt.show()
 
     # Salva risultati
-    save_confusion_matrix(results, filename, names)
+    print(results)
+    #save_confusion_matrix(results, filename, names)
     return results
 
 # Saves results into csv file
 def save_confusion_matrix(results, filename, names):
 
     with open(filename,'wb') as file:
-        with open(filename,'wb') as file:
         # Headers row
-        numpy.savetxt(file, names,  delimiter=',', newline=" ", fmt='%s')
+       # numpy.savetxt(file, names,  delimiter=',', newline=" ", fmt='%s')
 
         # Data
         for i in range(0, len(results)):
             # Header col
-            numpy.savetxt(filename, names[i], delimiter=',', fmt='%s')
+            #numpy.savetxt(filename, names[i], delimiter=',', fmt='%s')
             # Results
-            numpy.savetxt(filename, str(results[i]), delimiter=',', fmt='%s')
+            numpy.savetxt(filename, results[i], delimiter=',')
 
     # Send email

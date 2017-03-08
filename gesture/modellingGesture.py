@@ -1,7 +1,8 @@
 from gesture import *
 from model import *
 
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -114,7 +115,7 @@ class Parse:
                 stack.append(hmm)
 
             # Unary operators
-            elif exp in [exp == HmmFactory.TypeOperator.iterative.name]:
+            elif exp in [HmmFactory.TypeOperator.iterative.name]:
                 # Take operand
                 op1 = stack.pop()
                 # Iterative

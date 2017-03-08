@@ -63,8 +63,8 @@ n_states = 6 # Numero stati
 n_samples = 40
 mode = 2
 
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -120,7 +120,7 @@ if mode == 1:
 ################################################################ DEICTIC COMPOSED HMM ################################################################
 if mode == 2 or mode == 3:
     if mode == 2:
-        gestureDir = baseDir + 'deictic/1dollar-dataset/synthetic/'
+        gestureDir = baseDir + 'deictic/1dollar-dataset/synthetic/prova/'
     else:
         gestureDir = baseDir + 'deictic/mdollar-dataset/synthetic/'
 
@@ -128,9 +128,10 @@ if mode == 2 or mode == 3:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        hmms.append(parse.parse_expression_2(folder))
+        model = parse.parse_expression_2(folder)
+        hmms.append(model)
 
-    compares_deictic_models(hmms, gestureDir, folders, plot=false)
+    compares_deictic_models(hmms, gestureDir, folders, plot=False)
 
 
 

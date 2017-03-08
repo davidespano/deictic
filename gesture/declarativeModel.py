@@ -198,7 +198,7 @@ class ClassifierFactory:
         if isinstance(exp, IterativeExp):
             expType, hmm = self.parseExpression(exp.exp, startPoint)
             operand, seq_edge = self.createHMM(str(exp.exp), expType, hmm)
-            return expType, [(hmm, seq_edge)]
+            return OpEnum.Iterative, [(operand, seq_edge)]
 
         return None
 
@@ -385,7 +385,7 @@ class ClassifierFactory:
             return sequence, seq_edges
 
         if operator == OpEnum.Parallel: # create a parallel gesture
-            parallel = OpEnum[0]
+            parallel = models[0]
 
             for i in range(1, len(models)):
                 parallel, edges = HiddenMarkovModelTopology.parallel(parallel, models[i], edges)

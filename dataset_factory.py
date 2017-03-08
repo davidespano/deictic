@@ -35,16 +35,16 @@ def synthetic_dataset_factory(inputBase, outputBase, names, iter, type='unistrok
             print('dataset ' + filename + ' created')
 
         # Disabling : iterative + ground
-        operator = 0
-        if (operator == 0):
+        #operator = 0
+        #if (operator == 0):
             # Crea sequenze
-            filename = 'disabling-' +type+'-'+ names[num_rand_1] +'-'+type+'-'+ names[num_rand_2]
-            if not os.path.exists(outputBase + filename):
-                os.makedirs(outputBase + filename)
-            MergeDisablingDataset.create_disabling_dataset([CsvDataset(outputBase + 'iterative-' +type+'-'+ names[num_rand_1]+'/'),
-                                                            list_dataset[num_rand_2]],
-                                                           outputBase + filename +'/'+ filename)
-            print('dataset ' + filename + ' created')
+        #    filename = 'disabling-' +type+'-'+ names[num_rand_1] +'-'+type+'-'+ names[num_rand_2]
+        #    if not os.path.exists(outputBase + filename):
+        #        os.makedirs(outputBase + filename)
+        #    MergeDisablingDataset.create_disabling_dataset([CsvDataset(outputBase + 'iterative-' +type+'-'+ names[num_rand_1]+'/'),
+        #                                                    list_dataset[num_rand_2]],
+        #                                                   outputBase + filename +'/'+ filename)
+        #    print('dataset ' + filename + ' created')
 
         # Parallel
         operator = 2
@@ -115,7 +115,7 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
 mode = 5
 n_sample = 40

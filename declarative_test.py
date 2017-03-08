@@ -30,7 +30,7 @@ arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
 testDir = baseDir + "deictic/1dollar-dataset/resampled/"
 
-mode = 4
+mode = 6
 
 if mode == 1:
     for gesture in gesture_models:
@@ -75,3 +75,7 @@ if mode == 5:
     factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
     model, edges = factory.createClassifier(gesture_models[0][0])
     plot_gesture(model)
+
+if mode == 6:
+    for gesture, name in gesture_models:
+        gesture.plot()
