@@ -1,14 +1,24 @@
+from gesture import *
 from model import *
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
-testDir = baseDir + "deictic/mdollar-dataset/resampled/"
 
-class GestureFactory:
+class HmmFactory:
+
+    class TypeOperator(Enum):
+        disabling = 0
+        iterative = 1
+        sequence = 2
+        parallel = 3
+        choice = 4
+        unistroke = 5
+        multistroke = 6
+
     @staticmethod
-    def factory(gesture):
+    def factory(gesture, n_states, n_samples):
         factory = ClassifierFactory()
         factory.setLineSamplesPath(trainingDir)
         factory.setClockwiseArcSamplesPath(arcClockWiseDir)
@@ -18,152 +28,267 @@ class GestureFactory:
         model, edges = factory.createClassifier(gesture)
         return  model
 
+class Parse:
+    def __init__(self, n_states=6, n_samples=40):
+        super()
+        if isinstance(n_states, int):
+            self.n_states = n_states
+        if isinstance(n_samples, int):
+            self.n_samples = n_samples
+
+    def parse_expression(self, expression):
+        # Split expression
+        expression = expression.split('-')
+
+        stack = []
+        for exp in expression:
+            # Binary operators
+            if exp in ['%', '+', '*', '|']:
+                # Create new hmm
+                op1 = stack.pop()
+                op2 = stack.pop()
+                if val == '%':
+                    hmm = HmmFactory.factory(op1 % op2, self.n_states, self.n_samples)
+                elif val == '+':
+                    hmm = HmmFactory.factory(op1 + op2, self.n_states, self.n_samples)
+                elif val == '*':
+                    hmm = HmmFactory.factory(op1 * op2, self.n_states, self.n_samples)
+                elif val == '|':
+                    hmm = HmmFactory.factory(op1 | op2, self.n_states, self.n_samples)
+                # Add new hmm
+                stack.append(hmm)
+
+            # Unary operators
+            elif exp in ['~']:
+                # Take operand
+                op1 = stack.pop()
+                # Iterative
+                if(exp == '~'):
+                    hmm = HmmFactory.factory(~op1, self.n_states, self.n_samples)
+                # Add hmm
+                stack.append(hmm)
+
+            # Expression
+            else:
+                # Take operand
+                op1 = stack.pop()
+                # Take primitive expression
+                if(exp == HmmFactory.TypeOperator.unistroke.name):
+                    exp = OneDollarModels.getModel(op1)
+                elif(exp == HmmFactory.TypeOperator.multistroke.name):
+                    exp = MDollarModels.getModel(op1)
+                else:
+                    stack.append(exp)
+
+                # Add primitive expression
+                stack.append(exp)
+
+        return stack.pop()
+
+    def parse_expression_2(self, expression):
+        # Split expression
+        print(expression)
+        expression = reversed(expression.split('-'))
+
+        stack = []
+        for exp in expression:
+            # Binary operators
+            if exp in [HmmFactory.TypeOperator.disabling.name, HmmFactory.TypeOperator.sequence.name,
+                       HmmFactory.TypeOperator.parallel.name, HmmFactory.TypeOperator.choice.name]:
+                # Take operands
+                op1 = stack.pop()
+                op2 = stack.pop()
+                # Disabling
+                if exp == HmmFactory.TypeOperator.disabling.name:
+                    hmm = HmmFactory.factory(op1 % op2, self.n_states, self.n_samples)
+                # Sequence
+                elif exp == HmmFactory.TypeOperator.sequence.name:
+                    hmm = HmmFactory.factory(op1 + op2, self.n_states, self.n_samples)
+                # Parallel
+                elif exp == HmmFactory.TypeOperator.parallel.name:
+                    hmm = HmmFactory.factory(op1 * op2, self.n_states, self.n_samples)
+                # Choice
+                elif exp == HmmFactory.TypeOperator.choice.name:
+                    hmm = HmmFactory.factory(op1 | op2, self.n_states, self.n_samples)
+                # Add new hmm
+                stack.append(hmm)
+
+            # Unary operators
+            elif exp in [exp == HmmFactory.TypeOperator.iterative.name]:
+                # Take operand
+                op1 = stack.pop()
+                # Iterative
+                if(exp == HmmFactory.TypeOperator.iterative.name):
+                    hmm = HmmFactory.factory(~op1, self.n_states, self.n_samples)
+                # Add hmm
+                stack.append(hmm)
+
+            # Type Expression
+            elif exp in [HmmFactory.TypeOperator.unistroke.name,
+                         HmmFactory.TypeOperator.multistroke.name]:
+                # Take operand
+                op1 = stack.pop()
+                # Take primitive expression
+                if(exp == HmmFactory.TypeOperator.unistroke.name):
+                    primitive = OneDollarModels.getModel(op1)
+                elif(exp == HmmFactory.TypeOperator.multistroke.name):
+                    primitive = MDollarModels.getModel(op1)
+                # Add primitive expression
+                stack.append(primitive)
+            else:
+                # Add exp expression
+                stack.append(exp)
+
+        return stack.pop()
+
+
 # Take a gesture type and return its complete model
 class OneDollarModels:
 
     class TypeGesture(Enum):
         triangle = 0
-        X = 1
-        Rectangle = 2
-        Circle = 3
-        Check = 4
-        Caret = 5
-        QuestionMark = 6
-        LeftSquareBracket = 7
-        RightSquareBracket = 8
-        V = 9
-        Delete = 10
-        LeftCurlyBrace = 11
-        RightCurlyBrace = 12
-        Star = 13
-        Pigtail = 14
+        x = 1
+        rectangle = 2
+        circle = 3
+        check = 4
+        caret = 5
+        question_mark = 6
+        left_sq_bracket = 7
+        right_sq_bracket = 8
+        v = 9
+        delete_mark = 10
+        left_curly_brace = 11
+        right_curly_brace = 12
+        star = 13
+        pigtail = 14
+        arrow = 15
+        zig_zag = 16
 
-    # triangle
     @staticmethod
-    def triangle():
-        return GestureFactory.factory(Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4))
-    # x
-    @staticmethod
-    def x():
-        return GestureFactory.factory(Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3))
-    # rectangle
-    @staticmethod
-    def rectangle():
-        return GestureFactory.factory(Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0))
-    # circle
-    @staticmethod
-    def circle():
-        return GestureFactory.factory(Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False))
-    # check
-    @staticmethod
-    def check():
-        return GestureFactory.factory(Point(0,0) + Line(2,3) + Line(2,-3))
-    # caret
-    @staticmethod
-    def caret():
-        return GestureFactory.factory(Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3))
-    # question mark
-    @staticmethod
-    def question_mark():
-        return GestureFactory.factory(Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4))
-    # left square bracket
-    @staticmethod
-    def left_square_bracket():
-        return GestureFactory.factory(Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0))
-    # right square bracket
-    @staticmethod
-    def right_square_bracket():
-        return GestureFactory.factory(Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0))
-    # v
-    @staticmethod
-    def v():
-        return GestureFactory.factory(Point(0,0) + Line(2,-3) + Line(2,3))
-    # delete
-    @staticmethod
-    def delete():
-        return GestureFactory.factory(Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3))
-    # left curly brace
-    @staticmethod
-    def left_curly_brace():
-        return GestureFactory.factory(Point(0,0) + Arc(-5,-5, cw=False) + Line(0,-6) + Arc(-3,-3)  + Arc(3,-3) + Line(0,-6) + Arc(5,-5,cw=False))
-    # right curly brace
-    @staticmethod
-    def right_curly_brace():
-        return GestureFactory.factory(Point(0,0) + Arc(5,-5) + Line(0,-6) + Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Line(0,-6) + Arc(-5,-5))
-    # star
-    @staticmethod
-    def star():
-        return GestureFactory.factory(Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3))
-    # pigtail
-    @staticmethod
-    def pigtail():
-        return GestureFactory.factory(Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False))
+    def getModel(type_gesture):
+        definition = None
+
+        # triangle
+        if(type_gesture == OneDollarModels.TypeGesture.triangle.name):
+            definition = Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
+        # x
+        if(type_gesture == OneDollarModels.TypeGesture.x.name):
+            definition = Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3)
+        # rectangle
+        if(type_gesture == OneDollarModels.TypeGesture.rectangle.name):
+            definition = Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0)
+        # circle
+        if(type_gesture == OneDollarModels.TypeGesture.circle.name):
+            definition = Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)
+        # check
+        if(type_gesture == OneDollarModels.TypeGesture.check.name):
+            definition = Point(0,0) + Line(2,3) + Line(2,-3)
+        # caret
+        if(type_gesture == OneDollarModels.TypeGesture.caret.name):
+            definition = Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3)
+        # question mark
+        if(type_gesture == OneDollarModels.TypeGesture.question_mark.name):
+            definition = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
+        # left square bracket
+        if(type_gesture == OneDollarModels.TypeGesture.left_sq_bracket.name):
+            definition = Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0)
+        # right square bracket
+        if(type_gesture == OneDollarModels.TypeGesture.right_sq_bracket.name):
+            definition = Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0)
+        # v
+        if(type_gesture == OneDollarModels.TypeGesture.v.name):
+            definition = Point(0,0) + Line(2,-3) + Line(2,3)
+        # delete_mark
+        if(type_gesture == OneDollarModels.TypeGesture.delete_mark.name):
+            definition = Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3)
+        # left curly brace
+        if(type_gesture == OneDollarModels.TypeGesture.left_curly_brace.name):
+            definition = Point(0,0) + Arc(-5,-5, cw=False) + Line(0,-6) + Arc(-3,-3)  + Arc(3,-3) + Line(0,-6) + Arc(5,-5,cw=False)
+        # right curly brace
+        if(type_gesture == OneDollarModels.TypeGesture.right_curly_brace.name):
+            definition = Point(0,0) + Arc(5,-5) + Line(0,-6) + Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Line(0,-6) + Arc(-5,-5)
+        # star
+        if(type_gesture == OneDollarModels.TypeGesture.star.name):
+            definition = Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)
+        # pigtail
+        if(type_gesture == OneDollarModels.TypeGesture.pigtail.name):
+            definition = Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False)
+        # arrow
+        if(type_gesture == OneDollarModels.TypeGesture.arrow.name):
+            definition = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
+        # zig_zag
+        if(type_gesture == OneDollarModels.TypeGesture.zig_zag.name):
+            defition = None
+
+        return definition
 
 # Take a gesture type and return its complete model
 class MDollarModels:
 
     class TypeGesture(Enum):
-        Arrowhead = 0
+        arrowhead = 0
         H = 1
         N = 2
         I = 3
         P = 4
         T = 5
-        SixPointStar = 6
-        D = 7
-        Asterisk = 8
-        ExclamationPoint = 9
-        Null = 10
-        Pitchfork = 11
+        six_point_star = 6
+        d = 7
+        asterisk = 8
+        exclamation_point = 9
+        null = 10
+        pitchfork = 11
         half_note = 12
         X = 13
 
-    @staticMethod
-    def getModel():
+    @staticmethod
+    def getModel(type_gesture):
+        definition = None
+        # arrowhead
+        if(type_gesture == MDollarModels.TypeGesture.arrowhead.name):
+            definition = Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)
+        # h
+        elif(type_gesture == MDollarModels.TypeGesture.h.name):
+            definition = Point(0, 4) + Line(0, -4) + Point(-1, 2) + Line(5, 0) + Point(4, 4) + Line(0, -4)
+        # n
+        elif(type_gesture == MDollarModels.TypeGesture.n.name):
+            definition = Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4)
+        # i
+        elif(type_gesture == MDollarModels.TypeGesture.i.name):
+            definition = Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)
+        # p
+        elif(type_gesture == MDollarModels.TypeGesture.p.name):
+            definition = Point(0, 0) + Line(0, -4) + Point(0, 0) + Arc(1, -1, cw=True) + Arc(-1, -1, cw=True)
+        # t
+        elif(type_gesture == MDollarModels.TypeGesture.t.name):
+            definition = Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4)
+        # six point star
+        elif(type_gesture == MDollarModels.TypeGesture.six_point_star.name):
+            definition = Point(0, 0.5) + Line(2, 2) + Line(2, -2) + Line(-4, 0) + Point(0, 2) + Line(4, 0) + Line(-2, -2) + Line(-2, 2)
+        # d
+        elif(type_gesture == MDollarModels.TypeGesture.d.name):
+            definition = Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(2, -2, cw=True) + Point(2, 2) + Arc(-2, -2, cw=True)
+        # asterisk
+        elif(type_gesture == MDollarModels.TypeGesture.asterisk.name):
+            definition = Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4)
+        # exclamation_point
+        elif(type_gesture == MDollarModels.TypeGesture.exclamation_point.name):
+            definition = Point(0, 20) + Line(0, -19)+ Point(0, 1) + Line(0, -1)
+        # null
+        elif(type_gesture == MDollarModels.TypeGesture.null.name):
+            definition = Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + \
+                         Arc(-3,3, cw=False) + Point(4,1) + Line(-8, -8)
+        # pitchfork
+        elif(type_gesture == MDollarModels.TypeGesture.pitchfork.name):
+            definition = Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4)
+        # half note
+        elif(type_gesture == MDollarModels.TypeGesture.half_note.name):
+            definition = Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False)
+        # x
+        elif(type_gesture == MDollarModels.TypeGesture.x.name):
+            definition = Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3)
 
-    # arrowhead
-    def arrowhead():
-        return GestureFactory.factory(Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2))
-    # h
-    def h():
-        return GestureFactory.factory(Point(0, 4) + Line(0, -4) + Point(-1, 2) + Line(5, 0) + Point(4, 4) + Line(0, -4))
-    # n
-    def n():
-        return GestureFactory.factory(Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
-    # i
-    def i():
-        return GestureFactory.factory(Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0))
-    # p
-    def p():
-        return GestureFactory.factory(Point(0, 0) + Line(0, -4) + Point(0, 0) + Arc(1, -1, cw=True) + Arc(-1, -1, cw=True))
-    # t
-    def t():
-        return GestureFactory.factory(Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4))
-    # six point star
-    def six_point_star():
-        return GestureFactory.factory(Point(0, 0.5) + Line(2, 2) + Line(2, -2) + Line(-4, 0) + Point(0, 2) + Line(4, 0) + Line(-2, -2) + Line(-2, 2))
-    # d
-    def d():
-        return GestureFactory.factory(Point(0, 0) + Line(0, 4) + Point(0, 4) + Arc(2, -2, cw=True) + Point(2, 2) + Arc(-2, -2, cw=True))
-    # asterisk
-    def asterisk():
-        return GestureFactory.factory(Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4))
-    # exclamation_point
-    def exclamation_point():
-        return GestureFactory.factory(Point(0, 20) + Line(0, -19)+ Point(0, 1) + Line(0, -1))
-    # null
-    def null():
-        return GestureFactory.factory(Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) +
-                                      Arc(-3,3, cw=False) + Point(4,1) + Line(-8, -8))
-    # pitchfork
-    def pitchfork():
-        return GestureFactory.factory(Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4))
-    # half note
-    def half_note():
-        return  GestureFactory.factory(Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False))
-    # x
-    def x():
-        return GestureFactory.factory(Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3))
+        return definition
 
 
 

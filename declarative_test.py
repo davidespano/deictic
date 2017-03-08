@@ -10,7 +10,7 @@ gesture_models = [
     (Point(0,0) + Line(2, -2) + Line(4,6), 'check'), # check
     (Point(0,0) + Line(2,3) + Line(2,-3), 'caret'), # caret
     (Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3), 'question_mark'), # question mark
-    (Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4), 'arrow'),
+    (Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4), 'arrow'), # arrow
     (Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0), 'left_sq_bracket'), # left square bracket
     (Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0), 'right_sq_bracket'), # right square bracket
     (Point(0,0) + Line(2,-3) + Line(2,3), 'v'), # V

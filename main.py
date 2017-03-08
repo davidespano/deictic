@@ -61,7 +61,7 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 40
-mode = 0
+mode = 2
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
@@ -110,7 +110,7 @@ if mode == 1:
         ((Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3) + Point(2,4) + Line(0, -4)), 'asterisk'),  # asterisk
         ((Point(0, 20) + Line(0, -19)+ Point(0, 1) + Line(0, -1) ), 'exclamation_point'),  # exclamatoin point
         ((Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False) +
-            Point(4,1) + Line(-8, -8)), 'null'), # Null
+          Point(4,1) + Line(-8, -8)), 'null'), # Null
         ((Point(-2,4)+Arc(2,-2, cw=False) + Point(0,2)+Arc(2,2, cw=False) + Point(0,4)+Line(0,-4)), 'pitchfork'),# pitchfork
         ((Point(0,0)+Line(0,-4) + Point(0,-4)+Arc(-1,-1, cw=False) + Point(-1,-5)+Arc(1,1, cw=False)), 'half_note'),# half note
         ((Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3)), 'X')# X
@@ -118,28 +118,29 @@ if mode == 1:
     results = deictic_test(gestureDir, gesture_models, n_states, plot=False)
 
 ################################################################ DEICTIC COMPOSED HMM ################################################################
-if mode == 2:
-    gestureDir = baseDir + 'deictic/1dollar-dataset/synthetic/'
-    folders = [name for name in os.listdir(gestureDir)]
+if mode == 2 or mode == 3:
+    if mode == 2:
+        gestureDir = baseDir + 'deictic/1dollar-dataset/synthetic/'
+    else:
+        gestureDir = baseDir + 'deictic/mdollar-dataset/synthetic/'
 
+    folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
     hmms = []
+    parse = Parse(n_states, n_samples)
     for folder in folders:
-        items = folder.split('_')# In first position we find the operation type, in the other places the primitives
-        # Creates primitive hmms
-        primitives = []
-        for i in range(1, len(items)):
-            primitives.append()
-        # Creates complete hmm
-        model, seq =
+        hmms.append(parse.parse_expression_2(folder))
+
+    compares_deictic_models(hmms, gestureDir, folders, plot=false)
+
 
 
 ################################################################ ADHOC HMM ################################################################
 ## Adhoc hmm - 1Dollar
 if mode == 4:
     list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
-            ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
-            ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
-            ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
+                    ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
+                    ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
+                    ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
     results = adhoc_test(gestureDir, list_gesture)
 ## Adhoc hmm - MDollar
 if mode == 5:

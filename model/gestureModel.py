@@ -34,7 +34,7 @@ class GestureExp:
     def __or__(self, other):
         return CompositeExp(self, other, OpEnum.Choice)
 
-    def __ior__(self, other):
+    def __mod__(self, other):
         return CompositeExp(self, other, OpEnum.Disabling)
 
     def __invert__(self):

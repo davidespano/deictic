@@ -3,18 +3,21 @@ from gesture import *
 import random
 
 random.seed()
-def synthetic_dataset_factory(inputBase, outputBase, names, iter):
+def synthetic_dataset_factory(inputBase, outputBase, names, iter, type='unistroke'):
     # Get all gesture's dataset
     list_dataset = []
     for name in names:
         list_dataset.append(CsvDataset(inputBase+name+'/'))
 
-    for index in range(0, iter):
+    indices = []
+    for i in range(0, len(list_dataset)):
+        indices.append(i)
 
-        num_rand_1 = int(random.uniform(0, len(list_dataset)-1))#
-        num_rand_2 = int(random.uniform(0, len(list_dataset)-1))#
-        if(num_rand_1 == num_rand_2):#
-            num_rand_2 = (num_rand_2 + 1) % len(list_dataset)-1#
+    for index in range(0, iter):
+        # Get a random index for dataset
+        tmp_indices = deepcopy(indices)
+        num_rand_1 = tmp_indices.pop(int(random.uniform(0, len(tmp_indices)-1)))
+        num_rand_2 = tmp_indices.pop(int(random.uniform(0, len(tmp_indices)-1)))
 
         # Choice
         #if (operator == Operator.choice):
@@ -23,24 +26,25 @@ def synthetic_dataset_factory(inputBase, outputBase, names, iter):
         # Iterative
         operator = 1
         if (operator == 1):
-            filename = 'iterative_'+names[num_rand_1]
-            if not os.path.exists(outputBase + '/' + filename):
-                os.makedirs(outputBase+'/' + filename)
+            filename = 'iterative-' +type+'-'+ names[num_rand_1]
+            if not os.path.exists(outputBase + filename):
+                os.makedirs(outputBase + filename)
             # Crea sequenze
-            MergeIterativeDataset.create_iterative_dataset(list_dataset[num_rand_1], outputBase+'/'+filename+'/'+filename)
+            MergeIterativeDataset.create_iterative_dataset(list_dataset[num_rand_1],
+                                                           outputBase + filename +'/'+ filename)
             print('dataset ' + filename + ' created')
 
         # Disabling : iterative + ground
         operator = 0
         if (operator == 0):
             # Crea sequenze
-            filename = 'disabling_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            filename = 'disabling-' +type+'-'+ names[num_rand_1] +'-'+type+'-'+ names[num_rand_2]
             if not os.path.exists(outputBase + filename):
                 os.makedirs(outputBase + filename)
-            MergeDisablingDataset.create_disabling_dataset([CsvDataset(outputBase+'iterative_'+names[num_rand_1]+'/'), list_dataset[num_rand_2]],
-                                                           outputBase+filename+'/'+filename)
+            MergeDisablingDataset.create_disabling_dataset([CsvDataset(outputBase + 'iterative-' +type+'-'+ names[num_rand_1]+'/'),
+                                                            list_dataset[num_rand_2]],
+                                                           outputBase + filename +'/'+ filename)
             print('dataset ' + filename + ' created')
-
 
         # Parallel
         operator = 2
@@ -48,7 +52,7 @@ def synthetic_dataset_factory(inputBase, outputBase, names, iter):
             list = []
             list.append(list_dataset[num_rand_1])
             list.append(list_dataset[num_rand_2])
-            filename = 'parallel_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            filename = 'parallel-' +type+'-'+ names[num_rand_1] +'-'+type+'-'+ names[num_rand_2]
             if not os.path.exists(outputBase + filename):
                 os.makedirs(outputBase + filename)
             #filename = ''
@@ -57,14 +61,16 @@ def synthetic_dataset_factory(inputBase, outputBase, names, iter):
             #    filename = 'parallel_'+filename + '_' + names[num_rand]
             #    list.append(list_dataset[num_rand])
             # Make sequences
-            MergeParallelDataset.create_parallel_dataset(list, outputBase+filename+'/'+filename, flag_trasl=False)
+            MergeParallelDataset.create_parallel_dataset(list,
+                                                         outputBase + filename +'/'+ filename,
+                                                         flag_trasl=False)
             print('dataset ' + filename + ' created')
 
         # Sequence
         operator = 3
         if (operator == 3):
             list = []
-            filename = 'sequence_'+names[num_rand_1] +'_'+ names[num_rand_2]
+            filename = 'sequence-' +type+'-'+ names[num_rand_1] +'-'+type+'-'+ names[num_rand_2]
             list.append(list_dataset[num_rand_1])
             list.append(list_dataset[num_rand_2])
             if not os.path.exists(outputBase + filename):
@@ -73,7 +79,8 @@ def synthetic_dataset_factory(inputBase, outputBase, names, iter):
             #    num_rand = int(random.uniform(0, len(list_dataset)-1))
             #    filename = 'sequence_'+filename + '_' + names[num_rand]
             #    list.append(list_dataset[num_rand])
-            MergeSequenceDataset.create_sequence_dataset(list, outputBase+filename+'/'+filename)
+            MergeSequenceDataset.create_sequence_dataset(list,
+                                                         outputBase + filename +'/'+ filename)
             print('dataset ' + filename + ' created')
 
 
@@ -113,6 +120,7 @@ baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 mode = 5
 n_sample = 40
 
+########################################## Deictic Dataset ##########################################################
 # Unica
 if mode == 1:
     list = {("rectangle", 4*n_sample), ("triangle", 3*n_sample), ("caret", 2*n_sample), ("v", 2*n_sample), ("x", 3*n_sample),
@@ -128,34 +136,37 @@ if mode == 2:
             ("left_curly_brace", 6*n_sample), ("left_sq_bracket", 3*n_sample), ("pigtail", 4*n_sample), ("question_mark", 4*n_sample),
             ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
             ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)
-            }
+            }#('zig_zag', 5*n_sample)
     dataset_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
 
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
     list = {("arrowhead", n_sample, 2, True), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
-            ("five_point_star", n_sample, 1, True), ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
+            ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
             ("I", n_sample, 3, True), ("N", n_sample, 3, True), ("null", n_sample, 2, True),
             ("P", n_sample, 2, True), ("pitchfork", n_sample, 2, True), ("six_point_star", n_sample, 2, True),
             ("T", n_sample, 2, True), ("X", n_sample, 2, True)
-            }#("line", n_sample, 1)
+            }#("line", n_sample, 1), ("five_point_star", n_sample, 1, True),
     dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
+########################################## Synthetic Dataset ##########################################################
 # Sinthetic Database 1Dollar
 if mode == 4:
     list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
             'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
             'v', 'x']
-    synthetic_dataset_factory(baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/resampled/',
-                              list, iter=16)#int(random.uniform(0, len(list)-1)))
+    synthetic_dataset_factory(baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/synthetic/',
+                              list, iter=16, type='unistroke')#int(random.uniform(0, len(list)-1)))
 
 if mode == 5:
     # Sinthetic Database MDollar
     list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
             'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
-    synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/resampled/',
-                              list, iter=16)#int(random.uniform(1, len(list)-1)))
+    synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
+                              list, iter=16, type='multistroke')#int(random.uniform(1, len(list)-1)))
+
+
 
 ## Original
 # Unica
