@@ -203,16 +203,18 @@ class ClassifierFactory:
         return None
 
     def addStrokeIdDistribution(self, hmm):
-        #print(hmm)
-        step = 0.5 / len(hmm.states) +1
 
-        for i in range(0, len(hmm.states)):
-            state = hmm.states[i]
-            if not state.distribution is None:
-                x = state.distribution.distributions[0]
-                y = state.distribution.distributions[1]
-                s = NormalDistribution(self.stroke + 1.0, (i +1) * step)
-                state.distribution = IndependentComponentsDistribution([x, y, s], weights = [1,1, 1000])
+        if len(self.strokeList) > 1:
+
+            step = 0.5 / len(hmm.states) +1
+
+            for i in range(0, len(hmm.states)):
+                state = hmm.states[i]
+                if not state.distribution is None:
+                    x = state.distribution.distributions[0]
+                    y = state.distribution.distributions[1]
+                    s = NormalDistribution(self.stroke + 1.0, (i +1) * step)
+                    state.distribution = IndependentComponentsDistribution([x, y, s], weights = [1,1, 1000])
 
 
 
