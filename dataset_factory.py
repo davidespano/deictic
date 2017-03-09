@@ -2,8 +2,19 @@ from dataset import *
 from gesture import *
 import random
 
-random.seed()
+def ten_cross_validation_factory(list, inputBase, outputBase, iterations = 10):
+    for index in range(1, iterations+1):
+        for name in list:
+            dataset = CsvDataset(inputBase+name)
+            # Creates the folder for the index iteration
+            if not os.path.exists(outputBase + '{}/'.format(index)+name):
+                os.makedirs(outputBase + '{}/'.format(index)+name)
+            # Creates test and training list
+            dataset.ten_cross_validation(outputBase+'{}/'.format(index)+name+'/')
+
 def synthetic_dataset_factory(inputBase, outputBase, names, iter, type='unistroke'):
+    random.seed()
+
     # Get all gesture's dataset
     list_dataset = []
     for name in names:
@@ -92,17 +103,16 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         dataset = CsvDataset(input_dir)
 
         # Transform
-        if unistroke_mode:
-            transform1 = NormaliseLengthTransform(axisMode=True)
-        else:
-            transform1 = NormaliseLengthTransform(axisMode=gesture[3])
+        transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         #transform4 = RotateCenterTransform(traslationMode=True)
+
         if unistroke_mode:
             transform5 = ResampleInSpaceTransform(samples=gesture[1])
         else:
             transform5 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes = gesture[2])
+
         # Apply transforms
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
@@ -111,13 +121,14 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
+        print('dataset '+gesture[0]+' created')
     return
 
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 
-mode = 5
+mode = 6
 n_sample = 40
 
 ########################################## Deictic Dataset ##########################################################
@@ -137,21 +148,21 @@ if mode == 2:
             ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
             ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)
             }#('zig_zag', 5*n_sample)
-    dataset_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
+    dataset_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/', unistroke_mode=True)
 
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
-    list = {("arrowhead", n_sample, 2, True), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
-            ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
-            ("I", n_sample, 3, True), ("N", n_sample, 3, True), ("null", n_sample, 2, True),
-            ("P", n_sample, 2, True), ("pitchfork", n_sample, 2, True), ("six_point_star", n_sample, 2, True),
-            ("T", n_sample, 2, True), ("X", n_sample, 2, True)
+    list = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3), ("D", n_sample, 2), ("exclamation_point", n_sample, 2),
+            ("H", n_sample, 3), ("half_note", n_sample, 2),
+            ("I", n_sample, 3), ("N", n_sample, 3), ("null", n_sample, 2),
+            ("P", n_sample, 2), ("pitchfork", n_sample, 2), ("six_point_star", n_sample, 2),
+            ("T", n_sample, 2), ("X", n_sample, 2)
             }#("line", n_sample, 1), ("five_point_star", n_sample, 1, True),
     dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
 ########################################## Synthetic Dataset ##########################################################
-# Sinthetic Database 1Dollar
+# Synthetic Database 1Dollar
 if mode == 4:
     list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
             'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
@@ -159,13 +170,25 @@ if mode == 4:
     synthetic_dataset_factory(baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/synthetic/',
                               list, iter=16, type='unistroke')#int(random.uniform(0, len(list)-1)))
 
+# Synthetic Database MDollar
 if mode == 5:
-    # Sinthetic Database MDollar
     list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
             'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
     synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
                               list, iter=16, type='multistroke')#int(random.uniform(1, len(list)-1)))
 
+########################################## Ten-Cross-Validation Dataset ##########################################################
+# Ten-Cross-Validation 1Dollar
+if mode == 6:
+    list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
+            'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
+            'v', 'x']
+    ten_cross_validation_factory(list, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
+# Ten-Cross-Validation MDollar
+if mode == 7:
+    list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
+            'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
+    ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
 
 
 ## Original

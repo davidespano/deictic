@@ -9,6 +9,8 @@ import csv
 import numpy
 import matplotlib.pyplot as plt
 import os
+from random import randint
+from shutil import copyfile
 
 
 class DatasetIterator:
@@ -78,6 +80,15 @@ class CsvDataset:
             result = numpy.array(vals).astype('float')
             return result
 
+    def read_ten_cross_validation_dataset(self, inputDir, type):
+        files = open(inputDir+type+'_ten-cross-validation.txt').readlines()
+        files = files[0].split('/')
+        sequences = []
+        for filename in files:
+            seq = self.read_file(filename);
+            sequences.append(seq)
+        return  sequences
+
     def addTransform(self, transform):
         self.compositeTransform.addTranform(transform)
 
@@ -94,6 +105,29 @@ class CsvDataset:
 
         return sequences
 
+    def ten_cross_validation(self, outputDir):
+        """ Selects the tenth part of the files in the dataset as test and uses the other ones for training
+
+        Parameters
+        ----------
+        outputDir: str
+            path where the list of files will be save
+        """
+        # Take all files
+        training_dataset = self.getDatasetIterator().filenames
+        # Test files number (the tenth part of the files in the dataset)
+        length = int(len(training_dataset)/10)
+
+        testing_dataset = []
+        for i in range(0, length):
+            index_for_testing = randint(0, len(training_dataset)-1)
+            testing_dataset.append(training_dataset.pop(index_for_testing))
+
+        # Save test and training files in csv file
+        with open(outputDir+'train_ten-cross-validation.txt', mode='wt', encoding='utf-8') as myfile:
+            myfile.write('/'.join(training_dataset))
+        with open(outputDir+'test_ten-cross-validation.txt', mode='wt', encoding='utf-8') as myfile:
+            myfile.write('/'.join(testing_dataset))
 
     def leave_one_out(self, conditionFilename=None, leave_index = -1):
         """ Selects one of the files in the dataset as test and uses the other ones for training
