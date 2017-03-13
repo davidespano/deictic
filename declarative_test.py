@@ -79,3 +79,11 @@ if mode == 5:
 if mode == 6:
     for gesture, name in gesture_models:
         gesture.plot()
+
+if mode == 7:
+    #fork = Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False) + Point(0, 4) + Line(0, -4)
+    #fork.plot()
+
+    dataset = CsvDataset(testDir + "pitchfork/")
+    dataset.plot(count=5)
+

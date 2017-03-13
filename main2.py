@@ -61,7 +61,7 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 40
-mode = 2
+mode = 1
 
 baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 #baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
