@@ -6,12 +6,12 @@ from test import *
 
 # Main
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-n_states = 2 # Numero stati
+n_states = 6 # Numero stati
 n_samples = 40
 mode = 6
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -80,11 +80,11 @@ if mode in [4,5]:
 if mode in [6, 7]:
     ## Adhoc hmm - 1Dollar
     if mode == 6:
-        #list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
-        #            ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
-        #            ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
-        #            ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
-        list_gesture = [("caret", n_states*2), ("v", n_states*2)]
+        list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
+                    ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
+                    ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
+                    ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
+        #list_gesture = [("caret", n_states*2), ("v", n_states*2)]
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
     ## Adhoc hmm - MDollar
@@ -114,7 +114,7 @@ if mode in [6, 7]:
             hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1]))
 
         t = test(hmms, gestureDir, gestures, plot=False, results=results)
-        results = t.ten_cross_validation(list_filesDir, iterations=1)
+        results = t.ten_cross_validation(list_filesDir, iterations=10)
         print(results)
 
 

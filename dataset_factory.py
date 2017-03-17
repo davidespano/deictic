@@ -3,6 +3,18 @@ from gesture import *
 import random
 
 random.seed()
+
+def ten_cross_validation_factory(list, inputBase, outputBase, iterations = 10):
+    for index in range(1, iterations+1):
+        for name in list:
+            dataset = CsvDataset(inputBase+name)
+            # Creates the folder for the index iteration
+            if not os.path.exists(outputBase + '{}/'.format(index)+name):
+                os.makedirs(outputBase + '{}/'.format(index)+name)
+            # Creates test and training list
+            dataset.ten_cross_validation(outputBase+'{}/'.format(index)+name+'/')
+
+
 def synthetic_dataset_factory(inputBase, outputBase, names, iter, type='unistroke'):
     # Get all gesture's dataset
     list_dataset = []
@@ -115,10 +127,10 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 5
-n_sample = 40
+mode = 2
+n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
 # Unica
@@ -165,6 +177,18 @@ if mode == 5:
             'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
     synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
                               list, iter=16, type='multistroke')#int(random.uniform(1, len(list)-1)))
+########################################## Ten-Cross-Validation Dataset ##########################################################
+# Ten-Cross-Validation 1Dollar
+if mode == 6:
+    list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
+            'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
+            'v', 'x']
+    ten_cross_validation_factory(list, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
+    # Ten-Cross-Validation MDollar
+if mode == 7:
+    list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
+            'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
+    ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
 
 
 

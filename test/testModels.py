@@ -83,26 +83,36 @@ def compares_deictic_models(models, baseDir, names, plot=False):
         print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
 
         # Get all sequence files
-        sequences = list_dataset[index_dataset].read_dataset()
+        sequences = list_dataset[index_dataset].read_dataset(d=True)
 
         # Max probability, index gestureindex model
         max_norm_log_probability = -sys.maxsize
         index_model = -1
 
         # For each sequence
+        j = 0
         for sequence in sequences:
+            # Max probability, index gestureindex model
+            max_norm_log_probability = -sys.maxsize
+            index_model = -1
             # for each model
             for i in range(0, len(models)):
 
                 # Computes sequence's log-probability and normalized
                 log_probability = models[i].log_probability(sequence)
-                norm_log_probability = log_probability / len(sequence)
+                norm_log_probability = log_probability #/ len(sequence)
 
                 # Check which is the best result
                 if(norm_log_probability > max_norm_log_probability):
+
+                   # print("change index: old {0} (p={1}); new {2} (p={3})".format(
+                   #     index_model, max_norm_log_probability, i, norm_log_probability))
                     max_norm_log_probability = norm_log_probability
                     index_model = i
 
+            if index_model != index_dataset:
+                print("file {0} not recognized".format(j))
+            j +=1
             # Aggiorno matrice risultati
             results[index_dataset][index_model] += 1 #results[index_dataset][index_model] + 1
 

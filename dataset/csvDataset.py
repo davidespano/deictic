@@ -45,7 +45,7 @@ class CsvDataset:
         """ Returns an iterator on all csv files in a dataset """
         return DatasetIterator(self.dir)
 
-    def read_dataset(self):
+    def read_dataset(self, d=False):
         """ Returns a list of sequences, containing the samples in each file of the dataset"
 
         Returns
@@ -55,9 +55,13 @@ class CsvDataset:
 
         """
         sequences = [];
+        i = 0
         for filename in self.getDatasetIterator():
             seq = self.read_file(filename);
             sequences.append(seq)
+            if d:
+                print("{0}: file {1}".format(i, filename))
+            i += 1
         return sequences;
 
     def read_file(self, filename):
