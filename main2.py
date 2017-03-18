@@ -117,30 +117,22 @@ if mode == 1:
         ],
 
         'D': [
-            #Point(0, 0) + Line(0, 6) + Point(0, 0) + Line(2, 0) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Line(-2, 0),
             Point(0, 0) + Line(0, 6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2,0),
-            #Point(0, 6) + Line(0, -6) + Point(0, 0) + Line(2, 0) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Line(-2, 0),
             Point(0, 6) + Line(0, -6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2,0),
-            #Point(0, 0) + Line(2, 0) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Line(-2, 0) + Point(0, 0) + Line(0, 6),
-            #Point(0, 0) + Line(2, 0) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Line(-2, 0) + Point(0, 6) + Line(0, -6),
             Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 6),
             Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 6) + Line(0, -6)
         ],
 
         'P': [
-            #Point(0, 0) + Line(0, 8) + Point(0, 4) + Line(2, 0) + Arc(2, 2, cw=False) + Arc(-2, 2, cw=False) + Line(-2, 0),
             Point(0, 0) + Line(0, 8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-            #Point(0, 8) + Line(0, -8) + Point(0, 4) + Line(2, 0) + Arc(2, 2, cw=False) + Arc(-2, 2, cw=False) + Line(-2, 0),
             Point(0, 8) + Line(0, -8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-            #Point(0, 4) + Line(2, 0) + Arc(2, 2, cw=False) + Arc(-2, 2, cw=False) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
-            #Point(0, 4) + Line(2, 0) + Arc(2, 2, cw=False) + Arc(-2, 2, cw=False) + Line(-2, 0) + Point(0, 0) + Line(0, 8),
             Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
             Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 8)
         ],
 
         'X': [
             #(Point(0, 0) + Line(4, 4) + Point(4, 0) + Line(-4, 4)), NO
-            #(Point(0, 0) + Line(4, 4) + Point(0, 4) + Line(4, -4)), 33
+            (Point(0, 0) + Line(4, 4) + Point(0, 4) + Line(4, -4)), #33
             #(Point(4, 4) + Line(-4, -4) + Point(4, 0) + Line(-4, 4)), NO
             (Point(4, 4) + Line(-4, -4) + Point(0, 4) + Line(4, -4)), #174
             #(Point(4, 0) + Line(-4, 4) + Point(0, 0) + Line(4, 4)), # NO
@@ -169,9 +161,7 @@ if mode == 1:
 
         'null' : [
             (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(4, 1) + Line(-8, -8)), #410
-            #(Point(4, 1) + Line(-8, -8) + Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False)), #NO
             (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(-4, -7) + Line(8, 8)), #118
-            #(Point(-4, -7) + Line(8, 8) + Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False)), #4
         ],
 
         'arrowhead' : [
