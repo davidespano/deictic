@@ -155,7 +155,6 @@ class Point(GestureExp):
         current.x = self.x
         current.y = self.y
         return path
-        #return path.append((mpath.Path.MOVETO, (self.x, self.y)))
 
     def get_points(self, points):
         points.append([self.x, self.y, self])
@@ -179,7 +178,6 @@ class Line(GestureExp):
         current.x += self.dx
         current.y += self.dy
         return path
-        #return path.append((mpath.Path.LINETO, (current.x, current.y)))
 
     def get_points(self, points):
         last = points[-1]
@@ -217,25 +215,6 @@ class Arc(GestureExp):
         current.x += self.dx
         current.y += self.dy
         return path
-        #if self.cw:
-        #    if self.dx * self.dy <= 0:
-        #        current.x += self.dx
-        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
-        #        current.y += self.dy
-        #    else:
-        #        current.y += self.dy
-        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
-        #        current.x += self.dx
-        #else:
-        #    if self.dx * self.dy <= 0:
-        #        current.y += self.dy
-        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
-        #        current.x += self.dx
-        #    else:
-        #        current.x += self.dx
-        #        path.append((mpath.Path.CURVE3, (current.x, current.y)))
-        #        current.y += self.dy
-        #return path.append((mpath.Path.CURVE3, (current.x, current.y)))
 
     def get_points(self, points):
         last = points[-1]

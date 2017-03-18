@@ -83,7 +83,7 @@ def compares_deictic_models(models, baseDir, names, plot=False):
         print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
 
         # Get all sequence files
-        sequences = list_dataset[index_dataset].read_dataset(d=True)
+        sequences = list_dataset[index_dataset].read_dataset(d=False)
 
         # Max probability, index gestureindex model
         max_norm_log_probability = -sys.maxsize
@@ -100,7 +100,9 @@ def compares_deictic_models(models, baseDir, names, plot=False):
 
                 # Computes sequence's log-probability and normalized
                 log_probability = models[i].log_probability(sequence)
-                norm_log_probability = log_probability #/ len(sequence)
+                norm_log_probability = log_probability / len(sequence)
+
+                #print("file {0}: {1}".format( j,  norm_log_probability))
 
                 # Check which is the best result
                 if(norm_log_probability > max_norm_log_probability):
@@ -110,15 +112,65 @@ def compares_deictic_models(models, baseDir, names, plot=False):
                     max_norm_log_probability = norm_log_probability
                     index_model = i
 
-            if index_model != index_dataset:
-                print("file {0} not recognized".format(j))
+            #if index_model != index_dataset:
+            #    print("file {0} not recognized".format(j))
             j +=1
             # Aggiorno matrice risultati
             results[index_dataset][index_model] += 1 #results[index_dataset][index_model] + 1
 
     return results
 
+def compares_deictic_models2(groups, baseDir,  plot=False):
+    filename = baseDir + 'deictic_results.csv'
 
+    # Confusion Matrix (n * n, where n is the number of models)
+    results = numpy.zeros((len(groups.keys()), len(groups.keys())), dtype=numpy.int)
+
+    # Get all gesture's dataset
+    list_dataset = []
+    for name in groups.keys():
+        list_dataset.append(CsvDataset(baseDir + name + '/'))
+
+    # For each gesture's dataset
+    for index_dataset in range(0, len(list_dataset)):
+        print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
+        # Get all sequence files
+        sequences = list_dataset[index_dataset].read_dataset(d=False)
+
+        # For each sequence
+        j = 0
+        for sequence in sequences:
+            # Max probability, index gestureindex model
+            max_norm_log_probability = -sys.maxsize
+            index_model = -1
+            # for each group
+
+            i = 0
+            for k in groups.keys():
+                group = groups[k]
+
+                max_group = -sys.maxsize
+
+                for model in group:
+                    log_probability = model.log_probability(sequence)
+                    norm_log_probability = log_probability / len(sequence)
+
+                    if(norm_log_probability > max_group):
+                        max_group = norm_log_probability
+
+                if (max_group > max_norm_log_probability):
+                    # print("change index: old {0} (p={1}); new {2} (p={3})".format(
+                    #     index_model, max_norm_log_probability, i, norm_log_probability))
+                    max_norm_log_probability = max_group
+                    index_model = i
+                i += 1
+            #if index_model != index_dataset:
+            #    print("file {0} not recognized".format(j))
+            j += 1
+            # Aggiorno matrice risultati
+            results[index_dataset][index_model] += 1  # results[index_dataset][index_model] + 1
+
+    return results
 
 ## Compare deictic model
 class test:

@@ -181,6 +181,7 @@ class CsvDataset:
                     if dimensions == 3:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
                     else:
+
                         fig, ax = plt.subplots()
                         ax.scatter(result[:,0], result[:,1])
                         for i in range(0, len(result)):
@@ -189,7 +190,6 @@ class CsvDataset:
                         plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
 
                     if singleMode:
-
                         plt.show()
         if dimensions == 3:
             ax.legend()

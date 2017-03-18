@@ -85,6 +85,7 @@ class ClassifierFactory:
             if d:
                 self.debugPlot(samples, exp)
             hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
 
             self.addStrokeIdDistribution(hmm)
 
@@ -190,6 +191,10 @@ class ClassifierFactory:
                 for el in hmmRight:
                     hmmLeft.append(el)
                 return expType, hmmLeft
+            elif expTypeLeft == expType:
+                rightOperand, seq_edge_right = self.createHMM(str(exp.right), expTypeRight, hmmRight)
+                hmmLeft.append((rightOperand, seq_edge_right))
+                return expType, hmmLeft
             else:
                 leftOperand, seq_edge_left = self.createHMM(str(exp.left), expTypeLeft, hmmLeft)
                 rightOperand, seq_edge_right = self.createHMM(str(exp.right), expTypeRight, hmmRight)
@@ -213,8 +218,9 @@ class ClassifierFactory:
                 if not state.distribution is None:
                     x = state.distribution.distributions[0]
                     y = state.distribution.distributions[1]
-                    s = NormalDistribution(self.stroke + 1.0, (i +1) * step)
-                    state.distribution = IndependentComponentsDistribution([x, y, s], weights = [1,1, 1000])
+                    #s = NormalDistribution(self.stroke + 1.0, (i +1 ) * step)
+                    s = NormalDistribution(self.stroke + 1.0, 0.01)
+                    state.distribution = IndependentComponentsDistribution([x, y, s], weights = [1,1, 10000])
 
 
 
