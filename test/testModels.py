@@ -222,12 +222,14 @@ class test:
         return self.results
 
     def compares_models(self, sequences, index_dataset):
-        # Max probability, index gestureindex model
-        max_norm_log_probability = -sys.maxsize
-        index_model = -1
+
 
         # For each sequence
         for sequence in sequences:
+            # Max probability, index gestureindex model
+            max_norm_log_probability = -sys.maxsize
+            index_model = -1
+
             if self.plot:
                 plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
                 plt.title(list_dataset[index_dataset])
