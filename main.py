@@ -8,10 +8,10 @@ from test import *
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 40
-mode = 6
+mode = 0
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -20,14 +20,20 @@ arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWi
 if mode in [0, 1]:
     if mode == 0:
         # 1Dollar
+        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
+                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
+                   'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         type = 'unistroke-'
     else:
         # MDollar
+        folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
+                   'asterisk', 'exclamation_point', 'half_note', 'null', 'pitchfork',
+                   'six_point_star']
+        folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         type = 'multistroke-'
 
-    folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
@@ -57,15 +63,20 @@ if mode in [2,3]:
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
 if mode in [4,5]:
     if mode == 4:
+        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
+                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
+                   'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
         type = 'unistroke-'
     else:
+        folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
+                   'asterisk', 'exclamation_point', 'half_note', 'null', 'pitchfork',
+                   'six_point_star']
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation'
         type = 'multistroke-'
 
-    folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:

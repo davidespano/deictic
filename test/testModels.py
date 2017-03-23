@@ -7,22 +7,6 @@ import numpy
 import sys
 from gesture import *
 
-def compare_models_test(model_1, model_2, dir, dimensions = 2):
-    dataset = DatasetIterator(dir)
-
-    for filename in dataset.getCsvDataset():
-        sequence = dataset.read_file(filename, dimensions, scale=100)
-        print(model_1.name +' - {} log-probability: {}, normalised-log-probability {}'.format(
-            filename, model_1.log_probability(sequence),
-            model_1.log_probability(sequence) / len(sequence)
-        ))
-        print(model_2.name + ' - {} log-probability: {}, normalised-log-probability {}'.format(
-            filename, model_2.log_probability(sequence),
-            model_2.log_probability(sequence) / len(sequence)
-        ))
-        print()
-
-
 ## Compare adhoc HMM
 #
 def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2):
@@ -84,10 +68,6 @@ def compares_deictic_models(models, baseDir, names, plot=False):
 
         # Get all sequence files
         sequences = list_dataset[index_dataset].read_dataset(d=False)
-
-        # Max probability, index gestureindex model
-        max_norm_log_probability = -sys.maxsize
-        index_model = -1
 
         # For each sequence
         j = 0
@@ -205,7 +185,6 @@ class test:
             # Compares models
             self.compares_models(sequences, index_dataset)
 
-        print(self.gesture_names)
         return self.results
 
     def ten_cross_validation(self, list_filesDir, iterations=10):
@@ -223,9 +202,9 @@ class test:
 
     def compares_models(self, sequences, index_dataset):
 
-
         # For each sequence
         for sequence in sequences:
+
             # Max probability, index gestureindex model
             max_norm_log_probability = -sys.maxsize
             index_model = -1
@@ -233,6 +212,7 @@ class test:
             if self.plot:
                 plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
                 plt.title(list_dataset[index_dataset])
+
             # for each model
             for i in range(0, len(self.models)):
                 if self.plot:
@@ -267,4 +247,25 @@ class test:
         # Results
         numpy.savetxt(self.filename, self.results, delimiter=',')
 
-        # Send email
+        size = len(self.gesture_names)+1
+        # Char matrix for results
+        results_string = []
+        # Headers
+        headers = []
+        headers.append('models')
+        for i in range(1,size):
+            headers.append(self.gesture_names[i-1])
+        results_string.append(headers)
+        # Values
+        for i in range(0, size-1):
+            new_row = []
+            new_row.append(self.gesture_names[i-1])
+            for j in range(0,size-1):
+                new_row.append(str(self.results[i,j]))
+            results_string.append(new_row)
+
+        with open('matrix_confusion.csv', 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            for row in results_string:
+                spamwriter.writerow(row)

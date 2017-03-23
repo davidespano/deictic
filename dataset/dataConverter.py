@@ -85,4 +85,4 @@ class DollarMConverter:
         for name in sub:
             if not os.path.exists(outputBase + '/' + name):
                 os.makedirs(outputBase+'/'+name)
-            Dollar1Converter.xml_to_csv(self, inputBase + '/' + name, outputBase + '/' + name, xsltPath)
+            Dollar1Converter.xml_to_csv(self, inputBase +'/'+ name, outputBase +'/'+ name +'/', xsltPath)
