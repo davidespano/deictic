@@ -94,7 +94,6 @@ class Parse:
 
         return stack.pop()
 
-
 # Take a gesture type and return its complete model
 class OneDollarModels:
 
@@ -242,6 +241,4 @@ class MDollarModels:
             definition = Point(4,3) + Line(-4,-3) + Point(0,3) + Line (4,-3)
 
         return definition
-
-
 

@@ -111,21 +111,23 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
         dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
+
+        print("Dataset "+gesture[0]+" completed")
     return
 
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 3
+mode = 1
 n_sample = 40
 
 ########################################## Deictic Dataset ##########################################################
 # Unica
 if mode == 1:
     list = {("rectangle", 4*n_sample), ("triangle", 3*n_sample), ("caret", 2*n_sample), ("v", 2*n_sample), ("x", 3*n_sample),
-            ("square-braket-left", 3*n_sample), ("square-braket-right", 3*n_sample), ("delete", 3*n_sample),
-            ("star", 5*n_sample)
+            ("left_sq_bracket", 3*n_sample), ("right_sq_bracket", 3*n_sample), ("delete_mark", 3*n_sample),
+            ("star", 5*n_sample), ('check', 2*n_sample)
             }#, ("left", n_sample), ("right", n_sample)
     dataset_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
 
@@ -142,7 +144,7 @@ if mode == 2:
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
-    list = {("arrowhead", n_sample, 2, True), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
+    list = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
             ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
             ("I", n_sample, 3, True), ("N", n_sample, 3, True), ("null", n_sample, 2, True),
             ("P", n_sample, 2, True), ("pitchfork", n_sample, 2, True), ("six_point_star", n_sample, 2, True),

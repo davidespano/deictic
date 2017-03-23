@@ -8,25 +8,30 @@ from test import *
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 40
-mode = 0
+mode = -1
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
 
 ################################################################ DEICTIC HMM ################################################################
-if mode in [0, 1]:
-    if mode == 0:
-        # 1Dollar
+if mode in [-1, 0, 1]:
+    # Unica
+    if mode == -1:
+        folders = ['caret', 'check', 'delete_mark', 'left_sq_bracket', 'right_sq_bracket',
+                   'star', 'triangle', 'v', 'x']
+        gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
+        type = 'unistroke-'
+    # 1Dollar
+    elif mode == 0:
         folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
                    'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
                    'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         type = 'unistroke-'
+    # MDollar
     else:
-        # MDollar
         folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
                    'asterisk', 'exclamation_point', 'half_note', 'null', 'pitchfork',
                    'six_point_star']
@@ -37,6 +42,7 @@ if mode in [0, 1]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
+        print(folder)
         model = parse.parse_expression(type+folder)
         hmms.append(model)
 

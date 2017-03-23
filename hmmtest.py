@@ -277,11 +277,11 @@ def test_leap(baseDir, n_states, typeTest):
     print('X')
     wrong_test(model, baseDir + 'down-trajectory/x/')
     print('Square Bracket Left')
-    wrong_test(model, baseDir + 'down-trajectory/square-braket-left/')
+    wrong_test(model, baseDir + 'down-trajectory/left_sq_bracket/')
     print('Square Bracket Right')
-    wrong_test(model, baseDir + 'down-trajectory/square-braket-right/')
+    wrong_test(model, baseDir + 'down-trajectory/right_sq_bracket/')
     print('Delete')
-    wrong_test(model, baseDir + 'down-trajectory/delete/')
+    wrong_test(model, baseDir + 'down-trajectory/delete_mark/')
     print('Star')
     wrong_test(model, baseDir + 'down-trajectory/star/')
 
@@ -315,15 +315,15 @@ def compare_composite_models(baseDir, n_states, operator, dimensions = 2):
         for name in names:
             if name == 'caret':
                 type = TypeTest.caret
-            elif name == 'delete':
+            elif name == 'delete_mark':
                 type = TypeTest.delete
             elif name == 'left':
                 type = TypeTest.left_swipe
             elif name == 'rectangle':
                 type = TypeTest.rectangle
-            elif name == 'square-braket-left':
+            elif name == 'left_sq_bracket':
                 type = TypeTest.square_braket_left
-            elif name == 'square-braket-right':
+            elif name == 'right_sq_bracket':
                 type = TypeTest.square_braket_right
             elif name == 'triangle':
                 type = TypeTest.triangle
@@ -438,9 +438,9 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #LeapDataset.find_gesture_file('', '/home/alessandro/Scaricati/gestures/', baseDir, 'caret')
 #LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'v')
 #LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'x')
-#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'square-braket-left')
-#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'square-braket-right')
-#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'delete')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'left_sq_bracket')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'right_sq_bracket')
+#LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'delete_mark')
 #LeapDataset.find_gesture_file('/home/alessandro/Scaricati/gestures/', baseDir, 'star')
 
 # Crea file csv gesture
@@ -455,11 +455,11 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 # X
 #create_gesture_dataset(baseDir, 'x/', 54)
 # Square Bracket Left
-#create_gesture_dataset(baseDir, 'square-braket-left/', 54)
+#create_gesture_dataset(baseDir, 'left_sq_bracket/', 54)
 # Square Bracket Right
-#create_gesture_dataset(baseDir, 'square-braket-right/', 54)
+#create_gesture_dataset(baseDir, 'right_sq_bracket/', 54)
 # Delete
-#create_gesture_dataset(baseDir, 'delete/', 54)
+#create_gesture_dataset(baseDir, 'delete_mark/', 54)
 # Star
 #create_gesture_dataset(baseDir, 'star/', 90)
 
@@ -482,7 +482,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #print('Square braket right')
 #test_leap(baseDir, 8, TypeTest.square_braket_right)# Ok
 #print('Delete')
-#test_leap(baseDir, 8, TypeTest.delete) # Ok anche se con square braket, x e rettangolo le differenze non sono nettissime (in ogni caso sono il doppio)
+#test_leap(baseDir, 8, TypeTest.delete_mark) # Ok anche se con square braket, x e rettangolo le differenze non sono nettissime (in ogni caso sono il doppio)
 #print('Star')
 #test_leap(baseDir, 8, TypeTest.star) # Ok
 # Test - senza primitive

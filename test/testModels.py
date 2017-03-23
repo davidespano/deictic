@@ -259,7 +259,7 @@ class test:
         # Values
         for i in range(0, size-1):
             new_row = []
-            new_row.append(self.gesture_names[i-1])
+            new_row.append(self.gesture_names[i])
             for j in range(0,size-1):
                 new_row.append(str(self.results[i,j]))
             results_string.append(new_row)
