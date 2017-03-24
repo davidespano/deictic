@@ -119,7 +119,7 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 1
+mode = 7
 n_sample = 40
 
 ########################################## Deictic Dataset ##########################################################

@@ -8,29 +8,30 @@ random.seed(0)
 ########## Emissions #########
 ## gesture_emissions
 # Defines the emissions for the hmm
-def gesture_emissions(n_states,  scale = 1):
+def gesture_emissions(n_states,  n_features = 2, scale = 1):
     distributions = []
     step = scale / n_states;
     for i in range(0, n_states):
-        a = scale - (i * step)
-        b = scale - (i * step)
-        gaussianX = NormalDistribution(a, scale * 0.01)
-        gaussianY = NormalDistribution(b, scale * 0.01)
-        distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+        distr_list = []
+        for i in range(0, n_features):
+            value = scale - (i * step)
+            gaussian = NormalDistribution(value, scale * 0.01)
+            distr_list.append(gaussian)
+
+        distributions.append(IndependentComponentsDistribution(distr_list))
     return  distributions
 
 ## create_hmm_gesture
 # Defines the hmm for recognizing the specified gesture
-def create_hmm_gesture(name, training_set, n_states = 8):
+def create_hmm_gesture(name, training_set, n_states = 8, n_features = 2):
     # Creates hmm
     topology_factory = HiddenMarkovModelTopology()
-    emissions = gesture_emissions(n_states, scale=100)
+    emissions = gesture_emissions(n_states, n_features = n_features, scale=100)
     model = topology_factory.forward(name, n_states, emissions)
     # Train
     model.fit(training_set, use_pseudocount=True, n_jobs=2)
 
     return model
-
 
 ## plot_gesture
 # Plots the model input examples.

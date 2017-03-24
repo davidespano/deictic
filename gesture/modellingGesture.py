@@ -84,7 +84,6 @@ class Parse:
                 if(exp == HmmFactory.TypeOperator.unistroke.name):
                     primitive = HmmFactory.factory(OneDollarModels.getModel(op1), self.n_states, self.n_samples)
                 elif(exp == HmmFactory.TypeOperator.multistroke.name):
-                    print(exp)
                     primitive = HmmFactory.factory(MDollarModels.getModel(op1), self.n_states, self.n_samples)
                 # Add primitive expression
                 stack.append(primitive)
