@@ -158,14 +158,16 @@ if mode in [6, 7]:
                 list_occurrence_models = []
                 for file in files:
                     file = file.split('_')
-                    list_files.append(file)
-                    list_occurrence_models.append(file[-1])
-                for model in numpy.unique(list_occurrence_models):
-                    model_dataset = []
-                    for file in list_files:
-                        if file[-1] == model:
-                            model_dataset.append(training_dataset.read_file(file[0]))
-                        list_dataset_for_models.append(model_dataset)
+                    list_files.append(file[0])
+                    list_occurrence_models.append(int(file[1]))
+
+                n_models = max(list_occurrence_models)
+                for i in range(0, n_models+1):
+                    list_dataset_for_models.append([]);
+
+                for i in range(0, len(list_occurrence_models)):
+
+                    list_dataset_for_models[list_occurrence_models[i]].append(training_dataset.read_file(list_files[i]));
 
                 for i in range(0, len(list_dataset_for_models)):
                     # Create and training hmm

@@ -106,6 +106,8 @@ def label_class(groups, baseDir, outputDir):
     k = groups.keys()
     for name in k:
         name = name
+
+    os.mkdir(outputDir + name + '/')
     dataset = CsvDataset(baseDir + name + '/')
     group = groups[name]
 
