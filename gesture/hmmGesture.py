@@ -29,7 +29,7 @@ def create_hmm_gesture(name, training_set, n_states = 8, n_features = 2):
     emissions = gesture_emissions(n_states, n_features = n_features, scale=100)
     model = topology_factory.forward(name, n_states, emissions)
     # Train
-    model.fit(training_set, use_pseudocount=True, n_jobs=2)
+    model.fit(training_set, use_pseudocount=True)
 
     return model
 

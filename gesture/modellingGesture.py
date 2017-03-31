@@ -2,7 +2,7 @@ from gesture import *
 from model import *
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -17,6 +17,7 @@ class HmmFactory:
         choice = 4
         unistroke = 5
         multistroke = 6
+        unica = 7
 
     @staticmethod
     def factory(gesture, n_states, n_samples):
@@ -77,7 +78,8 @@ class Parse:
 
             # Type Expression
             elif exp in [HmmFactory.TypeOperator.unistroke.name,
-                         HmmFactory.TypeOperator.multistroke.name]:
+                         HmmFactory.TypeOperator.multistroke.name,
+                         HmmFactory.TypeOperator.unica.name]:
                 # Take operand
                 op1 = stack.pop()
                 # Take primitive expression
@@ -85,6 +87,8 @@ class Parse:
                     primitive = HmmFactory.factory(OneDollarModels.getModel(op1), self.n_states, self.n_samples)
                 elif(exp == HmmFactory.TypeOperator.multistroke.name):
                     primitive = HmmFactory.factory(MDollarModels.getModel(op1), self.n_states, self.n_samples)
+                elif(exp == HmmFactory.TypeOperator.unica.name):
+                    primitive = HmmFactory.factory(UnicaModels.getModel(op1), self.n_states, self.n_samples)
                 # Add primitive expression
                 stack.append(primitive)
             else:
@@ -172,6 +176,19 @@ class OneDollarModels:
             #definition = None
 
         return definition
+
+class UnicaModels(OneDollarModels):
+
+    @staticmethod
+    def getModel(type_gesture):
+        definition = super(UnicaModels, UnicaModels).getModel(type_gesture)
+        if type_gesture == OneDollarModels.TypeGesture.x.name:
+            definition = Point(0, 0) + Line(3, 3) + Line(0, -3) + Line(-3, 3)
+        elif type_gesture == OneDollarModels.TypeGesture.delete_mark.name:
+            definition = Point(0, 0) + Line(3, -3) + Line(-3, 0) + Line(3, 3)
+        return definition
+
+
 
 # Take a gesture type and return its complete model
 class MDollarModels:

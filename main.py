@@ -5,15 +5,17 @@ from test import *
 
 
 # Main
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-n_states = 2 # Numero stati
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+n_states = 6 # Numero stati
 n_samples = 40
-mode = 6
+mode = 7
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
+testDir = baseDir + "deictic/unica-dataset/resampled/"
 
 ################################################################ DEICTIC HMM ################################################################
 if mode in [-1, 0, 1]:
@@ -22,7 +24,7 @@ if mode in [-1, 0, 1]:
         folders = ['caret', 'check', 'delete_mark', 'left_sq_bracket', 'right_sq_bracket',
                    'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
-        type = 'unistroke-'
+        type = 'unica-'
     # 1Dollar
     elif mode == 0:
         folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
@@ -44,12 +46,8 @@ if mode in [-1, 0, 1]:
         model = parse.parse_expression(type+folder)
         hmms.append(model)
 
-    #t = test(hmms, gestureDir, folders, plot=False)
-    #results = t.all_files()
-
-    ## Plot
-    for hmm in hmms:
-        hmm.plot()
+    t = test(hmms, gestureDir, folders, plot=False)
+    results = t.all_files()
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
 if mode in [2,3]:
@@ -71,20 +69,15 @@ if mode in [2,3]:
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
 if mode in [4,5]:
     if mode == 4:
-        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
-                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
-                   'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
         type = 'unistroke-'
     else:
-        folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
-                   'asterisk', 'exclamation_point', 'half_note', 'null', 'pitchfork',
-                   'six_point_star']
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation'
         type = 'multistroke-'
 
+    folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
@@ -103,20 +96,17 @@ if mode in [6, 7]:
                     ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
                     ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
                     ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
-        list_gesture = [("caret", n_states*2), ("v", n_states*2)]
+        #list_gesture = [("caret", n_states*2), ("v", n_states*2)]
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
-        n_features = 2
     ## Adhoc hmm - MDollar
     if mode == 7:
         list_gesture = [("D", n_states*3), ("H", n_states*3), ("I", n_states*3), ("N", n_states*3), ("P", n_states*3),
                         ("T", n_states*2), ("X", n_states*2), ("arrowhead", n_states*3), ("asterisk", n_states*4),
                         ("exclamation_point", n_states*2), ("half_note", n_states*3),
                         ("null", n_states*5), ("pitchfork", n_states*3), ("six_point_star", n_states*6)]
-        list_gesture = [("D", n_states*3), ("H", n_states*3)]
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation'
-        n_features = 3
 
 
     gestures = [i[0] for i in list_gesture]
@@ -133,15 +123,13 @@ if mode in [6, 7]:
                                                                                                        '/',
                                                                                                        type='train')
             # Create and training hmm
-            hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1], n_features))
+            hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1]))
 
         t = test(hmms, gestureDir, gestures, plot=False, results=results)
         results = t.ten_cross_validation(list_filesDir, iterations=10)
+        print(results)
 
-    print(results)
-
-
-
+print(results)
 
 
 if mode == 24:
@@ -157,7 +145,7 @@ if mode == 24:
     plot_gesture(model)
 
 if mode == 25:
-    dataset = CsvDataset(testDir + "exclamation_point/")
+    dataset = CsvDataset(testDir + "delete_mark/")
     #dataset.plot()
     dataset.plot(singleMode=True)
 
