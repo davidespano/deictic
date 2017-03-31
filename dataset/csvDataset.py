@@ -84,8 +84,8 @@ class CsvDataset:
             result = numpy.array(vals).astype('float')
             return result
 
-    def read_ten_cross_validation_dataset(self, inputDir, type):
-        files = open(inputDir+type+'_ten-cross-validation.txt').readlines()
+    def read_ten_cross_validation_dataset(self, inputDir, type, k = 0, model_index = None):
+        files = open(inputDir+type+'_ten-cross-validation_{}.txt'.format(str(k))).readlines()
         files = files[0].split('/')
         sequences = []
         for filename in files:
@@ -109,28 +109,50 @@ class CsvDataset:
 
         return sequences
 
-    def ten_cross_validation(self, outputDir):
+    def ten_cross_validation(self, outputDir, k = 0, rates = None, labels = None):
         """ Selects the tenth part of the files in the dataset as test and uses the other ones for training
 
         Parameters
         ----------
         outputDir: str
             path where the list of files will be save
+        k: int
+        rates: list
+        labels: list
         """
-        # Take all files
-        training_dataset = self.getDatasetIterator().filenames
-        # Test files number (the tenth part of the files in the dataset)
-        length = int(len(training_dataset)/10)
 
         testing_dataset = []
-        for i in range(0, length):
-            index_for_testing = randint(0, len(training_dataset)-1)
-            testing_dataset.append(training_dataset.pop(index_for_testing))
+        if(rates != None and labels != None):
+            length = int(len(labels)/10)
+            # Test files
+            for index in range(0, len(rates)):
+                num_file_label = int((length * rates[index][1])/100)
+                for i in range(0, num_file_label):
+                    flag = False
+                    index_for_testing = -1
+                    while flag == False:
+                        index_for_testing = randint(0, len(labels)-1)
+                        if labels[index_for_testing][1] == index:
+                            flag = True
+                    file_test = labels.pop(index_for_testing)
+                    testing_dataset.append(file_test[0])
+            # Training files
+            training_dataset = []
+            for row in labels:
+                training_dataset.append(row[0]+'_'+str(row[1]))
+        else:
+            # Take all files
+            training_dataset = self.getDatasetIterator().filenames
+            # Test files number (the tenth part of the files in the dataset)
+            length = int(len(training_dataset)/10)
+            for i in range(0, length):
+                index_for_testing = randint(0, len(training_dataset)-1)
+                testing_dataset.append(training_dataset.pop(index_for_testing))
 
         # Save test and training files in csv file
-        with open(outputDir+'train_ten-cross-validation.txt', mode='wt', encoding='utf-8') as myfile:
+        with open(outputDir+'train_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
             myfile.write('/'.join(training_dataset))
-        with open(outputDir+'test_ten-cross-validation.txt', mode='wt', encoding='utf-8') as myfile:
+        with open(outputDir+'test_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
             myfile.write('/'.join(testing_dataset))
 
     def leave_one_out(self, conditionFilename=None, leave_index = -1):

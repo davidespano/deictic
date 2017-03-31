@@ -4,13 +4,13 @@ import random
 
 random.seed()
 
-def ten_cross_validation_factory(list, inputBase, outputBase, iterations = 10):
-    for index in range(1, iterations+1):
+def ten_cross_validation_factory(list, inputBase, outputBase, k = 10):
+    for index in range(0, k):
         for name in list:
             dataset = CsvDataset(inputBase+name)
             # Creates the folder for the index iteration
-            if not os.path.exists(outputBase + '{}/'.format(index)+name):
-                os.makedirs(outputBase + '{}/'.format(index)+name)
+            if not os.path.exists(outputBase+name):
+                os.makedirs(outputBase+name)
             # Creates test and training list
             dataset.ten_cross_validation(outputBase+'{}/'.format(index)+name+'/')
 
@@ -116,69 +116,105 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
     return
 
 
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 1
+mode = 7
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
 # Unica
 if mode == 1:
-    list = {("rectangle", 4*n_sample), ("triangle", 3*n_sample), ("caret", 2*n_sample), ("v", 2*n_sample), ("x", 3*n_sample),
+    list_gesture = {("rectangle", 4*n_sample), ("triangle", 3*n_sample), ("caret", 2*n_sample), ("v", 2*n_sample), ("x", 3*n_sample),
             ("left_sq_bracket", 3*n_sample), ("right_sq_bracket", 3*n_sample), ("delete_mark", 3*n_sample),
             ("star", 5*n_sample), ('check', 2*n_sample)
             }#, ("left", n_sample), ("right", n_sample)
-    dataset_factory(list, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
+    dataset_factory(list_gesture, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
 
 # 1Dollar
 if mode == 2:
     # name and n_samples
-    list = {("arrow", 4*n_sample), ("caret", 2*n_sample), ("circle", 4*n_sample), ("check", 2*n_sample), ("delete_mark", 3*n_sample),
+    list_gesture = {("arrow", 4*n_sample), ("caret", 2*n_sample), ("circle", 4*n_sample), ("check", 2*n_sample), ("delete_mark", 3*n_sample),
             ("left_curly_brace", 6*n_sample), ("left_sq_bracket", 3*n_sample), ("pigtail", 4*n_sample), ("question_mark", 4*n_sample),
             ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
             ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)
             }#('zig_zag', 5*n_sample)
-    dataset_factory(list, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
+    dataset_factory(list_gesture, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
 
 # MDollar
 if mode == 3:
     # Name gesture, n samples and strokes
-    list = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
+    list_gesture = {("arrowhead", n_sample, 2), ("asterisk", n_sample, 3, True), ("D", n_sample, 2, True), ("exclamation_point", n_sample, 2, False),
             ("H", n_sample, 3, True), ("half_note", n_sample, 2, True),
             ("I", n_sample, 3, True), ("N", n_sample, 3, True), ("null", n_sample, 2, True),
             ("P", n_sample, 2, True), ("pitchfork", n_sample, 2, True), ("six_point_star", n_sample, 2, True),
             ("T", n_sample, 2, True), ("X", n_sample, 2, True)
             }#("line", n_sample, 1), ("five_point_star", n_sample, 1, True),
-    dataset_factory(list, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
+    dataset_factory(list_gesture, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
 ########################################## Synthetic Dataset ##########################################################
 # Sinthetic Database 1Dollar
 if mode == 4:
-    list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
+    list_gesture = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
             'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
             'v', 'x']
     synthetic_dataset_factory(baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/synthetic/',
-                              list, iter=16, type='unistroke')#int(random.uniform(0, len(list)-1)))
+                              list_gesture, iter=24, type='unistroke')#int(random.uniform(0, len(list)-1)))
 
 if mode == 5:
     # Sinthetic Database MDollar
-    list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
+    list_gesture = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
             'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
     synthetic_dataset_factory(baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
-                              list, iter=16, type='multistroke')#int(random.uniform(1, len(list)-1)))
+                              list_gesture, iter=24, type='multistroke')#int(random.uniform(1, len(list)-1)))
 ########################################## Ten-Cross-Validation Dataset ##########################################################
 # Ten-Cross-Validation 1Dollar
 if mode == 6:
-    list = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
+    list_gesture = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
             'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
             'v', 'x']
-    ten_cross_validation_factory(list, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
+    ten_cross_validation_factory(list_gesture, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
     # Ten-Cross-Validation MDollar
 if mode == 7:
-    list = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
+    list_gesture = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
             'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
-    ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
+    datasetDir = baseDir + "deictic/mdollar-dataset/resampled/"
+    reportDir = baseDir + "deictic/mdollar-dataset/ten-cross-validation/"
+    outputDir = reportDir
+    for gesture in list_gesture:
+        # Read report
+        file_array = []
+        labels = []
+        with open(reportDir+gesture+'/report.csv', "r") as f:
+            reader = csv.reader(f, delimiter=',')
+            vals = list(reader)
+            for row in vals:
+                new_row = []
+                new_row.append(row[0])
+
+                v = int(row[1])
+                if v<0:
+                    v=0
+                new_row.append(v)
+
+                file_array.append(new_row)
+                labels.append(v)
+
+        # Compute rate
+        percent_rates = numpy.bincount(labels)
+        rates = []
+        for value in percent_rates:
+            new_row = []
+            rate = (value*100)/len(file_array)
+            new_row.append(value)
+            new_row.append(rate)
+            rates.append(new_row)
+
+        # Define new ten-cross-validation dataset
+        dataset = CsvDataset(datasetDir+gesture+'/')
+        for i in range(0, 10):
+            dataset.ten_cross_validation(outputDir+gesture+'/', i, rates, file_array)
+    #ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
 
 
 

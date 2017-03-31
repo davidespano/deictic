@@ -5,10 +5,12 @@ from test import *
 
 
 # Main
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 40
+iterations = 1 # k-fold cross-validation
 mode = 7
+
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
@@ -49,6 +51,10 @@ if mode in [-1, 0, 1]:
     t = test(hmms, gestureDir, folders, plot=False)
     results = t.all_files()
 
+    ## Plot
+    #for hmm in hmms:
+    #    hmm.plot()
+
 ############################################################ DEICTIC Synthetic HMM ###########################################################
 if mode in [2,3]:
     if mode == 2:
@@ -69,15 +75,20 @@ if mode in [2,3]:
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
 if mode in [4,5]:
     if mode == 4:
+        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
+                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
+                   'star', 'triangle', 'v', 'x']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
         type = 'unistroke-'
     else:
+        folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
+                   'asterisk', 'exclamation_point', 'half_note', 'null', 'pitchfork',
+                   'six_point_star']
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation'
         type = 'multistroke-'
 
-    folders = [name for name in os.listdir(gestureDir) if os.path.isdir(os.path.join(gestureDir, name))]
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
@@ -96,39 +107,77 @@ if mode in [6, 7]:
                     ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
                     ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
                     ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
-        #list_gesture = [("caret", n_states*2), ("v", n_states*2)]
+        list_gesture = [("caret", n_states*2), ("v", n_states*2)]
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
-    ## Adhoc hmm - MDollar
-    if mode == 7:
-        list_gesture = [("D", n_states*3), ("H", n_states*3), ("I", n_states*3), ("N", n_states*3), ("P", n_states*3),
-                        ("T", n_states*2), ("X", n_states*2), ("arrowhead", n_states*3), ("asterisk", n_states*4),
-                        ("exclamation_point", n_states*2), ("half_note", n_states*3),
-                        ("null", n_states*5), ("pitchfork", n_states*3), ("six_point_star", n_states*6)]
-        gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
-        list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation'
+        n_features = 2
 
+        gestures = [i[0] for i in list_gesture]
+        results = None
 
-    gestures = [i[0] for i in list_gesture]
-    results = None
-    for index in range(0, 2):#10):
         # Create hmm gesture, training and testing sequences
         hmms = []
 
-        for gesture in list_gesture:
-            # Training dataset
-            training_dataset = CsvDataset(gestureDir+gesture[0]+'/').read_ten_cross_validation_dataset(list_filesDir +
-                                                                                                       '/{}'.format(index+1) +
-                                                                                                       '/' + gesture[0] +
-                                                                                                       '/',
-                                                                                                       type='train')
-            # Create and training hmm
-            hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1]))
+        for k in range(0, iterations):
+            for gesture in list_gesture:
+                # Training dataset
+                training_dataset = CsvDataset(gestureDir+gesture[0]+'/'). \
+                    read_ten_cross_validation_dataset(list_filesDir + gesture +'/', type='train')
+                # Create and training hmm
+                hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1], n_features))
 
-        t = test(hmms, gestureDir, gestures, plot=False, results=results)
-        results = t.ten_cross_validation(list_filesDir, iterations=10)
-        print(results)
+            t = test(hmms, gestureDir, gestures, plot=False, results=results)
+            results = t.ten_cross_validation(list_filesDir, iterations=10)
+            print("K = {}".format(k))
+            print(results)
 
+    ## Adhoc hmm - MDollar
+    if mode == 7:
+        #list_gesture = [("D", n_states*3), ("H", n_states*3), ("I", n_states*3), ("N", n_states*3), ("P", n_states*3),
+        #                ("T", n_states*2), ("X", n_states*2), ("arrowhead", n_states*3), ("asterisk", n_states*4),
+        #                ("exclamation_point", n_states*2), ("half_note", n_states*3),
+        #                ("null", n_states*5), ("pitchfork", n_states*3), ("six_point_star", n_states*6)]
+        list_gesture = [("D", n_states*3), ("H", n_states*3)]
+        gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
+        list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation/'
+        n_features = 3
+
+        # Training
+        gestures = dict()
+
+        for k in range(0, iterations):
+            for gesture in list_gesture:
+                hmms = []
+                # Read training dataset
+                training_dataset = CsvDataset(gestureDir+gesture[0]+'/')
+                files = open(list_filesDir + gesture[0] +'/train_ten-cross-validation_{}.txt'.format(str(k))).readlines()
+                files = files[0].split('/')
+                # Order training dataset
+                list_dataset_for_models = []
+                list_files = []
+                list_occurrence_models = []
+                for file in files:
+                    file = file.split('_')
+                    list_files.append(file)
+                    list_occurrence_models.append(file[-1])
+                for model in numpy.unique(list_occurrence_models):
+                    model_dataset = []
+                    for file in list_files:
+                        if file[-1] == model:
+                            model_dataset.append(training_dataset.read_file(file[0]))
+                        list_dataset_for_models.append(model_dataset)
+
+                for i in range(0, len(list_dataset_for_models)):
+                    # Create and training hmm
+                    hmms.append(create_hmm_gesture(gesture[0], list_dataset_for_models[i], gesture[1], n_features))
+                gestures[gesture].append(hmms)
+
+            results = compares_deictic_models(hmms, gestureDir)
+            print("K = {}".format(k))
+            print(results)
+
+
+# Stampa matrice di confusione
 print(results)
 
 

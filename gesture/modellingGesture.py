@@ -1,5 +1,6 @@
 from gesture import *
 from model import *
+from topology import *
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
@@ -49,22 +50,20 @@ class Parse:
             if exp in [HmmFactory.TypeOperator.disabling.name, HmmFactory.TypeOperator.sequence.name,
                        HmmFactory.TypeOperator.parallel.name, HmmFactory.TypeOperator.choice.name]:
                 # Take operands
-                op1 = stack.pop()
-                op2 = stack.pop()
-                # Disabling
-                if exp == HmmFactory.TypeOperator.disabling.name:
-                    hmm = HmmFactory.factory(op1 % op2, self.n_states, self.n_samples)
-                # Sequence
-                elif exp == HmmFactory.TypeOperator.sequence.name:
-                    hmm = HmmFactory.factory(op1 + op2, self.n_states, self.n_samples)
-                # Parallel
-                elif exp == HmmFactory.TypeOperator.parallel.name:
-                    hmm = HmmFactory.factory(op1 * op2, self.n_states, self.n_samples)
-                # Choice
-                elif exp == HmmFactory.TypeOperator.choice.name:
-                    hmm = HmmFactory.factory(op1 | op2, self.n_states, self.n_samples)
+                new_hmm = stack.pop()
+                while stack:
+                    op = stack.pop()
+                    # Sequence
+                    if exp == HmmFactory.TypeOperator.sequence.name:
+                        new_hmm,seq = HiddenMarkovModelTopology.sequence([new_hmm, op], [])
+                    # Parallel
+                    elif exp == HmmFactory.TypeOperator.parallel.name:
+                        new_hmm,seq = HiddenMarkovModelTopology.parallel(new_hmm, op, [])
+                    # Choice
+                    elif exp == HmmFactory.TypeOperator.choice.name:
+                        new_hmm,seq = HiddenMarkovModelTopology.choice([new_hmm, op], [])
                 # Add new hmm
-                stack.append(hmm)
+                stack.append(new_hmm)
 
             # Unary operators
             elif exp in [HmmFactory.TypeOperator.iterative.name]:
@@ -72,24 +71,23 @@ class Parse:
                 op1 = stack.pop()
                 # Iterative
                 if(exp == HmmFactory.TypeOperator.iterative.name):
-                    hmm = HmmFactory.factory(~op1, self.n_states, self.n_samples)
+                    new_hmm,seq = HiddenMarkovModelTopology.iterative(op1, [])
                 # Add hmm
-                stack.append(hmm)
+                stack.append(new_hmm)
 
             # Type Expression
             elif exp in [HmmFactory.TypeOperator.unistroke.name,
-                         HmmFactory.TypeOperator.multistroke.name,
-                         HmmFactory.TypeOperator.unica.name]:
+                         HmmFactory.TypeOperator.multistroke.name]:
                 # Take operand
                 op1 = stack.pop()
+                expression = None
                 # Take primitive expression
                 if(exp == HmmFactory.TypeOperator.unistroke.name):
-                    primitive = HmmFactory.factory(OneDollarModels.getModel(op1), self.n_states, self.n_samples)
+                    expression = OneDollarModels.getModel(op1)
                 elif(exp == HmmFactory.TypeOperator.multistroke.name):
-                    primitive = HmmFactory.factory(MDollarModels.getModel(op1), self.n_states, self.n_samples)
-                elif(exp == HmmFactory.TypeOperator.unica.name):
-                    primitive = HmmFactory.factory(UnicaModels.getModel(op1), self.n_states, self.n_samples)
+                    expression = MDollarModels.getModel(op1)
                 # Add primitive expression
+                primitive = HmmFactory.factory(expression, self.n_states, self.n_samples)
                 stack.append(primitive)
             else:
                 # Add exp expression
