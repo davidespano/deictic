@@ -48,59 +48,7 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
-def compares_deictic_models(models, baseDir, names, plot=False):
-
-    # Namefile
-    filename = baseDir+'deictic_results.csv'
-
-    # Confusion Matrix (n * n, where n is the number of models)
-    results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
-
-    # Get all gesture's dataset
-    list_dataset = []
-    for name in names:
-        list_dataset.append(CsvDataset(baseDir+name+'/'))
-
-    # For each gesture's dataset
-    for index_dataset in range(0, len(list_dataset)):
-
-        print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
-
-        # Get all sequence files
-        sequences = list_dataset[index_dataset].read_dataset(d=False)
-
-        # For each sequence
-        j = 0
-        for sequence in sequences:
-            # Max probability, index gestureindex model
-            max_norm_log_probability = -sys.maxsize
-            index_model = -1
-            # for each model
-            for i in range(0, len(models)):
-
-                # Computes sequence's log-probability and normalized
-                log_probability = models[i].log_probability(sequence)
-                norm_log_probability = log_probability / len(sequence)
-
-                #print("file {0}: {1}".format( j,  norm_log_probability))
-
-                # Check which is the best result
-                if(norm_log_probability > max_norm_log_probability):
-
-                   # print("change index: old {0} (p={1}); new {2} (p={3})".format(
-                   #     index_model, max_norm_log_probability, i, norm_log_probability))
-                    max_norm_log_probability = norm_log_probability
-                    index_model = i
-
-            #if index_model != index_dataset:
-            #    print("file {0} not recognized".format(j))
-            j +=1
-            # Aggiorno matrice risultati
-            results[index_dataset][index_model] += 1 #results[index_dataset][index_model] + 1
-
-    return results
-
-def compares_deictic_models2(groups, baseDir,  plot=False):
+def compares_deictic_models(groups, baseDir,  plot=False):
     filename = baseDir + 'deictic_results.csv'
 
     # Confusion Matrix (n * n, where n is the number of models)
@@ -152,6 +100,51 @@ def compares_deictic_models2(groups, baseDir,  plot=False):
 
     return results
 
+def label_class(groups, baseDir, outputDir):
+
+    # Get all gesture's dataset
+    k = groups.keys()
+    for name in k:
+        name = name
+    dataset = CsvDataset(baseDir + name + '/')
+    group = groups[name]
+
+    report_string = []
+    # For each file
+    for filename in dataset.getDatasetIterator():
+        # sequence
+        sequence = dataset.read_file(filename)
+
+        # Max probability, index gestureindex model
+        max_norm_log_probability = -sys.maxsize
+        index_model = -1
+
+        new_row = []
+        i = 0# counter model
+
+        for model in group:
+            log_probability = model.log_probability(sequence)
+            norm_log_probability = log_probability / len(sequence)
+
+            if (norm_log_probability > max_norm_log_probability):
+                max_norm_log_probability = norm_log_probability
+                index_model = i
+            i += 1
+
+        new_row.append(filename)
+        new_row.append(str(index_model))
+        report_string.append(new_row)
+
+
+    with open(outputDir+name+'/report.csv', 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for row in report_string:
+            spamwriter.writerow(row)
+
+
+
+
 ## Compare deictic model
 class test:
 
@@ -174,7 +167,7 @@ class test:
         for name in gesture_names:
             self.list_dataset.append(CsvDataset(datasetDir+name+'/'))
         # Namefile
-        self.filename = self.datasetDir+'deictic_results.csv'
+        self.filename = self.datasetDir+'matrix_confusion.csv'
 
     def all_files(self):
         for index_dataset in range(0, len(self.list_dataset)):
@@ -185,20 +178,19 @@ class test:
             # Compares models
             self.compares_models(sequences, index_dataset)
 
+        print(self.results)
         return self.results
 
-    def ten_cross_validation(self, list_filesDir, iterations=10):
-        for i in range(0, iterations):
-            for index_dataset in range(0, len(self.list_dataset)):
-                print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
+    def ten_cross_validation(self, list_filesDir, k=0):
+        for index_dataset in range(0, len(self.list_dataset)):
+            print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
 
-                # Gets sequences
-                sequences = self.list_dataset[index_dataset].read_ten_cross_validation_dataset(list_filesDir+'/{}/'.format(i+1)+
-                                                                                               self.gesture_names[index_dataset]+'/', 'test')
-                # Compares models
-                self.compares_models(sequences, index_dataset)
+            # Gets sequences
+            sequences = self.list_dataset[index_dataset].\
+                read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test', k)
+            # Compares models
+            self.compares_models(sequences, index_dataset)
 
-        return self.results
 
     def compares_models(self, sequences, index_dataset):
 
@@ -245,8 +237,6 @@ class test:
     def save_confusion_matrix(self):
 
         # Results
-        numpy.savetxt(self.filename, self.results, delimiter=',')
-
         size = len(self.gesture_names)+1
         # Char matrix for results
         results_string = []
@@ -264,7 +254,7 @@ class test:
                 new_row.append(str(self.results[i,j]))
             results_string.append(new_row)
 
-        with open('matrix_confusion.csv', 'w', newline='') as csvfile:
+        with open(self.filename, 'w', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
             for row in results_string:
