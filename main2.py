@@ -2,7 +2,17 @@ from dataset import *
 from gesture import *
 from test import *
 
-def multistroke_test(gestureDir, gesture_models, n_states=6, n_samples=20, plot=False):
+def multistroke_test(gestureDir, gesture_models, n_states=6, n_samples=20):
+
+    hmms = create_hmms(gesture_models, n_states, n_samples);
+    results = compares_deictic_models(hmms, gestureDir)
+    #label_class(hmms, gestureDir,
+    #"/home/alessandro/PycharmProjects/deictic/repository/deictic/mdollar-dataset/ten-cross-validation/")
+
+    print(gesture_models.keys())
+    print(results)
+
+def create_hmms(gesture_models, n_states=6, n_samples=20):
     hmms = dict()
 
     factory = ClassifierFactory()
@@ -15,15 +25,10 @@ def multistroke_test(gestureDir, gesture_models, n_states=6, n_samples=20, plot=
     for k in gesture_models.keys():
         print('Group {0}'.format(k))
         hmms[k] = []
-        for gesture in gesture_models[k] :
+        for gesture in gesture_models[k]:
             model, edges = factory.createClassifier(gesture)
             hmms[k].append(model)
-
-    results = compares_deictic_models2(hmms, gestureDir, plot)
-
-    print(gesture_models.keys())
-    print(results)
-
+    return hmms;
 
 # Test
 def deictic_test(gestureDir, gesture_models, n_states=6, n_samples=20, plot=False):
@@ -84,14 +89,131 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
-mode = 1
+mode = 6
 
 baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
 testDir = baseDir + "deictic/mdollar-dataset/resampled/"
+outputDir = baseDir +"deictic/mdollar-dataset/ten-cross-validation/"
+
+gesture_models = {
+    'T': [
+        Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4),
+        Point(-2, 0) + Line(4, 0) + Point(-4, 2) + Line(0, 4),
+        Point(2, 0) + Line(-4, 0) + Point(0, 0) + Line(0, -4),
+        Point(2, 0) + Line(-4, 0) + Point(-4, 2) + Line(0, 4),
+        Point(0, 0) + Line(0, -4) + Point(-2, 0) + Line(4, 0),
+        Point(0, 0) + Line(0, -4) + Point(2, 0) + Line(-4, 0),
+        Point(-4, 2) + Line(0, 4) + Point(-2, 0) + Line(4, 0),
+        Point(-4, 2) + Line(0, 4) + Point(2, 0) + Line(-4, 0)
+    ],
+
+    'N': [
+        (Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
+    ],
+
+    'D': [
+        Point(0, 0) + Line(0, 6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0),
+        Point(0, 6) + Line(0, -6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0),
+        Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 6),
+        Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 6) + Line(0, -6)
+    ],
+
+    'P': [
+        Point(0, 0) + Line(0, 8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
+        Point(0, 8) + Line(0, -8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
+        Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
+        Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 8)
+    ],
+
+    'X': [
+        # (Point(0, 0) + Line(4, 4) + Point(4, 0) + Line(-4, 4)), NO
+        (Point(0, 0) + Line(4, 4) + Point(0, 4) + Line(4, -4)),  # 33
+        # (Point(4, 4) + Line(-4, -4) + Point(4, 0) + Line(-4, 4)), NO
+        (Point(4, 4) + Line(-4, -4) + Point(0, 4) + Line(4, -4)),  # 174
+        # (Point(4, 0) + Line(-4, 4) + Point(0, 0) + Line(4, 4)), # NO
+        # (Point(4, 0) + Line(-4, 4) + Point(4, 4) + Line(-4, -4)), #NO
+        # (Point(0, 4) + Line(4, -4) + Point(0, 0) + Line(4, 4)), # 44
+        (Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(-4, -4))  # 368
+    ],
+
+    'H': [
+        (Point(0, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0) + Point(4, 4) + Line(0, -4)),
+        (Point(0, 4) + Line(0, -4) + Point(4, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0)),
+        (Point(4, 4) + Line(0, -4) + Point(0, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0))
+    ],
+
+    'I': [
+        (Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)),
+        (Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0) + Point(0, 4) + Line(4, 0)),
+        (Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0) + Point(2, 0) + Line(0, 4)),
+        (Point(2, 4) + Line(0, -4) + Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0))
+    ],
+
+    'exclamation_point': [
+        Point(0, 4) + Line(0, -3) + Point(0, 1) + Line(0, -1),
+
+    ],
+
+    'null': [
+        (
+        Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(
+            4, 1) + Line(-8, -8)),  # 410
+        (
+        Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(
+            -4, -7) + Line(8, 8)),  # 118
+    ],
+
+    'arrowhead': [
+        (Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)),
+        (Point(4, 2) + Line(2, -2) + Line(-2, -2) + Point(0, 0) + Line(6, 0)),
+    ],
+
+    'pitchfork': [
+        (Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False) + Point(0, 4) + Line(0, -4)),
+        (Point(0, 4) + Line(0, -4) + Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False))
+    ],
+
+    'six_point_star': [
+        (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2,
+                                                                                                                  4)),
+        (Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2,
+                                                                                                                  4)),
+        (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2,
+                                                                                                                  4)),
+        (Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4,
+                                                                                                                  0)),
+        (
+        Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
+        (
+        Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0)),
+        (
+        Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
+        (Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4))
+    ],
+
+    'asterisk': [
+        ((Point(4, 4) + Line(-4, -4)) + Point(0, 4) + Line(4, -4) + Point(2, 4) + Line(0, -4))
+    ],
+
+    'half_note': [
+        (
+        Point(0, 0) + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Point(
+            2, 16) + Line(0, -20)),
+        (Point(2, 16) + Line(0, -20) + Point(0, 0) + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3,
+                                                                                                        cw=False) + Arc(
+            3, 3, cw=False)),
+        (
+        Point(0, 0) + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Point(
+            2, -4) + Line(0, 20)),
+        (Point(2, -4) + Line(0, 20) + Point(0, 0) + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3,
+                                                                                                       cw=False) + Arc(
+            3, 3, cw=False)),
+    ]
+
+}
 
 
 # MDollar Test
@@ -100,108 +222,8 @@ if mode == 1:
 
 
     gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
-    gesture_models = {
-        'T': [
-            Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4),
-            Point(-2, 0) + Line(4, 0) + Point(-4, 2) + Line (0, 4),
-            Point(2, 0) + Line(-4, 0) + Point(0, 0) + Line(0, -4),
-            Point(2, 0) + Line(-4, 0) + Point(-4, 2) + Line (0, 4),
-            Point(0, 0) + Line(0, -4) + Point(-2, 0) + Line(4,0),
-            Point(0, 0) + Line(0, -4) + Point( 2, 0) + Line(-4,0),
-            Point(-4, 2) + Line(0, 4) + Point(-2, 0) + Line(4,0),
-            Point(-4, 2) + Line(0, 4) + Point( 2, 0) + Line(-4,0)
-        ],
 
-        'N': [
-            (Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
-        ],
-
-        'D': [
-            Point(0, 0) + Line(0, 6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2,0),
-            Point(0, 6) + Line(0, -6) + Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2,0),
-            Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 6),
-            Point(0, 6) + Line(2, 0) + Arc(3, -3, cw=True) + Arc(-3, -3, cw=True) + Line(-2, 0) + Point(0, 6) + Line(0, -6)
-        ],
-
-        'P': [
-            Point(0, 0) + Line(0, 8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-            Point(0, 8) + Line(0, -8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-            Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
-            Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 8)
-        ],
-
-        'X': [
-            #(Point(0, 0) + Line(4, 4) + Point(4, 0) + Line(-4, 4)), NO
-            (Point(0, 0) + Line(4, 4) + Point(0, 4) + Line(4, -4)), #33
-            #(Point(4, 4) + Line(-4, -4) + Point(4, 0) + Line(-4, 4)), NO
-            (Point(4, 4) + Line(-4, -4) + Point(0, 4) + Line(4, -4)), #174
-            #(Point(4, 0) + Line(-4, 4) + Point(0, 0) + Line(4, 4)), # NO
-            #(Point(4, 0) + Line(-4, 4) + Point(4, 4) + Line(-4, -4)), #NO
-            #(Point(0, 4) + Line(4, -4) + Point(0, 0) + Line(4, 4)), # 44
-            (Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(-4, -4)) # 368
-        ],
-
-        'H': [
-            (Point(0, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0) + Point(4, 4) + Line(0, -4)),
-            (Point(0, 4) + Line(0, -4) + Point(4, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0)),
-            (Point(4, 4) + Line(0, -4) + Point(0, 4) + Line(0, -4) + Point(0, 2) + Line(4, 0))
-        ],
-
-        'I' : [
-            (Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)),
-            (Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0) + Point(0, 4) + Line(4, 0)),
-            (Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0) + Point(2, 0)  + Line(0, 4)),
-            (Point(2, 4) + Line(0, -4) + Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0))
-        ],
-
-        'exclamation_point' : [
-             Point(0, 4) + Line(0, -3) + Point(0, 1) + Line(0, -1),
-
-         ],
-
-        'null' : [
-            (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(4, 1) + Line(-8, -8)), #410
-            (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(-4, -7) + Line(8, 8)), #118
-        ],
-
-        'arrowhead' : [
-            (Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)),
-            (Point(4, 2) + Line(2, -2) + Line(-2, -2) + Point(0, 0) + Line(6, 0) ),
-        ],
-
-        'pitchfork' : [
-            (Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False) + Point(0, 4) + Line(0, -4)),
-            (Point(0, 4) + Line(0, -4) + Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False))
-        ],
-
-        'six_point_star':[
-            (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(4,0) + Line(-2,-4) + Line(-2, 4)),
-            (Point(-2, -1) + Line(4,0) + Line(-2,-4) + Line(-2, 4)+Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4)),
-            (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(4,0) + Line(-2,-4) + Line(-2, 4)),
-            (Point(-2, 1) + Line(4,0) + Line(-2,-4) + Line(-2, 4) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) ),
-            (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(2,-4) + Line(2, 4) + Line(-4,0)),
-            (Point(-2, 1) + Line(2,-4) + Line(2, 4) + Line(-4,0) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) ),
-            (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4)+ Point(-2, -1) + Line(2,-4) + Line(2, 4) + Line(-4,0)),
-            (Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4,0)+ Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) )
-        ],
-
-        'asterisk' : [
-            ((Point(4, 4) + Line(-4, -4)) + Point(0, 4) + Line(4, -4) + Point(2, 4) + Line(0, -4))
-        ],
-
-        'half_note' : [
-            (Point(0, 0)  + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False)+ Point(2, 16) + Line(0, -20)),
-            (Point(2, 16) + Line(0, -20) + Point(0, 0)  + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False)),
-            (Point(0, 0)  + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False)+ Point(2, -4) + Line(0, 20)),
-            (Point(2, -4) + Line(0, 20) + Point(0, 0)  + Arc(-3, 3, cw=False) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False)),
-        ]
-
-
-
-
-
-    }
-    results = multistroke_test(gestureDir, gesture_models, n_states, plot=False)
+    results = multistroke_test(gestureDir, gesture_models, n_states)
 
 ################################################################ DEICTIC COMPOSED HMM ################################################################
 if mode == 2 or mode == 3:
@@ -237,7 +259,10 @@ if mode == 5:
                     ("null", n_states*5), ("pitchfork", n_states*3), ("six_point_star", n_states*6)]
     results = adhoc_test(gestureDir, list_gesture)
 
-
+if mode == 6:
+    hmms = create_hmms(gesture_models, n_states, n_samples)
+    for key in hmms:
+        label_class({key: hmms[key]}, testDir, outputDir)
 
 
 

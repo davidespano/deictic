@@ -9,13 +9,13 @@ class UnicaConverter:
 
     def create_deictic_dataset(self, inputBase, outputBase):
         sub = ['arc3Dleft', 'pigtail', 'spiral',
-               'arc3Dright', 'poly3Dxyz', 'square-braket-left',
-                'caret', 'poly3Dxzy', 'square-braket-right',
+               'arc3Dright', 'poly3Dxyz', 'left_sq_bracket',
+                'caret', 'poly3Dxzy', 'right_sq_bracket',
                'check', 'poly3Dyxz', 'star',
                'circle', 'poly3Dyzx', 'triangle',
                'curly-braket-left', 'poly3Dzxy', 'v',
                'curly-braket-right', 'poly3Dzyx', 'x',
-               'delete', 'rectangle', 'zig-zag',
+               'delete_mark', 'rectangle', 'zig-zag',
                'left', 'right'
                ]
         for name in sub:
@@ -85,4 +85,4 @@ class DollarMConverter:
         for name in sub:
             if not os.path.exists(outputBase + '/' + name):
                 os.makedirs(outputBase+'/'+name)
-            Dollar1Converter.xml_to_csv(self, inputBase + '/' + name, outputBase + '/' + name, xsltPath)
+            Dollar1Converter.xml_to_csv(self, inputBase +'/'+ name, outputBase +'/'+ name +'/', xsltPath)

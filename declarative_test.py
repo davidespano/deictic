@@ -14,7 +14,7 @@ gesture_models = [
     (Point(0,0) + Line(-4,0) + Line(0,-5) + Line(4,0), 'left_sq_bracket'), # left square bracket
     (Point(0,0) + Line(4,0) + Line(0, -5)  + Line(-4, 0), 'right_sq_bracket'), # right square bracket
     (Point(0,0) + Line(2,-3) + Line(2,3), 'v'), # V
-    (Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), 'delete_mark'), # delete
+    (Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3), 'delete_mark'), # delete_mark
     (Point(0,0) + Arc(-5,-5, cw=False) + Arc(-3,-3)  + Arc(3,-3) +  Arc(5,-5,cw=False),
      "left_curly_brace"),  # left curly brace
     (Point(0,0) + Arc(5,-5) +  Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Arc(-5,-5), "right_curly_brace"),
