@@ -139,7 +139,7 @@ class CsvDataset:
             # Training files
             training_dataset = []
             for row in labels:
-                training_dataset.append(row[0]+'_'+str(row[1]))
+                training_dataset.append(row[0]+'#'+str(row[1]))
         else:
             # Take all files
             training_dataset = self.getDatasetIterator().filenames
