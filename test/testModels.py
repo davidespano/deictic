@@ -48,7 +48,7 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
-def compares_deictic_models(groups, baseDir,  plot=False):
+def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0, plot=False):
     filename = baseDir + 'deictic_results.csv'
 
     # Confusion Matrix (n * n, where n is the number of models)
@@ -57,13 +57,31 @@ def compares_deictic_models(groups, baseDir,  plot=False):
     # Get all gesture's dataset
     list_dataset = []
     for name in groups.keys():
-        list_dataset.append(CsvDataset(baseDir + name + '/'))
+        if not ten_fold:
+            list_dataset.append(CsvDataset(baseDir + name + '/'))
+        else:
+            files = open(baseDir + "../ten-cross-validation/" + name  + '/test_ten-cross-validation_{}.txt'.format(str(fold))).readlines()
+            files = files[0].split('/')
+            list_dataset.append([name, files])
 
     # For each gesture's dataset
     for index_dataset in range(0, len(list_dataset)):
-        print("gesture {0}: {1}".format(index_dataset, list_dataset[index_dataset].dir))
+        if not ten_fold:
+            dir = list_dataset[index_dataset].dir
+        else:
+            dir = list_dataset[index_dataset][0]
+        print("gesture {0}: {1}".format(index_dataset, dir ))
         # Get all sequence files
-        sequences = list_dataset[index_dataset].read_dataset(d=False)
+        if not ten_fold:
+            sequences = list_dataset[index_dataset].read_dataset(d=False)
+        else:
+            sequences = []
+            for el in list_dataset[index_dataset][1]:
+                with open("{0}{1}/{2}".format(baseDir, list_dataset[index_dataset][0], el), "r") as f:
+                    reader = csv.reader(f, delimiter=',')
+                    vals = list(reader)
+                    sequence = numpy.array(vals).astype('float')
+                    sequences.append(sequence)
 
         # For each sequence
         j = 0

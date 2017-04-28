@@ -33,7 +33,7 @@ def create_hmm_gesture(name, training_set, n_states = 8, n_features = 2, weights
     emissions = gesture_emissions(n_states, n_features = 2, scale=100, weights=weights)
     model = topology_factory.forward(name, n_states, emissions)
     # Train
-    model.fit(training_set, use_pseudocount=True)
+    model.fit(training_set)
 
     sps = n_states / stroke
     if n_features == 3:
