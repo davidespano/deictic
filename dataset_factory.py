@@ -12,7 +12,7 @@ def ten_cross_validation_factory(list, inputBase, outputBase, k = 10):
             if not os.path.exists(outputBase+name):
                 os.makedirs(outputBase+name)
             # Creates test and training list
-            dataset.ten_cross_validation(outputBase+'{}/'.format(index)+name+'/')
+            dataset.ten_cross_validation(outputBase+'/'+name+'/', k=index)
 
 
 def synthetic_dataset_factory(inputBase, outputBase, names, iter, type='unistroke'):
@@ -119,7 +119,7 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
 #baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 7
+mode = 8
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
@@ -215,7 +215,11 @@ if mode == 7:
         for i in range(0, 10):
             dataset.ten_cross_validation(outputDir+gesture+'/', i, rates, file_array)
     #ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
-
+if mode == 8:
+    list_gesture = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket',
+                              'x', 'delete_mark', 'triangle', 'rectangle']
+    ten_cross_validation_factory(list_gesture, baseDir + 'deictic/unica-dataset/resampled/',
+                                     baseDir + 'deictic/unica-dataset/ten-cross-validation/')
 
 
 ## Original

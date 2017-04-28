@@ -7,9 +7,9 @@ from test import *
 # Main
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
-n_samples = 40
-iterations = 1 # k-fold cross-validation
-mode = 7
+n_samples = 20
+iterations = 10 # k-fold cross-validation
+mode = 10
 
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
@@ -23,8 +23,10 @@ testDir = baseDir + "deictic/mdollar-dataset/resampled/"
 if mode in [-1, 0, 1]:
     # Unica
     if mode == -1:
-        folders = ['caret', 'check', 'delete_mark', 'left_sq_bracket', 'right_sq_bracket',
-                   'star', 'triangle', 'v', 'x']
+        #folders = ['caret', 'check', 'delete_mark', 'left_sq_bracket', 'right_sq_bracket',
+        #           'star', 'triangle', 'v', 'x']
+        folders = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket',
+                              'x', 'delete_mark', 'triangle', 'rectangle']
         gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
         type = 'unica-'
     # 1Dollar
@@ -100,7 +102,7 @@ if mode in [4,5]:
 
 
 ################################################################ ADHOC HMM ################################################################
-if mode in [6, 7]:
+if mode in [6, 7, 8, 9, 10]:
     ## Adhoc hmm - 1Dollar
     if mode == 6:
         list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
@@ -134,24 +136,24 @@ if mode in [6, 7]:
     ## Adhoc hmm - MDollar
     if mode == 7:
         list_gesture = [("D", 2),
-                        #("H", 3),
-                        #("I", 3),
-                        #("N", 3),
+                        ("H", 3),
+                        ("I", 3),
+                        ("N", 3),
                         ("P", 2),
-                        #("T", 2),
-                        #("X", 2),
-                        #("arrowhead", 2),
-                        #("asterisk", 3),
+                        ("T", 2),
+                        ("X", 2),
+                        ("arrowhead", 2),
+                        ("asterisk", 3),
                         #("exclamation_point", 2),
                         #("half_note", 3),
-                        #("null", 2),
-                        #("pitchfork", 2),
+                        ("null", 2),
+                        ("pitchfork", 2),
                         #("six_point_star", 2)
                         ]
         #list_gesture = [("D", 2), ("X", 2)]
 
         list_avoid = {
-            "D" : [2,3], "H" : [], "I": [], "N" : [], "P": [0], "T": [1,2,3], "X": [], "arrowhead": [], "asterisk" : [],
+            "D" : [0,3], "H" : [], "I": [], "N" : [], "P": [0,3], "T": [1,2,3], "X": [], "arrowhead": [], "asterisk" : [],
             #"exclamation_point": [], "half_note": [],
             "null": [0], "pitchfork":[0],
             #"six_point_star": []
@@ -159,7 +161,7 @@ if mode in [6, 7]:
 
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/mdollar-dataset/ten-cross-validation/'
-        n_features = 3
+        n_features = 2
 
         # Training
         gestures = dict()
@@ -205,40 +207,77 @@ if mode in [6, 7]:
                 gestures[gesture[0]] = hmms
 
             print("inizio il test")
-            results = compares_deictic_models(gestures, gestureDir)
+            results = compares_deictic_models(gestures, gestureDir, ten_fold=True)
             print("K = {}".format(k))
             print(results)
 
-if mode == 8:
-    folders = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket', 'x', 'delete_mark',
-               'triangle', 'rectangle']
-    gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
+    if mode == 9:
+        folders = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket', 'x', 'delete_mark',
+                   'triangle', 'rectangle']
+        gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
 
-    confusion = numpy.zeros((len(folders), len(folders)))
-    for k in range(0, 13):
-        hmms = []
-        test = []
-        for dir in folders:
-            data = CsvDataset(gestureDir + dir + '/');
-            one, train = data.leave_one_out(leave_index=k);
-            test.append(one)
-            print("---------------  gesture: {0} fold: {1} -----------------".format(dir, k));
-            model = create_hmm_gesture(dir, train, n_states, 2)
-            model.fit(train, use_pseudocount=True)
-            hmms.append(model)
-        for i in range(0, len(test)):
-            max_norm_log_probability = -sys.maxsize
-            j = 0
-            for h in range(0, len(hmms)):
-                normLog = hmms[h].log_probability(test[i]) / len(test[i])
+        confusion = numpy.zeros((len(folders), len(folders)))
+        for k in range(0, 13):
+            hmms = []
+            test = []
+            for dir in folders:
+                data = CsvDataset(gestureDir + dir + '/');
+                one, train = data.leave_one_out(leave_index=k);
+                test.append(one)
+                print("---------------  gesture: {0} fold: {1} -----------------".format(dir, k));
+                model = create_hmm_gesture(dir, train, n_states, 2)
+                model.fit(train, use_pseudocount=True)
+                hmms.append(model)
+            for i in range(0, len(test)):
+                max_norm_log_probability = -sys.maxsize
+                j = 0
+                for h in range(0, len(hmms)):
+                    normLog = hmms[h].log_probability(test[i]) / len(test[i])
 
-                if normLog > max_norm_log_probability:
-                    j = h
-                    max_norm_log_probability = normLog
+                    if normLog > max_norm_log_probability:
+                        j = h
+                        max_norm_log_probability = normLog
 
-            confusion[i][j] = confusion[i][j] + 1
-    print(folders)
-    print(confusion)
+                confusion[i][j] = confusion[i][j] + 1
+        print(folders)
+        print(confusion)
+
+    if mode == 10:
+        list_gesture = [('v', n_states * 2), ('caret', n_states * 2), ('left_sq_bracket', n_states * 3),
+                        ('right_sq_bracket',n_states * 3), ('x',n_states * 3), ('delete_mark', n_states * 3),
+                        ('triangle', n_states * 3), ('rectangle', n_states * 3)]
+
+        #list_gesture = [("caret", n_states * 2), ("v", n_states * 2)]
+        gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
+        list_filesDir = baseDir + 'deictic/unica-dataset/ten-cross-validation/'
+        n_features = 2
+
+        gestures = [i[0] for i in list_gesture]
+        results = None
+
+        # Create hmm gesture, training and testing sequences
+
+
+        confusion = numpy.zeros((len(list_gesture), len(list_gesture)))
+
+
+
+        for k in range(0, iterations):
+            hmms = []
+            for gesture in list_gesture:
+                # Training dataset
+                training_dataset = CsvDataset(gestureDir + gesture[0] + '/'). \
+                    read_ten_cross_validation_dataset(list_filesDir + gesture[0] + '/', type='train')
+                # Create and training hmm
+                hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1], n_features))
+
+            t = test(hmms, gestureDir, gestures, plot=False)
+            t.ten_cross_validation(list_filesDir, k)
+            print("K = {}".format(k))
+            print(t.results)
+            confusion = confusion + t.results;
+        print("--------------------- finale ------------------------")
+        print(confusion)
 
 
 
@@ -261,560 +300,9 @@ if mode == 24:
     plot_gesture(model)
 
 if mode == 25:
-    dataset = CsvDataset(testDir + "D/")
+    dataset = CsvDataset(testDir + "P/")
     #dataset.plot()
-    sampleNames0 =[
-        '66-finger-slow-D-04.csv',
-        '85-finger-slow-D-07.csv',
-        '98-stylus-slow-D-09.csv'
-    ];
-
-
-
-    sampleNames1 = [
-        '10-stylus-fast-D-01.csv',
-        '10-stylus-fast-D-02.csv',
-        '10-stylus-fast-D-03.csv',
-'10-stylus-fast-D-04.csv',
-'10-stylus-fast-D-05.csv',
-'10-stylus-fast-D-06.csv',
-'10-stylus-fast-D-07.csv',
-'10-stylus-fast-D-08.csv',
-'10-stylus-fast-D-09.csv',
-'10-stylus-fast-D-10.csv',
-'10-stylus-medium-D-01.csv',
-'10-stylus-medium-D-02.csv',
-'10-stylus-medium-D-03.csv',
-'10-stylus-medium-D-04.csv',
-'10-stylus-medium-D-05.csv',
-'10-stylus-medium-D-06.csv',
-'10-stylus-medium-D-07.csv',
-'10-stylus-medium-D-08.csv',
-'10-stylus-medium-D-09.csv',
-'10-stylus-medium-D-10.csv',
-'10-stylus-slow-D-01.csv',
-'10-stylus-slow-D-03.csv',
-'10-stylus-slow-D-04.csv',
-'10-stylus-slow-D-06.csv',
-'10-stylus-slow-D-07.csv',
-'10-stylus-slow-D-08.csv',
-'10-stylus-slow-D-09.csv',
-'10-stylus-slow-D-10.csv',
-'11-stylus-fast-D-01.csv',
-'11-stylus-fast-D-03.csv',
-'11-stylus-fast-D-04.csv',
-'11-stylus-fast-D-06.csv',
-'11-stylus-fast-D-07.csv',
-'11-stylus-fast-D-09.csv',
-'11-stylus-fast-D-10.csv',
-'11-stylus-medium-D-01.csv',
-'11-stylus-medium-D-02.csv',
-'11-stylus-medium-D-03.csv',
-'11-stylus-medium-D-05.csv',
-'11-stylus-medium-D-07.csv',
-'11-stylus-medium-D-08.csv',
-'11-stylus-medium-D-09.csv',
-'11-stylus-slow-D-01.csv',
-'11-stylus-slow-D-02.csv',
-'11-stylus-slow-D-03.csv',
-'11-stylus-slow-D-04.csv',
-'11-stylus-slow-D-05.csv',
-'11-stylus-slow-D-06.csv',
-'11-stylus-slow-D-07.csv',
-'11-stylus-slow-D-08.csv',
-'11-stylus-slow-D-10.csv',
-'12-stylus-fast-D-01.csv',
-'12-stylus-fast-D-02.csv',
-'12-stylus-fast-D-03.csv',
-'12-stylus-fast-D-04.csv',
-'12-stylus-fast-D-05.csv',
-'12-stylus-fast-D-06.csv',
-'12-stylus-fast-D-07.csv',
-'12-stylus-fast-D-08.csv',
-'12-stylus-fast-D-09.csv',
-'12-stylus-fast-D-10.csv',
-'12-stylus-medium-D-01.csv',
-'12-stylus-medium-D-02.csv',
-'12-stylus-medium-D-03.csv',
-'12-stylus-medium-D-04.csv',
-'12-stylus-medium-D-05.csv',
-'12-stylus-medium-D-06.csv',
-'12-stylus-medium-D-07.csv',
-'12-stylus-medium-D-08.csv',
-'12-stylus-medium-D-09.csv',
-'12-stylus-medium-D-10.csv',
-'12-stylus-slow-D-01.csv',
-'12-stylus-slow-D-02.csv',
-'12-stylus-slow-D-03.csv',
-'12-stylus-slow-D-04.csv',
-'12-stylus-slow-D-05.csv',
-'12-stylus-slow-D-06.csv',
-'12-stylus-slow-D-07.csv',
-'12-stylus-slow-D-08.csv',
-'12-stylus-slow-D-09.csv',
-'12-stylus-slow-D-10.csv',
-'22-stylus-fast-D-02.csv',
-'22-stylus-fast-D-03.csv',
-'22-stylus-fast-D-04.csv',
-'22-stylus-fast-D-05.csv',
-'22-stylus-fast-D-06.csv',
-'22-stylus-fast-D-07.csv',
-'22-stylus-fast-D-08.csv',
-'22-stylus-fast-D-10.csv',
-'22-stylus-medium-D-02.csv',
-'22-stylus-medium-D-03.csv',
-'22-stylus-medium-D-04.csv',
-'22-stylus-medium-D-05.csv',
-'22-stylus-medium-D-07.csv',
-'22-stylus-medium-D-08.csv',
-'22-stylus-medium-D-09.csv',
-'22-stylus-medium-D-10.csv',
-'22-stylus-slow-D-01.csv',
-'22-stylus-slow-D-02.csv',
-'22-stylus-slow-D-03.csv',
-'22-stylus-slow-D-04.csv',
-'22-stylus-slow-D-05.csv',
-'22-stylus-slow-D-06.csv',
-'22-stylus-slow-D-07.csv',
-'22-stylus-slow-D-08.csv',
-'22-stylus-slow-D-09.csv',
-'22-stylus-slow-D-10.csv',
-'28-stylus-fast-D-01.csv',
-'28-stylus-fast-D-02.csv',
-'28-stylus-fast-D-03.csv',
-'28-stylus-fast-D-04.csv',
-'28-stylus-fast-D-05.csv',
-'28-stylus-fast-D-06.csv',
-'28-stylus-fast-D-07.csv',
-'28-stylus-fast-D-08.csv',
-'28-stylus-fast-D-09.csv',
-'28-stylus-fast-D-10.csv',
-'28-stylus-medium-D-01.csv',
-'28-stylus-medium-D-02.csv',
-'28-stylus-medium-D-03.csv',
-'28-stylus-medium-D-04.csv',
-'28-stylus-medium-D-05.csv',
-'28-stylus-medium-D-06.csv',
-'28-stylus-medium-D-07.csv',
-'28-stylus-medium-D-08.csv',
-'28-stylus-medium-D-09.csv',
-'28-stylus-medium-D-10.csv',
-'28-stylus-slow-D-01.csv',
-'28-stylus-slow-D-02.csv',
-'28-stylus-slow-D-03.csv',
-'28-stylus-slow-D-04.csv',
-'28-stylus-slow-D-05.csv',
-'28-stylus-slow-D-06.csv',
-'28-stylus-slow-D-07.csv',
-'28-stylus-slow-D-08.csv',
-'28-stylus-slow-D-09.csv',
-'28-stylus-slow-D-10.csv',
-'41-finger-fast-D-01.csv',
-'41-finger-fast-D-02.csv',
-'41-finger-fast-D-03.csv',
-'41-finger-fast-D-04.csv',
-'41-finger-fast-D-05.csv',
-'41-finger-fast-D-07.csv',
-'41-finger-fast-D-08.csv',
-'41-finger-fast-D-09.csv',
-'41-finger-fast-D-10.csv',
-'41-finger-medium-D-01.csv',
-'41-finger-medium-D-02.csv',
-'41-finger-medium-D-03.csv',
-'41-finger-medium-D-04.csv',
-'41-finger-medium-D-05.csv',
-'41-finger-medium-D-06.csv',
-'41-finger-medium-D-07.csv',
-'41-finger-medium-D-08.csv',
-'41-finger-medium-D-09.csv',
-'41-finger-medium-D-10.csv',
-'41-finger-slow-D-01.csv',
-'41-finger-slow-D-02.csv',
-'41-finger-slow-D-05.csv',
-'41-finger-slow-D-06.csv',
-'41-finger-slow-D-07.csv',
-'41-finger-slow-D-08.csv',
-'41-finger-slow-D-09.csv',
-'41-finger-slow-D-10.csv',
-'58-finger-fast-D-01.csv',
-'58-finger-fast-D-03.csv',
-'58-finger-fast-D-04.csv',
-'58-finger-fast-D-05.csv',
-'58-finger-fast-D-06.csv',
-'58-finger-fast-D-07.csv',
-'58-finger-fast-D-08.csv',
-'58-finger-fast-D-09.csv',
-'58-finger-fast-D-10.csv',
-'58-finger-medium-D-01.csv',
-'58-finger-medium-D-02.csv',
-'58-finger-medium-D-03.csv',
-'58-finger-medium-D-04.csv',
-'58-finger-medium-D-05.csv',
-'58-finger-medium-D-06.csv',
-'58-finger-medium-D-07.csv',
-'58-finger-medium-D-08.csv',
-'58-finger-medium-D-09.csv',
-'58-finger-medium-D-10.csv',
-'58-finger-slow-D-01.csv',
-'58-finger-slow-D-02.csv',
-'58-finger-slow-D-04.csv',
-'58-finger-slow-D-05.csv',
-'58-finger-slow-D-06.csv',
-'58-finger-slow-D-07.csv',
-'58-finger-slow-D-08.csv',
-'58-finger-slow-D-09.csv',
-'61-finger-fast-D-01.csv',
-'61-finger-fast-D-02.csv',
-'61-finger-fast-D-03.csv',
-'61-finger-fast-D-05.csv',
-'61-finger-fast-D-06.csv',
-'61-finger-fast-D-07.csv',
-'61-finger-fast-D-08.csv',
-'61-finger-fast-D-09.csv',
-'61-finger-fast-D-10.csv',
-'61-finger-medium-D-01.csv',
-'61-finger-medium-D-02.csv',
-'61-finger-medium-D-03.csv',
-'61-finger-medium-D-05.csv',
-'61-finger-medium-D-06.csv',
-'61-finger-medium-D-07.csv',
-'61-finger-medium-D-08.csv',
-'61-finger-medium-D-09.csv',
-'61-finger-medium-D-10.csv',
-'61-finger-slow-D-01.csv',
-'61-finger-slow-D-02.csv',
-'61-finger-slow-D-03.csv',
-'61-finger-slow-D-04.csv',
-'61-finger-slow-D-05.csv',
-'61-finger-slow-D-06.csv',
-'61-finger-slow-D-07.csv',
-'61-finger-slow-D-08.csv',
-'61-finger-slow-D-09.csv',
-'61-finger-slow-D-10.csv',
-'66-finger-fast-D-01.csv',
-'66-finger-fast-D-02.csv',
-'66-finger-fast-D-03.csv',
-'66-finger-fast-D-04.csv',
-'66-finger-fast-D-06.csv',
-'66-finger-fast-D-08.csv',
-'66-finger-fast-D-09.csv',
-'66-finger-fast-D-10.csv',
-'66-finger-medium-D-01.csv',
-'66-finger-medium-D-02.csv',
-'66-finger-medium-D-03.csv',
-'66-finger-medium-D-04.csv',
-'66-finger-medium-D-05.csv',
-'66-finger-medium-D-06.csv',
-'66-finger-medium-D-08.csv',
-'66-finger-medium-D-09.csv',
-'66-finger-medium-D-10.csv',
-'66-finger-slow-D-01.csv',
-'66-finger-slow-D-02.csv',
-'66-finger-slow-D-03.csv',
-
-'66-finger-slow-D-05.csv',
-'66-finger-slow-D-06.csv',
-'66-finger-slow-D-07.csv',
-'66-finger-slow-D-08.csv',
-'66-finger-slow-D-09.csv',
-'66-finger-slow-D-10.csv',
-'68-stylus-fast-D-01.csv',
-'68-stylus-fast-D-02.csv',
-'68-stylus-fast-D-03.csv',
-'68-stylus-fast-D-05.csv',
-'68-stylus-fast-D-07.csv',
-'68-stylus-fast-D-08.csv',
-'68-stylus-fast-D-09.csv',
-'68-stylus-fast-D-10.csv',
-'68-stylus-medium-D-02.csv',
-'68-stylus-medium-D-03.csv',
-'68-stylus-medium-D-04.csv',
-'68-stylus-medium-D-05.csv',
-'68-stylus-medium-D-06.csv',
-'68-stylus-medium-D-07.csv',
-'68-stylus-medium-D-08.csv',
-'68-stylus-medium-D-09.csv',
-'68-stylus-medium-D-10.csv',
-'68-stylus-slow-D-02.csv',
-'68-stylus-slow-D-03.csv',
-'68-stylus-slow-D-04.csv',
-'68-stylus-slow-D-05.csv',
-'68-stylus-slow-D-06.csv',
-'68-stylus-slow-D-08.csv',
-'68-stylus-slow-D-09.csv',
-'68-stylus-slow-D-10.csv',
-'71-stylus-fast-D-01.csv',
-'71-stylus-fast-D-02.csv',
-'71-stylus-fast-D-03.csv',
-'71-stylus-fast-D-04.csv',
-'71-stylus-fast-D-06.csv',
-'71-stylus-fast-D-07.csv',
-'71-stylus-fast-D-08.csv',
-'71-stylus-fast-D-09.csv',
-'71-stylus-fast-D-10.csv',
-'71-stylus-medium-D-01.csv',
-'71-stylus-medium-D-02.csv',
-'71-stylus-medium-D-03.csv',
-'71-stylus-medium-D-04.csv',
-'71-stylus-medium-D-05.csv',
-'71-stylus-medium-D-06.csv',
-'71-stylus-medium-D-07.csv',
-'71-stylus-medium-D-10.csv',
-'71-stylus-slow-D-01.csv',
-'71-stylus-slow-D-02.csv',
-'71-stylus-slow-D-04.csv',
-'71-stylus-slow-D-05.csv',
-'71-stylus-slow-D-06.csv',
-'71-stylus-slow-D-07.csv',
-'71-stylus-slow-D-08.csv',
-'71-stylus-slow-D-09.csv',
-'71-stylus-slow-D-10.csv',
-'73-finger-fast-D-01.csv',
-'73-finger-fast-D-02.csv',
-'73-finger-fast-D-04.csv',
-'73-finger-fast-D-05.csv',
-'73-finger-fast-D-06.csv',
-'73-finger-fast-D-08.csv',
-'73-finger-fast-D-09.csv',
-'73-finger-fast-D-10.csv',
-'73-finger-medium-D-01.csv',
-'73-finger-medium-D-02.csv',
-'73-finger-medium-D-03.csv',
-'73-finger-medium-D-04.csv',
-'73-finger-medium-D-05.csv',
-'73-finger-medium-D-06.csv',
-'73-finger-medium-D-07.csv',
-'73-finger-medium-D-08.csv',
-'73-finger-medium-D-09.csv',
-'73-finger-medium-D-10.csv',
-'73-finger-slow-D-03.csv',
-'73-finger-slow-D-04.csv',
-'73-finger-slow-D-05.csv',
-'73-finger-slow-D-06.csv',
-'73-finger-slow-D-07.csv',
-'73-finger-slow-D-08.csv',
-'73-finger-slow-D-10.csv',
-'75-finger-fast-D-01.csv',
-'75-finger-fast-D-02.csv',
-'75-finger-fast-D-03.csv',
-'75-finger-fast-D-04.csv',
-'75-finger-fast-D-05.csv',
-'75-finger-fast-D-06.csv',
-'75-finger-fast-D-07.csv',
-'75-finger-fast-D-08.csv',
-'75-finger-fast-D-09.csv',
-'75-finger-fast-D-10.csv',
-'75-finger-medium-D-01.csv',
-'75-finger-medium-D-02.csv',
-'75-finger-medium-D-03.csv',
-'75-finger-medium-D-04.csv',
-'75-finger-medium-D-05.csv',
-'75-finger-medium-D-06.csv',
-'75-finger-medium-D-07.csv',
-'75-finger-medium-D-08.csv',
-'75-finger-medium-D-09.csv',
-'75-finger-medium-D-10.csv',
-'75-finger-slow-D-02.csv',
-'75-finger-slow-D-03.csv',
-'75-finger-slow-D-04.csv',
-'75-finger-slow-D-05.csv',
-'75-finger-slow-D-06.csv',
-'75-finger-slow-D-07.csv',
-'75-finger-slow-D-08.csv',
-'75-finger-slow-D-10.csv',
-'77-finger-fast-D-01.csv',
-'77-finger-fast-D-02.csv',
-'77-finger-fast-D-03.csv',
-'77-finger-fast-D-05.csv',
-'77-finger-fast-D-06.csv',
-'77-finger-fast-D-07.csv',
-'77-finger-fast-D-08.csv',
-'77-finger-fast-D-09.csv',
-'77-finger-fast-D-10.csv',
-'77-finger-medium-D-01.csv',
-'77-finger-medium-D-02.csv',
-'77-finger-medium-D-03.csv',
-'77-finger-medium-D-04.csv',
-'77-finger-medium-D-05.csv',
-'77-finger-medium-D-07.csv',
-'77-finger-medium-D-08.csv',
-'77-finger-medium-D-09.csv',
-'77-finger-medium-D-10.csv',
-'77-finger-slow-D-01.csv',
-'77-finger-slow-D-02.csv',
-'77-finger-slow-D-03.csv',
-'77-finger-slow-D-04.csv',
-'77-finger-slow-D-05.csv',
-'77-finger-slow-D-06.csv',
-'77-finger-slow-D-07.csv',
-'77-finger-slow-D-09.csv',
-'77-finger-slow-D-10.csv',
-'85-finger-fast-D-02.csv',
-'85-finger-fast-D-04.csv',
-'85-finger-fast-D-06.csv',
-'85-finger-fast-D-07.csv',
-'85-finger-fast-D-09.csv',
-'85-finger-fast-D-10.csv',
-'85-finger-medium-D-01.csv',
-'85-finger-medium-D-02.csv',
-'85-finger-medium-D-03.csv',
-'85-finger-medium-D-04.csv',
-'85-finger-medium-D-05.csv',
-'85-finger-medium-D-06.csv',
-'85-finger-medium-D-07.csv',
-'85-finger-medium-D-08.csv',
-'85-finger-medium-D-09.csv',
-'85-finger-slow-D-01.csv',
-'85-finger-slow-D-02.csv',
-'85-finger-slow-D-03.csv',
-'85-finger-slow-D-04.csv',
-'85-finger-slow-D-05.csv',
-'85-finger-slow-D-06.csv',
-
-'85-finger-slow-D-08.csv',
-'88-stylus-fast-D-01.csv',
-'88-stylus-fast-D-02.csv',
-'88-stylus-fast-D-03.csv',
-'88-stylus-fast-D-04.csv',
-'88-stylus-fast-D-05.csv',
-'88-stylus-fast-D-06.csv',
-'88-stylus-fast-D-07.csv',
-'88-stylus-fast-D-08.csv',
-'88-stylus-fast-D-09.csv',
-'88-stylus-fast-D-10.csv',
-'88-stylus-medium-D-01.csv',
-'88-stylus-medium-D-02.csv',
-'88-stylus-medium-D-03.csv',
-'88-stylus-medium-D-04.csv',
-'88-stylus-medium-D-05.csv',
-'88-stylus-medium-D-06.csv',
-'88-stylus-medium-D-07.csv',
-'88-stylus-medium-D-08.csv',
-'88-stylus-medium-D-09.csv',
-'88-stylus-medium-D-10.csv',
-'88-stylus-slow-D-01.csv',
-'88-stylus-slow-D-02.csv',
-'88-stylus-slow-D-03.csv',
-'88-stylus-slow-D-06.csv',
-'88-stylus-slow-D-07.csv',
-'88-stylus-slow-D-08.csv',
-'88-stylus-slow-D-09.csv',
-'88-stylus-slow-D-10.csv',
-'94-finger-fast-D-01.csv',
-'94-finger-fast-D-02.csv',
-'94-finger-fast-D-03.csv',
-'94-finger-fast-D-04.csv',
-'94-finger-fast-D-05.csv',
-'94-finger-fast-D-06.csv',
-'94-finger-fast-D-07.csv',
-'94-finger-fast-D-08.csv',
-'94-finger-fast-D-09.csv',
-'94-finger-fast-D-10.csv',
-'94-finger-medium-D-01.csv',
-'94-finger-medium-D-02.csv',
-'94-finger-medium-D-05.csv',
-'94-finger-medium-D-07.csv',
-'94-finger-medium-D-08.csv',
-'94-finger-medium-D-09.csv',
-'94-finger-medium-D-10.csv',
-'94-finger-slow-D-01.csv',
-'94-finger-slow-D-02.csv',
-'94-finger-slow-D-03.csv',
-'94-finger-slow-D-04.csv',
-'94-finger-slow-D-05.csv',
-'94-finger-slow-D-06.csv',
-'94-finger-slow-D-07.csv',
-'94-finger-slow-D-08.csv',
-'94-finger-slow-D-09.csv',
-'94-finger-slow-D-10.csv',
-'95-stylus-fast-D-01.csv',
-'95-stylus-fast-D-02.csv',
-'95-stylus-fast-D-03.csv',
-'95-stylus-fast-D-04.csv',
-'95-stylus-fast-D-05.csv',
-'95-stylus-fast-D-06.csv',
-'95-stylus-fast-D-07.csv',
-'95-stylus-fast-D-08.csv',
-'95-stylus-fast-D-09.csv',
-'95-stylus-medium-D-01.csv',
-'95-stylus-medium-D-02.csv',
-'95-stylus-medium-D-03.csv',
-'95-stylus-medium-D-04.csv',
-'95-stylus-medium-D-05.csv',
-'95-stylus-medium-D-06.csv',
-'95-stylus-medium-D-07.csv',
-'95-stylus-medium-D-08.csv',
-'95-stylus-medium-D-09.csv',
-'95-stylus-medium-D-10.csv',
-'95-stylus-slow-D-01.csv',
-'95-stylus-slow-D-02.csv',
-'95-stylus-slow-D-03.csv',
-'95-stylus-slow-D-04.csv',
-'95-stylus-slow-D-06.csv',
-'95-stylus-slow-D-07.csv',
-'95-stylus-slow-D-09.csv',
-'95-stylus-slow-D-10.csv',
-'98-stylus-fast-D-01.csv',
-'98-stylus-fast-D-02.csv',
-'98-stylus-fast-D-03.csv',
-'98-stylus-fast-D-04.csv',
-'98-stylus-fast-D-05.csv',
-'98-stylus-fast-D-06.csv',
-'98-stylus-fast-D-07.csv',
-'98-stylus-fast-D-08.csv',
-'98-stylus-fast-D-09.csv',
-'98-stylus-fast-D-10.csv',
-'98-stylus-medium-D-01.csv',
-'98-stylus-medium-D-02.csv',
-'98-stylus-medium-D-03.csv',
-'98-stylus-medium-D-04.csv',
-'98-stylus-medium-D-05.csv',
-'98-stylus-medium-D-06.csv',
-'98-stylus-medium-D-07.csv',
-'98-stylus-medium-D-08.csv',
-'98-stylus-medium-D-09.csv',
-'98-stylus-medium-D-10.csv',
-'98-stylus-slow-D-01.csv',
-'98-stylus-slow-D-03.csv',
-'98-stylus-slow-D-04.csv',
-'98-stylus-slow-D-05.csv',
-'98-stylus-slow-D-06.csv',
-'98-stylus-slow-D-07.csv',
-'98-stylus-slow-D-08.csv',
-
-'98-stylus-slow-D-10.csv',
-'99-finger-fast-D-01.csv',
-'99-finger-fast-D-02.csv',
-'99-finger-fast-D-03.csv',
-'99-finger-fast-D-04.csv',
-'99-finger-fast-D-05.csv',
-'99-finger-fast-D-06.csv',
-'99-finger-fast-D-07.csv',
-'99-finger-fast-D-08.csv',
-'99-finger-fast-D-09.csv',
-'99-finger-fast-D-10.csv',
-'99-finger-medium-D-01.csv',
-'99-finger-medium-D-02.csv',
-'99-finger-medium-D-03.csv',
-'99-finger-medium-D-04.csv',
-'99-finger-medium-D-05.csv',
-'99-finger-medium-D-06.csv',
-'99-finger-medium-D-07.csv',
-'99-finger-medium-D-08.csv',
-'99-finger-medium-D-09.csv',
-'99-finger-medium-D-10.csv',
-'99-finger-slow-D-01.csv',
-'99-finger-slow-D-03.csv',
-'99-finger-slow-D-04.csv',
-'99-finger-slow-D-06.csv',
-'99-finger-slow-D-07.csv',
-'99-finger-slow-D-08.csv',
-'99-finger-slow-D-09.csv',
-    ];
-
-    for sampleName in sampleNames1:
-        dataset.plot(sampleName=sampleName)
-
+    dataset.plot(singleMode=True)
 
 if mode == 26:
     d = NormalDistribution(2.0, 0.5)

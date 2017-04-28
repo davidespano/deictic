@@ -77,7 +77,8 @@ class Parse:
 
             # Type Expression
             elif exp in [HmmFactory.TypeOperator.unistroke.name,
-                         HmmFactory.TypeOperator.multistroke.name]:
+                         HmmFactory.TypeOperator.multistroke.name,
+                         HmmFactory.TypeOperator.unica.name]:
                 # Take operand
                 op1 = stack.pop()
                 expression = None
@@ -86,6 +87,8 @@ class Parse:
                     expression = OneDollarModels.getModel(op1)
                 elif(exp == HmmFactory.TypeOperator.multistroke.name):
                     expression = MDollarModels.getModel(op1)
+                elif (exp == HmmFactory.TypeOperator.unica.name):
+                    expression = UnicaModels.getModel(op1)
                 # Add primitive expression
                 primitive = HmmFactory.factory(expression, self.n_states, self.n_samples)
                 stack.append(primitive)

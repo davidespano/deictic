@@ -187,6 +187,7 @@ class CsvDataset:
     # Plots input dataset's files
     def plot(self, dimensions = 2, sampleName = None, singleMode = False):
         fig = plt.figure();
+        labels =[];
         ax = None
         if dimensions == 3:
             ax = fig.gca(projection='3d')
@@ -212,7 +213,9 @@ class CsvDataset:
                         plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
 
                     if singleMode:
+                        plt.title(filename)
                         plt.show()
+                        #labels.append(filename + input(filename));
         if dimensions == 3:
             ax.legend()
         else:
@@ -222,6 +225,7 @@ class CsvDataset:
             plt.title(sampleName)
         if not singleMode:
             plt.show()
+        print(labels)
 
 
 class DatasetTransform:
