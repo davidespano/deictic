@@ -179,7 +179,7 @@ if mode in [6, 7, 8, 9, 10]:
                 list_files = []
                 list_occurrence_models = []
                 for file in files:
-                    file = file.split('_')
+                    file = file.split('#')
                     list_files.append(file[0])
                     list_occurrence_models.append(int(file[1]))
 
