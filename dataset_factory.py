@@ -116,10 +116,10 @@ def dataset_factory(list, inputDir, outputDir, unistroke_mode = True):
     return
 
 
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 8
+mode = 6
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
@@ -185,6 +185,7 @@ if mode == 7:
         # Read report
         file_array = []
         labels = []
+        print("========== Gesture {0} ===========".format(gesture))
         with open(reportDir+gesture+'/report.csv', "r") as f:
             reader = csv.reader(f, delimiter=',')
             vals = list(reader)

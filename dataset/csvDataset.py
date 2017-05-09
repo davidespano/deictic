@@ -215,7 +215,7 @@ class CsvDataset:
                     if singleMode:
                         plt.title(filename)
                         plt.show()
-                        #labels.append(filename + input(filename));
+                        labels.append(filename + "," + input(filename +"->"));
         if dimensions == 3:
             ax.legend()
         else:

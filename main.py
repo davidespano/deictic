@@ -9,7 +9,7 @@ baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 10
+mode = 6
 
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
@@ -31,9 +31,13 @@ if mode in [-1, 0, 1]:
         type = 'unica-'
     # 1Dollar
     elif mode == 0:
-        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
-                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
-                   'star', 'triangle', 'v', 'x']
+        #folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
+        #           'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
+        #           'star', 'triangle', 'v', 'x']
+        folders = [ 'triangle', 'x', 'rectangle', 'circle', 'check', 'caret', 'question_mark', 'arrow',
+                    'left_sq_bracket', 'right_sq_bracket', 'v', 'delete_mark', 'left_curly_brace', 'right_curly_brace',
+                    'star', 'pigtail']
+
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
         type = 'unistroke-'
     # MDollar
@@ -77,11 +81,11 @@ if mode in [2,3]:
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
 if mode in [4,5]:
     if mode == 4:
-        folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
-                   'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
-                   'star', 'triangle', 'v', 'x']
+        folders = ['triangle', 'x', 'rectangle', 'circle', 'check', 'caret', 'question_mark', 'arrow',
+                   'left_sq_bracket', 'right_sq_bracket', 'v', 'delete_mark', 'left_curly_brace', 'right_curly_brace',
+                   'star', 'pigtail']
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
-        list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
+        list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation/'
         type = 'unistroke-'
     else:
         folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
@@ -105,13 +109,26 @@ if mode in [4,5]:
 if mode in [6, 7, 8, 9, 10]:
     ## Adhoc hmm - 1Dollar
     if mode == 6:
-        list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
-                    ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
-                    ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
-                    ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
-        list_gesture = [("caret", n_states*2), ("v", n_states*2)]
+        list_gesture = [
+            ("triangle", n_states * 3),
+            ("x", n_states * 3),
+            ("rectangle", n_states * 4),
+            ("circle", n_states * 4),
+            ("check", n_states * 2),
+            ("caret", n_states * 2),
+            ("question_mark", n_states * 4),
+            ("arrow", n_states * 4),
+            ("left_sq_bracket", n_states * 3),
+            ("right_sq_bracket", n_states * 3),
+            ("v", n_states*2),
+            ("delete_mark", n_states*4),
+            ("left_curly_brace", n_states * 6),
+            ("right_curly_brace", n_states * 6),
+            ("star", n_states*4),
+            ("pigtail", n_states*4) ]
+        #list_gesture = [("caret", n_states*2), ("v", n_states*2)]
         gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
-        list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation'
+        list_filesDir = baseDir + 'deictic/1dollar-dataset/ten-cross-validation/'
         n_features = 2
 
         gestures = [i[0] for i in list_gesture]
@@ -119,44 +136,51 @@ if mode in [6, 7, 8, 9, 10]:
 
         # Create hmm gesture, training and testing sequences
         hmms = []
-
+        confusion = numpy.zeros((len(list_gesture), len(list_gesture)))
         for k in range(0, iterations):
+            hmms = []
             for gesture in list_gesture:
+                # Create and training hmm
+                print("---------------  gesture: {0}  -----------------".format(gesture[0]));
                 # Training dataset
-                training_dataset = CsvDataset(gestureDir+gesture[0]+'/'). \
-                    read_ten_cross_validation_dataset(list_filesDir + gesture +'/', type='train')
+                training_dataset = CsvDataset(gestureDir + gesture[0] + '/'). \
+                    read_ten_cross_validation_dataset(list_filesDir + gesture[0] + '/', type='train')
                 # Create and training hmm
                 hmms.append(create_hmm_gesture(gesture[0], training_dataset, gesture[1], n_features))
 
-            t = test(hmms, gestureDir, gestures, plot=False, results=results)
-            results = t.ten_cross_validation(list_filesDir, iterations=10)
+            t = test(hmms, gestureDir, gestures, plot=False)
+            t.ten_cross_validation(list_filesDir, k)
             print("K = {}".format(k))
-            print(results)
+            print(t.results)
+            confusion = confusion + t.results;
+        print("--------------------- finale ------------------------")
+        print(confusion)
 
     ## Adhoc hmm - MDollar
     if mode == 7:
-        list_gesture = [("D", 2),
-                        ("H", 3),
-                        ("I", 3),
-                        ("N", 3),
-                        ("P", 2),
-                        ("T", 2),
-                        ("X", 2),
-                        ("arrowhead", 2),
-                        ("asterisk", 3),
-                        #("exclamation_point", 2),
-                        #("half_note", 3),
-                        ("null", 2),
-                        ("pitchfork", 2),
-                        #("six_point_star", 2)
-                        ]
+        list_gesture = [
+            ("T", 2),
+            ("N", 3),
+            ("D", 2),
+            ("P", 2),
+            ("X", 2),
+            ("H", 3),
+            ("I", 3),
+            ("exclamation_point", 2),
+            ("null", 2),
+            ("arrowhead", 2),
+            ("pitchfork", 2),
+            ("six_point_star", 2),
+            ("asterisk", 3),
+            ("half_note", 3)
+            ]
         #list_gesture = [("D", 2), ("X", 2)]
 
         list_avoid = {
-            "D" : [0,3], "H" : [], "I": [], "N" : [], "P": [0,3], "T": [1,2,3], "X": [], "arrowhead": [], "asterisk" : [],
-            #"exclamation_point": [], "half_note": [],
-            "null": [0], "pitchfork":[0],
-            #"six_point_star": []
+            "D" : [0,3], "H" : [], "I": [], "N" : [], "P": [0,3], "T": [1,2,3], "X": [], "arrowhead": [1], "asterisk" : [],
+            "exclamation_point": [], "half_note": [0],
+            "null": [], "pitchfork":[],
+            "six_point_star": []
         }
 
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
@@ -165,6 +189,8 @@ if mode in [6, 7, 8, 9, 10]:
 
         # Training
         gestures = dict()
+
+        complete = numpy.zeros((len(list_gesture), len(list_gesture)))
 
         for k in range(0, iterations):
             for gesture in list_gesture:
@@ -201,15 +227,19 @@ if mode in [6, 7, 8, 9, 10]:
                                 gesture[0],
                                 list_dataset_for_models[i],
                                 gesture[1] * n_states, n_features,
-                                weights = [1,1, 10000],
+                                weights = [1,1, 100000],
                                 stroke = gesture[1])
                             )
                 gestures[gesture[0]] = hmms
 
             print("inizio il test")
             results = compares_deictic_models(gestures, gestureDir, ten_fold=True)
+            complete = complete + results
             print("K = {}".format(k))
             print(results)
+
+        print('============== complete ================')
+        print(complete)
 
     if mode == 9:
         folders = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket', 'x', 'delete_mark',
@@ -300,9 +330,10 @@ if mode == 24:
     plot_gesture(model)
 
 if mode == 25:
-    dataset = CsvDataset(testDir + "P/")
+    dataset = CsvDataset(testDir + "exclamation_point/")
     #dataset.plot()
     dataset.plot(singleMode=True)
+    #dataset.plot(sampleName="10-stylus-fast-pitchfork-10.csv")
 
 if mode == 26:
     d = NormalDistribution(2.0, 0.5)

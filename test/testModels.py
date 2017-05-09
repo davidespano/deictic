@@ -202,6 +202,7 @@ class test:
         return self.results
 
     def ten_cross_validation(self, list_filesDir, k=0):
+        self.results = numpy.zeros((len(self.models), len(self.models)), dtype=numpy.int)
         for index_dataset in range(0, len(self.list_dataset)):
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
 
@@ -213,7 +214,6 @@ class test:
 
 
     def compares_models(self, sequences, index_dataset):
-
         # For each sequence
         for sequence in sequences:
 

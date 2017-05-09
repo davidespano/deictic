@@ -144,13 +144,13 @@ class OneDollarModels:
             definition = Point(0,0) + Line(2,3) + Line(2,-3)
         # question mark
         elif(type_gesture == OneDollarModels.TypeGesture.question_mark.name):
-            definition = Point(0,0) + Arc(2,2) + Arc(2,-2) + Arc(-2,-2) + Line(0,-3)
+            definition = Point(0,0) + Arc(4,4) + Arc(4,-4) + Arc(-4,-4) + Arc(-2,-2, cw=False) + Arc(2, -2, cw=False)
         # left square bracket
         elif(type_gesture == OneDollarModels.TypeGesture.left_sq_bracket.name):
-            definition = Point(0,0) + Line(-2,0) + Line(0,-4) + Line(2,0)
+            definition = Point(0,0) + Line(-4,0) + Line(0,-5) + Line(4,0)
         # right square bracket
         elif(type_gesture == OneDollarModels.TypeGesture.right_sq_bracket.name):
-            definition = Point(0,0) + Line(2,0) + Line(0, -4)  + Line(-2, 0)
+            definition = Point(0,0) + Line(4,0) + Line(0, -5)  + Line(-4, 0)
         # v
         elif(type_gesture == OneDollarModels.TypeGesture.v.name):
             definition = Point(0,0) + Line(2,-3) + Line(2,3)
@@ -159,10 +159,10 @@ class OneDollarModels:
             definition = Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3)
         # left curly brace
         elif(type_gesture == OneDollarModels.TypeGesture.left_curly_brace.name):
-            definition = Point(0,0) + Arc(-5,-5, cw=False) + Line(0,-6) + Arc(-3,-3)  + Arc(3,-3) + Line(0,-6) + Arc(5,-5,cw=False)
+            definition =  Point(0,0) + Arc(-5,-5, cw=False) + Arc(-3,-3)  + Arc(3,-3) +  Arc(5,-5,cw=False)
         # right curly brace
         elif(type_gesture == OneDollarModels.TypeGesture.right_curly_brace.name):
-            definition = Point(0,0) + Arc(5,-5) + Line(0,-6) + Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Line(0,-6) + Arc(-5,-5)
+            definition = Point(0,0) + Arc(5,-5) +  Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Arc(-5,-5)
         # star
         elif(type_gesture == OneDollarModels.TypeGesture.star.name):
             definition = Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)

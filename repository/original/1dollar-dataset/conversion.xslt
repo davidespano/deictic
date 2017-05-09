@@ -15,7 +15,6 @@
         <xsl:value-of select="-number(@Y)"/>
         <xsl:text>,1,</xsl:text>
         <xsl:value-of select="@T"/>
-        <xsl:text>,</xsl:text>
         <xsl:text>&#10;</xsl:text>
     </xsl:template>
 </xsl:stylesheet>
