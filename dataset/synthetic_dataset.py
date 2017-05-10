@@ -3,66 +3,47 @@ import random
 ### Makes synthetic datasets  ###
 
 random.seed()
-# Sequence
-class MergeSequenceDataset:
-    # Provides to compose the sequence of all files in a single sequence. self's files start the sequence.
+
+# Choice
+class MergeChoiceDataset:
+    # Composes the sequence of two or more gesture to make a choice sequence.
     @staticmethod
-    def create_sequence_dataset(list_dataset, filepath, cols=[0,1]):
+    def create_merge_dataset(list_dataset, filepath, cols=[0,1]):
         if not isinstance(list_dataset, list):
             raise TypeError
         if not isinstance(cols, list):
             raise TypeError
 
-        # Read dataset
-        dataset = []
-        for data in list_dataset:
-            dataset.append(data.read_dataset())
-
-        # Composes first dataset's files with each one of the other dataset
+        # Gets sequences
         sequences = []
-        for sequence in dataset[0]:
-            new_sequence = deepcopy(sequence)
-            for i in range(1, len(dataset)):
-                num_rand = int(random.uniform(0, len(dataset[i])-1))
-                new_sequence = numpy.concatenate((new_sequence, dataset[i][num_rand]), axis=0)
-            # Add new sequence
-            sequences.append(new_sequence)
+        for dataset in list_dataset:
+            dataset_sequences = []
+            for sequence in dataset.read_dataset():
+                dataset_sequences.append(sequence)
+            sequences.append(dataset_sequences)
+
+        # Creates dataset
+        new_sequences = []
+        for i in range(0, len(sequences[0])):
+            # Choices a gesture from the list_dataset
+            gesture_index = int(random.uniform(0, len(list_dataset)))
+            # and choices a file of the selected gesture
+            file_index = int(random.uniform(0, len(sequences[gesture_index])))
+            # Add sequence
+            new_sequences.append(sequences[gesture_index][file_index])
 
         # Save file
-        for i in range(0, len(sequences)):
-            numpy.savetxt(filepath+'_{}.csv'.format(i), sequences[i], delimiter=',')
-
-# Iterative
-class MergeIterativeDataset:
-    # Provides to compose the sequence of all files in a single sequence. self's files start the sequence.
-    @staticmethod
-    def create_iterative_dataset(dataset, filepath, cols=[0,1], iterations = 1):
-        if not isinstance(cols, list):
-            raise TypeError
-
-        # Composes an iteration of each file with a random file (of same dataset)
-        dataset_seq = dataset.read_dataset()
-        length = len(dataset_seq)
-        sequences = []
-        for sequence in dataset.read_dataset():
-            new_sequence = deepcopy(sequence)
-            # Select a different random file for each iteration
-            for j in range(0, iterations):
-                num_rand = int(random.uniform(0, length-1))
-                # Concatenate
-                new_sequence = numpy.concatenate((new_sequence, dataset_seq[num_rand]), axis = 0)
-            sequences.append(new_sequence)
-
-        # Save file
-        for i in range(0, len(sequences)):
-            numpy.savetxt(filepath+'_{}.csv'.format(i), sequences[i], delimiter=',')
+        for i in range(0, len(new_sequences)):
+            numpy.savetxt(filepath+'_{}.csv'.format(i), new_sequences[i], delimiter=',')
 
 # Disabling
 class MergeDisablingDataset:
-    # Composes three files (from self, second and third dataset) to make a disabling sequence
+    # Composes the sequence of all files to make a disabling sequence
     @staticmethod
     def create_disabling_dataset(list_dataset, filepath, cols=[0,1]):
         if not isinstance(list_dataset, list):
+            raise TypeError
+        if not isinstance(cols, list):
             raise TypeError
 
         first_sequences = list_dataset[0].read_dataset()
@@ -76,8 +57,33 @@ class MergeDisablingDataset:
         for i in range(0, len(sequences)):
             numpy.savetxt(filepath+'_{}.csv'.format(i), sequences[i], delimiter=',')
 
+# Iterative
+class MergeIterativeDataset:
+    # Provides to compose the sequence of all files in a single sequence. self's files start the sequence.
+    @staticmethod
+    def create_iterative_dataset(list_dataset, filepath, cols=[0,1], iterations = 1):
+        if not isinstance(cols, list):
+            raise TypeError
+
+        # Composes an iteration of each file with a random file (of same dataset)
+        dataset_seq = list_dataset.read_dataset()
+        length = len(dataset_seq)
+        sequences = []
+        for sequence in list_dataset.read_dataset():
+            new_sequence = deepcopy(sequence)
+            # Select a different random file for each iteration
+            for j in range(0, iterations):
+                num_rand = int(random.uniform(0, length-1))
+                # Concatenate
+                new_sequence = numpy.concatenate((new_sequence, dataset_seq[num_rand]), axis = 0)
+            sequences.append(new_sequence)
+
+        # Save file
+        for i in range(0, len(sequences)):
+            numpy.savetxt(filepath+'_{}.csv'.format(i), sequences[i], delimiter=',')
+
+# Parallel
 class MergeParallelDataset:
-    # Parallel
     @staticmethod
     def create_parallel_dataset(list_dataset, filepath, cols=[0,1], flag_trasl=False):
         original_seq = []
@@ -130,6 +136,45 @@ class MergeParallelDataset:
                 merge = merge_temp
 
             sequences.append(merge)
+
+        # Save file
+        for i in range(0, len(sequences)):
+            numpy.savetxt(filepath+'_{}.csv'.format(i), sequences[i], delimiter=',')
+
+
+# Sequence
+class MergeSequenceDataset:
+    # Provides to compose the sequence of all files in a single sequence. self's files start the sequence.
+    @staticmethod
+    def create_sequence_dataset(list_dataset, filepath, cols=[0,1], type="unistroke"):
+        if not isinstance(list_dataset, list):
+            raise TypeError
+        if not isinstance(cols, list):
+            raise TypeError
+
+        # Read dataset
+        dataset = []
+        for data in list_dataset:
+            dataset.append(data.read_dataset())
+
+        # Composes first dataset's files with each one of the other dataset
+        sequences = []
+        for sequence in dataset[0]:
+            new_sequence = deepcopy(sequence)
+            for i in range(1, len(dataset)):
+                # Gets a random sequence from the dataset
+                num_rand = int(random.uniform(0, len(dataset[i])-1))
+                sequence_to_concatenate = deepcopy(dataset[i][num_rand])
+
+                # If we are working on multistroke dataset, this function changes the number of strokes:
+                # for each frame the new stroke number is obtained by adding the last stroke number of new_sequence.
+                if type != "unistroke":
+                    for index in range(0, len(sequence_to_concatenate)):
+                        sequence_to_concatenate[index][-1] = sequence_to_concatenate[index][-1] + new_sequence[-1][-1]
+
+                new_sequence = numpy.concatenate((new_sequence, sequence_to_concatenate), axis=0)
+            # Add new sequence
+            sequences.append(new_sequence)
 
         # Save file
         for i in range(0, len(sequences)):

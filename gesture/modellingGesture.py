@@ -3,7 +3,7 @@ from model import *
 from topology import *
 
 baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'

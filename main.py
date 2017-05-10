@@ -23,17 +23,12 @@ testDir = baseDir + "deictic/mdollar-dataset/resampled/"
 if mode in [-1, 0, 1]:
     # Unica
     if mode == -1:
-        #folders = ['caret', 'check', 'delete_mark', 'left_sq_bracket', 'right_sq_bracket',
-        #           'star', 'triangle', 'v', 'x']
         folders = ['v', 'caret', 'left_sq_bracket', 'right_sq_bracket',
                               'x', 'delete_mark', 'triangle', 'rectangle']
         gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
         type = 'unica-'
     # 1Dollar
     elif mode == 0:
-        #folders = ['arrow', 'caret', 'check', 'circle', 'delete_mark', 'left_curly_brace', 'left_sq_bracket',
-        #           'pigtail', 'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket',
-        #           'star', 'triangle', 'v', 'x']
         folders = [ 'triangle', 'x', 'rectangle', 'circle', 'check', 'caret', 'question_mark', 'arrow',
                     'left_sq_bracket', 'right_sq_bracket', 'v', 'delete_mark', 'left_curly_brace', 'right_curly_brace',
                     'star', 'pigtail']
@@ -56,10 +51,6 @@ if mode in [-1, 0, 1]:
 
     t = test(hmms, gestureDir, folders, plot=False)
     results = t.all_files()
-
-    ## Plot
-    #for hmm in hmms:
-    #    hmm.plot()
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
 if mode in [2,3]:

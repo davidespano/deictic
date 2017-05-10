@@ -48,8 +48,13 @@ def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2
 
 ## Compare deictic model
 # Compara tutti i modelli con tutte le gesture definite
-def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0, plot=False):
-    filename = baseDir + 'deictic_results.csv'
+def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
+    # Filename results
+    filename = baseDir + 'matrix_confusion.csv'
+    # Gesture names
+    names = []
+    for name in groups.keys():
+        names.append(name)
 
     # Confusion Matrix (n * n, where n is the number of models)
     results = numpy.zeros((len(groups.keys()), len(groups.keys())), dtype=numpy.int)
@@ -116,7 +121,36 @@ def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0, plot=Fal
             # Aggiorno matrice risultati
             results[index_dataset][index_model] += 1  # results[index_dataset][index_model] + 1
 
+        # Salva risultati
+        size = len(names)+1
+        # Char matrix for results
+        results_string = []
+        # Headers
+        headers = []
+        headers.append('models')
+        for i in range(1,size):
+            headers.append(names[i-1])
+        results_string.append(headers)
+        # Values
+        for i in range(0, size-1):
+            new_row = []
+            new_row.append(names[i])
+            for j in range(0,size-1):
+                new_row.append(str(results[i,j]))
+            results_string.append(new_row)
+
+        with open(filename, 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            for row in results_string:
+                spamwriter.writerow(row)
+
     return results
+
+
+
+
+
 
 def label_class(groups, baseDir, outputDir):
 
@@ -187,7 +221,7 @@ class test:
         for name in gesture_names:
             self.list_dataset.append(CsvDataset(datasetDir+name+'/'))
         # Namefile
-        self.filename = self.datasetDir+'matrix_confusion.csv'
+        self.filename = self.datasetDir+'matrix_confusion_choice.csv'
 
     def all_files(self):
         for index_dataset in range(0, len(self.list_dataset)):
