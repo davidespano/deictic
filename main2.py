@@ -55,8 +55,8 @@ def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
 
 
 # Main
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -175,7 +175,7 @@ if mode == 2 or mode == 3:
     #list_hmms = []
     #parse = Parse(n_states, n_samples)
 
-    hmms = create_hmms(gesture_models, n_states, n_samples)
+    #hmms = create_hmms(gesture_models, n_states, n_samples)
     list_hmms = dict()
 
     # Choice splitter
@@ -185,9 +185,27 @@ if mode == 2 or mode == 3:
     # Parallel splitter
     splitter = ['parallel', '-multistroke-']
     # Sequence splitter
-    splitter = ['sequence', '-multistroke-']
+    #splitter = ['sequence', '-multistroke-']
+
+    factory = ClassifierFactory()
+    factory.setLineSamplesPath(trainingDir)
+    factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+    factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+    factory.states = n_states
+    factory.spu = n_samples
+
+    folders = [
+        "parallel-multistroke-asterisk-multistroke-N",
+        "parallel-multistroke-T-multistroke-half_note",
+        "parallel-multistroke-null-multistroke-H",
+        "parallel-multistroke-I-multistroke-D",
+        "parallel-multistroke-six_point_star-multistroke-P",
+
+    ]
 
     for folder in folders:
+
+
         # Splitting
         gestures = folder.split(splitter[0])[1].split(splitter[1])
 
@@ -198,16 +216,31 @@ if mode == 2 or mode == 3:
                 list_hmms[folder].append(m)
         else:
             list_hmms[folder] = []
-            for model_1 in hmms.get(gestures[1]):
-                for model_2 in hmms.get(gestures[2]):
-                    if "choice" in splitter:
-                        m,s = HiddenMarkovModelTopology.choice([model_1, model_2], [])
-                    elif "parallel" in splitter:
-                        m,s = HiddenMarkovModelTopology.parallel(model_1, model_2, [])
-                    elif "sequence" in splitter:
-                        m,s = HiddenMarkovModelTopology.sequence([model_1, model_2], [])
+            if "sequence" in splitter:
+                for first in gesture_models[gestures[1]]:
+                    for second in gesture_models[gestures[2]]:
+                        seq = first + second
+                        model, edges = factory.createClassifier(seq)
+                        list_hmms[folder].append(model)
 
-                    list_hmms[folder].append(m)
+            if "parallel" in splitter:
+                 for first in gesture_models[gestures[1]]:
+                    for second in gesture_models[gestures[2]]:
+                        seq = first * second
+                        model, edges = factory.createClassifier(seq)
+                        list_hmms[folder].append(model)
+            # for model_1 in hmms.get(gestures[1]):
+            #     for model_2 in hmms.get(gestures[2]):
+            #         if "choice" in splitter:
+            #             m,s = HiddenMarkovModelTopology.choice([model_1, model_2], [])
+            #         elif "parallel" in splitter:
+            #             m,s = HiddenMarkovModelTopology.parallel(model_1, model_2, [])
+            #         elif "sequence" in splitter:
+            #             m,s = HiddenMarkovModelTopology.sequence([model_1, model_2], [])
+                        #m = gestures[1] + gestures[2];
+
+
+
 
 
 

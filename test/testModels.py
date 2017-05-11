@@ -103,6 +103,7 @@ def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
                 max_group = -sys.maxsize
 
                 for model in group:
+
                     log_probability = model.log_probability(sequence)
                     norm_log_probability = log_probability / len(sequence)
 

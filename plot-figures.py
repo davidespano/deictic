@@ -33,24 +33,30 @@ def plot_confusion_matrix(cm, classes,
 
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, "{0:.2f}".format(cm[i, j]),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+        if(cm[i,j] >= 0.01):
+            plt.text(j, i, "{0:.2f}".format(cm[i, j]),
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresh else "black")
 
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-# Compute confusion matrix
-class_names = ['T', 'N', 'D', 'P', 'X', 'H', 'I ', '! ',
+def accuracy(matrix, max_val):
 
-               ''+ chr(0x2205)+ ' ', #null
-               '' + chr(0x279C)+ '', # arrow head
-               '' + chr(0x03C8) + '', # pitchfork
-                '  ' + chr(0x2721) + '', # six point star
-               '' +chr(0x2731),  # asterisk
-               '' + chr(0x2669) #half note
-               ];
+    correct = np.zeros(len(matrix));
+    error = np.zeros(len(matrix));
+    for i in range(0, len(matrix)):
+        for j in range(0, len(matrix)):
+           if i == j:
+               correct[i] = matrix[i,j]
+           else:
+                error[i] += matrix[i,j]
+    print(correct)
+    print(error)
+    print("Accuracy mean: {0}, sd {1}".format(np.mean(correct, axis = 0)/max_val, np.std(correct, axis = 0)/max_val))
+    print("Error mean: {0}, sd {1}".format(np.mean(error)/max_val, np.std(error)/max_val))
+
 deictic_multistroke = np.matrix(
 [[592,   0,   0,   0,   4,   0,   0,   0,   0,   0,   4,   0,   0,   0],
  [  0, 573,   0,   0,  12,  11,   0,   0,   0,   0,   0,   0,   4,   0],
@@ -105,11 +111,99 @@ deictic_unistroke = np.matrix(
 )
 
 ad_hoc_unistroke = np.matrix(
-
-
+[[ 330,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   0,  330,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   3,    0,  326,    1,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   1,    0,    1,  327,    0,    0,    0,    0,    1,    0,    0,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,  324,    0,    0,    0,    0,    0,    6,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,  322,    0,    8,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    3,    0,  327,    0,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,  330,    0,    0,    0,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,  328,    0,    0,    0,   2,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,  329,    0,    0,   0,    1,    0,    0 ],
+ [   0,    0,    0,    0,   13,    0,    0,    0,    0,    0,  317,    0,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,  330,   0,    0,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 329,    1,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,    2,    0,    0,   0,  328,    0,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,  330,    0 ],
+ [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,  330 ]]
 )
 
+# synthetic unistroke
 
+synth_unistroke_iterative = np.matrix(
+    [[330,	0,	 0,	  0,	0,	 0,	  0],
+     [0,	330, 0,	  0,	0,	 0,	  0],
+     [0,	1,	 329, 0,	0,	 0,	  0],
+     [3,	0,	 0,	  327,	0,	 0,	  0],
+#     [0,	0,	 0,	  0,	330, 0,	  0],
+     [0,	1,	 0,	  0,	0,	 329, 0],
+     [0,	2,	 0,	  0,	15,	 0,	  313]]
+)
+
+synth_unistroke_iterative_names = [
+    'V* ',
+    '' + chr(0x25CB) + '* ',  # circle
+    '[* ', # left square bracket
+    '' + chr(0x2713) + '* ', # check
+#    '' + chr(0x22C0) + '* ', # caret
+    '' + chr(0x25B3) + '* ', # triangle
+    '?* ', # question mark
+]
+
+synth_unistroke_sequence = np.matrix(
+    [[330,	0,	    0,	   0,	0,	   0,	0],
+     [0,	326,	4,	   0,	0,	   0,	0],
+     [0,	0,	    330,   0,	0,	   0,	0],
+     [0,	0,	    0,	   330,	0,	   0,	0],
+     [0,	0,	    0,	   0,	330,   0,	0],
+     [1,	0,	    0,	   0,	0,	   329,	0],
+     [0,	0,	    0,	   0,	0,	   0,	330]]
+)
+
+synth_unistroke_sequence_names = [
+    'V » ' + chr(0x232B), # v + delete
+    chr(0x25B3) + ' » ' + chr(0x25CB),  # triangle + rectangle
+    chr(0x25CB) + ' » ' + chr(0x2113), # circle + pigtail
+    chr(0x22C0) + ' » ' + chr(0x279C), # caret + arrow
+    '[' + ' » ' + chr(0x2605), # left sq bracket + star
+    '?' + ' » ' + '[ ', # question mark + left sq bracket
+    chr(0x2713) + ' » ' + ']'
+]
+
+
+
+# Compute confusion matrix
+multi_class_names = ['T', 'N', 'D', 'P', 'X', 'H', 'I ', '! ',
+
+               ''+ chr(0x2205)+ ' ', #null
+               '' + chr(0x279C)+ '', # arrow head
+               '' + chr(0x03C8) + '', # pitchfork
+                '  ' + chr(0x2721) + '', # six point star
+               '' +chr(0x2731),  # asterisk
+               '' + chr(0x2669) #half note
+               ];
+
+uni_class_names = [
+    '' + chr(0x25B3) + ' ', # triangle
+    'X ', # X
+    '' + chr(0x2395) + ' ', # rectangle
+    '' + chr(0x25CB) + ' ', # circle
+    '' + chr(0x2713) + '', # check
+    '' + chr(0x22C0) + '', # caret
+    '? ', # question mark
+    '' + chr(0x279C)+ ' ', # arrow
+    '[ ', # left square bracket
+    '] ', # right square bracket
+    'V ', # V
+    '' + chr(0x232B) + ' ', # delete
+    '{ ', # left curly brace
+    '} ', #right curly brace
+    '' + chr(0x2605) +  ' ', # star
+    '' + chr(0x2113) + ' ' # pigtail
+
+
+];
 
 np.set_printoptions(precision=2)
 
@@ -123,10 +217,12 @@ np.set_printoptions(precision=2)
 
 # Plot multistroke matrix
 plt.figure()
-plot_confusion_matrix(deictic_unistroke, classes=class_names, normalize=True,
-                      title='DEICTIC', cmap=plt.cm.Greys)
-plt.figure()
-plot_confusion_matrix(ad_hoc_multistroke, classes=class_names, normalize=True,
-                      title='Ad-hoc HMMs', cmap=plt.cm.Greys)
+plot_confusion_matrix(synth_unistroke_sequence, classes=synth_unistroke_sequence_names, normalize=True,
+                       title='Iterative', cmap=plt.cm.Greys)
+#plt.figure()
+#plot_confusion_matrix(ad_hoc_unistroke, classes=uni_class_names, normalize=True,
+#                       title='Ad-hoc HMMs', cmap=plt.cm.Greys)
 
 plt.show()
+
+#accuracy(ad_hoc_multistroke, 600);
