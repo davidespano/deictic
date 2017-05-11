@@ -136,10 +136,13 @@ synth_unistroke_iterative = np.matrix(
      [0,	330, 0,	  0,	0,	 0,	  0],
      [0,	1,	 329, 0,	0,	 0,	  0],
      [3,	0,	 0,	  327,	0,	 0,	  0],
-#     [0,	0,	 0,	  0,	330, 0,	  0],
+     [0,	0,	 0,	  0,	330, 0,	  0],
      [0,	1,	 0,	  0,	0,	 329, 0],
      [0,	2,	 0,	  0,	15,	 0,	  313]]
 )
+
+synth_unistroke_iterative = np.delete(synth_unistroke_iterative, 4, axis=0)
+synth_unistroke_iterative = np.delete(synth_unistroke_iterative, 4, axis=1)
 
 synth_unistroke_iterative_names = [
     'V* ',
@@ -158,8 +161,11 @@ synth_unistroke_sequence = np.matrix(
      [0,	0,	    0,	   330,	0,	   0,	0],
      [0,	0,	    0,	   0,	330,   0,	0],
      [1,	0,	    0,	   0,	0,	   329,	0],
-     [0,	0,	    0,	   0,	0,	   0,	330]]
+     [0,	0,	    0,	   0,	0,	   0 , 330]]
 )
+
+synth_unistroke_sequence = np.delete(synth_unistroke_sequence, 5, axis=0)
+synth_unistroke_sequence = np.delete(synth_unistroke_sequence, 5, axis=1)
 
 synth_unistroke_sequence_names = [
     'V » ' + chr(0x232B), # v + delete
@@ -167,9 +173,62 @@ synth_unistroke_sequence_names = [
     chr(0x25CB) + ' » ' + chr(0x2113), # circle + pigtail
     chr(0x22C0) + ' » ' + chr(0x279C), # caret + arrow
     '[' + ' » ' + chr(0x2605), # left sq bracket + star
-    '?' + ' » ' + '[ ', # question mark + left sq bracket
+    #'?' + ' » ' + '[ ', # question mark + left sq bracket
     chr(0x2713) + ' » ' + ']'
 ]
+
+synth_unistroke_choice =  np.matrix([
+    [316,   0,      0,      2,    2,    10,   0],
+    [0,     330,    0,      0,    0,    0,    0],
+    [0,     17,     313,    0,    0,    0,    0],
+    [0,     7,      3,      315,  0,    0,    5],
+    [2,     0,      0,      0,    328,  0,    0],
+    [7,     0,      0,      0,    0,    323,  0],
+    [0,     0,      0,      7,    1,    1,    321],
+])
+
+synth_unistroke_choice = np.delete(synth_unistroke_choice, 6, axis=0)
+synth_unistroke_choice = np.delete(synth_unistroke_choice, 6, axis=1)
+
+
+synth_unistroke_choice_names = [
+    'V [] }',
+    chr(0x25CB) + ' [] ' + chr(0x2605),  # circle [] star
+    chr(0x25B3) + ' [] ' + chr(0x25CB),  # triangle [] rectangle
+    '{ [] ' + chr(0x279C), # left curly brace [] caret
+    '? [] X',               # question mark [] X
+    chr(0x232B) + ' [] ' + chr(0x2713), # delete [] check
+    #chr(0x279C) + ' [] ' +  chr(0x2113) + ' ' # arrow [] pigtail
+]
+
+synth_unistroke_parallel = np.matrix ([
+    [330,	0,	    0,  	0,	    0,	    0,      0],
+    [0,	    330,    0,	    0,	    0,	    0,	    0],
+    [0,	    0,	    330,	0,	    0,	    0,	    0],
+    [0,	    0,	    0,	    330,	0,	    0,	    0],
+    [0,	    0,	    0,	    0,	    316,	0,	    14],
+    [0,	    0,	    0,	    0,	    0,	    330,	0],
+    [0,	    0,	    0,	    0,	    12,	    0,	    318]
+])
+
+synth_unistroke_parallel = np.delete(synth_unistroke_parallel, 3, axis=0)
+synth_unistroke_parallel = np.delete(synth_unistroke_parallel, 3, axis=1)
+
+synth_unistroke_parallel_names = [
+    chr(0x279C) + ' || ' +  chr(0x2113),    # caret || arrow
+    chr(0x2605) + ' || ' +  chr(0x2113),    # circle || pigtail
+    '[ || ' + chr(0x2605),                  # left sq bracket || star
+    #'? || [',                               # question mark || left sq bracket
+    chr(0x2713) + ' || ]',                  # check || right sq bracket
+    chr(0x25B3) + ' || ' + chr(0x25CB),     # triangle [] rectangle
+    'V || ]',                               # V || right sq bracket
+]
+
+
+
+
+
+#parallel-unistroke-v-unistroke-right_sq_bracket
 
 
 
@@ -215,14 +274,27 @@ np.set_printoptions(precision=2)
 #                      title='Confusion matrix, without normalization')
 
 
+def opPlot(matrix, names, title):
+    plt.figure()
+    for i in range(0,4):
+        plt.subplot(221+i)
+        plot_confusion_matrix(matrix[i], classes=names[i], normalize=True,
+                          title=title[i], cmap=plt.cm.Greys)
+    plt.show()
+
+
 # Plot multistroke matrix
-plt.figure()
-plot_confusion_matrix(synth_unistroke_sequence, classes=synth_unistroke_sequence_names, normalize=True,
-                       title='Iterative', cmap=plt.cm.Greys)
+#plt.figure()
+#plot_confusion_matrix(synth_unistroke_sequence, classes=synth_unistroke_sequence_names, normalize=True,
+#                       title='Choice', cmap=plt.cm.Greys)
 #plt.figure()
 #plot_confusion_matrix(ad_hoc_unistroke, classes=uni_class_names, normalize=True,
 #                       title='Ad-hoc HMMs', cmap=plt.cm.Greys)
 
-plt.show()
+#plt.show()
+
+opPlot(matrix = [synth_unistroke_iterative, synth_unistroke_sequence, synth_unistroke_choice, synth_unistroke_parallel],
+       names =  [synth_unistroke_iterative_names, synth_unistroke_sequence_names, synth_unistroke_choice_names, synth_unistroke_parallel_names],
+       title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
 
 #accuracy(ad_hoc_multistroke, 600);
