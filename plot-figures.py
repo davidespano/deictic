@@ -5,6 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+class MNames:
+    Null = chr(0x2205)
+    ArrowHead = chr(0x279C)
+    PitchFork = chr(0x03C8)
+    SixPointStar = chr(0x2721)
+    Asterisk =  chr(0x2731)
+    HalfNote = chr(0x2669)
+
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
@@ -129,7 +137,9 @@ ad_hoc_unistroke = np.matrix(
  [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,  330 ]]
 )
 
+# ------------------------------------------
 # synthetic unistroke
+# ------------------------------------------
 
 synth_unistroke_iterative = np.matrix(
     [[330,	0,	 0,	  0,	0,	 0,	  0],
@@ -169,7 +179,7 @@ synth_unistroke_sequence = np.delete(synth_unistroke_sequence, 5, axis=1)
 
 synth_unistroke_sequence_names = [
     'V » ' + chr(0x232B), # v + delete
-    chr(0x25B3) + ' » ' + chr(0x25CB),  # triangle + rectangle
+    chr(0x25B3) + ' » ' + chr(0x2395),  # triangle + rectangle
     chr(0x25CB) + ' » ' + chr(0x2113), # circle + pigtail
     chr(0x22C0) + ' » ' + chr(0x279C), # caret + arrow
     '[' + ' » ' + chr(0x2605), # left sq bracket + star
@@ -194,8 +204,8 @@ synth_unistroke_choice = np.delete(synth_unistroke_choice, 6, axis=1)
 synth_unistroke_choice_names = [
     'V [] }',
     chr(0x25CB) + ' [] ' + chr(0x2605),  # circle [] star
-    chr(0x25B3) + ' [] ' + chr(0x25CB),  # triangle [] rectangle
-    '{ [] ' + chr(0x279C), # left curly brace [] caret
+    chr(0x25B3) + ' [] ' + chr(0x2395),  # triangle [] rectangle
+    '{ [] ' + chr(0x22C0), # left curly brace [] caret
     '? [] X',               # question mark [] X
     chr(0x232B) + ' [] ' + chr(0x2713), # delete [] check
     #chr(0x279C) + ' [] ' +  chr(0x2113) + ' ' # arrow [] pigtail
@@ -215,12 +225,12 @@ synth_unistroke_parallel = np.delete(synth_unistroke_parallel, 3, axis=0)
 synth_unistroke_parallel = np.delete(synth_unistroke_parallel, 3, axis=1)
 
 synth_unistroke_parallel_names = [
-    chr(0x279C) + ' || ' +  chr(0x2113),    # caret || arrow
-    chr(0x2605) + ' || ' +  chr(0x2113),    # circle || pigtail
+    chr(0x22C0) + ' || ' +  chr(0x279C),    # caret || arrow
+    chr(0x25CB) + ' || ' +  chr(0x2113),    # circle || pigtail
     '[ || ' + chr(0x2605),                  # left sq bracket || star
     #'? || [',                               # question mark || left sq bracket
     chr(0x2713) + ' || ]',                  # check || right sq bracket
-    chr(0x25B3) + ' || ' + chr(0x25CB),     # triangle [] rectangle
+    chr(0x25B3) + ' || ' + chr(0x2395),     # triangle [] rectangle
     'V || ]',                               # V || right sq bracket
 ]
 
@@ -228,9 +238,75 @@ synth_unistroke_parallel_names = [
 
 
 
-#parallel-unistroke-v-unistroke-right_sq_bracket
+# ------------------------------------------
+# synthetic multistroke
+# ------------------------------------------
+synth_multistroke_iterative = np.matrix ([
+    [598,	0,	    2,	    0,	    0],
+    [0,	    600,	0,	    0,	    0],
+    [12,	0,	    588,	0,	    0],
+    [2,	    0,	    11,	    587,	0],
+    [0,	    19,	    0,	    0,	    581]
+])
+
+synth_multistroke_iterative_names = [
+    MNames.ArrowHead + '*',
+    'N*',
+    MNames.SixPointStar + '*',
+    'D*',
+    'I*'
+]
+
+synth_multistroke_sequence = np.matrix ([
+    [593,   7,   0,   0,    0],
+    [17,   583, 0,   0,    0],
+    [3,   4,   566, 1,    25],
+    [0,   1,   9,   588,  2],
+    [0,   0,   2,   0,    598],
+])
+
+synth_multistroke_sequence_names = [
+    MNames.PitchFork + ' » ' + '!',
+    MNames.ArrowHead + ' » ' + MNames.HalfNote,
+    MNames.Asterisk + ' » ' + MNames.SixPointStar,
+    'D' +  ' » ' + 'N',
+    'I' + ' » ' + 'T'
+]
 
 
+
+synth_multistroke_choice = np.matrix ([
+    [571,	1,	    0,	    11,     17],
+    [0,	    512,	14,	    28,	    46],
+    [0,	    3,	    589,	2,	    5],
+    [0,	    3,	    0,	    595,	2],
+    [0,	    1,	    0,	    9,	    590]
+])
+
+synth_multistroke_choice_names = [
+    MNames.HalfNote + " [] " + 'P',
+    '!' + " [] " + 'H',
+    MNames.Asterisk + " [] " + 'N',
+    MNames.ArrowHead + " [] " + 'T',
+    'D' + " [] " + MNames.Null
+]
+
+synth_multistroke_parallel = ([
+    [596,   0,   1,   2,   0],
+    [  0, 598,   0,   0,   2],
+    [  0,   0, 599,   0,   0],
+    [ 16,   0,   0, 584,   0],
+    [  0,  15,   2,   0, 583],
+])
+
+
+synth_multistroke_parallel_names = [
+    MNames.Asterisk + " || " + 'N'
+    'T' + " || " + MNames.HalfNote,
+    MNames.Null + " || " +  'H',
+    'I' + " || " +  'D',
+    MNames.SixPointStar + " || " +  'P'
+]
 
 # Compute confusion matrix
 multi_class_names = ['T', 'N', 'D', 'P', 'X', 'H', 'I ', '! ',
@@ -260,9 +336,11 @@ uni_class_names = [
     '} ', #right curly brace
     '' + chr(0x2605) +  ' ', # star
     '' + chr(0x2113) + ' ' # pigtail
-
-
 ];
+
+
+
+
 
 np.set_printoptions(precision=2)
 
@@ -293,8 +371,12 @@ def opPlot(matrix, names, title):
 
 #plt.show()
 
-opPlot(matrix = [synth_unistroke_iterative, synth_unistroke_sequence, synth_unistroke_choice, synth_unistroke_parallel],
-       names =  [synth_unistroke_iterative_names, synth_unistroke_sequence_names, synth_unistroke_choice_names, synth_unistroke_parallel_names],
+# opPlot(matrix = [synth_unistroke_iterative, synth_unistroke_sequence, synth_unistroke_choice, synth_unistroke_parallel],
+#        names =  [synth_unistroke_iterative_names, synth_unistroke_sequence_names, synth_unistroke_choice_names, synth_unistroke_parallel_names],
+#        title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
+
+opPlot(matrix = [synth_multistroke_iterative, synth_multistroke_sequence, synth_multistroke_choice, synth_multistroke_parallel],
+       names =  [synth_unistroke_iterative_names, synth_multistroke_sequence_names, synth_multistroke_choice, synth_multistroke_parallel_names],
        title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
 
 #accuracy(ad_hoc_multistroke, 600);
