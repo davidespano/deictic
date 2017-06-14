@@ -51,14 +51,17 @@ class CsvDataset:
         Returns
         --------
         sequences : list
-            the list of sequences
+            the list of sequences and their filenames
 
         """
         sequences = [];
         i = 0
         for filename in self.getDatasetIterator():
             seq = self.read_file(filename);
-            sequences.append(seq)
+            # Creates tuple
+            tuple = [seq, filename]
+            # Add tuple in sequences
+            sequences.append(tuple)
             if d:
                 print("{0}: file {1}".format(i, filename))
             i += 1

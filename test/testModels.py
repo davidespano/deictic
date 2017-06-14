@@ -248,10 +248,11 @@ class test:
 
 
     def compares_models(self, sequences, index_dataset):
-        # For each sequence
-        for sequence in sequences:
-
-            # Max probability, index gestureindex model
+        # Sequences is a list of tuples (data_features_movements and its filename)
+        for tuple in sequences:
+            # Gets sequence data
+            sequence = tuple[0]
+            # Max probability, index gesture-index model
             max_norm_log_probability = -sys.maxsize
             index_model = -1
 
@@ -269,7 +270,7 @@ class test:
                 log_probability = self.models[i].log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
 
-                # Stampo i risultati
+                # Print debug results
                 #print('{} - {} log-probability: {}, normalised-log-probability {}'.format(index_file,
                 #    models[i].name, log_probability, norm_log_probability))
 
@@ -279,6 +280,7 @@ class test:
                     index_model = i
 
             # Aggiorno matrice risultati
+            print("Sequence: " + tuple[1] + " Model: " + self.gesture_names[index_model])
             self.results[index_dataset][index_model] += 1
 
             if self.plot:

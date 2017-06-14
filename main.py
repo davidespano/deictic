@@ -9,11 +9,11 @@ baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 6
+mode = -1
 
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
