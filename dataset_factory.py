@@ -87,7 +87,7 @@ def synthetic_dataset_factory(names, inputBase, outputBase, iter, type='unistrok
             # Makes files
             MergeParallelDataset.create_parallel_dataset(list,
                                                          outputBase + filename +'/'+ filename,
-                                                         flag_trasl=False)
+                                                         flag_trasl=False, type = type)
             print('dataset ' + filename + ' created')
 
         # Sequence
@@ -147,8 +147,8 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
 
 
 
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
 mode = 1
 n_sample = 20
@@ -198,7 +198,7 @@ if mode == 5:
     list_gesture = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
                     'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
     synthetic_dataset_factory(list_gesture, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
-                              iter=25, type='multistroke', operator=[3])#int(random.uniform(1, len(list)-1)))
+                              iter=25, type='multistroke', operator=[2])#int(random.uniform(1, len(list)-1)))
 ########################################## Ten-Cross-Validation Dataset ##########################################################
 # Ten-Cross-Validation 1Dollar
 if mode == 6:

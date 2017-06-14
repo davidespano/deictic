@@ -84,12 +84,12 @@ class ClassifierFactory:
 
             if d:
                 self.debugPlot(samples, exp)
+
             hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
-            hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
+
 
             self.addStrokeIdDistribution(hmm)
 
-            s = hmm.sample()
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -159,6 +159,7 @@ class ClassifierFactory:
 
             if d:
                 self.debugPlot(samples, exp)
+
             hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
 
             self.addStrokeIdDistribution(hmm)

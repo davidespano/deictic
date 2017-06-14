@@ -85,7 +85,7 @@ class MergeIterativeDataset:
 # Parallel
 class MergeParallelDataset:
     @staticmethod
-    def create_parallel_dataset(list_dataset, filepath, cols=[0,1], flag_trasl=False):
+    def create_parallel_dataset(list_dataset, filepath, cols=[0,1], flag_trasl=False, type="unistroke"):
         original_seq = []
         for index in range(0, len(list_dataset)):
             original_seq.append(list_dataset[index].read_dataset())
@@ -104,9 +104,9 @@ class MergeParallelDataset:
                 merge_temp = []
 
                 # We can have two different situations:
-                # i) the first sequence is shortly than the second sequence.
+                # i) the first sequence is shorter than the second sequence.
                 # ii) viceversa.
-                # In each case we need two sequence with the same lenght
+                # In each case we need two sequences with the same lenght
                 if len(s_first) <= len(s_second):
                     # Starting part
                     for i in range(0, num_rand):
@@ -133,6 +133,11 @@ class MergeParallelDataset:
                     for i in range(len(s_second) - num_rand, len(s_second)):
                         merge_temp.append(numpy.concatenate((merge[len(s_first) - 1], s_second[i]), axis=0))
 
+                # If we are working on multistroke dataset, this function changes the number of strokes:
+                # for each frame the new stroke number is obtained by adding the last stroke number of new_sequence.
+                if type != "unistroke":
+                    for index in range(0, len(merge_temp)):
+                        merge_temp[index][-1] = merge_temp[index][-1] + merge_temp[-1][2]
                 merge = merge_temp
 
             sequences.append(merge)

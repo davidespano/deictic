@@ -221,12 +221,22 @@ class HiddenMarkovModelTopology :
 
                         # la distribuzione dello stato parallelo s1,s2 e' una distribuzione
                         # congiunta a componenti indipendenti
-                        e1e2 = IndependentComponentsDistribution(
-                            [e1.distributions[0].copy(),
-                             e1.distributions[1].copy(),
-                             e2.distributions[0].copy(),
-                             e2.distributions[1].copy()]);
-
+                        if len(e1.distributions) == 2 and len(e2.distributions == 2):
+                            e1e2 = IndependentComponentsDistribution(
+                                [e1.distributions[0].copy(),
+                                 e1.distributions[1].copy(),
+                                 e2.distributions[0].copy(),
+                                 e2.distributions[1].copy()])
+                        else:
+                            # se le componenti non sono due, ci sono gli identificatori degli stroke
+                            e1e2 = IndependentComponentsDistribution(
+                                [e1.distributions[0].copy(),
+                                 e1.distributions[1].copy(),
+                                 e1.distributions[2].copy(),
+                                 e2.distributions[0].copy(),
+                                 e2.distributions[1].copy(),
+                                 e2.distributions[2].copy()
+                                 ])
                         # creo lo stato parallelo e lo aggiungo alla hmm
                         s1s2 = State(e1e2, s1.name + ", " + s2.name + ' {0}{1}'.format(i,j))
                         par.add_state(s1s2)
