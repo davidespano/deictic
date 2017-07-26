@@ -150,9 +150,6 @@ def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
 
 
 
-
-
-
 def label_class(groups, baseDir, outputDir):
 
     # Get all gesture's dataset
@@ -203,7 +200,8 @@ def label_class(groups, baseDir, outputDir):
 ## Compare deictic model
 class test:
 
-    def __init__(self, models, datasetDir, gesture_names, plot=False, results=None):
+    def __init__(self, models, datasetDir, gesture_names, plot=False,
+                 plot_result = False, results=None):
         super()
         if isinstance(models, list):
             self.models = models
@@ -213,6 +211,8 @@ class test:
             self.gesture_names = gesture_names
         if isinstance(plot, bool):
             self.plot = plot
+        if isinstance(plot_result, bool):
+            self.plot_result = plot_result
         if isinstance(results, numpy.ndarray):
             self.results = results
         else:
@@ -224,6 +224,7 @@ class test:
         # Namefile
         self.filename = self.datasetDir+'matrix_confusion_choice.csv'
 
+    # Test models with all dataset's files
     def all_files(self):
         for index_dataset in range(0, len(self.list_dataset)):
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
@@ -231,11 +232,11 @@ class test:
             # Gets sequences
             sequences = self.list_dataset[index_dataset].read_dataset()
             # Compares models
-            self.compares_models(sequences, index_dataset)
+            self.__compares_models(sequences, index_dataset)
 
-        print(self.results)
         return self.results
 
+    # Test models with ten cross validation (using dataset's files)
     def ten_cross_validation(self, list_filesDir, k=0):
         self.results = numpy.zeros((len(self.models), len(self.models)), dtype=numpy.int)
         for index_dataset in range(0, len(self.list_dataset)):
@@ -245,10 +246,28 @@ class test:
             sequences = self.list_dataset[index_dataset].\
                 read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test', k)
             # Compares models
-            self.compares_models(sequences, index_dataset)
+            self.__compares_models(sequences, index_dataset)
 
+        return self.results
 
-    def compares_models(self, sequences, index_dataset):
+    # Test models with a single file
+    def single_file(self, path_file):
+        self.results = numpy.zeros((len(self.models)), dtype=numpy.float)
+
+        # Gets sequence
+        sequences = []
+        with open(filepath, "r") as f:
+            reader = csv.reader(f, delimiter=',')
+            vals = list(reader)
+            result = numpy.array(vals).astype('float')
+            sequences.append(result)
+        # Compares models
+        self.__compares_models(self, sequences, index_dataset)
+
+        return self.results
+
+    # Compares models with dataset
+    def __compares_models(self, sequences, index_dataset = None):
         # Sequences is a list of tuples (data_features_movements and its filename)
         for tuple in sequences:
             # Gets sequence data
@@ -257,18 +276,15 @@ class test:
             max_norm_log_probability = -sys.maxsize
             index_model = -1
 
-            if self.plot:
-                plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
-                plt.title(list_dataset[index_dataset])
-
             # for each model
-            for i in range(0, len(self.models)):
+            for model in range(0, len(self.models)):
+                # Plot data
                 if self.plot:
-                    c = numpy.array(self.models[i].sample()).astype('float')
-                    plt.plot(c[:, 0], c[:, 1], label=self.models[i].name, marker='.')
+                    c = numpy.array(self.models[model].sample()).astype('float')
+                    plt.plot(c[:, 0], c[:, 1], label=self.models[model].name, marker='.')
 
                 # Computes sequence's log-probability and normalized
-                log_probability = self.models[i].log_probability(sequence)
+                log_probability = self.models[model].log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
 
                 # Print debug results
@@ -278,20 +294,33 @@ class test:
                 # Check which is the best result
                 if(norm_log_probability > max_norm_log_probability):
                     max_norm_log_probability = norm_log_probability
-                    index_model = i
+                    index_model = model
 
-            # Aggiorno matrice risultati
-            print("Sequence: " + tuple[1] + " Model: " + self.gesture_names[index_model])
+            # Update array result
             self.results[index_dataset][index_model] += 1
 
+            # Plots data
             if self.plot:
-                plt.show()
+                plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
+                plt.title(list_dataset[index_dataset])
+            # Shows recognition result
+            if self.plot_result != False:
+                print("Sequence: " + tuple[1] + " Model: " + self.gesture_names[index_model])
+        # Saves results
+        self.__save_confusion_matrix()
 
-        # Salva risultati
-        self.save_confusion_matrix()
+    # Compares models with a single file
+    def _compares_models(self, sequence):
+        # For each model
+        for model in range(0, len(self.models)):
+            # Computes sequence's log-probability and normalized
+            log_probability = self.models[model].log_probability(sequence)
+            norm_log_probability = log_probability / len(sequence)
+            # Saves log probability result
+            self.results[model] = log_probability
 
     # Saves results into csv file
-    def save_confusion_matrix(self):
+    def __save_confusion_matrix(self):
 
         # Results
         size = len(self.gesture_names)+1

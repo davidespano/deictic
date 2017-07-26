@@ -230,7 +230,6 @@ class CsvDataset:
             plt.show()
         print(labels)
 
-
 class DatasetTransform:
 
     def transform(self, sequence):
