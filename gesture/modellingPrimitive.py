@@ -7,6 +7,7 @@ from enum import Enum
 
 random.seed(0)
 
+################### NOT USED ###################
 # Primitive
 class Primitive(Enum):
     left = 3
@@ -36,7 +37,7 @@ def primitive_model(baseDir, n_states, direction, theta = 0):
     # Create model
     model = create_model(direction, name, n_states)
     # Training
-    model.fit(dataset.read_dataset(), use_pseudocount=True)
+    model.fit(dataset.readDataset(), use_pseudocount=True)
 
     return model
 

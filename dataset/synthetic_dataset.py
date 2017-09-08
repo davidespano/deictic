@@ -18,7 +18,7 @@ class MergeChoiceDataset:
         sequences = []
         for dataset in list_dataset:
             dataset_sequences = []
-            for sequence in dataset.read_dataset():
+            for sequence in dataset.readDataset():
                 dataset_sequences.append(sequence)
             sequences.append(dataset_sequences)
 
@@ -46,8 +46,8 @@ class MergeDisablingDataset:
         if not isinstance(cols, list):
             raise TypeError
 
-        first_sequences = list_dataset[0].read_dataset()
-        second_sequences = list_dataset[1].read_dataset()
+        first_sequences = list_dataset[0].readDataset()
+        second_sequences = list_dataset[1].readDataset()
         sequences = []
         for i in range(0, len(first_sequences)):
             j = int(random.uniform(0, len(second_sequences)-1))
@@ -66,10 +66,10 @@ class MergeIterativeDataset:
             raise TypeError
 
         # Composes an iteration of each file with a random file (of same dataset)
-        dataset_seq = list_dataset.read_dataset()
+        dataset_seq = list_dataset.readDataset()
         length = len(dataset_seq)
         sequences = []
-        for sequence in list_dataset.read_dataset():
+        for sequence in list_dataset.readDataset():
             new_sequence = deepcopy(sequence)
             # Select a different random file for each iteration
             for j in range(0, iterations):
@@ -88,7 +88,7 @@ class MergeParallelDataset:
     def create_parallel_dataset(list_dataset, filepath, cols=[0,1], flag_trasl=False, type="unistroke"):
         original_seq = []
         for index in range(0, len(list_dataset)):
-            original_seq.append(list_dataset[index].read_dataset())
+            original_seq.append(list_dataset[index].readDataset())
 
         sequences = []
         for s_first in original_seq[0]:
@@ -160,7 +160,7 @@ class MergeSequenceDataset:
         # Read dataset
         dataset = []
         for data in list_dataset:
-            dataset.append(data.read_dataset())
+            dataset.append(data.readDataset())
 
         # Composes first dataset's files with each one of the other dataset
         sequences = []

@@ -21,39 +21,6 @@ def create_hmms(gesture_models, n_states=6, n_samples=20):
             hmms[k].append(model)
     return hmms;
 
-# Test ad-hoc hidden markov models
-def adhoc_test(gestureDir, list_gesture, dimensions=2, scale=100):
-
-    # Results
-    results = numpy.zeros((len(list_gesture), len(list_gesture)))
-    list_dataset = []
-    for gesture in list_gesture:
-        list_dataset.append(CsvDataset(gestureDir+gesture[0]+'/'))
-
-    # Training
-    len_sequence = len(list_dataset[0].read_dataset())
-    for index in range(0, 1):# len_sequence):
-        list_testing = []
-        # Create hmm gesture, training and testing sequences
-        models = []
-        index_dataset = 0
-        for gesture in list_gesture:
-            # Gets traning and testing sequences
-            te_seq , tr_seq = list_dataset[index_dataset].leave_one_out(index)
-            # Create and training hmm
-            models.append(create_hmm_gesture(gesture[0], tr_seq, gesture[1]))
-            # Test list
-            list_testing.append(te_seq)
-            # Index dataset
-            index_dataset = index_dataset+1
-
-        # Testing
-        results = compares_adhoc_models(models, list_testing, gestureDir, results)
-
-    return results
-
-
-
 # Main
 #baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
@@ -245,24 +212,3 @@ if mode == 2 or mode == 3:
 
 
     print(compares_deictic_models(list_hmms, gestureDir))
-
-##################################################################### ADHOC HMM #####################################################################
-## Adhoc hmm - 1Dollar
-if mode == 5:
-    list_gesture = [("rectangle", n_states*4), ("triangle", n_states*3), ("caret", n_states*2), ("v", n_states*2), ("x", n_states*3),
-                    ("left_sq_bracket", n_states*3), ("right_sq_bracket", n_states*3), ("delete_mark", n_states*4), ("star", n_states*4),
-                    ("arrow", n_states*4), ("check", n_states*2), ("circle", n_states*4), ("left_curly_brace", n_states*6),
-                    ("right_curly_brace", n_states*6), ("pigtail", n_states*4), ("question_mark", n_states*4)]
-    results = adhoc_test(gestureDir, list_gesture)
-## Adhoc hmm - MDollar
-if mode == 6:
-    list_gesture = [("D", n_states*3), ("H", n_states*3), ("I", n_states*3), ("N", n_states*3), ("P", n_states*3),
-                    ("T", n_states*2), ("X", n_states*2), ("arrowhead", n_states*3), ("asterisk", n_states*4),
-                    ("exclamation_point", n_states*2), ("half_note", n_states*3),
-                    ("null", n_states*5), ("pitchfork", n_states*3), ("six_point_star", n_states*6)]
-    results = adhoc_test(gestureDir, list_gesture)
-
-if mode == 7:
-    hmms = create_hmms(gesture_models, n_states, n_samples)
-    for key in hmms:
-        label_class({key: hmms[key]}, testDir, outputDir)

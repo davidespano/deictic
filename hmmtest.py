@@ -11,7 +11,7 @@ from enum import Enum
 def viterbi_seq(model, dir):
     data = LeapDataset(dir)
     for filename in data.getDatasetIterator():
-        sequence = data.read_file(filename, dimensions=2, scale=100)
+        sequence = data.readFile(filename, dimensions=2, scale=100)
         logp, states = model.viterbi(sequence)
         print('{} log-probability: {}'.format(filename, logp))
         print('{} state sequence: {}'.format(filename, ' '.join(state.name for idx, state in states[1:])))
@@ -57,8 +57,8 @@ def test_sequence(baseDir, n_states):
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     left, seq_edges = HiddenMarkovModelTopology.sequence([left, right]);
 
@@ -91,8 +91,8 @@ def test_choice(baseDir, n_states):
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     left, seq_edges = HiddenMarkovModelTopology.choice([left, right])
 
@@ -120,7 +120,7 @@ def test_iterative(baseDir, n_states):
     leftDataset = LeapDataset(baseDir + 'down-trajectory/left/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
 
     sequences = leftDataset.sequence_merge(leftDataset, dimensions=2)
     for i in range(0, len(sequences)):
@@ -170,8 +170,8 @@ def test_parallel(baseDir, n_states):
     # Training
     leftDataset = LeapDataset(baseDir + 'down-trajectory/left/')
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     # definizione parallel
     parallel, seq_edges = HiddenMarkovModelTopology.parallel(left, right)

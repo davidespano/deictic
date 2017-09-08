@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 import os
 from random import randint
 from shutil import copyfile
-
+# Lib for events like c#
+import axel
+# Timer delay (for simulating real time)
+from time import sleep
 
 class DatasetIterator:
 
@@ -45,7 +48,7 @@ class CsvDataset:
         """ Returns an iterator on all csv files in a dataset """
         return DatasetIterator(self.dir)
 
-    def read_dataset(self, d=False):
+    def readDataset(self, d=False):
         """ Returns a list of sequences, containing the samples in each file of the dataset"
 
         Returns
@@ -57,7 +60,7 @@ class CsvDataset:
         sequences = [];
         i = 0
         for filename in self.getDatasetIterator():
-            seq = self.read_file(filename);
+            seq = self.readFile(filename);
             # Creates tuple
             tuple = [seq, filename]
             # Add tuple in sequences
@@ -67,7 +70,7 @@ class CsvDataset:
             i += 1
         return sequences;
 
-    def read_file(self, filename):
+    def readFile(self, filename):
         """ Reads a single file, returning the samples in a list
 
         Parameters
@@ -92,7 +95,7 @@ class CsvDataset:
         files = files[0].split('/')
         sequences = []
         for filename in files:
-            seq = self.read_file(filename);
+            seq = self.readFile(filename);
             sequences.append(seq)
         return  sequences
 
@@ -104,7 +107,7 @@ class CsvDataset:
         if not outputDir is None and not os.path.exists(outputDir):
             os.makedirs(outputDir)
         for file in self.getDatasetIterator():
-            sequence = self.read_file(file)
+            sequence = self.readFile(file)
             sequence = self.compositeTransform.transform(sequence)
             sequences.append(sequence)
             if not outputDir is None:
@@ -180,7 +183,7 @@ class CsvDataset:
                     training_list.append(filename)# If false append the file to training list
         else:
             # Gets all files
-            training_list = self.read_dataset()
+            training_list = self.readDataset()
             # Removes file at the specified index
             testing_list = training_list.pop(leave_index)
 
@@ -188,7 +191,7 @@ class CsvDataset:
 
     # Plot
     # Plots input dataset's files
-    def plot(self, dimensions = 2, sampleName = None, singleMode = False):
+    def plot(self, dimensions = 2, sampleName = None, model = None, singleMode = False):
         fig = plt.figure();
         labels =[];
         ax = None
@@ -198,7 +201,8 @@ class CsvDataset:
         else:
             plt.axis('equal')
 
-        for filename in self.getDatasetIterator():
+        files = self.getDatasetIterator().filenames
+        for filename in files:
             if sampleName == None or filename == sampleName:
                 with open(self.dir + filename, "r") as f:
                     reader = csv.reader(f, delimiter=',')
@@ -206,29 +210,36 @@ class CsvDataset:
                     result = numpy.array(vals).astype('float')
                     if dimensions == 3:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
-                    else:
 
+                    else:
                         fig, ax = plt.subplots()
                         ax.scatter(result[:,0], result[:,1])
                         for i in range(0, len(result)):
                             ax.annotate(str(i), (result[i,0], result[i,1]))
                         plt.axis('equal')
-                        plt.plot(result[:, 0], result[:, 1], label=filename, marker='.')
+                        plt.plot(result[:, 0], result[:, 1])
+                        if model != None:
+                            # Model
+                            sequence = model.sample()
+                            result = numpy.array(sequence).astype('float')
+                            plt.axis("equal")
+                            plt.plot(result[:, 0], result[:, 1])
 
                     if singleMode:
                         plt.title(filename)
                         plt.show()
-                        labels.append(filename + "," + input(filename +"->"));
-        if dimensions == 3:
-            ax.legend()
-        else:
-            plt.legend(loc='upper right')
+                        #labels.append(filename + "," + input(filename +"->"))
 
-        if sampleName != None:
-            plt.title(sampleName)
-        if not singleMode:
-            plt.show()
-        print(labels)
+            if dimensions == 3:
+                ax.legend()
+            else:
+                plt.legend(loc='upper right')
+
+            if sampleName != None:
+                plt.title(sampleName)
+            if not singleMode:
+                plt.show()
+            #print(labels)
 
 class DatasetTransform:
 

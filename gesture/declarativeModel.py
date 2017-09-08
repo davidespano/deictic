@@ -382,11 +382,24 @@ class ClassifierFactory:
         plt.show()
 
     def createHMM(self, name, operator, operands):
+
+
         edges = []
         models = []
         for model, edge in operands:
             edges.append(edge)
             models.append(model)
+
+        if operator == OpEnum.Iterative:
+            model = models[0]
+            iterative, edges = HiddenMarkovModelTopology.iterative(model, edges)
+            return iterative, edges
+
+        # if the operand is only one, the expression corresponds to the operand HMM
+        # e.g. a sequence with only one operand is the operand itself
+
+        if len(operands) == 1:
+            return operands[0]
 
         if operator == OpEnum.Sequence: # create a sequence
             sequence, seq_edges = HiddenMarkovModelTopology.sequence(operands = models, gt_edges= edges);
@@ -414,10 +427,7 @@ class ClassifierFactory:
             disabling.name = name
             return disabling, edges
 
-        if operator == OpEnum.Iterative:
-            model = models[0]
-            iterative, edges = HiddenMarkovModelTopology.iterative(model, edges)
-            return iterative, edges
+
 
         return None
 

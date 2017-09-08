@@ -1,53 +1,12 @@
 from dataset import *
-import matplotlib.pyplot as plt
-from dataset import *
-import os
 import csv
-import numpy
-import sys
 from gesture import *
-
-## Compare adhoc HMM
-#
-def compares_adhoc_models(models, sequences, gestureDir, results, dimensions = 2):
-    # Namefile
-    filename = gestureDir+'adhoc-hmm_results.csv'
-
-    # Get all gesture's dataset
-    list_dataset = []
-    for model in models:
-        list_dataset.append(CsvDataset(gestureDir+model.name+'/'))
-
-    index_gesture = 0
-    # For each gesture's test sequence
-    for sequence in sequences:
-
-        # Max probability, index gestureindex model
-        max_norm_log_probability = -sys.maxsize
-        index_model = -1
-
-        # Prendi ogni gesture in models
-        for i in range(0, len(models)):
-
-            # Per ogni modello
-            # Calcola la log probability della sequenza e la sua normalizzata
-            log_probability = models[i].log_probability(sequence)
-            norm_log_probability = log_probability / len(sequence)
-            # Determino qual è la gesture con la probabilità più alta
-            if (norm_log_probability > max_norm_log_probability):
-                max_norm_log_probability = norm_log_probability
-                index_model = i
-
-        # Aggiorno matrice risultati
-        results[index_gesture][index_model] = results[index_gesture][index_model] + 1
-        index_gesture = index_gesture + 1
-
-    # Salva risultati
-    save_confusion_matrix(results, filename, models)
-    return  results
+# Event
+from axel import Event
+# Copy
+import copy
 
 ## Compare deictic model
-# Compara tutti i modelli con tutte le gesture definite
 def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
     # Filename results
     filename = baseDir + 'matrix_confusion.csv'
@@ -78,7 +37,7 @@ def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
         print("gesture {0}: {1}".format(index_dataset, dir ))
         # Get all sequence files
         if not ten_fold:
-            sequences = list_dataset[index_dataset].read_dataset(d=False)
+            sequences = list_dataset[index_dataset].readDataset(d=False)
         else:
             sequences = []
             for el in list_dataset[index_dataset][1]:
@@ -165,7 +124,7 @@ def label_class(groups, baseDir, outputDir):
     # For each file
     for filename in dataset.getDatasetIterator():
         # sequence
-        sequence = dataset.read_file(filename)
+        sequence = dataset.readFile(filename)
 
         # Max probability, index gestureindex model
         max_norm_log_probability = -sys.maxsize
@@ -199,30 +158,34 @@ def label_class(groups, baseDir, outputDir):
 
 ## Compare deictic model
 class test:
-
-    def __init__(self, models, datasetDir, gesture_names, plot=False,
+    """This class implements the methods for comparing hmms"""
+    def __init__(self, models, gesture_names, datasetDir=None,
                  plot_result = False, results=None):
-        super()
+        #super()
         if isinstance(models, list):
+            # List of hmms
             self.models = models
         if isinstance(datasetDir, str):
+            # Path which contained the datasets
             self.datasetDir = datasetDir
+            # Gets gesture's testing dataset
+            self.list_dataset = []
+            for name in gesture_names:
+                self.list_dataset.append(CsvDataset(datasetDir + name + '/'))
+            # Namefile
+            self.filename = self.datasetDir + 'matrix_confusion_choice.csv'
         if isinstance(gesture_names, list):
+            # The list of gesture to recognized
             self.gesture_names = gesture_names
-        if isinstance(plot, bool):
-            self.plot = plot
         if isinstance(plot_result, bool):
+            # Plot results
             self.plot_result = plot_result
         if isinstance(results, numpy.ndarray):
+            # The developer pass an older of results
             self.results = results
         else:
             self.results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
-        # Gets gesture's testing dataset
-        self.list_dataset = []
-        for name in gesture_names:
-            self.list_dataset.append(CsvDataset(datasetDir+name+'/'))
-        # Namefile
-        self.filename = self.datasetDir+'matrix_confusion_choice.csv'
+
 
     # Test models with all dataset's files
     def all_files(self):
@@ -230,12 +193,10 @@ class test:
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
 
             # Gets sequences
-            sequences = self.list_dataset[index_dataset].read_dataset()
+            sequences = self.list_dataset[index_dataset].readDataset()
             # Compares models
-            self.__compares_models(sequences, index_dataset)
-
+            self.compares_models(sequences, index_dataset)
         return self.results
-
     # Test models with ten cross validation (using dataset's files)
     def ten_cross_validation(self, list_filesDir, k=0):
         self.results = numpy.zeros((len(self.models), len(self.models)), dtype=numpy.int)
@@ -246,28 +207,18 @@ class test:
             sequences = self.list_dataset[index_dataset].\
                 read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test', k)
             # Compares models
-            self.__compares_models(sequences, index_dataset)
-
+            self.compares_models(sequences, index_dataset)
         return self.results
-
     # Test models with a single file
-    def single_file(self, path_file):
-        self.results = numpy.zeros((len(self.models)), dtype=numpy.float)
-
-        # Gets sequence
-        sequences = []
-        with open(filepath, "r") as f:
-            reader = csv.reader(f, delimiter=',')
-            vals = list(reader)
-            result = numpy.array(vals).astype('float')
-            sequences.append(result)
+    def single_file(self, sequences):
+        self.results = []
         # Compares models
-        self.__compares_models(self, sequences, index_dataset)
-
+        self.__compares_models(sequences)
         return self.results
+
 
     # Compares models with dataset
-    def __compares_models(self, sequences, index_dataset = None):
+    def compares_models(self, sequences, index_dataset = None):
         # Sequences is a list of tuples (data_features_movements and its filename)
         for tuple in sequences:
             # Gets sequence data
@@ -278,46 +229,40 @@ class test:
 
             # for each model
             for model in range(0, len(self.models)):
-                # Plot data
-                if self.plot:
-                    c = numpy.array(self.models[model].sample()).astype('float')
-                    plt.plot(c[:, 0], c[:, 1], label=self.models[model].name, marker='.')
-
                 # Computes sequence's log-probability and normalized
                 log_probability = self.models[model].log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
 
                 # Print debug results
-                #print('{} - {} log-probability: {}, normalised-log-probability {}'.format(index_file,
-                #    models[i].name, log_probability, norm_log_probability))
+                if self.plot_result != False:
+                    print('File:{} - Model:{} log-probability: {}, normalised-log-probability {}'.format(tuple[1],
+                    models[model].name, log_probability, norm_log_probability))
 
-                # Check which is the best result
+                # Checks which is the best result
                 if(norm_log_probability > max_norm_log_probability):
                     max_norm_log_probability = norm_log_probability
                     index_model = model
-
             # Update array result
             self.results[index_dataset][index_model] += 1
 
-            # Plots data
-            if self.plot:
-                plt.plot(sequence[:, 0], sequence[:, 1], label=filename, marker='.')
-                plt.title(list_dataset[index_dataset])
             # Shows recognition result
             if self.plot_result != False:
                 print("Sequence: " + tuple[1] + " Model: " + self.gesture_names[index_model])
         # Saves results
         self.__save_confusion_matrix()
-
     # Compares models with a single file
-    def _compares_models(self, sequence):
+    def __compares_models(self, sequences):
         # For each model
         for model in range(0, len(self.models)):
             # Computes sequence's log-probability and normalized
-            log_probability = self.models[model].log_probability(sequence)
-            norm_log_probability = log_probability / len(sequence)
-            # Saves log probability result
-            self.results[model] = log_probability
+            log_probability = self.models[model].log_probability(sequences[model])#sequences[model])
+            norm_log_probability = log_probability / len(sequences[model])#sequences[model])
+            # Saves gesture name and norm log probability result
+            res = []
+            res.append(self.gesture_names[model])
+            res.append(str(norm_log_probability))
+            self.results.append(res)
+            # Take minor
 
     # Saves results into csv file
     def __save_confusion_matrix(self):
@@ -345,3 +290,79 @@ class test:
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
             for row in results_string:
                 spamwriter.writerow(row)
+
+
+
+
+
+class testRealTime():
+    """
+        This class implements the methods for testing deictic in real time
+    """
+    def __init__(self, hmms, plot_result = False):
+        # Hmms
+        self.hmms = hmms
+        # User option regarding the plotting of the computation
+        self.plot_result = plot_result
+        #### Results ####
+        # - log_probabilities: for each hmm this dictionary reports its norm log-probability
+        # - frame_log_probabilities: for each frame of a file it reports the high probabilities for each hmm        self.log_probabilities = {}
+        self.log_probabilities = {}
+        for hmm in hmms:
+            self.log_probabilities[hmm.name] = []
+        self.frame_log_probabilities = []
+        #self.results_for_file = []
+        #### Events ####
+        # Is raised when the system completed to fire a file, it is used for sending the results.
+        self.managing_frame = Event()
+        self.updateResults = Event()
+
+    def computeLogProbability(self, frame, buffer):
+        """
+            passes the content of buffer to all hmms and returns the norm log-probability of each one.
+        :param frame: the frame received
+        :param buffer: the list of the latest sent frames
+        :return: list of norm log-probabilities
+        """
+        for hmm in self.hmms:
+            # Computes sequence's log-probability and its normalize
+            log_probability = hmm.log_probability(buffer)
+            norm_log_probability = log_probability / len(buffer)
+
+            # Print debug results
+            if(plot_gesture == True):
+                print('Model:{} log-probability: {}, normalised-log-probability {}'.
+                      format(hmm.name, log_probability, norm_log_probability))
+
+            # Update log_probabilities
+            self.log_probabilities[hmm.name].append(norm_log_probability)
+            # Update log_probabilities_for_frame
+            self.frame_log_probabilities.append([hmm.name, norm_log_probability])
+
+
+        # new_item: coordinates points(x and y), stroke number, log temp and the hmm with the higher norm log-probability value and its value
+        # max_log_probability=-sys.maxsize
+        # best_hmm = self.hmms[0].name
+        # for hmm in self.hmms:
+        #     value = self.log_probabilities[hmm.name][-1]
+        #     if value > max_log_probability:
+        #         max_log_probability = value
+        #         best_hmm = hmm.name
+        # new_item = [frame[0], frame[1], frame[2], frame[3], best_hmm]
+        # self.results_for_file.append(new_item)
+        # Notifies that the new frame is managed
+        self.managing_frame(copy.deepcopy(self.frame_log_probabilities))
+        self.frame_log_probabilities.clear()
+
+    def compareClassifiers(self, filename):
+        """
+            compares the classifiers in order to find the best hmm and updates the dictionary "result"
+        :return:
+        """
+        # Notifies updating
+        self.updateResults(copy.deepcopy(self.log_probabilities),
+                           filename)
+        # Clears data structures
+        for hmm in self.hmms:
+            self.log_probabilities[hmm.name] = []
+

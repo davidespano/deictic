@@ -5,15 +5,14 @@ from test import *
 
 
 # Main
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = -1
-
-
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+mode = 1000
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -46,10 +45,10 @@ if mode in [-1, 0, 1]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parse_expression(type+folder)
+        model = parse.parseExpression(type + folder)
         hmms.append(model)
 
-    t = test(hmms, gestureDir, folders, plot=False)
+    t = test(hmms, folders, gestureDir, plot=False)
     results = t.all_files()
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
@@ -63,10 +62,10 @@ if mode in [2,3]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parse_expression(folder)
+        model = parse.parseExpression(folder)
         hmms.append(model)
 
-    t = test(hmms, gestureDir, folders, plot=False)
+    t = test(hmms, folders, gestureDir, plot=False)
     results = t.all_files()
 
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
@@ -89,10 +88,10 @@ if mode in [4,5]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parse_expression(type+folder)
+        model = parse.parseExpression(type + folder)
         hmms.append(model)
 
-    t = test(hmms, gestureDir, folders, plot=False)
+    t = test(hmms, folders, gestureDir, plot=False)
     results = t.ten_cross_validation(list_filesDir)
 
 
@@ -206,7 +205,7 @@ if mode in [6, 7, 8, 9, 10]:
 
                 for i in range(0, len(list_occurrence_models)):
 
-                    list_dataset_for_models[list_occurrence_models[i]].append(training_dataset.read_file(list_files[i]));
+                    list_dataset_for_models[list_occurrence_models[i]].append(training_dataset.readFile(list_files[i]));
 
                 for i in range(0, len(list_dataset_for_models)):
                     # Create and training hmm
@@ -268,7 +267,6 @@ if mode in [6, 7, 8, 9, 10]:
                         ('right_sq_bracket',n_states * 3), ('x',n_states * 3), ('delete_mark', n_states * 3),
                         ('triangle', n_states * 3), ('rectangle', n_states * 3)]
 
-        #list_gesture = [("caret", n_states * 2), ("v", n_states * 2)]
         gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/unica-dataset/ten-cross-validation/'
         n_features = 2
@@ -276,12 +274,8 @@ if mode in [6, 7, 8, 9, 10]:
         gestures = [i[0] for i in list_gesture]
         results = None
 
-        # Create hmm gesture, training and testing sequences
-
-
+        # Creates hmm gesture, training and testing sequences
         confusion = numpy.zeros((len(list_gesture), len(list_gesture)))
-
-
 
         for k in range(0, iterations):
             hmms = []
@@ -300,12 +294,22 @@ if mode in [6, 7, 8, 9, 10]:
         print("--------------------- finale ------------------------")
         print(confusion)
 
+################################################################ Plot Gestures #############################
+# Create model
+gesture = "v/"
+parse = Parse()
+model = parse.parseExpression("unistroke-rectangle")
+# Mode for showing database image
+if mode == 1000:
+    # Gets dataset file
+    dataset = CsvDataset("/home/ale/PycharmProjects/deictic/repository/"
+                         "deictic/1dollar-dataset/raw/"+gesture)
+    # Gets 10 random images
+    dataset.plot(singleMode=True)
 
 
 
 
-# Stampa matrice di confusione
-#print(results)
 
 
 if mode == 24:
@@ -331,3 +335,4 @@ if mode == 26:
     samples = [d.sample() for i in range(10000)]
     plt.hist(samples, edgecolor='c', color='c', bins=50)
     plt.show()
+
