@@ -20,7 +20,7 @@ class DataAnalyzer():
         # Num Primitive
         self.num_primitives = 0
         # Max flickering permitted
-        self.__delta_flick = 3
+        self.__delta_flick = 2
 
     def setNumPrimitive(self, num_primitives=0):
         self.num_primitives = num_primitives
@@ -54,12 +54,12 @@ class DataAnalyzer():
         start = 0
         during = 0
         hmm_name = self.data_frame[0][0]
-        for n_frame in range(5, len(self.data_frame)):
+        for n_frame in range(0, len(self.data_frame)):
             if hmm_name != self.data_frame[n_frame][0] or n_frame == len(self.data_frame)-1:
                 # Saves old pass
                 analized_file.append([hmm_name, str(start), str(during)])
                 # Updates data
-                start = n_frame - 1
+                start = n_frame
                 during = 1
                 hmm_name = self.data_frame[n_frame][0]
             else:
@@ -101,6 +101,8 @@ class DataAnalyzer():
             # Has been recognized the complete gesture?
             if primitive_recognized == self.num_primitives:
                 self.data_dataset[gesture_name] += 1
+            else:
+                print(file_results)
         # Clears data structures
         self.data_file.clear()
 
