@@ -27,7 +27,7 @@ def plot_sample(model, samples=3):
         plt.plot(seq[:, 0], seq[:, 1], marker='.')
         plt.show()
 
-#### Test ####
+#### test ####
 def test_1(baseDir, direction, n_states):
     if direction == Direction.left:
         correct = 'down-trajectory/left/'
@@ -221,7 +221,7 @@ def test_primitive(baseDir, n_states, direction, degree = 0):
 
 def test_leap(baseDir, n_states, typeTest):
 
-    #### Test ####
+    #### test ####
     # Rectangle
     if(typeTest == TypeTest.rectangle):
         model = create_rectangle(baseDir, n_states)
@@ -407,14 +407,14 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #test_1(baseDir, Direction.left, 4)
 #test_1(baseDir, Direction.right, 4)
 
-#### Test Primitive ####
+#### test Primitive ####
 #test_sequence(baseDir, 4)
 #test_choice(baseDir, 4)
 #test_iterative(baseDir, 4)
 #test_disabling(baseDir, 4)
 #test_parallel(baseDir, 4)
 
-#### Test Gesture Complete ####
+#### test Gesture Complete ####
 
 # Crea file csv primitive
 # Left
@@ -466,7 +466,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 # Crea dataset gesture composte
 #create_operators_dataset(baseDir, Operator.iterative, dimensions=2, scale=1)
 
-# Test - con primitive
+# test - con primitive
 #print('Rectangle')
 #test_leap(baseDir, 8, TypeTest.rectangle) # Ok
 #print('Triangle')
@@ -485,7 +485,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #test_leap(baseDir, 8, TypeTest.delete_mark) # Ok anche se con square braket, x e rettangolo le differenze non sono nettissime (in ogni caso sono il doppio)
 #print('Star')
 #test_leap(baseDir, 8, TypeTest.star) # Ok
-# Test - senza primitive
+# test - senza primitive
 
 #print('V')
 #test_leap(baseDir, 8, TypeTest.v) # Si confonde un poco con il rettangolo!

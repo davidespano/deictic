@@ -222,7 +222,7 @@ if mode in [6, 7, 8, 9, 10]:
                             )
                 gestures[gesture[0]] = hmms
 
-            print("inizio il test")
+            print("inizio il test_real_time")
             results = compares_deictic_models(gestures, gestureDir, ten_fold=True)
             complete = complete + results
             print("K = {}".format(k))

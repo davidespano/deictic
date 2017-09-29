@@ -116,7 +116,7 @@ class CsvDataset:
         return sequences
 
     def ten_cross_validation(self, outputDir, k = 0, rates = None, labels = None):
-        """ Selects the tenth part of the files in the dataset as test and uses the other ones for training
+        """ Selects the tenth part of the files in the dataset as test_real_time and uses the other ones for training
 
         Parameters
         ----------
@@ -130,7 +130,7 @@ class CsvDataset:
         testing_dataset = []
         if(rates != None and labels != None):
             length = int(len(labels)/10)
-            # Test files
+            # test_real_time files
             for index in range(0, len(rates)):
                 num_file_label = int((length * rates[index][1])/100)
                 for i in range(0, num_file_label):
@@ -149,27 +149,27 @@ class CsvDataset:
         else:
             # Take all files
             training_dataset = self.getDatasetIterator().filenames
-            # Test files number (the tenth part of the files in the dataset)
+            # test_real_time files number (the tenth part of the files in the dataset)
             length = int(len(training_dataset)/10)
             for i in range(0, length):
                 index_for_testing = randint(0, len(training_dataset)-1)
                 testing_dataset.append(training_dataset.pop(index_for_testing))
 
-        # Save test and training files in csv file
+        # Save test_real_time and training files in csv file
         with open(outputDir+'train_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
             myfile.write('/'.join(training_dataset))
         with open(outputDir+'test_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
             myfile.write('/'.join(testing_dataset))
 
     def leave_one_out(self, conditionFilename=None, leave_index = -1):
-        """ Selects one of the files in the dataset as test and uses the other ones for training
+        """ Selects one of the files in the dataset as test_real_time and uses the other ones for training
 
         Parameters
         ----------
         conditionFilename: fun
-            function for defining test and train set
+            function for defining test_real_time and train set
         leave_index: int
-            index of the test file
+            index of the test_real_time file
         """
 
         if(conditionFilename):
@@ -193,7 +193,6 @@ class CsvDataset:
     # Plots input dataset's files
     def plot(self, dimensions = 2, sampleName = None, model = None, singleMode = False):
         fig = plt.figure();
-        labels =[];
         ax = None
         if dimensions == 3:
             ax = fig.gca(projection='3d')
@@ -228,18 +227,16 @@ class CsvDataset:
                     if singleMode:
                         plt.title(filename)
                         plt.show()
-                        #labels.append(filename + "," + input(filename +"->"))
 
-            if dimensions == 3:
-                ax.legend()
-            else:
-                plt.legend(loc='upper right')
+                if dimensions == 3:
+                    ax.legend()
+                else:
+                    plt.legend(loc='upper right')
+                if sampleName != None:
+                    plt.title(sampleName)
+                if not singleMode:
+                    plt.show()
 
-            if sampleName != None:
-                plt.title(sampleName)
-            if not singleMode:
-                plt.show()
-            #print(labels)
 
 class DatasetTransform:
 

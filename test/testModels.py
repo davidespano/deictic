@@ -187,7 +187,7 @@ class test:
             self.results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
 
 
-    # Test models with all dataset's files
+    # test models with all dataset's files
     def all_files(self):
         for index_dataset in range(0, len(self.list_dataset)):
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
@@ -197,7 +197,7 @@ class test:
             # Compares models
             self.compares_models(sequences, index_dataset)
         return self.results
-    # Test models with ten cross validation (using dataset's files)
+    # test models with ten cross validation (using dataset's files)
     def ten_cross_validation(self, list_filesDir, k=0):
         self.results = numpy.zeros((len(self.models), len(self.models)), dtype=numpy.int)
         for index_dataset in range(0, len(self.list_dataset)):
@@ -205,11 +205,11 @@ class test:
 
             # Gets sequences
             sequences = self.list_dataset[index_dataset].\
-                read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test', k)
+                read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test_real_time', k)
             # Compares models
             self.compares_models(sequences, index_dataset)
         return self.results
-    # Test models with a single file
+    # test models with a single file
     def single_file(self, sequences):
         self.results = []
         # Compares models
@@ -290,79 +290,4 @@ class test:
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
             for row in results_string:
                 spamwriter.writerow(row)
-
-
-
-
-
-class testRealTime():
-    """
-        This class implements the methods for testing deictic in real time
-    """
-    def __init__(self, hmms, plot_result = False):
-        # Hmms
-        self.hmms = hmms
-        # User option regarding the plotting of the computation
-        self.plot_result = plot_result
-        #### Results ####
-        # - log_probabilities: for each hmm this dictionary reports its norm log-probability
-        # - frame_log_probabilities: for each frame of a file it reports the high probabilities for each hmm        self.log_probabilities = {}
-        self.log_probabilities = {}
-        for hmm in hmms:
-            self.log_probabilities[hmm.name] = []
-        self.frame_log_probabilities = []
-        #self.results_for_file = []
-        #### Events ####
-        # Is raised when the system completed to fire a file, it is used for sending the results.
-        self.managing_frame = Event()
-        self.updateResults = Event()
-
-    def computeLogProbability(self, frame, buffer):
-        """
-            passes the content of buffer to all hmms and returns the norm log-probability of each one.
-        :param frame: the frame received
-        :param buffer: the list of the latest sent frames
-        :return: list of norm log-probabilities
-        """
-        for hmm in self.hmms:
-            # Computes sequence's log-probability and its normalize
-            log_probability = hmm.log_probability(buffer)
-            norm_log_probability = log_probability / len(buffer)
-
-            # Print debug results
-            if(plot_gesture == True):
-                print('Model:{} log-probability: {}, normalised-log-probability {}'.
-                      format(hmm.name, log_probability, norm_log_probability))
-
-            # Update log_probabilities
-            self.log_probabilities[hmm.name].append(norm_log_probability)
-            # Update log_probabilities_for_frame
-            self.frame_log_probabilities.append([hmm.name, norm_log_probability])
-
-
-        # new_item: coordinates points(x and y), stroke number, log temp and the hmm with the higher norm log-probability value and its value
-        # max_log_probability=-sys.maxsize
-        # best_hmm = self.hmms[0].name
-        # for hmm in self.hmms:
-        #     value = self.log_probabilities[hmm.name][-1]
-        #     if value > max_log_probability:
-        #         max_log_probability = value
-        #         best_hmm = hmm.name
-        # new_item = [frame[0], frame[1], frame[2], frame[3], best_hmm]
-        # self.results_for_file.append(new_item)
-        # Notifies that the new frame is managed
-        self.managing_frame(copy.deepcopy(self.frame_log_probabilities))
-        self.frame_log_probabilities.clear()
-
-    def compareClassifiers(self, filename):
-        """
-            compares the classifiers in order to find the best hmm and updates the dictionary "result"
-        :return:
-        """
-        # Notifies updating
-        self.updateResults(copy.deepcopy(self.log_probabilities),
-                           filename)
-        # Clears data structures
-        for hmm in self.hmms:
-            self.log_probabilities[hmm.name] = []
 

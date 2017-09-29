@@ -2,22 +2,21 @@
 #from time import sleep
 # Analyzing data
 from real_time.dataAnalyzer import DataAnalyzer
+from real_time.test_real_time import *
 # CsvDataset
 from dataset import CsvDataset
 # Circular Buffer
 import collections
 # Event
 from axel import Event
-# Test
-from test import testRealTime
 # Parse
 from real_time.modellingGesture import Parse
-#from gesture.modellingGesture import Parse
 # Transforms
 from dataset.normaliseSamplesDataset import *
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 class CsvDatasetRealTime(CsvDataset):
     """
@@ -32,9 +31,9 @@ class CsvDatasetRealTime(CsvDataset):
                        (its size should be big enough to contain all the frame of a gesture)
         """
         # Events
-        self.fire = Event()  # Fires a frame
-        self.end = Event()  # Ends of sequence
-        self.end_dataset = Event() # Ends firing dataset
+        self.start = Event() # Start to fire a sequence
+        self.fire = Event()  # Fire a frame
+        self.end = Event()  # End of sequence
         # Variables
         self.__buffer = collections.deque(maxlen=maxlen)# Circular buffer
         self.buffer = []#collections.deque(maxlen=maxlen) # Circular buffer
@@ -75,13 +74,13 @@ class CsvDatasetRealTime(CsvDataset):
 
         for sequence in self.readDataset():
             if filename == None or filename == sequence[1]:
+                self.__start(sequence[1])
                 for frame in sequence[0]:
                     # Updates buffer and sends frame
                     self.__updateBuffer(frame)
                 # Advises that the sequence is completed
                 self.__end(sequence[1])
-        # Advises that the dataset is completed
-        self.__endDataset(gesture_name)
+
 
     def __updateBuffer(self, frame):
         """
@@ -95,18 +94,15 @@ class CsvDatasetRealTime(CsvDataset):
             # Sends a single frame
             self.__fire(frame)
 
-        #self.buffer.append(frame)# Appends the frame
-
     # Firing events methods
+    def __start(self, filename):
+        self.start(filename)
     def __fire(self, frame):
         self.fire(frame, self.buffer)
     def __end(self, filename):
         # Clear Buffer
         self.__buffer.clear()
-        #self.buffer.clear()
         self.end(filename)
-    def __endDataset(self, gesture_name):
-        self.end_dataset(gesture_name)
 
 
 
@@ -124,6 +120,8 @@ class DeicticRealTime():
         self.outputDir = outputDir
         # Elaborated results
         self.elaborated_results = []
+        # Path save
+        self.saveDir = "/home/ale/PycharmProjects/deictic_test/"
 
         # List of gestures
         if isinstance(type_gesture, str):
@@ -131,20 +129,37 @@ class DeicticRealTime():
                 # Gestures
                 self.gestures = \
                     [
-                        #"unistroke-v_1",
-                        #"unistroke-v_2",
-                        #"unistroke-x_1",
-                        #"unistroke-x_2",
-                        #"unistroke-x_3",
-                        "unistroke-rectangle_1",
-                        "unistroke-rectangle_2",
-                        "unistroke-rectangle_3",
-                        "unistroke-rectangle_4",
-                        #"unistroke-star_1",
-                        #"unistroke-star_2",
-                        #"unistroke-star_3",
-                        #"unistroke-star_4",
-                        #"unistroke-star_5",
+                        #"unistroke-arrow_1", "unistroke-arrow_2", "unistroke-arrow_3", "unistroke-arrow_4",
+
+                        #"unistroke-circle_1","unistroke-circle_2","unistroke-circle_3","unistroke-circle_4",
+
+                        #"unistroke-check_1","unistroke-check_2",
+
+                        #"unistroke-caret_1","unistroke-caret_2",
+
+                        #"unistroke-delete_mark_1","unistroke-delete_mark_2","unistroke-delete_mark_3",
+
+                        #"unistroke-left_curly_brace_1","unistroke-left_curly_brace_2","unistroke-left_curly_brace_3","unistroke-left_curly_brace_4",
+
+                        #"unistroke-left_sq_bracket_1","unistroke-left_sq_bracket_2","unistroke-left_sq_bracket_3",
+
+                        #"unistroke-pigtail_1","unistroke-pigtail_2","unistroke-pigtail_3","unistroke-pigtail_4",
+
+                        #"unistroke-question_mark_1","unistroke-question_mark_2","unistroke-question_mark_3","unistroke-question_mark_4","unistroke-question_mark_5",
+
+                        #"unistroke-rectangle_1","unistroke-rectangle_2","unistroke-rectangle_3","unistroke-rectangle_4",
+
+                        #"unistroke-right_curly_brace_1","unistroke-right_curly_brace_2","unistroke-right_curly_brace_3","unistroke-right_curly_brace_4",
+
+                        #"unistroke-right_sq_bracket_1","unistroke-right_sq_bracket_2","unistroke-right_sq_bracket_3",
+
+                        #"unistroke-star_1","unistroke-star_2","unistroke-star_3","unistroke-star_4","unistroke-star_5",
+                        
+                        #"unistroke-triangle_1","unistroke-triangle_2","unistroke-triangle_3",
+                        
+                        "unistroke-v_1","unistroke-v_2",
+                                                
+                        #"unistroke-x_1","unistroke-x_2","unistroke-x_3",
 
                         #"arrow", "caret"
                         #"circle", "check",
@@ -157,9 +172,21 @@ class DeicticRealTime():
                     ]
                 self.gesturesDataset = \
                     [
-                        ["rectangle", self.n_samples*4],
+                        #["arrow", self.n_samples*4],
+                        #["circle", self.n_samples*4],
+                        #["check", self.n_samples*2],
+                        #["caret", self.n_samples * 2],
+                        #["delete_mark", self.n_samples * 3],
+                        #["left_curly_brace", self.n_samples * 4],
+                        #["left_sq_bracket", self.n_samples*3],
+                        #["pigtail", n_samples*4],
+                        #["question_mark", self.n_samples * 5],
+                        #["rectangle", self.n_samples*4],
+                        #["right_curly_brace", self.n_samples * 4],
+                        #["right_sq_bracket", self.n_samples * 3],
                         #["star", self.n_samples*5],
-                        #["v", self.n_samples*2],
+                        #["triangle", self.n_samples * 3],
+                        ["v", self.n_samples*2],
                         #["x", self.n_samples*3]
 
                     ]
@@ -185,42 +212,56 @@ class DeicticRealTime():
 
 
     def application(self):
-        # Inizializing model for analyzing data
-        self.data_analyzer = DataAnalyzer()
+        ### Tester ###
+        self.test = testRealTime(self.hmms)
+        ### Data Collect ###
+        self.testResult = {}
+
         # for each gesture in the dataset
         for gesture in self.gesturesDataset:
             # Gets sequences
             dataset = CsvDatasetRealTime(self.baseDir+gesture[0]+'/', maxlen=dim_buffer, num_samples=gesture[1])
-            #### Tester ####
-            self.test = testRealTime(self.hmms)
+            self.testResult[gesture[0]] = DatasetTestResult()
+
             # Links handlers to events
             dataset.fire += self.test.computeLogProbability # Grabs the fired frame
-            dataset.end += self.test.compareClassifiers # Computes some information when the file is fired
-            #### Data Analyzer ####
-            self.test.managing_frame += self.data_analyzer.analyzeFrame # Computes which is the hmm with the higher log probability value
-            dataset.end += self.data_analyzer.analyzeFile # Computes the evolution of the primitives throughout the file.
-            dataset.end_dataset += self.data_analyzer.analyzeOverallData # Computes how many file are recognized correctly.
-            self.data_analyzer.setNumPrimitive(len(self.hmms))
 
-            #self.test.updateResults += self.__savesResults
+            dataset.start += self.testResult[gesture[0]].start
+            self.test.managing_frame += self.testResult[gesture[0]].update
+            #dataset.end += self.testResult[gesture[0]].stop
+
             # Start firing
             dataset.startFire()
 
     # Saves results
     def showResults(self):
         """
-
+            Shows results
         :return:
         """
+        for item in self.testResult:
+            path = self.saveDir+item+'/'
+            if not os.path.exists(path):
+                os.makedirs(path)
+            self.testResult[item].save(path)
+            self.testResult[item].plot()
+
         # Shows the analyzed results
-        for gesture in self.data_analyzer.data_dataset:
-            # Takes data
-            data = self.data_analyzer.data_dataset[gesture]
-            # Prints gesture name, positive true, negative true
-            print(gesture +' - '+ str(data) +'/'+ (str(330-data)))
+        # for gesture in self.data_analyzer.data_dataset:
+        #     # Takes data
+        #     correct_samples = self.data_analyzer.data_dataset[gesture]
+        #     wrong_samples = len(self.data_analyzer.data_dataset_failed[gesture])
+        #     # Prints gesture name, positive true, negative true
+        #     print(gesture +' - '+ str(correct_samples) +'/'+ (str(wrong_samples)))
+        # # Analyzed wrong results
+        # for gesture in self.data_analyzer.data_dataset_failed:
+        #     dataset = CsvDataset(self.baseDir + gesture + '/')
+        #     for file in self.data_analyzer.data_dataset_failed[gesture]:
+        #         print(file[1])
+        #         dataset.plot(sampleName=file[0])
 
     # Plots results
-    # Handler for test model event
+    # Handler for test_real_time model event
     def __plotResults(self, log_probabilities, results_for_file, file_name):
         self.results.append(log_probabilities)
     # Plots the results

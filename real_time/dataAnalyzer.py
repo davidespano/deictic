@@ -5,6 +5,11 @@ import copy
 import collections
 
 
+# Debug lib - csvdataset
+from dataset.csvDataset import *
+from threading import Thread
+
+
 class DataAnalyzer():
     """
         This class provides to elaborate and analyze the incoming results about the last examinated file and the dataset which it belongs.
@@ -17,10 +22,11 @@ class DataAnalyzer():
         self.data_file = {}
         # Data for analyzing dataset
         self.data_dataset = {}
+        self.data_dataset_failed = {}
         # Num Primitive
         self.num_primitives = 0
         # Max flickering permitted
-        self.__delta_flick = 2
+        self.__delta_flick = 0
 
     def setNumPrimitive(self, num_primitives=0):
         self.num_primitives = num_primitives
@@ -76,13 +82,15 @@ class DataAnalyzer():
         :return:
         """
 
+        self.data_dataset_failed[gesture_name] = []
         self.data_dataset[gesture_name] = 0
+
         # Takes the result about a single file
         for filename in self.data_file:
             file_results = self.data_file[filename]
             # Number of primitives correctly recognized
             primitive_recognized = 1
-            #stack = collections.deque()
+            stack = collections.deque()
 
             # for each row
             for item in file_results:
@@ -95,14 +103,16 @@ class DataAnalyzer():
                 if str(primitive_recognized) in hmm_name and during_frames > self.__delta_flick:
                     # Update primitive
                     primitive_recognized = self.__updateNumberOfRecognizedPrimitive(primitive_recognized)
-                    # Update stack
-                    #stack.append(item)
+                # Update stack
+                stack.append(item)
 
             # Has been recognized the complete gesture?
-            if primitive_recognized == self.num_primitives:
+            if len(stack) == self.num_primitives and primitive_recognized == self.num_primitives:
                 self.data_dataset[gesture_name] += 1
             else:
-                print(file_results)
+                #print(file_results)
+                self.data_dataset_failed[gesture_name].append([filename, file_results])
+
         # Clears data structures
         self.data_file.clear()
 
