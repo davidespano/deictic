@@ -67,8 +67,7 @@ class Deictic():
 
 
 # Example #
-type_gesture = "unistroke"
-base_dir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
-deictic = Deictic(type_gestures=type_gesture, base_dir=base_dir)
-# Test
-deictic.test()
+type_gesture = "unistroke"# Tipo di gesture
+base_dir = '/home/ale/PycharmProjects/deictic/repository/deictic/'# Path del repository
+deictic = Deictic(type_gestures=type_gesture, base_dir=base_dir)# Crea un oggetto di tipo deictic
+deictic.test()# Esegui il test (il file viene salvato nel repository con il nome: matrix_confusion_choice.csv
