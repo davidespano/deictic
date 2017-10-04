@@ -8,13 +8,14 @@ import matplotlib.pyplot as plt
 class Result():
 
     # Methods
-    def __init__(self):
+    def __init__(self, n_primitives=1):
         self.data_array = []
+        # Features
+        self.n_primitives = n_primitives
 
     def get(self):
         """
-
-        :param row:
+            converts data_array to string.
         :return:
         """
         data_to_string = []
@@ -27,25 +28,9 @@ class Result():
 
         return data_to_string
 
-    def getToArray(self):
-        """
-
-        :return:
-        """
-        # Get
-        data_to_string = self.get()
-
-        data_to_float = np.zeros(shape=(len(data_to_string),2))
-        for row in range(len(data_to_float)):
-            for column in range(1):
-                data_to_float[row][column] = np.float(data_to_string[row][column])
-
-        return data_to_float
-
-
     def save(self, path_to_save):
         """
-
+            writes the collected data in the specified file.
         :param path_to_save:
         :return:
         """
@@ -61,8 +46,8 @@ class FrameTestResult(Result):
         FrameTestResult describes the results linked to a single frame. It contains the log probabilites computed for each models in the dataset.
     """
 
-    def __init__(self, test_results, n_frame = None):
-        super(FrameTestResult, self).__init__()
+    def __init__(self, test_results, n_frame = None, n_primitives = 1):
+        super(FrameTestResult, self).__init__(n_primitives)
         ### Check validity parameters ###
         if not isinstance(test_results, list):
             raise ValueError('test_results must be an array.')
@@ -79,7 +64,12 @@ class FrameTestResult(Result):
         # - best_log_probability reports which is the model with the highest log probability
         self.best_log_probability = self.__findBestLogProbability()
 
+
     def __findBestLogProbability(self):
+        """
+            find which is the best model in the last result.
+        :return: the model with the highest norm log probability value.
+        """
         best_model = None
         highest_log_probability = -sys.maxsize# (np.finfo(float).eps)
 
@@ -91,22 +81,32 @@ class FrameTestResult(Result):
 
         return best_model
 
+    # Override
     def get(self):
         """
-
+            converts data_array to string.
         :return:
         """
         # Num frame, norm log probability and model name
         return (str(self.n_frame), str(self.best_log_probability[1]), str(self.best_log_probability[0]))
 
+    def resultsToArray(self):
+        """
+            converts data_array to string.
+        :return:
+        """
+        data = {}
+        for item in self.data_array:
+            data[item[0]] = [item[1]]
+        return data
 
 class FileTestResult(Result):
     """
         FileTestResult describes the results linked to a single file.
     """
 
-    def __init__(self, file_path):
-        super(FileTestResult, self).__init__()
+    def __init__(self, file_path, n_primitives = 1):
+        super(FileTestResult, self).__init__(n_primitives)
         ### Check validity parameters ###
         if not isinstance(file_path, str):
             raise ValueError('file_path must be a string.')
@@ -114,14 +114,14 @@ class FileTestResult(Result):
         # The path of file
         self.file_path = file_path
         ## Data Structures
-        # This array contains the test_real_time result of each frame which compose the file
-        self.frameTestResults = []
         # This array reports the concise evolution of the recognition
         self.computedSequence = []
+        # This array reports for each models the log probabilitie values during the evolution
+        self.testTrend = {}
 
     def update(self, data_test):
         """
-
+            creates a new FrameTestResult and passes to it the incoming results.
         :param data_test:
         :return:
         """
@@ -130,6 +130,8 @@ class FileTestResult(Result):
         self.data_array.append(FrameTestResult(data_test, n_frame))
         # Update computedSequence array
         self.computeBestSequence()
+        # Update test trend
+        self.collectModelsTrend()
 
     def computeBestSequence(self):
         """
@@ -159,35 +161,71 @@ class FileTestResult(Result):
             during = 1
             self.computedSequence.append([new_hmm, start, end, during])
 
-    def plot(self, filename):
+    def collectModelsTrend(self):
         """
 
         :return:
         """
-        # Get data
-        data_to_plot = self.getToArray()
-        # Plot
-        fig = plt.figure();
-        fig, ax = plt.subplots()
-        ax.scatter(data_to_plot[:,0], data_to_plot[:,1])
-        for i in range(0, len(data_to_plot)):
-            ax.annotate(str(i), (data_to_plot[i,0], data_to_plot[i,1]))
-        plt.axis('equal')
-        plt.plot(data_to_plot[:,0], data_to_plot[:,1])
-        plt.title(filename)
-        plt.legend(loc='upper right')
+        for key,value in self.data_array[-1].resultsToArray().items():
+            if key not in self.testTrend:
+                self.testTrend[key] = []
+            self.testTrend[key].append(value)
 
-        return plt
+    def check(self):
+        """
+            This method analyzes the data include into computedSequence in order to check if primitives have been recognized correctly.
+        :return:
+            yes (the primitives have been recognized correctly) or false.
+        """
+        primitive_recognized = 1
+        for item in self.computedSequence:
+            # Gets info
+            model_name = item[0]
+            start_frame = item[1]
+            end_frame = item[2]
+            during_frames = item[3]
+
+            # Has it been recognized the correct primitive?
+            if str(primitive_recognized) in hmm_name and during_frames > self.__delta_flick:
+                # Update primitive
+                primitive_recognized = self.__updateNumberOfRecognizedPrimitive(primitive_recognized)
+
+        # Has been recognized the complete gesture? If yes return true else false
+        if len(stack) == self.n_primitives and primitive_recognized == self.n_primitives:
+            return True
+        else:
+            return False
+
+    def plot(self):
+        """
+            this method collects the log probabilities of each model and creates a plot of these data.
+        :return:
+        """
+        plot = plt.figure(1, figsize=(10,20))
+        # Plot
+        for key,value in self.testTrend.items():
+            x = np.arange(len(self.data_array))
+            y = value
+            plt.plot(x, y, label=key)
+
+        plt.title(self.file_path)
+        plt.xticks(np.arange(min(x), max(x) + 1, 2.0))
+
+        plt.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
+        return plot
+
+
 
 class DatasetTestResult(Result):
     """
         DatasetTestResult describes the results linked to a whole dataset.
     """
 
-    def __init__(self):
-        super(DatasetTestResult, self).__init__()
-        ### Features ###
-
+    def __init__(self, n_primitives=1):
+        super(DatasetTestResult, self).__init__(n_primitives)
+        #### Features ####
+        # For each file, test_result reports if the primitives have been recognized correctly or not.
+        self.test_result = {}
 
     # Handlers for managing the test_real_time result related to a speficified file's frame.
     def start(self, file_path):
@@ -205,64 +243,30 @@ class DatasetTestResult(Result):
         """
         self.data_array[-1].update(data_test)
 
-    def stop(self):
+    def stop(self, file_path):
         """
             handler links to the event "file completed"
             :return: None
         """
+        self.test_result[file_path] = self.data_array[-1].check()
 
     # Override
     def save(self, path_to_save):
         """
-
+            saves the data in the specified file.
         :param path_to_save:
         :return:
         """
         for item in self.data_array:
             item.save(path_to_save+item.file_path)
     # Override
-    def plot(self, file_path = None, singleMode = False):
+    def plot(self, csvDataset = None):
         """
-
+            plots the analized data.
         :return:
         """
         for item in self.data_array:
-            plot = item.plot(item.file_path)
+            plot = item.plot()
             plot.show()
-
-    #
-    def check_result(self, n_primitives = 1):
-        """
-
-        :return:
-        """
-        for item in self.data_array:
-            # Takes the result about the file
-            file_path = item.file_path
-            # Number of primitives correctly recognized
-            primitive_recognized = 1
-            stack = collections.deque()
-
-            # for each row
-            for item in file_results:
-                # Takes info
-                hmm_name = item[0]
-                start_frame = int(item[1])
-                during_frames = int(item[2])
-
-                # Has it been recognized the correct primitive?
-                if str(primitive_recognized) in hmm_name and during_frames > self.__delta_flick:
-                    # Update primitive
-                    primitive_recognized = self.__updateNumberOfRecognizedPrimitive(primitive_recognized)
-                # Update stack
-                stack.append(item)
-
-            # Has been recognized the complete gesture?
-            if len(stack) == self.num_primitives and primitive_recognized == self.num_primitives:
-                self.data_dataset[gesture_name] += 1
-            else:
-                # print(file_results)
-                self.data_dataset_failed[gesture_name].append([filename, file_results])
-
-        # Plot result
-        print("Gesture recognized:")
+            # If csvDataset is not None, plots also the file
+            csvDataset.plot(sampleName=item.file_path)

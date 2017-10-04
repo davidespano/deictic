@@ -14,9 +14,11 @@ from real_time.modellingGesture import Parse
 # Transforms
 from dataset.normaliseSamplesDataset import *
 
+# Imports
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+
 
 class CsvDatasetRealTime(CsvDataset):
     """
@@ -68,8 +70,8 @@ class CsvDatasetRealTime(CsvDataset):
             For each sequences contained in the dataset
             the system fire each frame of sequence.
         """
-        # Sets filename
-        gesture_name = self.dir.split('/') # Takes gesture name from the variable 'dir'
+        # Takes gesture name from the variable 'dir'
+        gesture_name = self.dir.split('/')
         gesture_name = gesture_name[len(gesture_name) - 2]
 
         for sequence in self.readDataset():
@@ -221,7 +223,7 @@ class DeicticRealTime():
         for gesture in self.gesturesDataset:
             # Gets sequences
             dataset = CsvDatasetRealTime(self.baseDir+gesture[0]+'/', maxlen=dim_buffer, num_samples=gesture[1])
-            self.testResult[gesture[0]] = DatasetTestResult()
+            self.testResult[gesture[0]] = DatasetTestResult(n_primitives = gesture[1]/self.n_samples)
 
             # Links handlers to events
             dataset.fire += self.test.computeLogProbability # Grabs the fired frame
@@ -232,9 +234,11 @@ class DeicticRealTime():
 
             # Start firing
             dataset.startFire()
+            # Show results
+            self.showResults(dataset)
 
     # Saves results
-    def showResults(self):
+    def showResults(self, dataset):
         """
             Shows results
         :return:
@@ -244,49 +248,18 @@ class DeicticRealTime():
             if not os.path.exists(path):
                 os.makedirs(path)
             self.testResult[item].save(path)
-            self.testResult[item].plot()
+            self.testResult[item].plot(csvDataset=dataset)
 
-        # Shows the analyzed results
-        # for gesture in self.data_analyzer.data_dataset:
-        #     # Takes data
-        #     correct_samples = self.data_analyzer.data_dataset[gesture]
-        #     wrong_samples = len(self.data_analyzer.data_dataset_failed[gesture])
-        #     # Prints gesture name, positive true, negative true
-        #     print(gesture +' - '+ str(correct_samples) +'/'+ (str(wrong_samples)))
-        # # Analyzed wrong results
-        # for gesture in self.data_analyzer.data_dataset_failed:
-        #     dataset = CsvDataset(self.baseDir + gesture + '/')
-        #     for file in self.data_analyzer.data_dataset_failed[gesture]:
-        #         print(file[1])
-        #         dataset.plot(sampleName=file[0])
-
-    # Plots results
-    # Handler for test_real_time model event
-    def __plotResults(self, log_probabilities, results_for_file, file_name):
-        self.results.append(log_probabilities)
-    # Plots the results
-    def printPlot(self):
-        for result in self.results:
-            plt.clf()
-            # Plot
-            for hmm in self.hmms:
-                y = result[hmm.name]
-                x = np.arange(len(y))
-                plt.plot(x,y, label=hmm.name)
-
-            plt.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
-            plt.show()
 
 #### ####
-n_states = 6
-n_samples = 20
+n_states = 12
+n_samples = 40
 dim_buffer = 1000
 baseDir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
 outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset/'
 
 app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples, dim_buffer=dim_buffer)
 app.application()
-app.showResults()
 
 
 #app.printPlot()

@@ -192,7 +192,7 @@ class CsvDataset:
     # Plot
     # Plots input dataset's files
     def plot(self, dimensions = 2, sampleName = None, model = None, singleMode = False):
-        fig = plt.figure();
+        #fig = plt.figure(2);
         ax = None
         if dimensions == 3:
             ax = fig.gca(projection='3d')
@@ -211,7 +211,7 @@ class CsvDataset:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
 
                     else:
-                        fig, ax = plt.subplots()
+                        fig, ax = plt.subplots(figsize=(10,15))
                         ax.scatter(result[:,0], result[:,1])
                         for i in range(0, len(result)):
                             ax.annotate(str(i), (result[i,0], result[i,1]))
