@@ -14,7 +14,7 @@ from .geometry import *
 
 class ScaleDatasetTransform(DatasetTransform):
     def __init__(self, scale=100, cols=[0,1]):
-        super()
+        super(ScaleDatasetTransform, self).__init__()
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
@@ -40,7 +40,7 @@ class ScaleDatasetTransform(DatasetTransform):
 
 class CenteringTransform(DatasetTransform):
     def __init__(self, cols=[0, 1]):
-        super()
+        super(CenteringTransform, self).__init__()
         if not isinstance(cols, list) or len(cols) > 3 or len(cols) < 2:
             return TypeError
         self.cols = cols
@@ -60,7 +60,7 @@ class CenteringTransform(DatasetTransform):
 class TranslateTransform(DatasetTransform):
 
     def __init__(self, cols=[0,1], t=[0,0]):
-        super()
+        super(TranslateTransform, self).__init__()
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
@@ -78,7 +78,7 @@ class TranslateTransform(DatasetTransform):
 
 class NormaliseLengthTransform(DatasetTransform):
     def __init__(self, axisMode=True, cols=[0,1]):
-        super()
+        super(NormaliseLengthTransform, self).__init__()
         if not isinstance(axisMode, bool):
             return TypeError
         self.axisMode = axisMode
@@ -111,7 +111,7 @@ class NormaliseLengthTransform(DatasetTransform):
 
 class SwapTransform(DatasetTransform):
     def __init__(self, cols=[[0,1],[1,0]]):
-        super()
+        super(SwapTransform, self).__init__()
         if not isinstance(cols, list):
             return TypeError
         self.cols = cols
@@ -134,7 +134,7 @@ class RotateTransform(DatasetTransform):
     radians = 2
 
     def __init__(self, traslationMode = False, cols=[0,1], theta=0, centre = [0,0], unit= degrees):
-        super()
+        super(RotateTransform, self).__init__()
         if not isinstance(traslationMode, bool):
             return TypeError
         self.traslationMode = traslationMode
@@ -207,7 +207,7 @@ class RotateCenterTransform(DatasetTransform):
     degrees = 1
     radians = 2
     def __init__(self, traslationMode = False, cols=[0,1], theta=0, centre = [0,0], unit= degrees):
-        super()
+        super(RotateCenterTransform, self).__init__()
         if not isinstance(traslationMode, bool):
             return TypeError
         self.traslationMode = traslationMode
@@ -266,7 +266,7 @@ class RotateCenterTransform(DatasetTransform):
 
 class Sampling(DatasetTransform):
     def __init__(self, scale=100):
-        super()
+        super(Sampling, self).__init__()
         if not isinstance(scale, int):
             return TypeError
         self.scale = scale

@@ -34,7 +34,6 @@ class HmmFactory:
 class Parse:
 
     def __init__(self, n_states=6, n_samples=20):
-        super()
         # Num of states and num of samples #
         if isinstance(n_states, int):
             self.n_states = n_states
