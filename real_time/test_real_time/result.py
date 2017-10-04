@@ -208,9 +208,13 @@ class FileTestResult(Result):
             y = value
             plt.plot(x, y, label=key)
 
+        # Title
         plt.title(self.file_path)
-        plt.xticks(np.arange(min(x), max(x) + 1, 2.0))
-
+        # Stretching x
+        plt.axes([min(x), max(x), -110, 0])
+        # Ticks on x axis
+        #plt.xticks(np.arange(min(x), max(x) + 1, 2.0))
+        # Legend
         plt.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
         return plot
 

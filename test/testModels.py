@@ -159,46 +159,56 @@ def label_class(groups, baseDir, outputDir):
 ## Compare deictic model
 class test:
     """This class implements the methods for comparing hmms"""
-    def __init__(self, models, gesture_names, datasetDir=None,
-                 plot_result = False, results=None):
+    def __init__(self, models, gesture_names, datasetDir, plot_result=False, results=None, file_path_results=None):
         #super()
         if isinstance(models, list):
             # List of hmms
             self.models = models
         if isinstance(datasetDir, str):
-            # Path which contained the datasets
+            # Path which contain the datasets
             self.datasetDir = datasetDir
             # Gets gesture's testing dataset
             self.list_dataset = []
             for name in gesture_names:
                 self.list_dataset.append(CsvDataset(datasetDir + name + '/'))
-            # Namefile
+        # path file results
+        if isinstance(file_path_results, str):
+            self.file_path_results = file_path_results
+        else:
             self.filename = self.datasetDir + 'matrix_confusion_choice.csv'
         if isinstance(gesture_names, list):
-            # The list of gesture to recognized
+            # The list of gesture to recognize
             self.gesture_names = gesture_names
         if isinstance(plot_result, bool):
-            # Plot results
+            # Plot results? Yes or not
             self.plot_result = plot_result
         if isinstance(results, numpy.ndarray):
-            # The developer pass an older of results
+            # The developer passes older results
             self.results = results
         else:
             self.results = numpy.zeros((len(models), len(models)), dtype=numpy.int)
 
 
-    # test models with all dataset's files
     def all_files(self):
+        """
+            Test models with all dataset's files
+        :return:
+        """
         for index_dataset in range(0, len(self.list_dataset)):
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
 
             # Gets sequences
             sequences = self.list_dataset[index_dataset].readDataset()
             # Compares models
-            self.compares_models(sequences, index_dataset)
+            self.__compares_models(sequences, index_dataset)
         return self.results
-    # test models with ten cross validation (using dataset's files)
     def ten_cross_validation(self, list_filesDir, k=0):
+        """
+            test models with ten cross validation (using dataset's files)
+        :param list_filesDir:
+        :param k:
+        :return:
+        """
         self.results = numpy.zeros((len(self.models), len(self.models)), dtype=numpy.int)
         for index_dataset in range(0, len(self.list_dataset)):
             print("gesture {0}:".format(self.list_dataset[index_dataset].dir))
@@ -207,18 +217,22 @@ class test:
             sequences = self.list_dataset[index_dataset].\
                 read_ten_cross_validation_dataset(list_filesDir+self.gesture_names[index_dataset]+'/','test_real_time', k)
             # Compares models
-            self.compares_models(sequences, index_dataset)
+            self.__compares_models(sequences, index_dataset)
         return self.results
-    # test models with a single file
     def single_file(self, sequences):
+        """
+            test models with a single file
+        :param sequences:
+        :return:
+        """
         self.results = []
         # Compares models
-        self.__compares_models(sequences)
+        self.__compares_models_single_file(sequences)
         return self.results
 
 
     # Compares models with dataset
-    def compares_models(self, sequences, index_dataset = None):
+    def __compares_models(self, sequences, index_dataset = None):
         # Sequences is a list of tuples (data_features_movements and its filename)
         for tuple in sequences:
             # Gets sequence data
@@ -251,7 +265,7 @@ class test:
         # Saves results
         self.__save_confusion_matrix()
     # Compares models with a single file
-    def __compares_models(self, sequences):
+    def __compares_models_single_file(self, sequences):
         # For each model
         for model in range(0, len(self.models)):
             # Computes sequence's log-probability and normalized
