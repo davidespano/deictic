@@ -24,7 +24,10 @@ if debug_mode == 1:
 #### Debug Dataset Shrek in 2 dimensioni ####
 if debug_mode == 2:
     # Gesture dataset
-    gestures = ['shrek-grab']
+    gestures = ['shrec-grab', 'shrec-tap', 'shrec-expand', 'shrec-pinch', 'shrec-rotation_clockwise',
+                'shrec-rotation_counter_clockwise', 'shrec-swipe_right', 'shrec-swipe_left',
+                'shrec-swipe_up', 'shrec-swipe_down', 'shrec-swipe_x', 'shrec-swipe_plus',
+                'shrec-swipe_v', 'shrec-shake']
 
     # Creazione hmm
     n_states = 6
