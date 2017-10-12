@@ -17,6 +17,8 @@ class OpEnum(Enum):
     Disabling = 5
     Iterative = 6
     Parallel = 7
+    Point3D = 8
+    Line3D = 9
 
     @staticmethod
     def isGround(opEnum):
@@ -138,7 +140,7 @@ class IterativeExp(GestureExp):
             return self.exp.get_points(points)
         return None
 
-
+################################### 2D ###################################
 class Point(GestureExp):
     def __init__(self, x, y):
         self.x = x
@@ -184,7 +186,6 @@ class Line(GestureExp):
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
 
-
 class Arc(GestureExp):
     def __init__(self, dx, dy, cw=True):
         self.dx = dx
@@ -220,3 +221,73 @@ class Arc(GestureExp):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
+
+
+################################### 3D ###################################
+class Point3D(GestureExp):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __str__(self):
+        return "l({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
+
+    def get_path(self, path, current):
+        path.append(patches.Ellipse(
+            xyz=(self.x, self.y, self.z),
+            width=0.3, height=0.3, lw=3.0,
+            edgecolor='black', facecolor='black'))
+        current.x = self.x
+        current.y = self.y
+        current.z = self.z
+        return path
+
+    def get_points(self, points):
+        points.append([self.x, self.y, self.z, self])
+
+class Line3D(GestureExp):
+    def __init__(self, dx, dy, dz):
+        self.dx = dx
+        self.dy = dy
+        self.dz = dz
+
+    def __str__(self):
+        return "l({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
+
+    def get_path(self, path, current):
+        path.append(patches.FancyArrowPatch(
+            (current.x, current.y, current.z),
+            (current.x + self.dx, current.y + self.dy, current.z + self.dz),
+            arrowstyle='-|>',
+            edgecolor='black', facecolor='black', mutation_scale = 20,
+            lw=3.0))
+        current.x += self.dx
+        current.y += self.dy
+        current.z += self.dz
+        return path
+
+    def get_points(self, points):
+        last = points[-1]
+        if last is not None:
+            points.append([last[0] + self.dx, last[1] + self.dy, self, last[2]+self.dz])
+
+    def plot(self):
+        pathList = list()
+        self.get_path(pathList, Point3D(0, 0, 0))
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.grid(True)
+        ax.set_xticks(numpy.arange(-50, 50, 1))
+        ax.set_yticks(numpy.arange(-50, 50, 1))
+        #codes, verts = zip(*pathList)
+        #path = mpath.Path(verts, codes)
+        #patch = patches.PathPatch(path, facecolor='None', lw=3)
+        for patch in pathList:
+            ax.add_patch(patch)
+        ax.set_axisbelow(True)
+        #x, y = zip(*path.vertices)
+        #line, = ax.plot(x, y, 'go-')
+        plt.axis('equal')
+        plt.show()
+        #return path

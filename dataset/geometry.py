@@ -50,3 +50,10 @@ class Geometry2D:
         return a, b
 
 
+class Geometry3D:
+    @staticmethod
+    def getCosineFromSides(x, y, z):
+        r_zyx = r(z,z) * r(y,y) * r(x,x)
+
+        #r = math.sqrt(x * x + y * y)
+        return x / r

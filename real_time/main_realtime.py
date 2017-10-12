@@ -15,8 +15,8 @@ from real_time.modellingGesture import Parse
 from dataset.normaliseSamplesDataset import *
 
 # Imports
-import numpy as np
-import matplotlib.pyplot as plt
+#import numpy as np
+#import matplotlib.pyplot as plt
 import os
 
 
@@ -151,7 +151,7 @@ class DeicticRealTime():
 
                         #"unistroke-rectangle_1","unistroke-rectangle_2","unistroke-rectangle_3","unistroke-rectangle_4",
 
-                        #"unistroke-right_curly_brace_1","unistroke-right_curly_brace_2","unistroke-right_curly_brace_3","unistroke-right_curly_brace_4",
+                        "unistroke-right_curly_brace_1","unistroke-right_curly_brace_2","unistroke-right_curly_brace_3","unistroke-right_curly_brace_4",
 
                         #"unistroke-right_sq_bracket_1","unistroke-right_sq_bracket_2","unistroke-right_sq_bracket_3",
 
@@ -159,7 +159,7 @@ class DeicticRealTime():
                         
                         #"unistroke-triangle_1","unistroke-triangle_2","unistroke-triangle_3",
                         
-                        "unistroke-v_1","unistroke-v_2",
+                        #"unistroke-v_1","unistroke-v_2",
                                                 
                         #"unistroke-x_1","unistroke-x_2","unistroke-x_3",
 
@@ -184,11 +184,11 @@ class DeicticRealTime():
                         #["pigtail", n_samples*4],
                         #["question_mark", self.n_samples * 5],
                         #["rectangle", self.n_samples*4],
-                        #["right_curly_brace", self.n_samples * 4],
+                        ["right_curly_brace", self.n_samples * 4],
                         #["right_sq_bracket", self.n_samples * 3],
                         #["star", self.n_samples*5],
                         #["triangle", self.n_samples * 3],
-                        ["v", self.n_samples*2],
+                        #["v", self.n_samples*2],
                         #["x", self.n_samples*3]
 
                     ]
@@ -230,7 +230,7 @@ class DeicticRealTime():
 
             dataset.start += self.testResult[gesture[0]].start
             self.test.managing_frame += self.testResult[gesture[0]].update
-            #dataset.end += self.testResult[gesture[0]].stop
+            dataset.end += self.testResult[gesture[0]].stop
 
             # Start firing
             dataset.startFire()
@@ -252,15 +252,14 @@ class DeicticRealTime():
 
 
 #### ####
-n_states = 12
-n_samples = 40
+n_states = 24
+n_samples = 60
 dim_buffer = 1000
 baseDir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
 outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset/'
 
 app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples, dim_buffer=dim_buffer)
 app.application()
-
 
 #app.printPlot()
 #numpy.savetxt(outputDir+'star_result.csv', app.elaborated_results, fmt='%5s', delimiter=',')

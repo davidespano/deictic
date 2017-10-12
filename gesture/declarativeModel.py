@@ -65,6 +65,13 @@ class ClassifierFactory:
             startPoint[1] = exp.y
             return OpEnum.Point, None
 
+        if isinstance(exp, Point3D):
+            self.stroke += 1
+            startPoint[0] = exp.x
+            startPoint[1] = exp.y
+            startPoint[2] = exp.z
+            return OpEnum.Point3D, None
+
         if isinstance(exp, Line):
             alpha = math.acos(Geometry2D.getCosineFromSides(exp.dx, exp.dy)) # rotation with respect to left-to-right line
             if exp.dy < 0:
@@ -95,6 +102,10 @@ class ClassifierFactory:
             startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
+
+        # Todo gestione Line3D e Point3D
+        #if isinstance(exp, Line3D):
+        #    alpha = math.acos(Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz))
 
         if isinstance(exp, Arc):
             if exp.cw:

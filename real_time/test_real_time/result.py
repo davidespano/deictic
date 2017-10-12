@@ -4,6 +4,7 @@ import sys
 import types
 # Plot
 import matplotlib.pyplot as plt
+import matplotlib.pylab as plb
 
 class Result():
 
@@ -144,16 +145,16 @@ class FileTestResult(Result):
         if len(self.computedSequence) > 0:
             last_hmm = self.computedSequence[-1][0]
             if last_hmm != self.data_array[-1].best_log_probability[0]:
-                new_hmm = self.data_array[-1].best_log_probability[0]
+                hmm = self.data_array[-1].best_log_probability[0]
                 start = self.computedSequence[-1][1] + 1
                 end = self.computedSequence[-1][2] + 1
                 during = 1
-                self.computedSequence.append([new_hmm, start, end, during])
             else:
+                hmm = last_hmm
                 start = self.computedSequence[-1][1]
                 end = self.computedSequence[-1][2] + 1
                 during = self.computedSequence[-1][3] + 1
-                self.computedSequence[-1] = ([last_hmm, start, end, during])
+            self.computedSequence[-1] = ([last_hmm, start, end, during])
         else:
             new_hmm = self.data_array[-1].best_log_probability[0]
             start = 0
@@ -201,22 +202,26 @@ class FileTestResult(Result):
             this method collects the log probabilities of each model and creates a plot of these data.
         :return:
         """
-        plot = plt.figure(1, figsize=(10,20))
-        # Plot
+        # Get data
+        #print(self.file_path)
+        fig, ax = plb.subplots(1,1,figsize=(18,20))
+        #plt.subplots_adjust(left=.038, bottom=0, right=1, top=1, wspace=0, hspace=0)
         for key,value in self.testTrend.items():
             x = np.arange(len(self.data_array))
-            y = value
-            plt.plot(x, y, label=key)
-
+            y = np.asarray(value)
+            plb.plot(x,y, label=key)
+            ax.scatter(x, y)
+            for i in range(0, len(value)):
+                ax.annotate(str(i), (x[i], y[i]))
         # Title
-        plt.title(self.file_path)
-        # Stretching x
-        plt.axes([min(x), max(x), -110, 0])
-        # Ticks on x axis
-        #plt.xticks(np.arange(min(x), max(x) + 1, 2.0))
+        plb.title(self.file_path)
         # Legend
-        plt.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
-        return plot
+        plb.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
+        # x ticks
+        plb.xticks(np.arange(min(x), max(x) + 1, 2.0))
+        plb.ylim(-100, 1)
+        # Show image
+        plb.show()
 
 
 
@@ -236,6 +241,7 @@ class DatasetTestResult(Result):
         """
             handler links to the event "starting to 'fire' a new file".
             :return: None
+
         """
         # Inizialize dictionary
         self.data_array.append(FileTestResult(file_path))
@@ -270,7 +276,6 @@ class DatasetTestResult(Result):
         :return:
         """
         for item in self.data_array:
-            plot = item.plot()
-            plot.show()
+            item.plot()
             # If csvDataset is not None, plots also the file
             csvDataset.plot(sampleName=item.file_path)
