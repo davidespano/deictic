@@ -5,7 +5,7 @@ from gesture import *
 from test import *
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 0
+debug_mode = 2
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -21,7 +21,8 @@ if debug_mode == 1:
 #### Debug Dataset Shrek in 2 dimensioni ####
 if debug_mode == 2:
     # Gesture dataset
-    gestures = ['shrek-grab', 'shrek-swipe_right']
+    gestures = [#'shrek-grab',
+                'shrek-swipe_right']
 
     # Creazione hmm
     n_states = 6

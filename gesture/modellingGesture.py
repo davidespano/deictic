@@ -71,7 +71,7 @@ class Parse:
                 self.stack.append(exp)
         return self.stack.pop()
 
-    def __binaryOperators(self):
+    def __binaryOperators(self, exp):
         """
             Manages parsing gestit binary/multiple operators (disabling, sequence, parallel and choice).
         :param exp: the expression to parse
@@ -79,7 +79,7 @@ class Parse:
         """
         # Take operands
         new_hmm = self.stack.pop()
-        while stack:
+        while self.stack:
             op = self.stack.pop()
             # Sequence
             if exp == HmmFactory.TypeOperator.sequence.name:
@@ -295,12 +295,16 @@ class Shrek:
 
     class TypeGesture(Enum):
         grab = 0
+        swipe_right = 7
 
     @staticmethod
     def getModel(type_gesture):
         definition = None
-        # arrowhead
+        # grab
         if (type_gesture == Shrek.TypeGesture.grab.name):
             definition = Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)
+        # Swipe right
+        elif(type_gesture == Shrek.TypeGesture.swipe_right.name):
+             definition = Point3D(0,0,0) + Line3D(1,1,1)
 
         return definition

@@ -260,7 +260,7 @@ class Point3D(GestureExp):
         self.z = z
 
     def __str__(self):
-        return "P3D({0},{1})".format(str(self.x), str(self.y), str(self.z))
+        return "P3D({0},{1},{2})".format(str(self.x), str(self.y), str(self.z))
 
     def get_path(self, path, current):
         # Create a circle 2D object and transform it in 3D
@@ -275,7 +275,7 @@ class Point3D(GestureExp):
         return path
 
     def get_points(self, points):
-        points.append([self.x, self.y, self, self.z, self])
+        points.append([self.x, self.y, self.z, self])
 
 class Line3D(GestureExp):
     def __init__(self, dx, dy, dz):
@@ -284,7 +284,7 @@ class Line3D(GestureExp):
         self.dz = dz
 
     def __str__(self):
-        return "L3D({0},{1})".format(str(self.dx), str(self.dy), str(self.dz))
+        return "L3D({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
 
     def get_path(self, path, current):
         # Create an arrow patch 2D and transform it in 3D
@@ -303,7 +303,7 @@ class Line3D(GestureExp):
     def get_points(self, points):
         last = points[-1]
         if last is not None:
-            points.append([last[0] + self.dx, last[1] + self.dy, last[2]+self.dz, self])
+            points.append([last[0]+self.dx, last[1]+self.dy, last[2]+self.dz, self])
 
     def plot(self):
         # Create figure
@@ -314,6 +314,7 @@ class Line3D(GestureExp):
         # Add origin
         self.get_path(pathList, Point3D(0, 0, 0))
         # Add patches
+        # TODO fix zdir
         for patch in pathList:
             ax.add_patch(patch)
             art3d.pathpatch_2d_to_3d(patch, z=self.dz, zdir="y")
