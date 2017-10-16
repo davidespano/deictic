@@ -9,7 +9,7 @@ baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 6
+mode = 24
 
 
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
@@ -17,7 +17,7 @@ baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
-testDir = baseDir + "deictic/mdollar-dataset/resampled/"
+testDir = baseDir + "deictic/1dollar-dataset/raw/"
 
 ################################################################ DEICTIC HMM ################################################################
 if mode in [-1, 0, 1]:
@@ -312,13 +312,59 @@ if mode == 24:
     #t = Point(0,0) + Line(4,0) + Point(2,0) + Line(0, -4)
     #t = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
     # t.plot()
-    gesture_models[10][0].plot()
+
+    #t = Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)
+    #t.plot()
+
+
     factory = ClassifierFactory()
     factory.setLineSamplesPath(trainingDir)
     factory.setClockwiseArcSamplesPath(arcClockWiseDir)
     factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-    model, edges = factory.createClassifier(gesture_models[10][0])
-    plot_gesture(model)
+    factory.states = 16
+    factory.spu = n_samples
+
+    r = Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0)
+    t = Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
+
+
+    factory.createClassifier(r)
+    factory.createClassifier(t)
+    g = r | t
+
+    model, edges = factory.createClassifier(g)
+
+    dataset = CsvDataset(testDir + "triangle/")
+
+    dataset.plot(sampleName="1_slow_triangle_10.csv")
+    s = dataset.read_file("1_slow_triangle_10.csv")
+
+    print(g)
+
+    print("---------------------------------")
+
+    for i in range(0, len(model.states)):
+        print("{0} {1}".format(i, model.states[i].name))
+
+    p = model.viterbi(s)
+
+    print("---------------------------------")
+
+    i = 1;
+    for state in p[1]:
+        print("{0} {1}".format(i, state[1].name))
+        i = i+1
+
+
+    #dataset = CsvDataset(testDir + "circle/")
+    #dataset.plot(max_samples=10)
+    # gesture_models[10][0].plot()
+    # factory = ClassifierFactory()
+    # factory.setLineSamplesPath(trainingDir)
+    # factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+    # factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+    # model, edges = factory.createClassifier(gesture_models[10][0])
+    # plot_gesture(model)
 
 if mode == 25:
     dataset = CsvDataset(testDir + "exclamation_point/")

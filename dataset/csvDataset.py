@@ -185,7 +185,7 @@ class CsvDataset:
 
     # Plot
     # Plots input dataset's files
-    def plot(self, dimensions = 2, sampleName = None, singleMode = False):
+    def plot(self, dimensions = 2, sampleName = None, singleMode = False, max_samples = None):
         fig = plt.figure();
         labels =[];
         ax = None
@@ -193,8 +193,11 @@ class CsvDataset:
             ax = fig.gca(projection='3d')
             ax.set_aspect('equal')
         else:
+            if not singleMode:
+                fig, ax = plt.subplots()
             plt.axis('equal')
 
+        count = 0;
         for filename in self.getDatasetIterator():
             if sampleName == None or filename == sampleName:
                 with open(self.dir + filename, "r") as f:
@@ -204,8 +207,8 @@ class CsvDataset:
                     if dimensions == 3:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
                     else:
-
-                        fig, ax = plt.subplots()
+                        if singleMode:
+                            fig, ax = plt.subplots()
                         ax.scatter(result[:,0], result[:,1])
                         for i in range(0, len(result)):
                             ax.annotate(str(i), (result[i,0], result[i,1]))
@@ -216,6 +219,10 @@ class CsvDataset:
                         plt.title(filename)
                         plt.show()
                         labels.append(filename + "," + input(filename +"->"));
+            count = count +1;
+            if max_samples != None and max_samples == count:
+                break;
+
         if dimensions == 3:
             ax.legend()
         else:
