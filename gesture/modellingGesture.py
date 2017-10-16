@@ -19,7 +19,7 @@ class HmmFactory:
         unistroke = 5
         multistroke = 6
         unica = 7
-        shrek = 8
+        shrec = 8
 
     @staticmethod
     def factory(gesture, n_states, n_samples):
@@ -64,7 +64,7 @@ class Parse:
             if exp in [HmmFactory.TypeOperator.unistroke.name,
                        HmmFactory.TypeOperator.multistroke.name,
                        HmmFactory.TypeOperator.unica.name,
-                       HmmFactory.TypeOperator.shrek.name]:
+                       HmmFactory.TypeOperator.shrec.name]:
                 self.__gestureComponents(exp)
             else:
                 # Add exp expression
@@ -123,8 +123,8 @@ class Parse:
             expression = MDollarGestures.getModel(op1)
         elif (exp == HmmFactory.TypeOperator.unica.name):
             expression = UnicaGestures.getModel(op1)
-        elif(exp == HmmFactory.TypeOperator.shrek.name):
-            expression = Shrek.getModel(op1)
+        elif(exp == HmmFactory.TypeOperator.shrec.name):
+            expression = Shrec.getModel(op1)
         # Adds gesture expression
         primitive = HmmFactory.factory(expression, self.n_states, self.n_samples)
         self.stack.append(primitive)
