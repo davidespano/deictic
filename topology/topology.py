@@ -1,3 +1,4 @@
+import networkx
 from pomegranate import *
 
 
@@ -50,6 +51,8 @@ class HiddenMarkovModelTopology :
         model.add_transition(model.start, states[0], 1)
         model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
         model.add_transition(states[n_states - 1], model.end, 0.5)
+
+
 
         model.bake()
 

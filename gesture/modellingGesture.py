@@ -50,9 +50,10 @@ class Parse:
         :return: the obtained hmm
         """
         # Split expression
-        expression = reversed(expression.split('-'))
+        splitted = expression.split('-');
+        rev = reversed(splitted)
 
-        for exp in expression:
+        for exp in rev:
             # Gestit binary operators
             if exp in [HmmFactory.TypeOperator.disabling.name, HmmFactory.TypeOperator.sequence.name,
                        HmmFactory.TypeOperator.parallel.name, HmmFactory.TypeOperator.choice.name]:
@@ -64,7 +65,7 @@ class Parse:
             if exp in [HmmFactory.TypeOperator.unistroke.name,
                        HmmFactory.TypeOperator.multistroke.name,
                        HmmFactory.TypeOperator.unica.name,
-                       HmmFactory.TypeOperator.shrek.name]:
+                       HmmFactory.TypeOperator.shrec.name]:
                 self.__gestureComponents(exp)
             else:
                 # Add exp expression
@@ -82,13 +83,13 @@ class Parse:
         while self.stack:
             op = self.stack.pop()
             # Sequence
-            if exp == HmmFactory.TypeOperator.sequence.name:
+            if op == HmmFactory.TypeOperator.sequence.name:
                 new_hmm, seq = HiddenMarkovModelTopology.sequence([new_hmm, op], [])
             # Parallel
-            elif exp == HmmFactory.TypeOperator.parallel.name:
+            elif op == HmmFactory.TypeOperator.parallel.name:
                 new_hmm, seq = HiddenMarkovModelTopology.parallel(new_hmm, op, [])
             # Choice
-            elif exp == HmmFactory.TypeOperator.choice.name:
+            elif op == HmmFactory.TypeOperator.choice.name:
                 new_hmm, seq = HiddenMarkovModelTopology.choice([new_hmm, op], [])
         # Add new hmm
         self.stack.append(new_hmm)
@@ -291,7 +292,7 @@ class MDollarGestures:
 
         return definition
 
-class Shrek:
+class Shrec:
 
     class TypeGesture(Enum):
         grab = 0
@@ -313,26 +314,26 @@ class Shrek:
     def getModel(type_gesture):
         definition = None
         # grab
-        if (type_gesture == Shrek.TypeGesture.grab.name):
+        if (type_gesture == Shrec.TypeGesture.grab.name):
             definition = Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)
         # Swipe right
-        elif(type_gesture == Shrek.TypeGesture.swipe_right.name):
-             definition = Point3D(0,0,0) + Line3D(1,1,1)
+        elif(type_gesture == Shrec.TypeGesture.swipe_right.name):
+             definition = Point(0,0) + Line(1,1)
         # grab
         if (type_gesture == Shrec.TypeGesture.grab.name):
-            definition = Line(4, 4) + Line(-4, -4) + Point(0, 0)
+            definition = Point(0, 0) + Line(4, 4) + Line(-4, -4);
         # tap
         elif (type_gesture == Shrec.TypeGesture.tap.name):
-            definition = Point(0, 4)
+            definition = Point(0, 0) +  Line(0, -4)
         # expand
         elif (type_gesture == Shrec.TypeGesture.expand.name):
             definition = Point(0, 0) + Line(3, 3) + Line(-3, -3)
         # pinch
         elif (type_gesture == Shrec.TypeGesture.pinch.name):
-            definition = Line(3, 3) + Line(-3, -3) + Point(0, 0)
+            definition = Point(0, 0) + Line(3, 3) + Line(-3, -3)
         # rotation clockwise
         elif (type_gesture == Shrec.TypeGesture.rotation_clockwise.name):
-            definition = Point(-4, 2) + Arc(6, 3, cw=True)
+            definition = Point(0,0) + Point(-4, 2) + Arc(6, 3, cw=True)
         # rotation_counter_clockwise
         elif (type_gesture == Shrec.TypeGesture.rotation_counter_clockwise.name):
             definition = Point(-4, -2) + Arc(6, -3, cw=False)

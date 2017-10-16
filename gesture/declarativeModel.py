@@ -185,6 +185,7 @@ class ClassifierFactory:
 
 
         if isinstance(exp, Arc):
+            exp.dz = 0;
             if exp.cw:
                 if exp.dx >= 0:
                     if exp.dy >= 0:

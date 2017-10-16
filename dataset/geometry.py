@@ -32,13 +32,13 @@ class Geometry2D:
         r = math.sqrt(x * x + y * y)
         return x / r
 
-    @staticmethod
-    def getCosineFromSides(x,y,z):
-        rx = [
-                [1, 0, 0],
-                [0, math.cos(theta[0]), -sin(theta[0])],
-                [0, sin]
-             ]
+   # @staticmethod
+   # def getCosineFromSides(x,y,z):
+   #     rx = [
+   #             [1, 0, 0],
+   #             [0, math.cos(theta[0]), -sin(theta[0])],
+   #             [0, sin]
+   #          ]
     ##########################################################
     # Compute the centroid of the given points. The centroid is defined as the
     # average x and average y values, i.e., (x_bar, y_bar).

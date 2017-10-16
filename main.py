@@ -5,7 +5,8 @@ from test import *
 
 
 # Main
-baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+baseDir = '/home/sara/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
 #baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 

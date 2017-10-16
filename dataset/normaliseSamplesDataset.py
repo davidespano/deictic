@@ -65,7 +65,7 @@ class TranslateTransform(DatasetTransform):
             return TypeError
         self.cols = cols
 
-        if not isinstance(t, list) or len(t) != 2 :
+        if not isinstance(t, list) or len(t) < 2 :
             return TypeError
         self.t = t
 
