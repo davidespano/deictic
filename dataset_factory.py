@@ -147,8 +147,8 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
 
 
 
-#baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
-baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
+baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
 mode = 2
 n_sample = 20
@@ -189,8 +189,9 @@ if mode == 4:
     list_gesture = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
                     'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
                     'v', 'x']
+    list_gesture = ['question_mark', 'x']
     synthetic_dataset_factory(list_gesture, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/synthetic/',
-                              iter=25, type='unistroke')#int(random.uniform(0, len(list)-1)))
+                              iter=1, type='unistroke', operator = [0])#int(random.uniform(0, len(list)-1)))
 
 if mode == 5:
     # Sinthetic Database MDollar

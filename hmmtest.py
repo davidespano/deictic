@@ -11,7 +11,7 @@ from enum import Enum
 def viterbi_seq(model, dir):
     data = LeapDataset(dir)
     for filename in data.getDatasetIterator():
-        sequence = data.read_file(filename, dimensions=2, scale=100)
+        sequence = data.readFile(filename, dimensions=2, scale=100)
         logp, states = model.viterbi(sequence)
         print('{} log-probability: {}'.format(filename, logp))
         print('{} state sequence: {}'.format(filename, ' '.join(state.name for idx, state in states[1:])))
@@ -27,7 +27,7 @@ def plot_sample(model, samples=3):
         plt.plot(seq[:, 0], seq[:, 1], marker='.')
         plt.show()
 
-#### Test ####
+#### test ####
 def test_1(baseDir, direction, n_states):
     if direction == Direction.left:
         correct = 'down-trajectory/left/'
@@ -57,8 +57,8 @@ def test_sequence(baseDir, n_states):
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     left, seq_edges = HiddenMarkovModelTopology.sequence([left, right]);
 
@@ -91,8 +91,8 @@ def test_choice(baseDir, n_states):
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     left, seq_edges = HiddenMarkovModelTopology.choice([left, right])
 
@@ -120,7 +120,7 @@ def test_iterative(baseDir, n_states):
     leftDataset = LeapDataset(baseDir + 'down-trajectory/left/')
 
     # train the hmm
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
 
     sequences = leftDataset.sequence_merge(leftDataset, dimensions=2)
     for i in range(0, len(sequences)):
@@ -170,8 +170,8 @@ def test_parallel(baseDir, n_states):
     # Training
     leftDataset = LeapDataset(baseDir + 'down-trajectory/left/')
     rightDataset = LeapDataset(baseDir + 'down-trajectory/right/')
-    left.fit(leftDataset.read_dataset(2, 100), use_pseudocount=True)
-    right.fit(rightDataset.read_dataset(2, 100), use_pseudocount=True)
+    left.fit(leftDataset.readDataset(2, 100), use_pseudocount=True)
+    right.fit(rightDataset.readDataset(2, 100), use_pseudocount=True)
 
     # definizione parallel
     parallel, seq_edges = HiddenMarkovModelTopology.parallel(left, right)
@@ -221,7 +221,7 @@ def test_primitive(baseDir, n_states, direction, degree = 0):
 
 def test_leap(baseDir, n_states, typeTest):
 
-    #### Test ####
+    #### test ####
     # Rectangle
     if(typeTest == TypeTest.rectangle):
         model = create_rectangle(baseDir, n_states)
@@ -407,14 +407,14 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #test_1(baseDir, Direction.left, 4)
 #test_1(baseDir, Direction.right, 4)
 
-#### Test Primitive ####
+#### test Primitive ####
 #test_sequence(baseDir, 4)
 #test_choice(baseDir, 4)
 #test_iterative(baseDir, 4)
 #test_disabling(baseDir, 4)
 #test_parallel(baseDir, 4)
 
-#### Test Gesture Complete ####
+#### test Gesture Complete ####
 
 # Crea file csv primitive
 # Left
@@ -466,7 +466,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 # Crea dataset gesture composte
 #create_operators_dataset(baseDir, Operator.iterative, dimensions=2, scale=1)
 
-# Test - con primitive
+# test - con primitive
 #print('Rectangle')
 #test_leap(baseDir, 8, TypeTest.rectangle) # Ok
 #print('Triangle')
@@ -485,7 +485,7 @@ def compare_composite_hmm_gesture(baseDir, operator, n_states, index = 1, dimens
 #test_leap(baseDir, 8, TypeTest.delete_mark) # Ok anche se con square braket, x e rettangolo le differenze non sono nettissime (in ogni caso sono il doppio)
 #print('Star')
 #test_leap(baseDir, 8, TypeTest.star) # Ok
-# Test - senza primitive
+# test - senza primitive
 
 #print('V')
 #test_leap(baseDir, 8, TypeTest.v) # Si confonde un poco con il rettangolo!

@@ -32,6 +32,13 @@ class Geometry2D:
         r = math.sqrt(x * x + y * y)
         return x / r
 
+    @staticmethod
+    def getCosineFromSides(x,y,z):
+        rx = [
+                [1, 0, 0],
+                [0, math.cos(theta[0]), -sin(theta[0])],
+                [0, sin]
+             ]
     ##########################################################
     # Compute the centroid of the given points. The centroid is defined as the
     # average x and average y values, i.e., (x_bar, y_bar).
@@ -50,3 +57,36 @@ class Geometry2D:
         return a, b
 
 
+class Geometry3D:
+
+    @staticmethod
+    def  distance(px, py, pz, qx, qy, qz):
+        """
+
+        :param px:
+        :param py:
+        :param pz:
+        :param qx:
+        :param qy:
+        :param qz:
+        :return:
+        """
+        dx = qx - px
+        dy = qy - py
+        dz = qz - pz
+        return math.sqrt(dx*dx + dy*dy + dz*dz)
+
+    @staticmethod
+    def getCosineFromSides(x, y, z):
+        """
+
+        :param x:
+        :param y:
+        :param z:
+        :return:
+        """
+        r_xy = math.sqrt(x * x + y * y)
+        r_zx = math.sqrt(x * x + z * z)
+        r_yz = math.sqrt(y * y + z * z)
+
+        return [math.acos(z/r_zx), math.acos(y/r_yz), math.acos(x/r_xy)]

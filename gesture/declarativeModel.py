@@ -4,6 +4,10 @@ from model import *
 from topology import *
 
 class ClassifierFactory:
+    """
+
+    """
+
     def __init__(self):
         self.line = None
         self.arc_cw = None
@@ -16,15 +20,35 @@ class ClassifierFactory:
         self.strokeList = []
 
     def setClockwiseArcSamplesPath(self, path):
+        """
+
+        :param path:
+        :return:
+        """
         self.arc_cw = path
 
     def setCounterClockwiseArcSamplesPath(self, path):
+        """
+
+        :param path:
+        :return:
+        """
         self.arc_ccw = path
 
     def setLineSamplesPath(self, path):
+        """
+
+        :param path:
+        :return:
+        """
         self.line = path
 
     def createClassifier(self, exp):
+        """
+
+        :param exp:
+        :return:
+        """
         # center and normalise the ideal model definition
         processor = ModelPreprocessor(exp)
         transform1 = CenteringTransform()
@@ -35,7 +59,7 @@ class ClassifierFactory:
         processor.transforms.addTranform(transform2)
         processor.preprocess()
         #exp.plot()
-        startPoint = [0,0]
+        startPoint = [0,0,0]#####
         self.strokeList = []
         self.stroke = -1
         self.parseStrokes(exp)
@@ -44,6 +68,11 @@ class ClassifierFactory:
         return self.createHMM(str(exp), expType, operands)
 
     def parseStrokes(self, exp):
+        """
+
+        :param exp:
+        :return:
+        """
         if isinstance(exp, Point):
             self.stroke += 1
             self.strokeList.append(str(self.stroke + 1))
@@ -55,18 +84,36 @@ class ClassifierFactory:
                 self.parseStrokes(exp.right)
 
     def parseExpression(self, exp, startPoint, d = False):
+        """
+
+        :param exp:
+        :param startPoint:
+        :param d:
+        :return:
+        """
 
         # -----------------------------------------------
         #       ground terms
         # -----------------------------------------------
+        # Point 2D
         if isinstance(exp, Point):
             self.stroke += 1
             startPoint[0] = exp.x
             startPoint[1] = exp.y
             return OpEnum.Point, None
 
+        # Point 3D
+        if isinstance(exp, Point3D):
+            self.stroke += 1
+            startPoint[0] = exp.x
+            startPoint[1] = exp.y
+            startPoint[2] = exp.z
+            return OpEnum.Point3D, None
+
+        # Line 2D
         if isinstance(exp, Line):
             alpha = math.acos(Geometry2D.getCosineFromSides(exp.dx, exp.dy)) # rotation with respect to left-to-right line
+
             if exp.dy < 0:
                 alpha = -alpha
             distance = Geometry2D.distance(0,0, exp.dx, exp.dy)
@@ -95,6 +142,47 @@ class ClassifierFactory:
             startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
+
+        # Line 3D
+        if isinstance(exp, Line3D):
+            # Gets angles
+            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
+
+            #
+            #if exp.dy < 0:
+            #    alpha = -alpha
+
+            # Computes the distance between origin and the passed vector. The distance value is used
+            # to compute the correct number of samples and states.
+            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
+            samples = round(distance * self.spu)
+            n_states = round(distance * self.states + 0.5)
+
+            # Reads the raw data
+            dataset = CsvDataset(self.line)
+
+            # Creates the primitives transforms
+            self.transformLine3DPrimitive(dataset, distance, angles, startPoint, samples)
+
+            # Creates empty HMM
+            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
+            samples = dataset.applyTransforms()
+
+            if d:
+                self.debugPlot(samples, exp)
+
+            # Trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True)
+
+            #
+            self.addStrokeIdDistribution(hmm)
+
+            #
+            startPoint[0] += exp.dx
+            startPoint[1] += exp.dy
+
+            return OpEnum.Line, [(hmm, None)]
+
 
         if isinstance(exp, Arc):
             if exp.cw:
@@ -166,6 +254,7 @@ class ClassifierFactory:
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
+            startPoint[2] += exp.dz
 
             return OpEnum.Arc, [(hmm, None)]
 
@@ -226,6 +315,17 @@ class ClassifierFactory:
 
 
     def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
+        """
+
+        :param dataset:
+        :param startPoint:
+        :param radiusX:
+        :param radiusY:
+        :param alpha:
+        :param center:
+        :param samples:
+        :return:
+        """
         # applying transforms for fitting
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
@@ -250,6 +350,15 @@ class ClassifierFactory:
 
 
     def transformPrimitive(self, dataset, distance, alpha, startPoint, samples):
+        """
+
+        :param dataset:
+        :param distance:
+        :param alpha:
+        :param startPoint:
+        :param samples:
+        :return:
+        """
         # applying transforms for fitting the expression
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
@@ -269,13 +378,68 @@ class ClassifierFactory:
         dataset.addTransform(resample)
         dataset.addTransform(translate)
 
+    def transformLine3DPrimitive(self, dataset, distance, angles, startPoint, samples):
+        """
+            Applying transforms for fitting the expression.
+        :param dataset:
+        :param distance:
+        :param angles:
+        :param startPoint:
+        :param samples:
+        :return:
+        """
+        # Centering the line
+        centering = CenteringTransform()
+        # Normalise the length
+        normalise = NormaliseLengthTransform(axisMode=False)
+        # Put the first sample in the origin, the line goes left-to-right
+        origin = TranslateTransform(t=[0.5, 0])
+        # Rotation, first through alpha_xy then alpha_xz
+        rotate_z = RotateTransform(theta=angles[0],
+                                 unit=RotateTransform.radians)  # rotate the samples for getting the right slope
+        rotate_y = RotateTransform(theta=angles[1],
+                                 unit=RotateTransform.radians)
+        rotate_x = RotateTransform(theta=angles[2],
+                                   unit=RotateTransform.radians)
+        # Adjust the size
+        scale = ScaleDatasetTransform(scale=distance * self.scale)
+        # Resampling
+        resample = ResampleInSpaceTransform(samples=samples)
+        # Position the segment at its starting point
+        translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])
+
+        # Apply transforms
+        dataset.addTransform(centering)
+        dataset.addTransform(normalise)
+        dataset.addTransform(origin)
+        dataset.addTransform(scale)
+        dataset.addTransform(rotate_z)
+        dataset.addTransform(rotate_y)
+        dataset.addTransform(rotate_x)
+        dataset.addTransform(resample)
+        dataset.addTransform(translate)
+
+
+
     def updateStartPoint(self, startPoint, oldPoint, op):
+        """
+
+        :param startPoint:
+        :param oldPoint:
+        :param op:
+        :return:
+        """
         # for parallel and choice, the starting point has to go back to the old position
         if op == OpEnum.Parallel or op == OpEnum.Choice:
             startPoint[0] = oldPoint[0]
             startPoint[1] = oldPoint[1]
 
     def addStrokeId(self, samples):
+        """
+
+        :param samples:
+        :return:
+        """
         # TODO this part wastes a lot of memory
         new_samples = []
         if len(self.strokeList) > 1:
@@ -289,6 +453,10 @@ class ClassifierFactory:
         return samples
 
     def createStrokeDiscreteDistribution(self):
+        """
+
+        :return:
+        """
         d = {}
         for i in range(0, len(self.strokeList)):
             p = 0
@@ -298,6 +466,16 @@ class ClassifierFactory:
         return DiscreteDistribution(d)
 
     def createCleanLine(self, name, startPoint, dx, dy, scale, samples):
+        """
+
+        :param name:
+        :param startPoint:
+        :param dx:
+        :param dy:
+        :param scale:
+        :param samples:
+        :return:
+        """
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
@@ -318,7 +496,51 @@ class ClassifierFactory:
 
         return topology_factory.forward(name, samples, distributions)
 
+    def createCleanLine3D(self, name, startPoint, dx, dy, dz, scale, samples):
+        """
+
+        :param name:
+        :param startPoint:
+        :param dx:
+        :param dy:
+        :param dz:
+        :param scale:
+        :param samples:
+        :return:
+        """
+        topology_factory = HiddenMarkovModelTopology()  # Topology
+        distributions = []
+
+        #
+        step_x = dx / max(samples - 1, 1)
+        step_y = dy / max(samples - 1, 1)
+        step_z = dz / max(samples - 1, 1)
+
+        #
+        for i in range(0, samples):
+            a = (startPoint[0] + (i * step_x)) * scale
+            b = (startPoint[1] + (i * step_y)) * scale
+            c = (startPoint[2] + (i * step_z)) * scale
+
+            gaussianX = NormalDistribution(a, self.scale * 0.01)
+            gaussianY = NormalDistribution(b, self.scale * 0.01)
+            gaussianZ = NormalDistribution(c, self.scale * 0.01)
+
+            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY, gaussianZ]))
+
+
+        return topology_factory.forward(name, samples, distributions)
+
     def createCleanArc(self, name, startPoint, exp, scale, n_states):
+        """
+
+        :param name:
+        :param startPoint:
+        :param exp:
+        :param scale:
+        :param n_states:
+        :return:
+        """
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
@@ -375,6 +597,12 @@ class ClassifierFactory:
 
 
     def debugPlot(self, samples, exp):
+        """
+
+        :param samples:
+        :param exp:
+        :return:
+        """
         plt.axis("equal")
         for sample in samples:
             plt.plot(sample[:, 0], sample[:, 1], marker='.')
@@ -382,11 +610,31 @@ class ClassifierFactory:
         plt.show()
 
     def createHMM(self, name, operator, operands):
+        """
+
+        :param name:
+        :param operator:
+        :param operands:
+        :return:
+        """
+
+
         edges = []
         models = []
         for model, edge in operands:
             edges.append(edge)
             models.append(model)
+
+        if operator == OpEnum.Iterative:
+            model = models[0]
+            iterative, edges = HiddenMarkovModelTopology.iterative(model, edges)
+            return iterative, edges
+
+        # if the operand is only one, the expression corresponds to the operand HMM
+        # e.g. a sequence with only one operand is the operand itself
+
+        if len(operands) == 1:
+            return operands[0]
 
         if operator == OpEnum.Sequence: # create a sequence
             sequence, seq_edges = HiddenMarkovModelTopology.sequence(operands = models, gt_edges= edges);
@@ -414,28 +662,38 @@ class ClassifierFactory:
             disabling.name = name
             return disabling, edges
 
-        if operator == OpEnum.Iterative:
-            model = models[0]
-            iterative, edges = HiddenMarkovModelTopology.iterative(model, edges)
-            return iterative, edges
+
 
         return None
 
 
 class ModelPreprocessor:
+    """
+
+    """
 
     def __init__(self, exp):
+        """
+
+        :param exp:
+        """
         self.exp = exp
         self.transforms = CompositeTransform()
 
     def preprocess(self):
+        """
+
+        :return:
+        """
         points = self.exp.to_point_sequence()
         transformed = self.transforms.transform(points)
 
         x = 0
         y = 0
+        z = 0
         # update the expression terms
         for i in range(0,len(points)):
+            #### 2D ####
             if isinstance(points[i][2], Point):
                 points[i][2].x = transformed[i][0]
                 points[i][2].y = transformed[i][1]
@@ -453,3 +711,20 @@ class ModelPreprocessor:
                 points[i][2].dy = transformed[i][1] - y
                 x = transformed[i][0]
                 y = transformed[i][1]
+
+            #### 3D ####
+            elif isinstance(points[i][2], Point3D):
+                points[i][2].x = transformed[i][0]
+                points[i][2].y = transformed[i][1]
+                points[i][2].z = transformed[i][2]
+                x = transformed[i][0]
+                y = transformed[i][1]
+                z = transformed[i][2]
+
+            elif isinstance(points[i][2], Line3D):
+                points[i][2].dx = transformed[i][0] - x
+                points[i][2].dy = transformed[i][1] - y
+                points[i][2].dz = transformed[i][2] - z
+                x = transformed[i][0]
+                y = transformed[i][1]
+                z = transformed[i][2]

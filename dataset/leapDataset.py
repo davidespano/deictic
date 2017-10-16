@@ -325,7 +325,7 @@ class LeapDataset_2:
         delta = 1#(int)(lenght/3)
 
         for i in range(1, lenght, delta):
-            sequence = dataset.read_file(dataset.getDatasetIterator().filenames[i], dimensions=2, scale=100)
+            sequence = dataset.readFile(dataset.getDatasetIterator().filenames[i], dimensions=2, scale=100)
             plt.axis("equal")
             plt.plot(sequence[:, 0], sequence[:, 1])
             plt.show()

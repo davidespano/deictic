@@ -370,7 +370,7 @@ iciap_names = [
 
 np.set_printoptions(precision=2)
 
-# delete 2A32
+# delete_mark 2A32
 
 # Plot non-normalized confusion matrix
 #plt.figure()
