@@ -5,19 +5,19 @@ from test import *
 
 
 # Main
-#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
-baseDir = '/home/sara/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
-
+baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 1000
+mode = 24
+
+
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
-testDir = baseDir + "deictic/mdollar-dataset/resampled/"
+testDir = baseDir + "deictic/1dollar-dataset/raw/"
 
 ################################################################ DEICTIC HMM ################################################################
 if mode in [-1, 0, 1]:
@@ -46,10 +46,10 @@ if mode in [-1, 0, 1]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parseExpression(type + folder)
+        model = parse.parse_expression(type+folder)
         hmms.append(model)
 
-    t = test(hmms, folders, gestureDir, plot=False)
+    t = test(hmms, gestureDir, folders, plot=False)
     results = t.all_files()
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
@@ -63,10 +63,10 @@ if mode in [2,3]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parseExpression(folder)
+        model = parse.parse_expression(folder)
         hmms.append(model)
 
-    t = test(hmms, folders, gestureDir, plot=False)
+    t = test(hmms, gestureDir, folders, plot=False)
     results = t.all_files()
 
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
@@ -89,10 +89,10 @@ if mode in [4,5]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parseExpression(type + folder)
+        model = parse.parse_expression(type+folder)
         hmms.append(model)
 
-    t = test(hmms, folders, gestureDir, plot=False)
+    t = test(hmms, gestureDir, folders, plot=False)
     results = t.ten_cross_validation(list_filesDir)
 
 
@@ -206,7 +206,7 @@ if mode in [6, 7, 8, 9, 10]:
 
                 for i in range(0, len(list_occurrence_models)):
 
-                    list_dataset_for_models[list_occurrence_models[i]].append(training_dataset.readFile(list_files[i]));
+                    list_dataset_for_models[list_occurrence_models[i]].append(training_dataset.read_file(list_files[i]));
 
                 for i in range(0, len(list_dataset_for_models)):
                     # Create and training hmm
@@ -223,7 +223,7 @@ if mode in [6, 7, 8, 9, 10]:
                             )
                 gestures[gesture[0]] = hmms
 
-            print("inizio il test_real_time")
+            print("inizio il test")
             results = compares_deictic_models(gestures, gestureDir, ten_fold=True)
             complete = complete + results
             print("K = {}".format(k))
@@ -268,6 +268,7 @@ if mode in [6, 7, 8, 9, 10]:
                         ('right_sq_bracket',n_states * 3), ('x',n_states * 3), ('delete_mark', n_states * 3),
                         ('triangle', n_states * 3), ('rectangle', n_states * 3)]
 
+        #list_gesture = [("caret", n_states * 2), ("v", n_states * 2)]
         gestureDir = baseDir + 'deictic/unica-dataset/resampled/'
         list_filesDir = baseDir + 'deictic/unica-dataset/ten-cross-validation/'
         n_features = 2
@@ -275,8 +276,12 @@ if mode in [6, 7, 8, 9, 10]:
         gestures = [i[0] for i in list_gesture]
         results = None
 
-        # Creates hmm gesture, training and testing sequences
+        # Create hmm gesture, training and testing sequences
+
+
         confusion = numpy.zeros((len(list_gesture), len(list_gesture)))
+
+
 
         for k in range(0, iterations):
             hmms = []
@@ -295,35 +300,71 @@ if mode in [6, 7, 8, 9, 10]:
         print("--------------------- finale ------------------------")
         print(confusion)
 
-################################################################ Plot Gestures #############################
-# Create model
-gesture = "v/"
-parse = Parse()
-model = parse.parseExpression("unistroke-rectangle")
-# Mode for showing database image
-if mode == 1000:
-    # Gets dataset file
-    dataset = CsvDataset("/home/ale/PycharmProjects/deictic/repository/"
-                         "deictic/1dollar-dataset/raw/"+gesture)
-    # Gets 10 random images
-    dataset.plot(singleMode=True)
 
 
 
 
+# Stampa matrice di confusione
+#print(results)
 
 
 if mode == 24:
     #t = Point(0,0) + Line(4,0) + Point(2,0) + Line(0, -4)
     #t = Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)
     # t.plot()
-    gesture_models[10][0].plot()
+
+    #t = Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)
+    #t.plot()
+
+
     factory = ClassifierFactory()
     factory.setLineSamplesPath(trainingDir)
     factory.setClockwiseArcSamplesPath(arcClockWiseDir)
     factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-    model, edges = factory.createClassifier(gesture_models[10][0])
-    plot_gesture(model)
+    factory.states = 16
+    factory.spu = n_samples
+
+    r = Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0)
+    t = Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
+
+
+    factory.createClassifier(r)
+    factory.createClassifier(t)
+    g = r | t
+
+    model, edges = factory.createClassifier(g)
+
+    dataset = CsvDataset(testDir + "triangle/")
+
+    dataset.plot(sampleName="1_slow_triangle_10.csv")
+    s = dataset.read_file("1_slow_triangle_10.csv")
+
+    print(g)
+
+    print("---------------------------------")
+
+    for i in range(0, len(model.states)):
+        print("{0} {1}".format(i, model.states[i].name))
+
+    p = model.viterbi(s)
+
+    print("---------------------------------")
+
+    i = 1;
+    for state in p[1]:
+        print("{0} {1}".format(i, state[1].name))
+        i = i+1
+
+
+    #dataset = CsvDataset(testDir + "circle/")
+    #dataset.plot(max_samples=10)
+    # gesture_models[10][0].plot()
+    # factory = ClassifierFactory()
+    # factory.setLineSamplesPath(trainingDir)
+    # factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+    # factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+    # model, edges = factory.createClassifier(gesture_models[10][0])
+    # plot_gesture(model)
 
 if mode == 25:
     dataset = CsvDataset(testDir + "exclamation_point/")
@@ -336,4 +377,3 @@ if mode == 26:
     samples = [d.sample() for i in range(10000)]
     plt.hist(samples, edgecolor='c', color='c', bins=50)
     plt.show()
-

@@ -42,7 +42,8 @@ def plot_confusion_matrix(cm, classes,
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         if(cm[i,j] >= 0.01):
-            plt.text(j, i, "{0:.2f}".format(cm[i, j]),
+            plt.text(j, i, cm[i,j],
+                     #"{0:.2f}".format(cm[i, j]),
                      horizontalalignment="center",
                      color="white" if cm[i, j] > thresh else "black")
 
@@ -60,7 +61,7 @@ def accuracy(matrix, max_val):
                correct[i] = matrix[i,j]
            else:
                 error[i] += matrix[i,j]
-    print(correct)
+    print(correct / max_val)
     print(error)
     print("Accuracy mean: {0}, sd {1}".format(np.mean(correct, axis = 0)/max_val, np.std(correct, axis = 0)/max_val))
     print("Error mean: {0}, sd {1}".format(np.mean(error)/max_val, np.std(error)/max_val))
@@ -266,11 +267,11 @@ synth_multistroke_sequence = np.matrix ([
 ])
 
 synth_multistroke_sequence_names = [
-    MNames.PitchFork + ' » ' + '!',
-    MNames.ArrowHead + ' » ' + MNames.HalfNote,
-    MNames.Asterisk + ' » ' + MNames.SixPointStar,
-    'D' +  ' » ' + 'N',
-    'I' + ' » ' + 'T'
+    MNames.PitchFork + ' + ' + '!',
+    MNames.ArrowHead + ' + ' + MNames.HalfNote,
+    MNames.Asterisk + ' + ' + MNames.SixPointStar,
+    'D' +  ' + ' + 'N',
+    'I' + ' + ' + 'T'
 ]
 
 
@@ -284,14 +285,14 @@ synth_multistroke_choice = np.matrix ([
 ])
 
 synth_multistroke_choice_names = [
-    MNames.HalfNote + " [] " + 'P',
-    '!' + " [] " + 'H',
-    MNames.Asterisk + " [] " + 'N',
-    MNames.ArrowHead + " [] " + 'T',
-    'D' + " [] " + MNames.Null
+    MNames.HalfNote + " | " + 'P',
+    '!' + " | " + 'H',
+    MNames.Asterisk + " | " + 'N',
+    MNames.ArrowHead + " | " + 'T',
+    'D' + " | " + MNames.Null
 ]
 
-synth_multistroke_parallel = ([
+synth_multistroke_parallel = np.matrix ([
     [596,   0,   1,   2,   0],
     [  0, 598,   0,   0,   2],
     [  0,   0, 599,   0,   0],
@@ -301,11 +302,11 @@ synth_multistroke_parallel = ([
 
 
 synth_multistroke_parallel_names = [
-    MNames.Asterisk + " || " + 'N'
-    'T' + " || " + MNames.HalfNote,
-    MNames.Null + " || " +  'H',
-    'I' + " || " +  'D',
-    MNames.SixPointStar + " || " +  'P'
+    MNames.Asterisk + ''+ chr(0x00D7 )+ ' ' + 'N',
+    'T' + ''+ chr(0x00D7 )+ ' ' + MNames.HalfNote,
+    MNames.Null + ''+ chr(0x00D7 )+ ' ' + 'H',
+    'I' + ''+ chr(0x00D7 )+ ' ' +  'D',
+    MNames.SixPointStar + ''+ chr(0x00D7 )+ ' ' + 'P'
 ]
 
 # Compute confusion matrix
@@ -339,7 +340,32 @@ uni_class_names = [
 ];
 
 
+iciap = np.matrix([
+    [60, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 60, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 60, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 60, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 60, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 60, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 60, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 59, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 60, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0,  1, 59],
 
+]);
+
+iciap_names = [
+    '' + chr(0x2190)+ ' ', # larrow
+    '' + chr(0x2192)+ ' ', # rarrow
+    'V ', # V
+    '' + chr(0x22C0) + '', # caret
+    '[ ', # left square bracket
+    '] ', # right square bracket
+    'X ', # X
+    '' + chr(0x232B) + ' ', # delete
+    '' + chr(0x25B3) + ' ', # triangle
+    '' + chr(0x2395) + ' ', # rectangle
+]
 
 
 np.set_printoptions(precision=2)
@@ -350,6 +376,8 @@ np.set_printoptions(precision=2)
 #plt.figure()
 #plot_confusion_matrix(cnf_matrix, classes=class_names,
 #                      title='Confusion matrix, without normalization')
+
+
 
 
 def opPlot(matrix, names, title):
@@ -375,8 +403,13 @@ def opPlot(matrix, names, title):
 #        names =  [synth_unistroke_iterative_names, synth_unistroke_sequence_names, synth_unistroke_choice_names, synth_unistroke_parallel_names],
 #        title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
 
-opPlot(matrix = [synth_multistroke_iterative, synth_multistroke_sequence, synth_multistroke_choice, synth_multistroke_parallel],
-       names =  [synth_unistroke_iterative_names, synth_multistroke_sequence_names, synth_multistroke_choice, synth_multistroke_parallel_names],
-       title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
+#opPlot(matrix = [synth_multistroke_iterative, synth_multistroke_sequence, synth_multistroke_choice, synth_multistroke_parallel],
+#       names =  [synth_unistroke_iterative_names, synth_multistroke_sequence_names, synth_multistroke_choice_names, synth_multistroke_parallel_names],
+#       title=   ["Iterative",'Sequence', 'Choice', 'Parallel'])
 
-#accuracy(ad_hoc_multistroke, 600);
+#accuracy(deictic_multistroke, 600);
+
+
+plot_confusion_matrix(iciap, classes=iciap_names, normalize=False,
+                       title='Confusion matrix', cmap=plt.cm.Greys)
+plt.show()
