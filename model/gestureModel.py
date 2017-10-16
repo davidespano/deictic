@@ -1,11 +1,17 @@
 from abc import ABCMeta, abstractmethod
 from enum import Enum
+import numpy
+from dataset import *
+## Matplotlib
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import numpy
-from dataset import *
-
+from matplotlib.patches import Circle, PathPatch
+# register Axes3D class with matplotlib by importing Axes3D
+from mpl_toolkits.mplot3d import Axes3D
+import mpl_toolkits.mplot3d.art3d as art3d
+from matplotlib.text import TextPath
+from matplotlib.transforms import Affine2D
 
 class OpEnum(Enum):
     Undef = -1
@@ -25,6 +31,9 @@ class OpEnum(Enum):
         return opEnum == OpEnum.Point or opEnum == OpEnum.Line or opEnum == OpEnum.Arc
 
 class GestureExp:
+    """
+
+    """
     __metaclass__ = ABCMeta
 
     def __add__(self, other):
@@ -46,16 +55,35 @@ class GestureExp:
 
 
     def get_path(self, path, current):
+        """
+
+        :param path:
+        :param current:
+        :return:
+        """
         return None
 
     def get_points(self, points):
+        """
+
+        :param points:
+        :return:
+        """
         return None
 
     def is_composite(self):
+        """
+
+        :return:
+        """
         return False
 
 
     def plot(self):
+        """
+
+        :return:
+        """
         pathList = list()
         self.get_path(pathList, Point(0, 0))
         fig = plt.figure()
@@ -225,19 +253,22 @@ class Arc(GestureExp):
 
 ################################### 3D ###################################
 class Point3D(GestureExp):
+
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
 
     def __str__(self):
-        return "l({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
+        return "P3D({0},{1},{2})".format(str(self.x), str(self.y), str(self.z))
 
     def get_path(self, path, current):
-        path.append(patches.Ellipse(
-            xyz=(self.x, self.y, self.z),
+        # Create a circle 2D object and transform it in 3D
+        path.append(patches.Circle(
+            xyz=(self.x, self.y),
             width=0.3, height=0.3, lw=3.0,
             edgecolor='black', facecolor='black'))
+        # Update current position
         current.x = self.x
         current.y = self.y
         current.z = self.z
@@ -253,15 +284,17 @@ class Line3D(GestureExp):
         self.dz = dz
 
     def __str__(self):
-        return "l({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
+        return "L3D({0},{1},{2})".format(str(self.dx), str(self.dy), str(self.dz))
 
     def get_path(self, path, current):
+        # Create an arrow patch 2D and transform it in 3D
         path.append(patches.FancyArrowPatch(
-            (current.x, current.y, current.z),
-            (current.x + self.dx, current.y + self.dy, current.z + self.dz),
+            (current.x, current.y),
+            (current.x + self.dx, current.y + self.dy),
             arrowstyle='-|>',
-            edgecolor='black', facecolor='black', mutation_scale = 20,
+            edgecolor='black', facecolor='black', mutation_scale=20,
             lw=3.0))
+        # Udpate current position
         current.x += self.dx
         current.y += self.dy
         current.z += self.dz
@@ -270,24 +303,27 @@ class Line3D(GestureExp):
     def get_points(self, points):
         last = points[-1]
         if last is not None:
-            points.append([last[0] + self.dx, last[1] + self.dy, self, last[2]+self.dz])
+            points.append([last[0]+self.dx, last[1]+self.dy, last[2]+self.dz, self])
 
     def plot(self):
-        pathList = list()
-        self.get_path(pathList, Point3D(0, 0, 0))
+        # Create figure
         fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.grid(True)
-        ax.set_xticks(numpy.arange(-50, 50, 1))
-        ax.set_yticks(numpy.arange(-50, 50, 1))
-        #codes, verts = zip(*pathList)
-        #path = mpath.Path(verts, codes)
-        #patch = patches.PathPatch(path, facecolor='None', lw=3)
+        ax = fig.add_subplot(111, projection='3d')
+        # Get patches and add them on a 3D plot
+        pathList = list()
+        # Add origin
+        self.get_path(pathList, Point3D(0, 0, 0))
+        # Add patches
+        # TODO fix zdir
         for patch in pathList:
             ax.add_patch(patch)
+            art3d.pathpatch_2d_to_3d(patch, z=self.dz, zdir="y")
+        # Plot settings
+        ax.grid(True)
         ax.set_axisbelow(True)
-        #x, y = zip(*path.vertices)
-        #line, = ax.plot(x, y, 'go-')
-        plt.axis('equal')
+        # Axis limit
+        ax.set_xlim(-self.dx-10, self.dx+10)
+        ax.set_ylim(-self.dy-10, self.dy+10)
+        ax.set_zlim(-self.dz-10, self.dz+10)
+
         plt.show()
-        #return path

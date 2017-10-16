@@ -64,7 +64,7 @@ class Parse:
             if exp in [HmmFactory.TypeOperator.unistroke.name,
                        HmmFactory.TypeOperator.multistroke.name,
                        HmmFactory.TypeOperator.unica.name,
-                       HmmFactory.TypeOperator.shrec.name]:
+                       HmmFactory.TypeOperator.shrek.name]:
                 self.__gestureComponents(exp)
             else:
                 # Add exp expression
@@ -79,7 +79,7 @@ class Parse:
         """
         # Take operands
         new_hmm = self.stack.pop()
-        while stack:
+        while self.stack:
             op = self.stack.pop()
             # Sequence
             if exp == HmmFactory.TypeOperator.sequence.name:
@@ -291,7 +291,7 @@ class MDollarGestures:
 
         return definition
 
-class Shrec:
+class Shrek:
 
     class TypeGesture(Enum):
         grab = 0
@@ -312,6 +312,12 @@ class Shrec:
     @staticmethod
     def getModel(type_gesture):
         definition = None
+        # grab
+        if (type_gesture == Shrek.TypeGesture.grab.name):
+            definition = Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)
+        # Swipe right
+        elif(type_gesture == Shrek.TypeGesture.swipe_right.name):
+             definition = Point3D(0,0,0) + Line3D(1,1,1)
         # grab
         if (type_gesture == Shrec.TypeGesture.grab.name):
             definition = Line(4, 4) + Line(-4, -4) + Point(0, 0)

@@ -58,9 +58,35 @@ class Geometry2D:
 
 
 class Geometry3D:
+
+    @staticmethod
+    def  distance(px, py, pz, qx, qy, qz):
+        """
+
+        :param px:
+        :param py:
+        :param pz:
+        :param qx:
+        :param qy:
+        :param qz:
+        :return:
+        """
+        dx = qx - px
+        dy = qy - py
+        dz = qz - pz
+        return math.sqrt(dx*dx + dy*dy + dz*dz)
+
     @staticmethod
     def getCosineFromSides(x, y, z):
-        r_zyx = r(z,z) * r(y,y) * r(x,x)
+        """
 
-        #r = math.sqrt(x * x + y * y)
-        return x / r
+        :param x:
+        :param y:
+        :param z:
+        :return:
+        """
+        r_xy = math.sqrt(x * x + y * y)
+        r_zx = math.sqrt(x * x + z * z)
+        r_yz = math.sqrt(y * y + z * z)
+
+        return [math.acos(z/r_zx), math.acos(y/r_yz), math.acos(x/r_xy)]

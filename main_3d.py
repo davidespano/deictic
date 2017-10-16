@@ -3,18 +3,15 @@ from model import *
 from dataset import *
 from gesture import *
 from test import *
-# Plot
-import matplotlib.pyplot as plt
-
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
 debug_mode = 2
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
-    l = Line3D(0,0,0)
+    l = Line3D(20,1,5)
     print(l.__str__())
-    #l.plot()
+    l.plot()
 
 #### Debug DeclarativeModel (Line3D e Point3D) ####
 if debug_mode == 1:
@@ -48,7 +45,7 @@ if debug_mode == 2:
     for hmm in hmms:
         # Genero una sequenza di punti di esempio
         sequence = hmm.sample()
-        # Visualizzo questa sequenza di punti usando la libreri matplotlib
+        # Visualizzo questa sequenza di punti usando la libreria matplotlib
         result = numpy.array(sequence).astype('float')
         plt.axis("equal")
         plt.plot(result[:, 0], result[:, 1])
