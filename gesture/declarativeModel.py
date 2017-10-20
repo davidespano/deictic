@@ -59,7 +59,7 @@ class ClassifierFactory:
         processor.transforms.addTranform(transform2)
         processor.preprocess()
         #exp.plot()
-        startPoint = [0,0,0]#####
+        startPoint = [0,0]
         self.strokeList = []
         self.stroke = -1
         self.parseStrokes(exp)
@@ -183,7 +183,7 @@ class ClassifierFactory:
 
             return OpEnum.Line, [(hmm, None)]
 
-
+        # Arc
         if isinstance(exp, Arc):
             exp.dz = 0;
             if exp.cw:
@@ -255,7 +255,7 @@ class ClassifierFactory:
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
-            startPoint[2] += exp.dz
+            #startPoint[2] += exp.dz
 
             return OpEnum.Arc, [(hmm, None)]
 

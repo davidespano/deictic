@@ -1,7 +1,6 @@
 # Delay
 #from time import sleep
 # Analyzing data
-from real_time.dataAnalyzer import DataAnalyzer
 from real_time.test_real_time import *
 # CsvDataset
 from dataset import CsvDataset
@@ -149,9 +148,9 @@ class DeicticRealTime():
 
                         #"unistroke-question_mark_1","unistroke-question_mark_2","unistroke-question_mark_3","unistroke-question_mark_4","unistroke-question_mark_5",
 
-                        #"unistroke-rectangle_1","unistroke-rectangle_2","unistroke-rectangle_3","unistroke-rectangle_4",
+                        "unistroke-rectangle_1","unistroke-rectangle_2","unistroke-rectangle_3","unistroke-rectangle_4",
 
-                        "unistroke-right_curly_brace_1","unistroke-right_curly_brace_2","unistroke-right_curly_brace_3","unistroke-right_curly_brace_4",
+                        #"unistroke-right_curly_brace_1","unistroke-right_curly_brace_2","unistroke-right_curly_brace_3","unistroke-right_curly_brace_4",
 
                         #"unistroke-right_sq_bracket_1","unistroke-right_sq_bracket_2","unistroke-right_sq_bracket_3",
 
@@ -183,8 +182,8 @@ class DeicticRealTime():
                         #["left_sq_bracket", self.n_samples*3],
                         #["pigtail", n_samples*4],
                         #["question_mark", self.n_samples * 5],
-                        #["rectangle", self.n_samples*4],
-                        ["right_curly_brace", self.n_samples * 4],
+                        ["rectangle", self.n_samples*4],
+                        #["right_curly_brace", self.n_samples * 4],
                         #["right_sq_bracket", self.n_samples * 3],
                         #["star", self.n_samples*5],
                         #["triangle", self.n_samples * 3],
@@ -243,17 +242,73 @@ class DeicticRealTime():
             Shows results
         :return:
         """
+        res = {}
+        with open("/home/ale/Documenti/prova-res/res_6states.csv", "r") as f:
+            reader = csv.reader(f, delimiter=',')
+            vals = list(reader)
+            result = numpy.array(vals).astype('int')
+        for item in result:
+            res[item[0]] = item[1]
+
+        """
+        # V
+        files = \
+        [
+            ["10_slow_v_10.csv",[29]], ["8_slow_v_03.csv",[36]], ["6_medium_v_04.csv",[35]], ["5_slow_v_09.csv",[50]], ["3_medium_v_06.csv",[38]],
+            ["5_slow_v_03.csv",[48]], ["9_fast_v_03.csv",[19]], ["10_medium_v_09.csv",[21]], ["11_slow_v_02.csv",[26]], ["6_slow_v_03.csv",[47]]
+        ]"""
+        """# Circle
+        files = \
+        [
+            ["9_slow_circle_03.csv", [26, 44, 58]], ["7_medium_circle_06.csv", [31, 43, 55]],
+            ["8_fast_circle_08.csv", [17, 32, 38]], ["9_slow_circle_08.csv", [25, 43, 59]],
+            ["7_fast_circle_05.csv", [25, 33, 40]],
+            ["3_fast_circle_02.csv", [15, 25, 36]], ["9_slow_circle_04.csv", [27, 45, 57]],
+            ["1_medium_circle_04.csv", [17, 28, 34]], ["1_slow_circle_05.csv", [21, 35, 45]],
+            ["5_fast_circle_03.csv", [17, 34, 50]]
+        ]"""
+        # Rectangle
+        files = \
+            [
+                ["8_medium_rectangle_07.csv", [30, 48, 61]], ["8_slow_rectangle_06.csv", [33, 58, 76]],
+                ["7_fast_rectangle_06.csv", [23, 43, 61]], ["10_medium_rectangle_03.csv", [21, 40, 54]],
+                ["2_fast_rectangle_09.csv", [20, 56, 75]],
+                ["5_medium_rectangle_01.csv", [45, 95, 126]], ["10_fast_rectangle_08.csv", [20, 31, 45]],
+                ["2_medium_rectangle_04.csv", [22, 58, 75]], ["4_slow_rectangle_09.csv", [41, 91, 118]],
+                ["11_slow_rectangle.csv", [22, 42, 56]]
+            ]
+
         for item in self.testResult:
+            for file,delta in files:
+                for num_primitive in range(0, len(delta)):
+                    value = self.testResult[item].findMaxPrimitive(file, num_primitive+2)
+                    if value == None:
+                        value = 1000
+                    else:
+                        value = value - delta[num_primitive]
+                    if value in res:
+                        res[value] = res[value]+1
+                    else:
+                        res[value] = 1
+        # Saves gesture description
+        r = []
+        for k,v in res.items():
+            r.append([k, v])
+        numpy.savetxt("/home/ale/Documenti/prova-res/res_6states.csv", r, fmt='%i', delimiter=',')
+
+        """for item in self.testResult:
             path = self.saveDir+item+'/'
             if not os.path.exists(path):
                 os.makedirs(path)
             self.testResult[item].save(path)
-            self.testResult[item].plot(csvDataset=dataset)
+            self.testResult[item].plot(csvDataset=dataset)"""
+
+
 
 
 #### ####
-n_states = 24
-n_samples = 60
+n_states = 6
+n_samples = 20
 dim_buffer = 1000
 baseDir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
 outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset/'
@@ -261,5 +316,32 @@ outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset
 app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples, dim_buffer=dim_buffer)
 app.application()
 
-#app.printPlot()
-#numpy.savetxt(outputDir+'star_result.csv', app.elaborated_results, fmt='%5s', delimiter=',')
+"""
+import matplotlib.pyplot as plt
+import matplotlib.pylab as plb
+res = [ 
+        # V
+
+        # Circle
+
+        # Rectangle
+
+        # Right Curly Brace
+
+        # Arrow
+    
+       ]
+fig, ax = plb.subplots(1, 1, figsize=(18, 20))
+x = []
+y = []
+for index in range(0, len(res)):
+    x.append(index)
+    y.append(res[index][1]-res[index][0])
+plb.plot(x, y, label='v')
+ax.scatter(x, y)
+for i in range(0, len(res)):
+    ax.annotate(str(i), (x[i], y[i]))
+plb.axis("equal")
+plt.show()"""
+
+
