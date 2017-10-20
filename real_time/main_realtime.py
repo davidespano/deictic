@@ -275,7 +275,7 @@ class DeicticRealTime():
                 ["2_fast_rectangle_09.csv", [20, 56, 75]],
                 ["5_medium_rectangle_01.csv", [45, 95, 126]], ["10_fast_rectangle_08.csv", [20, 31, 45]],
                 ["2_medium_rectangle_04.csv", [22, 58, 75]], ["4_slow_rectangle_09.csv", [41, 91, 118]],
-                ["11_slow_rectangle.csv", [22, 42, 56]]
+                ["11_slow_rectangle_08.csv", [22, 42, 56]]
             ]
 
         for item in self.testResult:
