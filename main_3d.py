@@ -7,7 +7,7 @@ from test import *
 
 class Joint:
 
-    def __init__(self, x, y, z, nome = None):
+    def __init__(self, x, y, z, nome):
         if (isinstance(x, float)):
             self.x = x
         elif (isinstance(y, float)):
@@ -24,6 +24,12 @@ class Frame:
         self.joints = []
         self.num = num
 
+    def recupera_joint(self, n):
+        for joints in range(0, len(joints)):
+            joint_recuperato = joints[n]
+            return joint_recuperato
+
+
 
 def txt_to_csv():
     file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
@@ -38,20 +44,37 @@ def txt_to_csv():
     print(f[3300] + " " + f[3301] + " " + f[3302]) #Frame numero 50
     print(f[5940] + " " + f[5941] + " " + f[5942]) #Frame numero 90
 
+    names = ['Wrist', 'Palm', 'thumb_base', 'thumb_first_joint', 'thumb_second_joint', 'thumb_tip', 'index_base',
+            'index_first_joint', 'index_second_joint', 'index_tip', 'middle_base', 'middle_first_joint',
+            'middle_second_joint', 'middle_tip', 'ring_base', 'ring_first_joint', 'ring_second_joint',
+            'ring_tip', 'pinky_base', 'pinky_first_joint', 'pinky_second_joint', 'pinky_tip']
+
     for index_frame in range(0, n_frame):
         i = index_frame*66
         frame = Frame(index_frame)
 
         for j in range(0, 66, 3):
+            k = 0
             x = float(f[i+j+0])
             y = float(f[i+j+1])
             z = float(f[i+j+2])
-            joint = Joint(x,y,z)
+            joint = Joint(x,y,z,str(names[k]))
             frame.joints.append(joint)
 
         frames.append(frame)
-
+        k = k+1
     return frames
+
+
+    for frames in range(0, len(frames)):
+        for frame in range(0, len(frame)):
+            palm_joint = joints[1]
+            index_tip = joints[9]
+    return palm_joint, index_tip
+
+
+
+    frames_da_salvare = []
 
 
 
