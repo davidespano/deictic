@@ -7,16 +7,22 @@ from test import *
 
 class Joint:
 
-    def __init__(self, x, y, z, nome):
+    def __init__(self, x, y, z):
         if (isinstance(x, float)):
             self.x = x
-        elif (isinstance(y, float)):
+        else:
+            print("Errore, non è un float")
+        if (isinstance(y, float)):
             self.y = y
-        elif (isinstance(z, float)):
+        else:
+            print("Errore, non è un float")
+        if (isinstance(z, float)):
             self.z = z
         else:
             print("Errore, non è un float")
-        self.nome = nome
+
+    def return_coordinates(self):
+        return [self.x,self.y,self.z]
 
 class Frame:
 
@@ -32,7 +38,9 @@ class Frame:
 
 
 def txt_to_csv():
-    file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
+    #file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
+    file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
+                "r").read()
     f = file.replace('\n', " ").split(" ")
 
     n_frame = int(len(f) / 66)
@@ -49,32 +57,30 @@ def txt_to_csv():
             'middle_second_joint', 'middle_tip', 'ring_base', 'ring_first_joint', 'ring_second_joint',
             'ring_tip', 'pinky_base', 'pinky_first_joint', 'pinky_second_joint', 'pinky_tip']
 
+    # Estrai i frame con tutti i joint dal file
     for index_frame in range(0, n_frame):
         i = index_frame*66
         frame = Frame(index_frame)
-
+        # Estrai tutti i joint relativi al frame in questione
         for j in range(0, 66, 3):
-            k = 0
+            k = int(j/3)
             x = float(f[i+j+0])
             y = float(f[i+j+1])
             z = float(f[i+j+2])
-            joint = Joint(x,y,z,str(names[k]))
+            joint = Joint(x,y,z)
             frame.joints.append(joint)
-
+        # Inserisci il frame nella lista frames
         frames.append(frame)
-        k = k+1
-    return frames
 
-
+    # Crea e restituisci due liste che contengono, rispettivamente, tutte le coordinate registrate nei vari frame e relativi
+    # a un determinato Joint (nel nostro caso palm (1) e l'index_tip (9)).
+    palm_joints = []
+    index_tip_joints = []
     for frames in range(0, len(frames)):
-        for frame in range(0, len(frame)):
-            palm_joint = joints[1]
-            index_tip = joints[9]
-    return palm_joint, index_tip
+        palm_joints.append(frame.joints[1].return_coordinates())
+        index_tip_joints.append(frame.joints[9].return_coordinates())
 
-
-
-    frames_da_salvare = []
+    return palm_joints, index_tip_joints
 
 
 
@@ -140,7 +146,10 @@ if debug_mode == 2:
 
 
 if debug_mode == 3:
- txt_to_csv()
+    palm_joints, index_tip_joints = txt_to_csv()
 
+    # Salva dati
+    numpy.savetxt("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    print("end")
 
 

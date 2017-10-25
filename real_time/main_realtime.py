@@ -243,14 +243,13 @@ class DeicticRealTime():
             Shows results
         :return:
         """
+        """
         file_names = ["/home/ale/Documenti/prova-res/der_"+str(self.n_states)+"states.csv", "/home/ale/Documenti/prova-res/norm_log_probability_" + str(self.n_states) + "states.csv"]
-
         for file_name in file_names:
             if "der" in file_name:
                 der_bool = True
             else:
                 der_bool = False
-
             res = []
             with open(file_name, "r") as f:
                 reader = csv.reader(f, delimiter=',')
@@ -263,14 +262,12 @@ class DeicticRealTime():
                             value = 50
                         res.append(value)
 
-                    """
             # V
             files = [
                 ["10_slow_v_10.csv",[29]], ["8_slow_v_03.csv",[36]], ["6_medium_v_04.csv",[35]], ["5_slow_v_09.csv",[50]], ["3_medium_v_06.csv",[38]],
                 ["5_slow_v_03.csv",[48]], ["9_fast_v_03.csv",[19]], ["10_medium_v_09.csv",[21]], ["11_slow_v_02.csv",[26]], ["6_slow_v_03.csv",[47]]
             ]
-            """
-                """
+
             # Circle
             files = [
                 ["9_slow_circle_03.csv", [26, 44, 58]], ["7_medium_circle_06.csv", [31, 43, 55]],
@@ -280,8 +277,7 @@ class DeicticRealTime():
                 ["1_medium_circle_04.csv", [17, 28, 34]], ["1_slow_circle_05.csv", [21, 35, 45]],
                 ["5_fast_circle_03.csv", [17, 34, 50]]
             ]
-            """
-            """
+
             # Rectangle
             files = [
                     ["8_medium_rectangle_07.csv", [30, 48, 61]], ["8_slow_rectangle_06.csv", [33, 58, 76]],
@@ -291,8 +287,7 @@ class DeicticRealTime():
                     ["2_medium_rectangle_04.csv", [22, 58, 75]], ["4_slow_rectangle_09.csv", [41, 91, 118]],
                     ["11_slow_rectangle_08.csv", [22, 42, 56]]
                 ]
-            """
-            """
+
             # Right curly brace
             files = [
                     ["8_medium_right_curly_brace_03.csv", [30,50,70]], ["9_slow_right_curly_brace_10.csv", [27,50,67]],
@@ -302,8 +297,7 @@ class DeicticRealTime():
                     ["8_fast_right_curly_brace_02.csv", [30,45,64]], ["11_medium_right_curly_brace_10.csv", [22,47,60]],
                     ["3_medium_right_curly_brace_06.csv", [21,45,60]]
                 ]
-            """
-            """
+
             # Arrow
             files = [
                     ["8_medium_arrow_07.csv", [29,45,57]], ["8_fast_arrow_01.csv", [25,35,43]],
@@ -313,9 +307,6 @@ class DeicticRealTime():
                     ["6_medium_arrow_05.csv", [30,44,60]], ["1_slow_arrow_04.csv", [38,50,63]],
                     ["10_medium_arrow_09.csv", [33,45,58]]
             ]
-            """
-
-            """
             for item in self.testResult:
                 for file,delta in files:
                     for num_primitive in range(0, len(delta)):
@@ -329,9 +320,7 @@ class DeicticRealTime():
             # Saves gesture description
             numpy.savetxt(file_name, res, fmt='%i', delimiter=',')
             print("saved on "+file_name)
-            """
-
-
+        
             if "der" in file_name:
                 plt.hist(res, normed=False, bins=500)
                 plt.title("Histogram")
@@ -354,23 +343,22 @@ class DeicticRealTime():
                 plt.ylim(0,20)
                 plt.grid()
                 plt.show()
-
-
         """
         for item in self.testResult:
             path = self.saveDir+item+'/'
             if not os.path.exists(path):
                 os.makedirs(path)
-            self.testResult[item].save(path)
-            self.testResult[item].plot(csvDataset=dataset)
-        """
+            #print
+            #self.testResult[item].save(path)
+            #self.testResult[item].plot(csvDataset=dataset)
+
 
 
 
 
 #### ####
 n_states = 24
-n_samples = 1
+n_samples = 60
 dim_buffer = 1000
 baseDir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
 outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset/'
