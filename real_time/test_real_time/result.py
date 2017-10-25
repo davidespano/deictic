@@ -47,7 +47,7 @@ class FrameTestResult(Result):
         FrameTestResult describes the results linked to a single frame. It contains the log probabilites computed for each models in the dataset.
     """
 
-    def __init__(self, test_results, n_frame = None, n_primitives = 1):
+    def __init__(self, test_results, prec_frame = None, n_frame = None, n_primitives=1):
         super(FrameTestResult, self).__init__(n_primitives)
         ### Check validity parameters ###
         if not isinstance(test_results, list):
@@ -57,13 +57,16 @@ class FrameTestResult(Result):
         ### Features ###
         # Number of frame, if it is known
         self.n_frame = n_frame
+        # Reference to the precedent frame
+        self.prec_frame = prec_frame
         ## Data structures
         # - log_probabilities contains the log probability value for each model.
         # test_result is an array which its elements have this form: name_model[0] - related log_probability[1]
-        #self.log_probabilites = test_results
         self.data_array = test_results
         # - best_log_probability reports which is the model with the highest log probability
         self.best_log_probability = self.__findBestLogProbability()
+        # - best_first_derivative reports which is the model with the highest first derivative
+        self.best_first_derivative = self.__findBestFirstDerivative()
 
 
     def __findBestLogProbability(self):
@@ -81,6 +84,31 @@ class FrameTestResult(Result):
                 highest_log_probability = item[1]
 
         return best_model
+
+    def __findBestFirstDerivative(self):
+        """
+
+        :return:
+        """
+        best_model = None
+        highest_first_derivative = -sys.maxsize
+
+        # Find the highest model
+        if self.prec_frame != None:
+            for index in range(len(self.data_array)):
+                value_y = 1 # Num_frame
+                value_x = self.data_array[index][1] - self.prec_frame.data_array[index][1] # Norm log probability
+                der = value_y/value_x # Derivative
+                if der > highest_first_derivative:
+                    best_model = self.data_array[index]
+                    highest_first_derivative = der
+
+        if best_model == None:
+            best_model = self.data_array[0]
+
+        return best_model
+
+
 
     # Override
     def get(self):
@@ -128,7 +156,10 @@ class FileTestResult(Result):
         """
         # Create a new FrameTestResult and add it into the correct array
         n_frame = len(self.data_array)+1
-        self.data_array.append(FrameTestResult(data_test, n_frame))
+        prec_frame = None
+        if len(self.data_array) > 0:
+            prec_frame = self.data_array[-1]
+        self.data_array.append(FrameTestResult(data_test, prec_frame=prec_frame, n_frame=n_frame))
         # Update computedSequence array
         #self.computeBestSequence()
         # Update test trend
@@ -304,7 +335,7 @@ class DatasetTestResult(Result):
             else:
                 fail+=1
         return success, fail
-    def findMaxPrimitive(self, file_name, num_primitive):
+    def findMaxPrimitive(self, file_name, num_primitive, der=False):
         """
 
         :param file_name:
@@ -313,6 +344,10 @@ class DatasetTestResult(Result):
         """
         file_description = self.find(file_name)
         for frame in file_description.data_array:
-            if str(num_primitive) in frame.best_log_probability[0]:
-                return  frame.n_frame
+            if der:
+                if str(num_primitive) in frame.best_first_derivative[0]:
+                    return frame.n_frame
+            else:
+                if str(num_primitive) in frame.best_log_probability[0]:
+                    return  frame.n_frame
         return None
