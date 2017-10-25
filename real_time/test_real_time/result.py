@@ -106,17 +106,17 @@ class FileTestResult(Result):
         FileTestResult describes the results linked to a single file.
     """
 
-    def __init__(self, file_path, n_primitives = 1):
+    def __init__(self, file_name, n_primitives = 1):
         super(FileTestResult, self).__init__(n_primitives)
         ### Check validity parameters ###
-        if not isinstance(file_path, str):
-            raise ValueError('file_path must be a string.')
+        if not isinstance(file_name, str):
+            raise ValueError('file_name must be a string.')
         ### Features ###
         # The path of file
-        self.file_path = file_path
+        self.file_name = file_name
         ## Data Structures
-        # This array reports the concise evolution of the recognition
-        self.computedSequence = []
+        # dictionary: frame number (key) -> the best primitive (value)
+        self.computedSequence = {}
         # This array reports for each models the log probabilitie values during the evolution
         self.testTrend = {}
 
@@ -130,7 +130,7 @@ class FileTestResult(Result):
         n_frame = len(self.data_array)+1
         self.data_array.append(FrameTestResult(data_test, n_frame))
         # Update computedSequence array
-        self.computeBestSequence()
+        #self.computeBestSequence()
         # Update test trend
         self.collectModelsTrend()
 
@@ -141,26 +141,29 @@ class FileTestResult(Result):
             highlighting when and how much frames the hmm changes its status.
         :return: None
         """
-        # Get the last best model (if computedSequence is not empty) and update the array
+        # Get the last best model
+        last_best_value_recorded = self.data_array[-1].best_log_probability
         if len(self.computedSequence) > 0:
-            last_hmm = self.computedSequence[-1][0]
-            if last_hmm != self.data_array[-1].best_log_probability[0]:
-                hmm = self.data_array[-1].best_log_probability[0]
-                start = self.computedSequence[-1][1] + 1
-                end = self.computedSequence[-1][2] + 1
+            last_hmm = self.computedSequence[-1]
+            if last_hmm[0] != last_best_value_recorded[0]:
+                model_name = last_best_value_recorded[0]
+                start_frame = self.data_array[-1].n_frame
+                end_frame = start_frame + 1
                 during = 1
+                self.computedSequence.append([model_name, start_frame, end_frame, during])
             else:
-                hmm = last_hmm
-                start = self.computedSequence[-1][1]
-                end = self.computedSequence[-1][2] + 1
-                during = self.computedSequence[-1][3] + 1
-            self.computedSequence[-1] = ([last_hmm, start, end, during])
+                model_name = last_hmm[0]
+                start_frame = last_hmm[1]
+                end_frame = self.data_array[-1].n_frame
+                during =  end_frame - start_frame
+                self.computedSequence[-1]=[model_name, start_frame, end_frame, during]
         else:
-            new_hmm = self.data_array[-1].best_log_probability[0]
+            model_name = last_best_value_recorded[0]
             start = 0
             end = 1
             during = 1
-            self.computedSequence.append([new_hmm, start, end, during])
+            self.computedSequence.append([model_name, start, end, during])
+
 
     def collectModelsTrend(self):
         """
@@ -178,24 +181,20 @@ class FileTestResult(Result):
         :return:
             yes (the primitives have been recognized correctly) or false.
         """
-        primitive_recognized = 1
-        for item in self.computedSequence:
-            # Gets info
-            model_name = item[0]
-            start_frame = item[1]
-            end_frame = item[2]
-            during_frames = item[3]
+        basic_recognized = 1
+        # Scan the array, in order to check if the primitives are recognized correctly
+        for frame in self.data_array:
+            hmm_name = frame.best_log_probability[0]
 
-            # Has it been recognized the correct primitive?
-            if str(primitive_recognized) in hmm_name and during_frames > self.__delta_flick:
-                # Update primitive
-                primitive_recognized = self.__updateNumberOfRecognizedPrimitive(primitive_recognized)
-
+            if str(basic_recognized) in hmm_name or str(basic_recognized+1) in hmm_name:
+                if str(basic_recognized+1) in hmm_name:
+                    basic_recognized+=1
+            else:
+                return False
         # Has been recognized the complete gesture? If yes return true else false
-        if len(stack) == self.n_primitives and primitive_recognized == self.n_primitives:
+        if basic_recognized == self.n_primitives+1:
             return True
-        else:
-            return False
+
 
     def plot(self):
         """
@@ -203,9 +202,8 @@ class FileTestResult(Result):
         :return:
         """
         # Get data
-        #print(self.file_path)
+        #print(self.file_name)
         fig, ax = plb.subplots(1,1,figsize=(18,20))
-        #plt.subplots_adjust(left=.038, bottom=0, right=1, top=1, wspace=0, hspace=0)
         for key,value in self.testTrend.items():
             x = np.arange(len(self.data_array))
             y = np.asarray(value)
@@ -214,12 +212,12 @@ class FileTestResult(Result):
             for i in range(0, len(value)):
                 ax.annotate(str(i), (x[i], y[i]))
         # Title
-        plb.title(self.file_path)
+        plb.title(self.file_name)
         # Legend
         plb.legend(bbox_to_anchor=(.05, 1), loc='best', borderaxespad=0.)
         # x ticks
         plb.xticks(np.arange(min(x), max(x) + 1, 2.0))
-        plb.ylim(-100, 1)
+        #plb.ylim(-250, 1)
         # Show image
         plb.show()
 
@@ -237,14 +235,14 @@ class DatasetTestResult(Result):
         self.test_result = {}
 
     # Handlers for managing the test_real_time result related to a speficified file's frame.
-    def start(self, file_path):
+    def start(self, file_name):
         """
             handler links to the event "starting to 'fire' a new file".
             :return: None
 
         """
         # Inizialize dictionary
-        self.data_array.append(FileTestResult(file_path))
+        self.data_array.append(FileTestResult(file_name))
 
     def update(self, data_test):
         """
@@ -253,12 +251,12 @@ class DatasetTestResult(Result):
         """
         self.data_array[-1].update(data_test)
 
-    def stop(self, file_path):
+    def stop(self, file_name):
         """
             handler links to the event "file completed"
             :return: None
         """
-        self.test_result[file_path] = self.data_array[-1].check()
+        self.test_result[file_name] = self.data_array[-1].check()
 
     # Override
     def save(self, path_to_save):
@@ -268,7 +266,7 @@ class DatasetTestResult(Result):
         :return:
         """
         for item in self.data_array:
-            item.save(path_to_save+item.file_path)
+            item.save(path_to_save+item.file_name)
     # Override
     def plot(self, csvDataset = None):
         """
@@ -278,4 +276,43 @@ class DatasetTestResult(Result):
         for item in self.data_array:
             item.plot()
             # If csvDataset is not None, plots also the file
-            csvDataset.plot(sampleName=item.file_path)
+            csvDataset.plot(sampleName=item.file_name)
+
+    # --- try ---
+    def find(self, file_name):
+        """
+
+        :param file_name:
+        :return:
+        """
+        for item in self.data_array:
+            if item.file_name == file_name:
+                return  item
+        return None
+
+    # Shows dataset result
+    def showResult(self):
+        """
+
+        :return:
+        """
+        success = 0
+        fail = 0
+        for item in self.test_result:
+            if item :
+                success+=1
+            else:
+                fail+=1
+        return success, fail
+    def findMaxPrimitive(self, file_name, num_primitive):
+        """
+
+        :param file_name:
+        :param num_primitive:
+        :return:
+        """
+        file_description = self.find(file_name)
+        for frame in file_description.data_array:
+            if str(num_primitive) in frame.best_log_probability[0]:
+                return  frame.n_frame
+        return None
