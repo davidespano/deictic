@@ -31,9 +31,8 @@ class Frame:
         self.num = num
 
     def recupera_joint(self, n):
-        for joints in range(0, len(joints)):
-            joint_recuperato = joints[n]
-            return joint_recuperato
+        joint_recuperato = self.joints[n]
+        return joint_recuperato
 
 
 
@@ -76,7 +75,7 @@ def txt_to_csv():
     # a un determinato Joint (nel nostro caso palm (1) e l'index_tip (9)).
     palm_joints = []
     index_tip_joints = []
-    for frames in range(0, len(frames)):
+    for frame in frames:
         palm_joints.append(frame.joints[1].return_coordinates())
         index_tip_joints.append(frame.joints[9].return_coordinates())
 
@@ -149,7 +148,7 @@ if debug_mode == 3:
     palm_joints, index_tip_joints = txt_to_csv()
 
     # Salva dati
-    numpy.savetxt("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    numpy.savetxt("/home/ale/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     print("end")
 
 
