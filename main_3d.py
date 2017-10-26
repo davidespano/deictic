@@ -148,7 +148,7 @@ if debug_mode == 3:
     palm_joints, index_tip_joints = txt_to_csv()
 
     # Salva dati
-    numpy.savetxt("/home/ale/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     print("end")
 
 
