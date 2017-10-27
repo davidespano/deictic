@@ -5,6 +5,7 @@ from dataset import *
 from gesture import *
 from test import *
 
+
 class Joint:
 
     def __init__(self, x, y, z):
@@ -96,7 +97,7 @@ def txt_to_csv():
 
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 3
+debug_mode = 4
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -144,11 +145,18 @@ if debug_mode == 2:
         plt.show()
 
 
+# Prova conversione txt to csv
 if debug_mode == 3:
+    baseDir = "/home/ale/Scaricati/gesture_1/"
     palm_joints, index_tip_joints = txt_to_csv()
 
     # Salva dati
-    numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    numpy.savetxt(baseDir+"nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     print("end")
 
+# Prova stampa shrec dataset
+if debug_mode == 4:
+    baseDir = "/home/ale/Scaricati/shrec/gesture_1/"
+    dataset = CsvDataset(baseDir)
 
+    dataset.plot(dimensions=3)
