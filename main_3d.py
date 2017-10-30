@@ -5,7 +5,6 @@ from dataset import *
 from gesture import *
 from test import *
 
-
 class Joint:
 
     def __init__(self, x, y, z):
@@ -38,9 +37,9 @@ class Frame:
 
 
 def txt_to_csv():
-    #file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
-    file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
-                "r").read()
+    file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
+    #file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
+                #"r").read()
     f = file.replace('\n', " ").split(" ")
 
     n_frame = int(len(f) / 66)
@@ -97,7 +96,7 @@ def txt_to_csv():
 
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 4
+debug_mode = 3
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -145,18 +144,20 @@ if debug_mode == 2:
         plt.show()
 
 
-# Prova conversione txt to csv
 if debug_mode == 3:
-    baseDir = "/home/ale/Scaricati/gesture_1/"
     palm_joints, index_tip_joints = txt_to_csv()
 
     # Salva dati
-    numpy.savetxt(baseDir+"nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     print("end")
 
-# Prova stampa shrec dataset
-if debug_mode == 4:
-    baseDir = "/home/ale/Scaricati/shrec/gesture_1/"
-    dataset = CsvDataset(baseDir)
+    dir = '/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/'
+    lista_subject = os.listdir(dir)
+    for subject in lista_subject:
+        path = subject
+        lista_essai = os.listdir(dir + subject)
 
-    dataset.plot(dimensions=3)
+        for essai in lista_essai:
+            palm_joints, index_tip_joints = txt_to_csv()
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
