@@ -173,7 +173,7 @@ class test:
                 self.list_dataset.append(CsvDataset(datasetDir + name + '/'))
         # path file results
         if isinstance(file_path_results, str):
-            self.file_path_results = file_path_results
+            self.filename = file_path_results + 'matrix_confusion_choice.csv'
         else:
             self.filename = self.datasetDir + 'matrix_confusion_choice.csv'
         if isinstance(gesture_names, list):
@@ -250,7 +250,7 @@ class test:
                 # Print debug results
                 if self.plot_result != False:
                     print('File:{} - Model:{} log-probability: {}, normalised-log-probability {}'.format(tuple[1],
-                    models[model].name, log_probability, norm_log_probability))
+                    self.models[model].name, log_probability, norm_log_probability))
 
                 # Checks which is the best result
                 if(norm_log_probability > max_norm_log_probability):
