@@ -37,9 +37,9 @@ class Frame:
 
 
 def txt_to_csv():
-    #file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
-    file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
-                "r").read()
+    file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
+    #file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
+                #"r").read()
     f = file.replace('\n', " ").split(" ")
 
     n_frame = int(len(f) / 66)
@@ -151,4 +151,13 @@ if debug_mode == 3:
     numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     print("end")
 
+    dir = '/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/'
+    lista_subject = os.listdir(dir)
+    for subject in lista_subject:
+        path = subject
+        lista_essai = os.listdir(dir + subject)
 
+        for essai in lista_essai:
+            palm_joints, index_tip_joints = txt_to_csv()
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
