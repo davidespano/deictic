@@ -192,7 +192,7 @@ class CsvDataset:
     # Plot
     # Plots input dataset's files
     def plot(self, dimensions = 2, sampleName = None, model = None, singleMode = False):
-        #fig = plt.figure(2);
+        fig = plt.figure(2);
         ax = None
         if dimensions == 3:
             ax = fig.gca(projection='3d')
