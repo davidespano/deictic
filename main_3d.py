@@ -164,3 +164,14 @@ if debug_mode == 3:
             index_tip_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
             numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
             numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
+
+if debug_mode == 4:
+    dir = "cartella da leggere"
+    dataset = CsvDataset(dir)
+    for item in dataset.readDataset():
+        sequence = item[0]
+        filename = item[1]
+
+        plt.plot(item[:,0],item[:,1])
+        plt.title(filename)
+        plt.show()

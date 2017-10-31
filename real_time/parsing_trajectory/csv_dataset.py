@@ -81,3 +81,13 @@ class CsvDataset(CsvDataset):
 
 
 
+"""
+dataset = CsvDataset(dir)
+for item in dataset.readDataset():
+    sequence = item[0]
+    filename = item[1]
+    
+    plt.plot(item[:,0],item[:,1])
+    plt.title(filename)
+    plt.show()
+"""
