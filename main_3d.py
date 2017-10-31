@@ -97,7 +97,7 @@ def txt_to_csv(file_scelto, joint_scelto):
 
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 3
+debug_mode = 4
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -147,26 +147,29 @@ if debug_mode == 2:
 
 if debug_mode == 3:
 
-    palm_joints= txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 1)
-    index_tip_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
-    # Salva dati
-    #numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
-    #print("end")
+    gesture = 14
+    finger = 2
 
-    dir = '/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/'
+    dir = '/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_'+str(gesture)+'/finger_'+str(finger)+'/'
     lista_subject = os.listdir(dir)
     for subject in lista_subject:
         path = subject
         lista_essai = os.listdir(dir + subject)
 
         for essai in lista_essai:
-            palm_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 1)
-            index_tip_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
-            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
-            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
+            if finger == 1:
+                joint_scelto = 9
+                nome_joint = "index_tip_joint"
+            else:
+                joint_scelto  = 1
+                nome_joint = "palm_joint"
+            file_da_leggere = dir + subject + '/'+ essai + '/skeletons_world.txt'
+            joints = txt_to_csv(file_da_leggere, joint_scelto)
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+str(gesture)+"/" + subject + "_" + essai + "_" + nome_joint +".csv", joints, delimiter=',', fmt='%f')
+
 
 if debug_mode == 4:
-    dir = "cartella da leggere"
+    dir = "/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_2/"
     dataset = CsvDataset(dir)
     for item in dataset.readDataset():
         sequence = item[0]
