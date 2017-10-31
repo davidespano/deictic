@@ -36,8 +36,8 @@ class Frame:
 
 
 
-def txt_to_csv():
-    file = open("/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", "r").read()
+def txt_to_csv(self, file_scelto, joint_scelto):
+    file = open(file_scelto, "r").read()
     #file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
                 #"r").read()
     f = file.replace('\n', " ").split(" ")
@@ -46,15 +46,15 @@ def txt_to_csv():
     frames = []
     index_frame = 0
 
-    print(f[0] + " " + f[1] + " " + f[2])# Frame numero 1
-    print(f[1320] + " " + f[1321] + " " + f[1322]) #Frame numero 20
-    print(f[3300] + " " + f[3301] + " " + f[3302]) #Frame numero 50
-    print(f[5940] + " " + f[5941] + " " + f[5942]) #Frame numero 90
+    #print(f[0] + " " + f[1] + " " + f[2])# Frame numero 1
+    #print(f[1320] + " " + f[1321] + " " + f[1322]) #Frame numero 20
+    #print(f[3300] + " " + f[3301] + " " + f[3302]) #Frame numero 50
+    #print(f[5940] + " " + f[5941] + " " + f[5942]) #Frame numero 90
 
-    names = ['Wrist', 'Palm', 'thumb_base', 'thumb_first_joint', 'thumb_second_joint', 'thumb_tip', 'index_base',
-            'index_first_joint', 'index_second_joint', 'index_tip', 'middle_base', 'middle_first_joint',
-            'middle_second_joint', 'middle_tip', 'ring_base', 'ring_first_joint', 'ring_second_joint',
-            'ring_tip', 'pinky_base', 'pinky_first_joint', 'pinky_second_joint', 'pinky_tip']
+    #names = ['Wrist', 'Palm', 'thumb_base', 'thumb_first_joint', 'thumb_second_joint', 'thumb_tip', 'index_base',
+            #'index_first_joint', 'index_second_joint', 'index_tip', 'middle_base', 'middle_first_joint',
+            #'middle_second_joint', 'middle_tip', 'ring_base', 'ring_first_joint', 'ring_second_joint',
+            #'ring_tip', 'pinky_base', 'pinky_first_joint', 'pinky_second_joint', 'pinky_tip']
 
     # Estrai i frame con tutti i joint dal file
     for index_frame in range(0, n_frame):
@@ -78,9 +78,10 @@ def txt_to_csv():
     for frame in frames:
         palm_joints.append(frame.joints[1].return_coordinates())
         index_tip_joints.append(frame.joints[9].return_coordinates())
-
-    return palm_joints, index_tip_joints
-
+        if joint_scelto == 1:
+            return palm_joints
+        elif joint_scelto == 9:
+            return index_tip_joints
 
 
 
@@ -145,11 +146,11 @@ if debug_mode == 2:
 
 
 if debug_mode == 3:
-    palm_joints, index_tip_joints = txt_to_csv()
+    palm_joints, index_tip_joints = txt_to_csv("home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
 
     # Salva dati
-    numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
-    print("end")
+    #numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
+    #print("end")
 
     dir = '/home/sara/Scrivania/simple-shrec/gesture_1/gesture_1/finger_1/'
     lista_subject = os.listdir(dir)
@@ -158,6 +159,6 @@ if debug_mode == 3:
         lista_essai = os.listdir(dir + subject)
 
         for essai in lista_essai:
-            palm_joints, index_tip_joints = txt_to_csv()
-            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
-            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_subject1_essai1_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
+            palm_joints, index_tip_joints = txt_to_csv("home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
+            numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
