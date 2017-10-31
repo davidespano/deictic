@@ -222,7 +222,7 @@ class OneDollarGestures(modellingGesture.OneDollarGestures):
         elif (type_gesture == OneDollarGestures.TypeGesture.v_1.name):
             definition = Point(0, 0) + Line(2, -3)
         elif (type_gesture == OneDollarGestures.TypeGesture.v_2.name):
-            definition = Point(0, 0) + Line(2, -3) + Line(2, 3)
+            definition = Point(2, -3) + Line(2, 3)
 
         # X
         elif (type_gesture == OneDollarGestures.TypeGesture.x_1.name):

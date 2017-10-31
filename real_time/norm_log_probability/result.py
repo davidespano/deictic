@@ -329,8 +329,8 @@ class DatasetTestResult(Result):
         """
         success = 0
         fail = 0
-        for item in self.test_result:
-            if item :
+        for value in self.test_result.values():
+            if value :
                 success+=1
             else:
                 fail+=1

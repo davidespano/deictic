@@ -130,7 +130,7 @@ class DeicticRealTime():
                     [
                         # "unistroke-arrow_1", "unistroke-arrow_2", "unistroke-arrow_3", "unistroke-arrow_4",
 
-                        # "unistroke-circle_1","unistroke-circle_2","unistroke-circle_3","unistroke-circle_4",
+                        #"unistroke-circle_1","unistroke-circle_2","unistroke-circle_3","unistroke-circle_4",
 
                         # "unistroke-check_1","unistroke-check_2",
 
@@ -172,7 +172,7 @@ class DeicticRealTime():
                 self.gesturesDataset = \
                     [
                         # ["arrow", self.n_samples*4],
-                        # ["circle", self.n_samples*4],
+                        #["circle", self.n_samples*4],
                         # ["check", self.n_samples*2],
                         # ["caret", self.n_samples * 2],
                         # ["delete_mark", self.n_samples * 3],
@@ -341,13 +341,9 @@ class DeicticRealTime():
                 plt.show()
         """
         for item in self.testResult:
-            path = self.saveDir + item + '/'
-            if not os.path.exists(path):
-                os.makedirs(path)
-                # print
-                # self.testResult[item].save(path)
-                #self.testResult[item].plot(csvDataset=dataset)
-                print(self.testResult[item].showResult())
+            #self.testResult[item].plot(csvDataset=dataset)
+            success,fail = self.testResult[item].showResult()
+            print(str(success)+" / "+str(fail))
 
 
 #### ####
@@ -357,6 +353,5 @@ dim_buffer = 1000
 baseDir = '/home/ale/PycharmProjects/deictic/repository/deictic/'
 outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset/'
 
-app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples,
-                      dim_buffer=dim_buffer)
+app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples, dim_buffer=dim_buffer)
 app.application()
