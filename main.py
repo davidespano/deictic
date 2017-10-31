@@ -1,19 +1,19 @@
 from dataset import *
-from gesture import *
+from gesture.modellingGesture import Parse
 from test import *
 
 
 
 # Main
-baseDir = '/home/alessandro/PycharmProjects/deictic/repository/'
+baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 24
+mode = 1
 
-
-#baseDir  = '/Users/davide/Google Drive/Dottorato/Software/python/hmmtest/repository/'
-baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
 arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -46,10 +46,11 @@ if mode in [-1, 0, 1]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parse_expression(type+folder)
+        str = type+folder
+        model = parse.parseExpression(str)
         hmms.append(model)
 
-    t = test(hmms, gestureDir, folders, plot=False)
+    t = test(hmms, folders, gestureDir, plot_result=False, file_path_results="/home/ale/")
     results = t.all_files()
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
@@ -63,7 +64,7 @@ if mode in [2,3]:
     hmms = []
     parse = Parse(n_states, n_samples)
     for folder in folders:
-        model = parse.parse_expression(folder)
+        model = parse.parseExpression(folder)
         hmms.append(model)
 
     t = test(hmms, gestureDir, folders, plot=False)

@@ -1,4 +1,4 @@
-from gesture import *
+from gesture import ClassifierFactory
 from model import *
 from topology import *
 
