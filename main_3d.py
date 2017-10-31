@@ -36,7 +36,7 @@ class Frame:
 
 
 
-def txt_to_csv(self, file_scelto, joint_scelto):
+def txt_to_csv(file_scelto, joint_scelto):
     file = open(file_scelto, "r").read()
     #file = open("/home/ale/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt",
                 #"r").read()
