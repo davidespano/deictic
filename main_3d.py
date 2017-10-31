@@ -146,8 +146,9 @@ if debug_mode == 2:
 
 
 if debug_mode == 3:
-    palm_joints, index_tip_joints = txt_to_csv("home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
 
+    palm_joints= txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 1)
+    index_tip_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
     # Salva dati
     #numpy.savetxt("/home/sara/Scaricati/nome_file.csv", palm_joints, delimiter=',', fmt='%f')
     #print("end")
@@ -159,6 +160,7 @@ if debug_mode == 3:
         lista_essai = os.listdir(dir + subject)
 
         for essai in lista_essai:
-            palm_joints, index_tip_joints = txt_to_csv("home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
+            palm_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 1)
+            index_tip_joints = txt_to_csv("/home/sara/Scaricati/HandGestureDataset_SHREC2017/gesture_1/finger_1/subject_1/essai_1/skeletons_world.txt", 9)
             numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_palm_joints.csv", palm_joints, delimiter=',', fmt='%f')
             numpy.savetxt("/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture1_" + subject + "_" + essai + "_index_tip_joints.csv", index_tip_joints, delimiter=',', fmt='%f')
