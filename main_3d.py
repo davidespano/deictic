@@ -168,16 +168,33 @@ if debug_mode == 3:
 
 
 if debug_mode == 4:
-    #person = "ale"
-    person = "sara"
-    gesture = "2"
+    person = "ale"
+    #person = "sara"
+    gesture = "7"
 
     dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
-    for item in dataset.readDataset():
-        sequence = item[0]
-        filename = item[1]
 
-        plt.plot(item[0])
-        plt.title(filename)
-        plt.show()
+    dataset.plot(singleMode=True)
+
+if debug_mode == 5:
+    # num_primitive + il numero di primitive che costituiscono la gesture (tipo 1 oppure 2 o 3 e così via, a seconda della gesture).
+    # Se non ti ricordi quali sono le primitive a disposizione, ricontrolla gli articoli che ti avevo passato.
+    num_primitive = 0
+    inputDir = "path_raw_gesture_x"
+    outputDir = "path_resampled_gesture_x" # ricordati di creare la cartella resampled
+    #### Questo codice ti serve per creare le sequenze campionate e normalizzate dei file che hai convertito con il metodo txt_to_csv.  ####
+    dataset = CsvDataset(inputDir)
+    # Transform
+    transform1 = NormaliseLengthTransform(axisMode=True)
+    transform2 = ScaleDatasetTransform(scale=100)
+    transform3 = CenteringTransform()
+    transform5 = ResampleInSpaceTransform(samples=num_primitive*20)
+    # Apply transforms
+    dataset.addTransform(transform1)
+    dataset.addTransform(transform2)
+    dataset.addTransform(transform3)
+    dataset.addTransform(transform5)
+    dataset.applyTransforms(outputDir)
+
+
