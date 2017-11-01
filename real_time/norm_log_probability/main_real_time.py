@@ -355,3 +355,25 @@ outputDir = '/home/ale/PycharmProjects/deictic/real_time/results/1dollar_dataset
 
 app = DeicticRealTime('unistroke', baseDir, outputDir=outputDir, n_states=n_states, n_samples=n_samples, dim_buffer=dim_buffer)
 app.application()
+
+
+"""
+# num_primitive + il numero di primitive che costituiscono la gesture (tipo 1 oppure 2 o 3 e così via, a seconda della gesture).
+# Se non ti ricordi quali sono le primitive a disposizione, ricontrolla gli articoli che ti avevo passato.
+num_primitive = 0
+inputDir = "path_raw_gesture_x"
+outputDir = "path_resampled_gesture_x" # ricordati di creare la cartella resampled
+#### Questo codice ti serve per creare le sequenze campionate e normalizzate dei file che hai convertito con il metodo txt_to_csv.  ####
+dataset = CsvDataset(input_dir)
+# Transform
+transform1 = NormaliseLengthTransform(axisMode=True)
+transform2 = ScaleDatasetTransform(scale=100)
+transform3 = CenteringTransform()
+transform5 = ResampleInSpaceTransform(samples=num_primitive*20)
+# Apply transforms
+dataset.addTransform(transform1)
+dataset.addTransform(transform2)
+dataset.addTransform(transform3)
+dataset.addTransform(transform5)
+dataset.applyTransforms(output_dir)
+"""

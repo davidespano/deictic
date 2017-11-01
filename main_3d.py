@@ -62,7 +62,6 @@ def txt_to_csv(file_scelto, joint_scelto):
         frame = Frame(index_frame)
         # Estrai tutti i joint relativi al frame in questione
         for j in range(0, 66, 3):
-            k = int(j/3)
             x = float(f[i+j+0])
             y = float(f[i+j+1])
             z = float(f[i+j+2])
@@ -78,10 +77,10 @@ def txt_to_csv(file_scelto, joint_scelto):
     for frame in frames:
         palm_joints.append(frame.joints[1].return_coordinates())
         index_tip_joints.append(frame.joints[9].return_coordinates())
-        if joint_scelto == 1:
-            return palm_joints
-        elif joint_scelto == 9:
-            return index_tip_joints
+    if joint_scelto == 1:
+        return palm_joints
+    elif joint_scelto == 9:
+        return index_tip_joints
 
 
 
@@ -169,12 +168,16 @@ if debug_mode == 3:
 
 
 if debug_mode == 4:
-    dir = "/home/sara/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_2/"
+    person = "ale"
+    #person = "sara"
+    gesture = "2"
+
+    dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
     for item in dataset.readDataset():
         sequence = item[0]
         filename = item[1]
 
-        plt.plot(item[:,0],item[:,1])
+        plt.plot(item[0])
         plt.title(filename)
         plt.show()

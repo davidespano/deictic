@@ -256,6 +256,3 @@ if mode == 8:
     ten_cross_validation_factory(list_gesture, baseDir + 'deictic/unica-dataset/resampled/',
                                  baseDir + 'deictic/unica-dataset/ten-cross-validation/')
 
-
-
-

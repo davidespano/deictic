@@ -45,23 +45,39 @@ class Parsing():
 
         # Kalmar smoother and threshold
         smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
-
+        #sequence = smoothed_sequence
         # Parsing line
-        for t in range(1, len(smoothed_sequence)-1, 1):
+        for t in range(1, len(sequence)-1, 1):
+
             # Compute delta
-            num1 = self.__sub(smoothed_sequence[t], smoothed_sequence[t-1])
-            num2 = self.__sub(smoothed_sequence[t+1], smoothed_sequence[t])
+            num1 = self.__sub(sequence[t], sequence[t-1])
+            num2 = self.__sub(sequence[t+1], sequence[t])
             num = self.__dot(num1,num2)
-            den1 = self.__magn(self.__sub(smoothed_sequence[t], smoothed_sequence[t-1]))
-            den2 = self.__magn(self.__sub(smoothed_sequence[t+1], smoothed_sequence[t]))
+            den1 = self.__magn(self.__sub(sequence[t], sequence[t-1]))
+            den2 = self.__magn(self.__sub(sequence[t+1], sequence[t]))
             den = den1 * den2
 
             delta = 1 - (num/den)
             # Check delta
             if delta < threshold:
+                print("A")
                 list.append("A")
             else:
+                print("0")
                 list.append("0")
+
+            """
+            # test collinear
+            first_item = (sequence[t][1]-sequence[t-1][1])*(sequence[t+1][0]-sequence[t][0])
+            second_item = (sequence[t+1][1]-sequence[t][1])*(sequence[t][0]-sequence[t-1][0])
+
+            if first_item == second_item:
+                print("A")
+                list.append("A")
+            else:
+                print("0")
+                list.append("0")
+            """
 
         return list
 
