@@ -37,10 +37,10 @@ class Deictic():
         # HMMs
         self.hmms = []
         # Creates models
-        parse = Parse(n_states, n_sample)
+        Parse.setStatesSamples(n_states, n_sample)
         for gesture in self.gestures:
             # Gets the hmm
-            model = parse.parseExpression(self.type_gestures + "-" + gesture)
+            model = Parse.parseExpression(self.type_gestures + "-" + gesture)
             self.hmms.append(model)
         # Base dir
         self.base_dir = base_dir

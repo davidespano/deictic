@@ -67,7 +67,7 @@ if mode in [2,3]:
         model = parse.parseExpression(folder)
         hmms.append(model)
 
-    t = test(hmms, gestureDir, folders, plot=False)
+    t = test(hmms, folders, gestureDir, plot=False)
     results = t.all_files()
 
 ############################################################ DEICTIC Ten-Cross-Validation HMM ###########################################################
