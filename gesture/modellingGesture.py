@@ -2,8 +2,8 @@ from gesture import ClassifierFactory
 from model import *
 from topology import *
 
-#baseDir = '/home/sara/PycharmProjects/deictic/repository/'
-baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+baseDir = '/home/sara/PycharmProjects/deictic/repository/'
+#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'

@@ -9,15 +9,15 @@ class Joint:
 
     def __init__(self, x, y, z):
         if (isinstance(x, float)):
-            self.x = x
+            self.x = x * 100
         else:
             print("Errore, non è un float")
         if (isinstance(y, float)):
-            self.y = y
+            self.y = y * 100
         else:
             print("Errore, non è un float")
         if (isinstance(z, float)):
-            self.z = z
+            self.z = z * 100
         else:
             print("Errore, non è un float")
 
@@ -77,6 +77,7 @@ def txt_to_csv(file_scelto, joint_scelto):
     for frame in frames:
         palm_joints.append(frame.joints[1].return_coordinates())
         index_tip_joints.append(frame.joints[9].return_coordinates())
+
     if joint_scelto == 1:
         return palm_joints
     elif joint_scelto == 9:
