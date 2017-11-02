@@ -20,6 +20,7 @@ import numpy as np
 import pylab as pl
 from pykalman import KalmanFilter
 
+
 # specify parameters
 random_state = np.random.RandomState(0)
 transition_matrix = [[1, 0.1], [0, 1]]
@@ -49,11 +50,11 @@ smoothed_state_estimates = kf.smooth(observations)[0]
 
 # draw estimates
 pl.figure()
-lines_true = pl.plot(states, color='b')
-lines_filt = pl.plot(filtered_state_estimates, color='r')
-lines_smooth = pl.plot(smoothed_state_estimates, color='g')
-pl.legend((lines_true[0], lines_filt[0], lines_smooth[0]),
-          ('true', 'filt', 'smooth'),
+lines_true = pl.plot(states[:,0],states[:,1], color='b')
+#lines_filt = pl.plot(filtered_state_estimates, color='r')
+lines_smooth = pl.plot(smoothed_state_estimates[:,0], smoothed_state_estimates[:,1], color='g')
+pl.legend((lines_true[0], lines_smooth[0]),
+          ('true', 'smooth'),
           loc='lower right'
           )
 pl.show()
