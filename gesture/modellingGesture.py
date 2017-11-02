@@ -297,71 +297,47 @@ class MDollarGestures:
 class Shrec:
 
     class TypeGesture(Enum):
-        grab = 0
-        tap = 1
-        expand = 2
-        pinch = 3
-        rotation_clockwise = 4
-        rotation_counter_clockwise = 5
-        swipe_right = 6
-        swipe_left = 7
-        swipe_up = 8
-        swipe_down = 9
-        swipe_x = 10
-        swipe_plus = 11
-        swipe_v = 12
-        shake = 13
+
+        gesture_2 = 2
+        gesture_7 = 7
+        gesture_8 = 8
+        gesture_9 = 9
+        gesture_10 = 10
+        gesture_11 = 11
+        gesture_12 = 12
+        gesture_13 = 13
+        gesture_14 = 14
 
     @staticmethod
     def getModel(type_gesture):
         definition = None
-        # grab
-        if (type_gesture == Shrec.TypeGesture.grab.name):
-            definition = Point(0, 0) + Line(6, 0) + Point(4, 2) + Line(2, -2) + Line(-2, -2)
-        # Swipe right
-        elif(type_gesture == Shrec.TypeGesture.swipe_right.name):
-             definition = Point(0,0) + Line(1,1)
-        # grab
-        if (type_gesture == Shrec.TypeGesture.grab.name):
-            definition = Point(0, 0) + Line(4, 4) + Line(-4, -4);
+
         # tap
-        elif (type_gesture == Shrec.TypeGesture.tap.name):
+        if (type_gesture == Shrec.TypeGesture.gesture_2.name):
             definition = Point(0, 0) +  Line(0, -4)
-        # expand
-        elif (type_gesture == Shrec.TypeGesture.expand.name):
-            definition = Point(0, 0) + Line(3, 3) + Line(-3, -3)
-        # pinch
-        elif (type_gesture == Shrec.TypeGesture.pinch.name):
-            definition = Point(0, 0) + Line(3, 3) + Line(-3, -3)
-        # rotation clockwise
-        elif (type_gesture == Shrec.TypeGesture.rotation_clockwise.name):
-            definition = Point(0,0) + Point(-4, 2) + Arc(6, 3, cw=True)
-        # rotation_counter_clockwise
-        elif (type_gesture == Shrec.TypeGesture.rotation_counter_clockwise.name):
-            definition = Point(-4, -2) + Arc(6, -3, cw=False)
         # swipe right
-        elif (type_gesture == Shrec.TypeGesture.swipe_right.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_7.name):
             definition = Point(-4, 2) + Line(4, 2)
         #swipe left
-        elif (type_gesture == Shrec.TypeGesture.swipe_left.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_8.name):
             definition = Point(4, 2) + Line(-4, 2)
         #swipe up
-        elif (type_gesture == Shrec.TypeGesture.swipe_up.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_9.name):
             definition = Point(4, -4) + Line(4, 4)
         #swipe down
-        elif (type_gesture == Shrec.TypeGesture.swipe_down.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_10.name):
             definition = Point(4, 4) + Line(4, -4)
         #swipe x
-        elif (type_gesture == Shrec.TypeGesture.swipe_x.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_11.name):
             definition = Point(-4, 4) + Line(-4, -4) + Line(4, -4) + Line(-4, 4)
         #swipe +
-        elif (type_gesture == Shrec.TypeGesture.swipe_plus.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_12.name):
             definition = Point(4, 4) + Line(4, -4) + Line(-4, 0) + Line(8, 0)
         #swipe v
-        elif (type_gesture == Shrec.TypeGesture.swipe_v.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_13.name):
             definition = Point(-4, 4) + Line(-4, 0) + Line(0, 4)
         #shake
-        elif (type_gesture == Shrec.TypeGesture.shake.name):
+        elif (type_gesture == Shrec.TypeGesture.gesture_14.name):
             definition = Point(-4, 4) + Line(8, 4) + Line(-8, 4) + Line(8, 4) + Line(-8, 4)
 
         return definition

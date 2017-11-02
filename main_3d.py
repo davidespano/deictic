@@ -168,21 +168,29 @@ if debug_mode == 3:
 
 
 if debug_mode == 4:
-    person = "ale"
-    #person = "sara"
-    gesture = "7"
+    #person = "ale"
+    person = "sara"
+    gesture = "2"
 
     dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
+    # Hmm
+    parse = Parse(n_states=6, n_samples=20)
+    model = parse.parseExpression("shrec-gesture"+gesture)
+    # Visualizza nella stessa immagine: movimento utente ed esempio generato dal model (caratteristica delle catene di markov)
+    dataset.plot(singleMode=True, model=model)
 
-    dataset.plot(singleMode=True)
 
 if debug_mode == 5:
     # num_primitive + il numero di primitive che costituiscono la gesture (tipo 1 oppure 2 o 3 e così via, a seconda della gesture).
     # Se non ti ricordi quali sono le primitive a disposizione, ricontrolla gli articoli che ti avevo passato.
-    num_primitive = 0
-    inputDir = "path_raw_gesture_x"
-    outputDir = "path_resampled_gesture_x" # ricordati di creare la cartella resampled
+    num_primitive = 4
+    #person = "ale"
+    person = "sara"
+    gesture = "14"
+
+    inputDir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
+    outputDir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/gesture_"+gesture+"/"
     #### Questo codice ti serve per creare le sequenze campionate e normalizzate dei file che hai convertito con il metodo txt_to_csv.  ####
     dataset = CsvDataset(inputDir)
     # Transform
@@ -196,5 +204,33 @@ if debug_mode == 5:
     dataset.addTransform(transform3)
     dataset.addTransform(transform5)
     dataset.applyTransforms(outputDir)
+
+if debug_mode==6:
+    # Creazione HMM #
+    # Aggiungi le altre gesture rispettando questa nomenclatura (shrec + gesture_x).
+    # Questa stringa serve alla funzione che si occupa di creare le hmm:
+    # - shrec indica alla classe Parsing che deve prendere la definizione della gesture dalla classe che che hai creato in modelling_gesture
+    # - come ti puoi immaginare, gesture_x indica l'espressione di tale gesture presente nella classe che definisce shrec
+    lista_gesture =["shrec-gesture_14"]
+    # Lista che conterrà tutte le hmm indicate in lista_gesture
+    hmms = []
+    # Creates models #
+    # n_states = numero di stati complessivi che costituiscono le hmm delle singole primitive
+    # [Quando si fanno dei test questo numero deve essere lo stesso per tutte le gesture da creare e testare]
+    n_states = 6
+    # n_samples = elemento usato nella fase di training
+    # [Quando si fanno dei test questo numero deve essere lo stesso per tutte le gesture da creare e testare]
+    n_samples = 20
+    parse = Parse(n_states, n_samples)
+    for gesture_name in lista_gesture:
+        # gesture_def è una tupla #
+        # Stampa il nome della gesture che sta gestendo
+        print(gesture_name)
+        # crea hmm
+        model = parse.parseExpression(gesture_name)
+        # assegna nome all'hmm
+        model.name = gesture_name
+        # Adds hmm in the list
+        hmms.append(model)
 
 
