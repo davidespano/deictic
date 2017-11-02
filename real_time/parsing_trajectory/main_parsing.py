@@ -45,7 +45,7 @@ if debug == 0:
 
 if debug == 1:
     # Get dataset
-    dir = "/home/ale/PycharmProjects/deictic/repository/deictic/unica-dataset/raw/circle/"
+    dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/circle/"
     dataset = CsvDataset(dir)
 
     for sequence in dataset.readDataset():
@@ -53,7 +53,6 @@ if debug == 1:
         original_sequence = sequence[0][:,[0,1]]
 
         # Result parsing
-        print(sequence[1])
         Parsing.getInstance().parsingLine(original_sequence)
         print('\n')
 

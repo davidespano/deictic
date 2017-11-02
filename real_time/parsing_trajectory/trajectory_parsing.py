@@ -126,8 +126,6 @@ class Parsing():
             ax.annotate(label_list[i-1], (smoothed_sequence[i, 0], smoothed_sequence[i, 1]))
         # legend
         plt.legend((original[0], smooth[0]), ('true', 'smooth'), loc='lower right')
-        # title
-        plt.title(sequence[1])
 
         plt.show()
 

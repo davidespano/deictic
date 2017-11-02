@@ -176,7 +176,7 @@ if debug_mode == 4:
     dataset = CsvDataset(dir)
     # Hmm
     parse = Parse(n_states=6, n_samples=20)
-    model = parse.parseExpression("shrec-gesture"+gesture)
+    model = parse.parseExpression("shrec-gesture_"+gesture)
     # Visualizza nella stessa immagine: movimento utente ed esempio generato dal model (caratteristica delle catene di markov)
     dataset.plot(singleMode=True, model=model)
 
