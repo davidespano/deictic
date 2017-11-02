@@ -216,22 +216,21 @@ class CsvDataset:
                         for i in range(0, len(result)):
                             ax.annotate(str(i), (result[i,0], result[i,1]))
                         plt.axis('equal')
-                        plt.plot(result[:, 0], result[:, 1])
+                        original_sequence = plt.plot(result[:, 0], result[:, 1])
                         if model != None:
                             # Model
-                            sequence = model.sample()
-                            result = numpy.array(sequence).astype('float')
+                            sequence = numpy.array(model.sample()).astype('float')
                             plt.axis("equal")
-                            plt.plot(result[:, 0], result[:, 1])
+                            generated_sequece = plt.plot(sequence[:, 0], sequence[:, 1])
 
-                    if singleMode:
+                    if model == None:
                         plt.title(filename)
                         plt.show()
+                    else:
+                        plt.title(filename)
+                        plt.legend( (original_sequence[0], generated_sequece[0]), ('original sequence', 'generated sequence'), loc='lower right')
+                        plt.show()
 
-                if dimensions == 3:
-                    ax.legend()
-                else:
-                    plt.legend(loc='upper right')
                 if sampleName != None:
                     plt.title(sampleName)
                 if not singleMode:

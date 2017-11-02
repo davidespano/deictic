@@ -168,8 +168,8 @@ if debug_mode == 3:
 
 
 if debug_mode == 4:
-    #person = "ale"
-    person = "sara"
+    person = "ale"
+    #person = "sara"
     gesture = "2"
 
     dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
