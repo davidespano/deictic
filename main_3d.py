@@ -9,15 +9,15 @@ class Joint:
 
     def __init__(self, x, y, z):
         if (isinstance(x, float)):
-            self.x = x * 100
+            self.x = x
         else:
             print("Errore, non è un float")
         if (isinstance(y, float)):
-            self.y = y * 100
+            self.y = y
         else:
             print("Errore, non è un float")
         if (isinstance(z, float)):
-            self.z = z * 100
+            self.z = z
         else:
             print("Errore, non è un float")
 
@@ -233,5 +233,4 @@ if debug_mode==6:
         model.name = gesture_name
         # Adds hmm in the list
         hmms.append(model)
-
 

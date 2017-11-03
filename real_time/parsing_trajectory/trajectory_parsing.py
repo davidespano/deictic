@@ -9,7 +9,10 @@ import numpy as np
 # Plot
 import matplotlib.pyplot as plt
 
-#
+
+'''
+    This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
+'''
 class Parsing():
     # Attribute
     singleton = None
@@ -20,6 +23,47 @@ class Parsing():
             Parsing.singleton = Parsing()
         return Parsing.singleton
 
+    # Methods #
+    def algorithm1(self, sequence):
+        """
+            algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
+        :param sequence: original user's trajectory
+        :return: list of label
+        """
+        list = []
+        # Kalmar smoother and threshold
+        smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
+        threshold = 0.002
+        print(threshold)
+        # Parsing line
+        for t in range(1, len(smoothed_sequence)-1, 1):
+
+            # Compute delta
+            num1 = self.__sub(smoothed_sequence[t], smoothed_sequence[t-1])
+            num2 = self.__sub(smoothed_sequence[t+1], smoothed_sequence[t])
+            num = self.__dot(num1,num2)
+            den1 = self.__magn(self.__sub(smoothed_sequence[t], smoothed_sequence[t-1]))
+            den2 = self.__magn(self.__sub(smoothed_sequence[t+1], smoothed_sequence[t]))
+            den = den1 * den2
+
+            delta = 1-(num/den)
+            # Check delta
+            if delta < threshold:
+                list.append("A")
+            else:
+                list.append("0")
+        return smoothed_sequence,list
+
+    def algorithm2(self, sequence, list):
+        """
+            algorithm1 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
+        :param sequence: original user's trajectory
+        :param list: list of label recived from algorithm1
+        :return:
+        """
+
+
+
 
     def parsingLine(self, sequence):
         """
@@ -27,29 +71,12 @@ class Parsing():
         :param sequence:
         :return:
         """
-        list = []
-        # Kalmar smoother and threshold
-        smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
-        # Parsing line
-        for t in range(1, len(sequence)-1, 1):
+        # Algorithm 1 (find straight linear)
+        smoothed_sequence, list = self.algorithm1(sequence)
+        # Algorithm 2 (find plane arc)
 
-            # Compute delta
-            num1 = self.__sub(sequence[t], sequence[t-1])
-            num2 = self.__sub(sequence[t+1], sequence[t])
-            num = self.__dot(num1,num2)
-            den1 = self.__magn(self.__sub(sequence[t], sequence[t-1]))
-            den2 = self.__magn(self.__sub(sequence[t+1], sequence[t]))
-            den = den1 * den2
-
-            delta = 1 - (num/den)
-            # Check delta
-            if delta < threshold:
-                list.append("A")
-            else:
-                list.append("0")
-        # Plot
+        # Plot data
         self.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
-        return list
 
 
     def __kalmanSmoother(self, original_sequence):
@@ -126,7 +153,7 @@ class Parsing():
             ax.annotate(label_list[i-1], (smoothed_sequence[i, 0], smoothed_sequence[i, 1]))
         # legend
         plt.legend((original[0], smooth[0]), ('true', 'smooth'), loc='lower right')
-
+        plt.axis('equal')
         plt.show()
 
 
