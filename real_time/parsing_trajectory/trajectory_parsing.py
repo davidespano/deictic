@@ -32,18 +32,18 @@ class Parsing():
         """
         list = []
         # Kalmar smoother and threshold
-        smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
+        smoothed_sequence, threshold = Parsing.__kalmanSmoother(sequence)
         threshold = 0.002
         print(threshold)
         # Parsing line
         for t in range(1, len(smoothed_sequence)-1, 1):
 
             # Compute delta
-            num1 = self.__sub(smoothed_sequence[t], smoothed_sequence[t-1])
-            num2 = self.__sub(smoothed_sequence[t+1], smoothed_sequence[t])
-            num = self.__dot(num1,num2)
-            den1 = self.__magn(self.__sub(smoothed_sequence[t], smoothed_sequence[t-1]))
-            den2 = self.__magn(self.__sub(smoothed_sequence[t+1], smoothed_sequence[t]))
+            num1 = Parsing.__sub(smoothed_sequence[t], smoothed_sequence[t-1])
+            num2 = Parsing.__sub(smoothed_sequence[t+1], smoothed_sequence[t])
+            num = Parsing.__dot(num1,num2)
+            den1 = Parsing.__magn(self.__sub(smoothed_sequence[t], smoothed_sequence[t-1]))
+            den2 = Parsing.__magn(self.__sub(smoothed_sequence[t+1], smoothed_sequence[t]))
             den = den1 * den2
 
             delta = 1-(num/den)
@@ -90,7 +90,7 @@ class Parsing():
         # Compute the mean square distance of original sequence with respect to the smoothed sequence
         distances = 0
         for index in range(0, len(original_sequence)):
-            distances+= math.pow(self.__distance(original_sequence[index], smoothed_sequence[index]),2)
+            distances+= math.pow(Parsing.__distance(original_sequence[index], smoothed_sequence[index]),2)
 
         mean_square_distance = (math.sqrt(distances))/len(original_sequence)
 
@@ -156,13 +156,30 @@ class Parsing():
         plt.axis('equal')
         plt.show()
 
+    @staticmethod
+    def __volTetrahedron(point_a, point_b, point_c):
+        dimension = len(point_a)
 
+        array = [[point_a[0],point_a[1],1],
+                 [point_b[0],point_b[1],1],
+                 [point_c[0],point_c[1],1]]
+        det = array
+        fact = math.pow(1/math.factorial(dimension), 3)
+
+        volume = fact*det
+
+
+
+    @staticmethod
     def __magn(self, point):
         return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
+    @staticmethod
     def __dot(self, point_a, point_b):
         return point_a[0]*point_b[0] + point_a[1]*point_b[1]
+    @staticmethod
     def __sub(self, point_a, point_b):
         vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
         return vector
+    @staticmethod
     def __distance(self, point_a, point_b):
         return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
