@@ -97,7 +97,7 @@ def txt_to_csv(file_scelto, joint_scelto):
 
 
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 4
+debug_mode = 6
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -209,12 +209,17 @@ if debug_mode == 5:
     dataset.applyTransforms(outputDir)
 
 if debug_mode==6:
+    # Person
+    #person = "ale"
+    person = "sara"
+    # Type
+    type = "palm"
+    # type = "index_tip"
+
     # Creazione HMM #
-    # Aggiungi le altre gesture rispettando questa nomenclatura (shrec + gesture_x).
-    # Questa stringa serve alla funzione che si occupa di creare le hmm:
-    # - shrec indica alla classe Parsing che deve prendere la definizione della gesture dalla classe che che hai creato in modelling_gesture
-    # - come ti puoi immaginare, gesture_x indica l'espressione di tale gesture presente nella classe che definisce shrec
-    lista_gesture =["shrec-gesture_14"]
+    # Aggiungi le altre gesture, questa stringa serve alla funzione che si occupa di creare le hmm.
+    lista_gesture =["gesture_x"]
+
     # Lista che conterrà tutte le hmm indicate in lista_gesture
     hmms = []
     # Creates models #
@@ -230,9 +235,24 @@ if debug_mode==6:
         # Stampa il nome della gesture che sta gestendo
         print(gesture_name)
         # crea hmm
-        model = parse.parseExpression(gesture_name)
+        if(type == "palm"):
+            model = parse.parseExpression("shrec-"+gesture_name)
+        else:
+            model = parse.parseExpression("shrec2-"+gesture_name)
         # assegna nome all'hmm
         model.name = gesture_name
         # Adds hmm in the list
         hmms.append(model)
+
+    # Test #
+    # test è la classe che si occupa di eseguire appunto di eseguire i test su un certo insieme di hmm e di stamparne i risultati.
+    # in questo caso siamo interessati alla matrice di confusione, una matrice nxn
+    # [dove n è il numero delle gesture, e in riga e in colonna abbiamo una gesture: quindi riga 1 = gesture_2, colonna 1 = gesture_2 e così via]
+    # l'obiettivo è duplice:
+    # - quantificare i file di un certo dataset che vengono riconosciuti dall'hmm che descrive quel dataset
+    # - quantificare gli eventuali errori (e nel caso sapere da quale hmm vengano invece riconosciuti)
+    # La situazione ottimale è una matrice diagonale
+    datasetDir = "/home/" + person + "/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/"+type+"/"
+    t = test(hmms, lista_gesture, datasetDir)
+    results = t.all_files()
 

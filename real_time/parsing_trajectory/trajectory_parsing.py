@@ -32,7 +32,7 @@ class Parsing():
         """
         list = []
         # Kalmar smoother and threshold
-        smoothed_sequence, threshold = Parsing.__kalmanSmoother(sequence)
+        smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
         threshold = 0.002
         print(threshold)
         # Parsing line
@@ -61,7 +61,13 @@ class Parsing():
         :param list: list of label recived from algorithm1
         :return:
         """
+        for t in range(1, len(list)-1):
+            if list[t] == "0" and list[t+1] == "0":
+                # compute volume
+                list[t] = "B"
+                list[t + 1] = "B"
 
+        return list
 
 
 
@@ -74,6 +80,7 @@ class Parsing():
         # Algorithm 1 (find straight linear)
         smoothed_sequence, list = self.algorithm1(sequence)
         # Algorithm 2 (find plane arc)
+        list = self.algorithm2(sequence, list)
 
         # Plot data
         self.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
@@ -157,29 +164,15 @@ class Parsing():
         plt.show()
 
     @staticmethod
-    def __volTetrahedron(point_a, point_b, point_c):
-        dimension = len(point_a)
-
-        array = [[point_a[0],point_a[1],1],
-                 [point_b[0],point_b[1],1],
-                 [point_c[0],point_c[1],1]]
-        det = array
-        fact = math.pow(1/math.factorial(dimension), 3)
-
-        volume = fact*det
-
-
-
-    @staticmethod
-    def __magn(self, point):
+    def __magn(point):
         return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
     @staticmethod
-    def __dot(self, point_a, point_b):
+    def __dot(point_a, point_b):
         return point_a[0]*point_b[0] + point_a[1]*point_b[1]
     @staticmethod
-    def __sub(self, point_a, point_b):
+    def __sub(point_a, point_b):
         vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
         return vector
     @staticmethod
-    def __distance(self, point_a, point_b):
+    def __distance(point_a, point_b):
         return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])

@@ -74,7 +74,7 @@ if debug == 0:
 
 if debug == 1:
     # Get dataset
-    dir = "/home/ale/PycharmProjects/deictic/repository/deictic/unica-dataset/raw/right/"
+    dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/rectangle/"
     dataset = CsvDataset(dir)
 
     for sequence in dataset.readDataset():
