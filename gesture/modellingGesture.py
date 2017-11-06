@@ -2,8 +2,8 @@ from gesture import ClassifierFactory
 from model import *
 from topology import *
 
-#baseDir = '/home/sara/PycharmProjects/deictic/repository/'
-baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+baseDir = '/home/sara/PycharmProjects/deictic/repository/'
+#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
@@ -314,7 +314,7 @@ class Shrec:
 
         # tap
         if (type_gesture == Shrec.TypeGesture.gesture_2.name):
-            definition = Point(0, 0) +  Line(0, -4)
+            definition = Point(-20, 0) +  Line(-20, 20)
         # swipe right
         elif (type_gesture == Shrec.TypeGesture.gesture_7.name):
             definition = Point(-4, 2) + Line(4, 2)
@@ -336,6 +336,54 @@ class Shrec:
         #swipe v
         elif (type_gesture == Shrec.TypeGesture.gesture_13.name):
             definition = Point(-4, 4) + Line(-4, 0) + Line(0, 4)
+        #shake
+        elif (type_gesture == Shrec.TypeGesture.gesture_14.name):
+            definition = Point(-4, 4) + Line(8, 4) + Line(-8, 4) + Line(8, 4) + Line(-8, 4)
+
+        return definition
+
+class Shrec2:
+
+    class TypeGesture(Enum):
+
+        gesture_2 = 2
+        gesture_7 = 7
+        gesture_8 = 8
+        gesture_9 = 9
+        gesture_10 = 10
+        gesture_11 = 11
+        gesture_12 = 12
+        gesture_13 = 13
+        gesture_14 = 14
+
+    @staticmethod
+    def getModel(type_gesture):
+        definition = None
+
+        # tap
+        if (type_gesture == Shrec.TypeGesture.gesture_2.name):
+            definition = Point(-20, 0) +  Line(-20, 20)
+        # swipe right
+        elif (type_gesture == Shrec.TypeGesture.gesture_7.name):
+            definition = Point(-4, 2) + Line(4, 2)
+        #swipe left
+        elif (type_gesture == Shrec.TypeGesture.gesture_8.name):
+            definition = Point(4, 2) + Line(-4, 2)
+        #swipe up
+        elif (type_gesture == Shrec.TypeGesture.gesture_9.name):
+            definition = Point(4, -4) + Line(4, 4)
+        #swipe down
+        elif (type_gesture == Shrec.TypeGesture.gesture_10.name):
+            definition = Point(4, 4) + Line(4, -4)
+        #swipe x
+        elif (type_gesture == Shrec.TypeGesture.gesture_11.name):
+            definition = Point(-4, 4) + Line(-4, -4) + Line(4, -4) + Line(-4, 4)
+        #swipe +
+        elif (type_gesture == Shrec.TypeGesture.gesture_12.name):
+            definition = Point(4, 4) + Line(4, -4) + Line(-4, 0) + Line(8, 0)
+        #swipe v
+        elif (type_gesture == Shrec.TypeGesture.gesture_13.name):
+            definition = Point(0, 0) +  Line(4, -4) + Line(-4,-4)#Point(-4, 4) + Line(-4, 0) + Line(0, 4)
         #shake
         elif (type_gesture == Shrec.TypeGesture.gesture_14.name):
             definition = Point(-4, 4) + Line(8, 4) + Line(-8, 4) + Line(8, 4) + Line(-8, 4)

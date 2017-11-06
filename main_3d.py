@@ -168,11 +168,13 @@ if debug_mode == 3:
 
 
 if debug_mode == 4:
-    person = "ale"
-    #person = "sara"
-    gesture = "2"
+    #person = "ale"
+    person = "sara"
+    gesture = "10"
+    tipo_joint = "index_tip"
+    #tipo_joint = "palm"
 
-    dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/gesture_"+gesture+"/"
+    dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/"+tipo_joint+"/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
     # Hmm
     parse = Parse(n_states=6, n_samples=20)
