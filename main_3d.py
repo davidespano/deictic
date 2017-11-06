@@ -77,6 +77,7 @@ def txt_to_csv(file_scelto, joint_scelto):
     for frame in frames:
         palm_joints.append(frame.joints[1].return_coordinates())
         index_tip_joints.append(frame.joints[9].return_coordinates())
+
     if joint_scelto == 1:
         return palm_joints
     elif joint_scelto == 9:
@@ -234,5 +235,4 @@ if debug_mode==6:
         model.name = gesture_name
         # Adds hmm in the list
         hmms.append(model)
-
 
