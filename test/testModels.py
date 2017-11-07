@@ -109,6 +109,62 @@ def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
 
 
 
+def test_dict(hmms, baseDir):
+    results = numpy.zeros((len(hmms), len(hmms)), dtype=numpy.int)
+    index_dataset = 0
+    for name_gesture in hmms:
+        dataset = CsvDataset(baseDir+name_gesture+"/").readDataset()
+        for sequence in dataset:
+            data = sequence[0]
+            # Max probability, index gesture-index model
+            max_norm_log_probability = -sys.maxsize
+            index_model = -1
+
+            # for each model
+            index = -1
+            for key in hmms:
+                index+=1
+                for hmm in hmms[key]:
+                    # Computes sequence's log-probability and normalized
+                    log_probability = hmm.log_probability(data)
+                    norm_log_probability = log_probability / len(data)
+                    # Checks which is the best result
+                    if (norm_log_probability > max_norm_log_probability):
+                        max_norm_log_probability = norm_log_probability
+                        index_model = index
+            # Update array result
+            results[index_dataset][index_model] += 1
+        # update index_dataset - index_model
+        index_dataset+=1
+
+    # Save results
+    # Results
+    size = len(hmms) + 1
+    # Char matrix for results
+    results_string = []
+    # Headers
+    headers = []
+    headers.append('models')
+    for name_gesture in hmms:
+        headers.append(name_gesture)
+    results_string.append(headers)
+    # Values
+    i = -1
+    for name_gesture in hmms:
+        i+=1
+        new_row = []
+        new_row.append(name_gesture)
+        for j in range(0, size - 1):
+            new_row.append(str(results[i, j]))
+        results_string.append(new_row)
+
+    with open(baseDir+"matrix_confusion_choice.csv", 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for row in results_string:
+            spamwriter.writerow(row)
+
+
 def label_class(groups, baseDir, outputDir):
 
     # Get all gesture's dataset
@@ -116,7 +172,7 @@ def label_class(groups, baseDir, outputDir):
     for name in k:
         name = name
 
-    os.mkdir(outputDir + name + '/')
+    #os.mkdir(outputDir + name + '/')
     dataset = CsvDataset(baseDir + name + '/')
     group = groups[name]
 

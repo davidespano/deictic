@@ -202,39 +202,38 @@ class CsvDataset:
 
         files = self.getDatasetIterator().filenames
         for filename in files:
+            fig, ax = plt.subplots(figsize=(10, 15))
             if sampleName == None or filename == sampleName:
                 with open(self.dir + filename, "r") as f:
                     reader = csv.reader(f, delimiter=',')
                     vals = list(reader)
                     result = numpy.array(vals).astype('float')
+
                     if dimensions == 3:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
 
                     else:
-                        fig, ax = plt.subplots(figsize=(10,15))
                         ax.scatter(result[:,0], result[:,1])
                         for i in range(0, len(result)):
                             ax.annotate(str(i), (result[i,0], result[i,1]))
                         plt.axis('equal')
                         original_sequence = plt.plot(result[:, 0], result[:, 1])
+                        # Model
                         if model != None:
-                            # Model
                             sequence = numpy.array(model.sample()).astype('float')
                             plt.axis("equal")
                             generated_sequece = plt.plot(sequence[:, 0], sequence[:, 1])
-
-                    if model == None:
+                            plt.legend((original_sequence[0], generated_sequece[0]),
+                                   ('original sequence', 'generated sequence'), loc='lower right')
+                        # Title
                         plt.title(filename)
-                        plt.show()
-                    else:
-                        plt.title(filename)
-                        plt.legend( (original_sequence[0], generated_sequece[0]), ('original sequence', 'generated sequence'), loc='lower right')
-                        plt.show()
+            if singleMode:
+                plt.show()
 
-                if sampleName != None:
-                    plt.title(sampleName)
-                if not singleMode:
-                    plt.show()
+        if sampleName != None:
+            plt.title(sampleName)
+        if not singleMode:
+            plt.show()
 
 
 
