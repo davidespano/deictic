@@ -170,24 +170,11 @@ if debug_mode == 3:
                 joints = txt_to_csv(file_da_leggere, joint_scelto, axis)
                 numpy.savetxt(save_dir + "gesture_"+str(gesture) +"_"+ subject +"_"+ essai +"_"+ nome_joint +".csv", joints, delimiter=',', fmt='%f')
         print("Gesture "+str(gesture)+" converted.")
-# Plotting raw data
-if debug_mode == -3:
-    # Gesture 2, 7, 8, 9, 10, 11, 12, 13
-    gesture = 9
-    type = "palm"
-    #type = "index_tip"
-
-    dir_dataset = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/raw/"+type+"/gesture_"+str(gesture)+"/"
-    #dir_dataset = "/home/"+person+"/PycharmProjects/deictic/repository/original/shrec-dataset/"+type+"/gesture_"+str(gesture)+"/"
-    dataset = CsvDataset(dir_dataset)
-    dataset.plot(singleMode=True)
-
-
 
 # Resample
 if debug_mode == 4:
     # Gesture 2 (tap), 7 (right), 8(left), 9(up), 10(down), 11(x), 12(+), 13(v) - num_primitives
-    gestures = [[2, 2], [7, 1], [8, 1], [9, 1], [10, 1]]
+    gestures = [[11, 3], [12, 3], [13, 2]]
     #type = "palm"
     type = "index_tip"
 
@@ -205,7 +192,7 @@ if debug_mode == 4:
         #### Questo codice ti serve per creare le sequenze campionate e normalizzate dei file che hai convertito con il metodo txt_to_csv.  ####
         dataset = CsvDataset(inputDir)
         # Transform
-        transform1 = NormaliseLengthTransform(axisMode=False)
+        transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         transform5 = ResampleInSpaceTransform(samples=num_primitive*20)
@@ -219,9 +206,9 @@ if debug_mode == 4:
 
 # Debug plot
 if debug_mode == 5:
-    gesture = "10"
-    #tipo_joint = "index_tip"
-    tipo_joint = "palm"
+    gesture = "13"
+    tipo_joint = "index_tip"
+    #tipo_joint = "palm"
 
     dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/"+tipo_joint+"/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
@@ -241,7 +228,7 @@ if debug_mode==6:
 
     # Creazione HMM #
     # Aggiungi le altre gesture, questa stringa serve alla funzione che si occupa di creare le hmm.
-    lista_gesture =["gesture_7", "gesture_9"]#, "gesture_11", "gesture_12", "gesture_13", "gesture_14"]
+    lista_gesture =["gesture_2", "gesture_7", "gesture_8", "gesture_9", "gesture_10", "gesture_11", "gesture_12", "gesture_13"]
 
     # Lista che conterrà tutte le hmm indicate in lista_gesture
     hmms = []
@@ -281,13 +268,12 @@ if debug_mode==6:
 
 # Test v.2
 if debug_mode == 7:
-    lista_gesture = ["gesture_2", "gesture_7", "gesture_8", "gesture_9","gesture_10"]  # , "gesture_11", "gesture_12", "gesture_13", "gesture_14"]
     gesture_models = \
     {
 
         'gesture_2': [
-            Point(0, 0) + Line(-4, 4) + Line(0, -4),
-            Point(0, 0) + Line(-4, 4) + Line(4, -4),
+            Point(0, 0) + Line(-4, 2),
+            Point(0, 0) + Line(-4, 2) + Line(4, -2),
             #Point(0, 0) + Line(0, -4) + Line(-4, 2),
             #Point(0, 0) + Line(2, -4) + Line(2, 4),
         ],
@@ -313,25 +299,23 @@ if debug_mode == 7:
         ],
 
         'gesture_11': [
-            Point(0, 4) + Line(0, -4),
-            Point(0, 4) + Line(0, -4) + Line(0, 4)
+            Point(0, 4) + Line(4, -4) + Line(-4, 0) + Line(4,4),
+            Point(4, 4) + Line(-4, -4) + Line(0, 4) + Line(4,-4)
         ],
 
         'gesture_12': [
-            Point(0, 4) + Line(4,-4) + Line(-4,0) + Line(4,4),
-            Point(4,0) + Line(-4,4) + Line(0,-4) + Line(4,4),
-            Point(0,0) + Line(4,4) + Line(0,-4)+Line(-4,4),
-            Point(0, 4) + Line(0, -4) + Line(0, 4)
+            Point(0,4) + Line(0,-4) + Line(-2,2) + Line(4,0),
+            Point(0,2) + Line(0,2) + Line(0,-4) + Line(-2,2) + Line(4,0),
         ],
 
         'gesture_13': [
-            Point(0, 4) + Line(0, -4),
-            Point(0, 4) + Line(0, -4) + Line(0, 4)
+            Point(2, 4) + Line(-2, -4) + Line(-2, 4),
+            Point(-2, 4) + Line(2, -4) + Line(2, 4)
         ]
     }
     # Type
-    type = "palm"
-    #type = "index_tip"
+    #type = "palm"
+    type = "index_tip"
     n_states = 6
     n_samples = 20
     hmms = dict()
