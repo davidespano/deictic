@@ -82,8 +82,12 @@ def txt_to_csv(file_scelto, joint_scelto, axis = []):
 # Person
 person = "ale"
 #person = "sara"
+# Type
+type = "palm"
+# type = "index_tip"
+print(type)
 # Indica quale tipo di debug voglio avviare (0 = debug GestureModel, 1 = debug DeclarativeModel, 2 = debug Dataset Shrek in 2 Dimensioni)
-debug_mode = 7
+debug_mode = 6
 
 #### Debug GestureModel (Line3D e Point3D) ####
 if debug_mode == 0:
@@ -96,50 +100,12 @@ if debug_mode == 1:
     # todo
     print()
 
-#### Debug Dataset Shrek in 2 dimensioni ####
-if debug_mode == 2:
-    # Gesture dataset
-    gestures = ['shrec-grab', 'shrec-tap', 'shrec-expand', 'shrec-pinch', 'shrec-rotation_clockwise',
-                'shrec-rotation_counter_clockwise', 'shrec-swipe_right', 'shrec-swipe_left',
-                'shrec-swipe_up', 'shrec-swipe_down', 'shrec-swipe_x', 'shrec-swipe_plus',
-                'shrec-swipe_v', 'shrec-shake']
-
-    # Creazione hmm
-    n_states = 6
-    n_samples = 20
-    hmms = []
-    parse = Parse(n_states, n_samples)
-    for gesture in gestures:
-        # 'Per quale gesture sta creando l'hmm?'
-        print('Creazione hmm per la gesture: '+gesture)
-        # Creo l'hmm (Ricordati di aggiungere nel metodo getModel della classe Shrek di modellingGesture la definizione per tutte le gesture che vuoi definire).
-        model = parse.parseExpression(gesture)
-        # Gli assegno il nome della gesture a cui fa riferimento
-        model.name = gesture
-        # Aggiungo l'hmm nella mia lista hmms
-        hmms.append(model)
-
-    # Creo e visualizzo un sample generato dal hmm
-    for hmm in hmms:
-        # Genero una sequenza di punti di esempio
-        sequence = hmm.sample()
-        # Visualizzo questa sequenza di punti usando la libreria matplotlib
-        result = numpy.array(sequence).astype('float')
-        plt.axis("equal")
-        plt.plot(result[:, 0], result[:, 1])
-        plt.title(gesture)
-        plt.show()
-
-
 # Convert shrec dataset files from txt to csv
 if debug_mode == 3:
     # Selected axis (x=0, y=1, z=2)
     x = 0; y = 1; z = 2
     # Gesture 2, 7, 8, 9, 10, 11, 12, 13
     gestures = [[2,[z,y]], [7,[x,z]], [8,[x,z]], [9,[z,y]], [10,[z,y]], [11,[x,y]], [12,[x,y]], [13,[x,y]]]
-    # Type
-    #type = "palm"
-    type = "index_tip"
     # Finger joint_scelto and nome_joint
     if type == "palm":
         finger = "2"
@@ -173,10 +139,8 @@ if debug_mode == 3:
 
 # Resample
 if debug_mode == 4:
-    # Gesture 2 (tap), 7 (right), 8(left), 9(up), 10(down), 11(x), 12(+), 13(v) - num_primitives
-    gestures = [[11, 3], [12, 3], [13, 2]]
-    #type = "palm"
-    type = "index_tip"
+    # Gesture 2 (tap), 7 (right), 8(left), 9(up), 10(down), 11(x), 12(+), 13(v) - num_primitives - true/false axisMode
+    gestures = [[2, 2, False], [7, 1, False], [8, 1, False], [9, 1, False], [10, 1, False], [11, 3, True], [12, 3, True], [13, 2, True]]
 
     for gesture in gestures:
         # num_primitive + il numero di primitive che costituiscono la gesture (tipo 1 oppure 2 o 3 e così via, a seconda della gesture).
@@ -192,7 +156,7 @@ if debug_mode == 4:
         #### Questo codice ti serve per creare le sequenze campionate e normalizzate dei file che hai convertito con il metodo txt_to_csv.  ####
         dataset = CsvDataset(inputDir)
         # Transform
-        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform1 = NormaliseLengthTransform(axisMode=gesture[2])
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         transform5 = ResampleInSpaceTransform(samples=num_primitive*20)
@@ -207,8 +171,6 @@ if debug_mode == 4:
 # Debug plot
 if debug_mode == 5:
     gesture = "13"
-    tipo_joint = "index_tip"
-    #tipo_joint = "palm"
 
     dir = "/home/"+person+"/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/"+tipo_joint+"/gesture_"+gesture+"/"
     dataset = CsvDataset(dir)
@@ -221,53 +183,7 @@ if debug_mode == 5:
 
 
 # Test
-if debug_mode==6:
-    # Type
-    type = "palm"
-    # type = "index_tip"
-
-    # Creazione HMM #
-    # Aggiungi le altre gesture, questa stringa serve alla funzione che si occupa di creare le hmm.
-    lista_gesture =["gesture_2", "gesture_7", "gesture_8", "gesture_9", "gesture_10", "gesture_11", "gesture_12", "gesture_13"]
-
-    # Lista che conterrà tutte le hmm indicate in lista_gesture
-    hmms = []
-    # Creates models #
-    # n_states = numero di stati complessivi che costituiscono le hmm delle singole primitive
-    # [Quando si fanno dei test questo numero deve essere lo stesso per tutte le gesture da creare e testare]
-    n_states = 6
-    # n_samples = elemento usato nella fase di training
-    # [Quando si fanno dei test questo numero deve essere lo stesso per tutte le gesture da creare e testare]
-    n_samples = 20
-    parse = Parse(n_states, n_samples)
-    for gesture_name in lista_gesture:
-        # gesture_def è una tupla #
-        # Stampa il nome della gesture che sta gestendo
-        print(gesture_name)
-        # crea hmm
-        if(type == "palm"):
-            model = parse.parseExpression("shrec-"+gesture_name)
-        else:
-            model = parse.parseExpression("shrec2-"+gesture_name)
-        # assegna nome all'hmm
-        model.name = gesture_name
-        # Adds hmm in the list
-        hmms.append(model)
-
-    # Test #
-    # test è la classe che si occupa di eseguire appunto di eseguire i test su un certo insieme di hmm e di stamparne i risultati.
-    # in questo caso siamo interessati alla matrice di confusione, una matrice nxn
-    # [dove n è il numero delle gesture, e in riga e in colonna abbiamo una gesture: quindi riga 1 = gesture_2, colonna 1 = gesture_2 e così via]
-    # l'obiettivo è duplice:
-    # - quantificare i file di un certo dataset che vengono riconosciuti dall'hmm che descrive quel dataset
-    # - quantificare gli eventuali errori (e nel caso sapere da quale hmm vengano invece riconosciuti)
-    # La situazione ottimale è una matrice diagonale
-    datasetDir = "/home/" + person + "/PycharmProjects/deictic/repository/deictic/shrec-dataset/resampled/"+type+"/"
-    t = test(hmms, lista_gesture, datasetDir)
-    results = t.all_files()
-
-# Test v.2
-if debug_mode == 7:
+if debug_mode == 6:
     gesture_models = \
     {
 
@@ -313,11 +229,8 @@ if debug_mode == 7:
             Point(-2, 4) + Line(2, -4) + Line(2, 4)
         ]
     }
-    # Type
-    #type = "palm"
-    type = "index_tip"
-    n_states = 6
-    n_samples = 20
+    n_states = 12
+    n_samples = 40
     hmms = dict()
     factory = ClassifierFactory()
     factory.setLineSamplesPath(trainingDir)
@@ -339,12 +252,6 @@ if debug_mode == 7:
 
 # Debug comparing raw and resampled data
 if debug_mode == 8:
-    # Person
-    person = "ale"
-    #person = "sara"
-    # Type
-    type = "palm"
-    #type = "index_tip"
     # Gesture
     gesture = 10
 

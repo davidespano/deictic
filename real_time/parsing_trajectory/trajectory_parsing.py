@@ -24,39 +24,36 @@ class Parsing():
         return Parsing.singleton
 
     # Methods #
-    def algorithm1(self, sequence):
+    def algorithm1(self, sequence, threshold_a):
         """
             algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
         :param sequence: original user's trajectory
         :return: list of label
         """
         list = []
-        # Kalmar smoother and threshold
-        smoothed_sequence, threshold = self.__kalmanSmoother(sequence)
-        threshold = 0.002
-        print(threshold)
+        threshold_a = 0.002
         # Parsing line
-        for t in range(1, len(smoothed_sequence)-1, 1):
+        for t in range(1, len(sequence)-1, 1):
 
             # Compute delta
-            num1 = Parsing.__sub(smoothed_sequence[t], smoothed_sequence[t-1])
-            num2 = Parsing.__sub(smoothed_sequence[t+1], smoothed_sequence[t])
+            num1 = Parsing.__sub(sequence[t], sequence[t-1])
+            num2 = Parsing.__sub(sequence[t+1], sequence[t])
             num = Parsing.__dot(num1,num2)
-            den1 = Parsing.__magn(self.__sub(smoothed_sequence[t], smoothed_sequence[t-1]))
-            den2 = Parsing.__magn(self.__sub(smoothed_sequence[t+1], smoothed_sequence[t]))
+            den1 = Parsing.__magn(self.__sub(sequence[t], sequence[t-1]))
+            den2 = Parsing.__magn(self.__sub(sequence[t+1], sequence[t]))
             den = den1 * den2
 
             delta = 1-(num/den)
             # Check delta
-            if delta < threshold:
+            if delta < threshold_a:
                 list.append("A")
             else:
                 list.append("0")
-        return smoothed_sequence,list
+        return list
 
-    def algorithm2(self, sequence, list):
+    def algorithm2(self, sequence, list, threshold_b = None):
         """
-            algorithm1 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
+            algorithm2 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
         :param sequence: original user's trajectory
         :param list: list of label recived from algorithm1
         :return:
@@ -69,18 +66,35 @@ class Parsing():
 
         return list
 
+    def algorithm3(self, list):
+        """
+            algorithm3 provides to label the sequence's points, in accordance with the Algorithm 3 proposed in "Parsing 3D motion trajectory for gesture recognition"
+            in order to localize the boundary points (isolated points or label transition).
+        :param list:
+        :return:
+        """
+        for t in range(2, len(list)-1):
+            if list[t] == "0":
+                list[t] = "O" # isolated points
+            elif list[t+1] != "0" and list[t] != list[t+1]:
+                list[t] = "O" # for label transition
 
+        return list
 
     def parsingLine(self, sequence):
         """
-
+            parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence:
         :return:
         """
+        # Kalmar smoother and threshold for algorithm 1
+        smoothed_sequence, threshold_a = self.__kalmanSmoother(sequence)
         # Algorithm 1 (find straight linear)
-        smoothed_sequence, list = self.algorithm1(sequence)
+        list = self.algorithm1(smoothed_sequence, threshold_a)
         # Algorithm 2 (find plane arc)
-        list = self.algorithm2(sequence, list)
+        list = self.algorithm2(smoothed_sequence, list)
+        # Algorithm 3 (localizing boundary points)
+        list = self.algorithm3(list)
 
         # Plot data
         self.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)

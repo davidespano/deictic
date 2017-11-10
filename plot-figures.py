@@ -138,6 +138,42 @@ ad_hoc_unistroke = np.matrix(
  [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,  330 ]]
 )
 
+
+deictic_shrec_palm = np.matrix(
+#  2    7   8   9   10  11  12   13
+[[62,   0,  6,  1,  14, 10, 2,  5],  # 2
+ [  0,  76, 3,  1,  1,  0,  0,  19], # 7
+ [  2,  1,  91, 0,  0,  0,  0,  6],  # 8
+ [  8,  3,  1,  82, 4,  0,  0,  2],  # 9
+ [  6,  1,  16, 1,  60, 0,  7,  9],  # 10
+ [  0,  0,  0,  0,  0,  99, 1,  0],  # 11
+ [  1,  0,  0,  0,  0,  17, 79, 3],  # 12
+ [  0,  0,  0,  0,  0,  8,  0,  92]] # 13
+)
+#  2    7   8   9   10  11  12   13
+deictic_shrec_index_tip = np.matrix(
+[[48,   0,  24, 1,  10, 10, 1,  6],  # 2
+ [  1,  85, 2,  0,  0,  0,  0,  12], # 7
+ [  4,  2,  76, 0,  0,  0,  0,  18],  # 8
+ [  18, 0,  0,  77, 3,  0,  0,  2],  # 9
+ [  5,  0,  8,  0,  72, 0,  2,  13],  # 10
+ [  2,  0,  0,  0,  0,  95, 1,  2],  # 11
+ [  8,  0,  0,  0,  1,  32, 57, 2],  # 12
+ [  1,  0,  0,  0,  0,  2,  0,  97]] # 13
+)
+
+shrec_class_names = [
+    'Tap ', # 2
+    'Swipe Right ', # 7
+    'Swipe Left ', # 8
+    'Swipe Up ', # 9
+    'Swipe Down ', # 10
+    'Swipe X ', # 11
+    'Swipe + ', # 12
+    'Swipe V '  # 13
+];
+
+
 # ------------------------------------------
 # synthetic unistroke
 # ------------------------------------------
@@ -410,6 +446,6 @@ def opPlot(matrix, names, title):
 #accuracy(deictic_multistroke, 600);
 
 
-plot_confusion_matrix(iciap, classes=iciap_names, normalize=False,
+plot_confusion_matrix(deictic_shrec_index_tip, classes=shrec_class_names, normalize=False,
                        title='Confusion matrix', cmap=plt.cm.Greys)
 plt.show()
