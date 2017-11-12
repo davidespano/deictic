@@ -1,3 +1,4 @@
 from .declarativeModel import *
 from .hmmGesture import *
-from .modellingGesture import *
+from .datasetExample import *
+from .modellingExpression import ModelFactory

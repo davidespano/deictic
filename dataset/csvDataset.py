@@ -202,7 +202,6 @@ class CsvDataset:
 
         files = self.getDatasetIterator().filenames
         for filename in files:
-            fig, ax = plt.subplots(figsize=(10, 15))
             if sampleName == None or filename == sampleName:
                 with open(self.dir + filename, "r") as f:
                     reader = csv.reader(f, delimiter=',')
@@ -211,6 +210,7 @@ class CsvDataset:
 
                     if dimensions == 3:
                         ax.plot(result[:, 0], result[:, 1], result[:, 2], label=filename)
+                        plt.axis('equal')
 
                     else:
                         ax.scatter(result[:,0], result[:,1])

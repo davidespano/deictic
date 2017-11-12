@@ -1,10 +1,10 @@
-from gesture import modellingGesture
+from gesture import datasetExample
 from model import *
 # Enum
 from enum import Enum
 
 
-class Parse(modellingGesture.Parse):
+class Parse(datasetExample.Parse):
     def __gestureComponents(self, exp):
         """
             Manages parsing gesture components (from three different dataset)
@@ -15,17 +15,17 @@ class Parse(modellingGesture.Parse):
         op1 = self.stack.pop()
         expression = None
         # Takes gesture expression
-        if (exp == modellingGesture.HmmFactory.TypeOperator.unistroke.name):
+        if (exp == datasetExample.HmmFactory.TypeOperator.unistroke.name):
             expression = OneDollarGestures.getModel(op1)
         # Adds gesture expressions
-        gesture = modellingGesture.HmmFactory.factory(expression, self.n_states, self.n_samples)
+        gesture = datasetExample.HmmFactory.factory(expression, self.n_states, self.n_samples)
         self.stack.append(gesture)
         # for exp in expression:
         #    primitive = modellingGesture.HmmFactory.factory(exp, self.n_states, self.n_samples)
         #    self.stack.append(primitive)
 
 
-class OneDollarGestures(modellingGesture.OneDollarGestures):
+class OneDollarGestures(datasetExample.OneDollarGestures):
     class TypeGesture(Enum):
         # Primitives
         circle_1 = 0,
