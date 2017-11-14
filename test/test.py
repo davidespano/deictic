@@ -1,7 +1,9 @@
 import numpy
-import csv
-import matplotlib as plt
+import sys
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import itertools
+from gesture import ModelFactory
 
 class Result():
     """
@@ -12,7 +14,7 @@ class Result():
     def __init__(self, gesture_labels = []):
         # Check parameters
         if not isinstance(gesture_labels, list):
-            raise ("name_gestures must be a list of object.")
+            raise Exception("name_gestures must be a list of object.")
         # gesture_labels
         self.labels = gesture_labels
         # array (the core of the confusion matrix)
@@ -25,9 +27,11 @@ class Result():
         :param coloumn: the gesture which recognized this file (str).
         :return:
         """
+        if not isinstance(row_label, str) or not isinstance(column_label, str):
+            raise Exception("The parameters must be string.")
         row = self.__getLabelIndex(wanted_label=row_label)
         column = self.__getLabelIndex(wanted_label=column_label)
-        self.array[row, column]+=1
+        self.array[row][column]+=1
 
     def save(self, path):
         """
@@ -35,6 +39,8 @@ class Result():
         :param path:
         :return:
         """
+        if not isinstance(path, str):
+            raise Exception("The parameter path must be string.")
         array_to_save = numpy.chararray((len(self.labels)+1, len(self.labels)+1))
         # Gesture labels
         for index in range(0, len(self.labels)):
@@ -56,6 +62,13 @@ class Result():
         :param cmap:
         :return:
         """
+        if not isinstance(normalize, bool):
+            raise Exception("normalize must be bool.")
+        if not isinstance(title, str):
+            raise Exception("title must be bool.")
+        if not isinstance(cmap, LinearSegmentedColormap):
+            raise Exception("cmap must be a LinearSegmentedColormap object.")
+
         plt.imshow(self.array, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.colorbar()
@@ -66,34 +79,36 @@ class Result():
         if normalize:
             den = self.array.sum(axis=1)[:, numpy.newaxis]
             print(den)
-            cm = self.array.astype('float') / den[0]
+            self.array = self.array.astype('float') / den[0]
             print("Normalized confusion matrix")
         else:
             print('Confusion matrix, without normalization')
-        print(cm)
+        print(self.array)
 
-        thresh = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            if (cm[i, j] >= 0.01):
-                plt.text(j, i, cm[i, j],
+        thresh = self.array.max() / 2.
+        for i, j in itertools.product(range(self.array.shape[0]), range(self.array.shape[1])):
+            if (self.array[i, j] >= 0.01):
+                plt.text(j, i, self.array[i, j],
                          horizontalalignment="center",
-                         color="white" if cm[i, j] > thresh else "black")
+                         color="white" if self.array[i, j] > thresh else "black")
         plt.tight_layout()
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
+        plt.show()
 
     ### Private methods ###
     def __getLabelIndex(self, wanted_label):
         """
             this methods finds and returns the index links to the passed label.
         :param label: a gesture label
-        :return:
+        :return: the corresponding index or raise an exception if labels does not contain wanted_label.
         """
         index = 0
         for label in self.labels:
             if label == wanted_label:
                 return index
             index+=1
+        raise Exception(wanted_label+" is not present.")
 
 class Test():
 
@@ -117,10 +132,13 @@ class Test():
         :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
         :return: comparison results
         """
+        # Check parameters
+        if not isinstance(gesture_expressions, dict):
+            raise Exception("gesture_expressions must be a dictionary of deictic expressions.")
         # creates models
-        self.__createModel(gesture_expressions=gesture_expressions)
+        gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
         # start comparison
-        self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        return self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
 
     def offlineTest(self, gesture_hmms, gesture_datasets):
         """
@@ -130,19 +148,25 @@ class Test():
         :return: comparision results
         """
         # Check parameters
+
         if not isinstance(gesture_hmms, dict):
-            raise ("gesture_hmms must be a dictionary of hidden markov models.")
-        self.gesture_hmms = gesture_hmms
+            raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         if not isinstance(gesture_datasets, dict):
-            raise ("dataset_dir must be a dictionary of CsvDataset objects.")
+            raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
+        if len(gesture_hmms) != len(gesture_datasets):
+            raise Exception("gesture_hmms and gesture_datasets must have the same lenght.")
+
+        self.gesture_hmms = gesture_hmms
         self.gesture_datasets = gesture_datasets
         # comparison results
-        self.result = Result()
+        self.result = Result(list(self.gesture_hmms.keys()))
         # comparasing gesture_hmms
-        for gesture_label, gesture_dataset in self.gesture_datasets.items():
-            # for each dataset's file
-            for sequence in gesture_dataset.readDataset():
-                self.__comparison(sequence=sequence, dataset_label=gesture_label)
+        for gesture_label, gesture_datasets in self.gesture_datasets.items():
+            # for each dataset
+            for gesture_dataset in gesture_datasets:
+                # for each dataset's file
+                for sequence in gesture_dataset.readDataset():
+                    self.__comparison(sequence=sequence[0], dataset_label=gesture_label)
         # return comparison results
         return self.result
 
@@ -154,9 +178,9 @@ class Test():
         :return: comparison results
         """
         # creates models
-        self.__createModel(gesture_expressions=gesture_expressions)
+        gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
         # start comparison
-        self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
 
     def onlineTest(self, gesture_hmms, gesture_datasets): pass
 
@@ -167,18 +191,7 @@ class Test():
         :param gesture_expressions: a dictionary of deictic expression.
         :return: a dictionary of deictic hmms.
         """
-        # Check parameters
-        if not isinstance(gesture_expressions, dict):
-            raise ("gesture_hmms must be a dictionary of deictic expressions.")
-        gesture_hmms = dict
-        # create hmms object from deictic expressiion
-        for gesture_label, expressions in gesture_expressions.items():
-            gesture_hmms[gesture_label] = []
-            for expression in expressions:
-                # create model
-                model = None
-                gesture_hmms[gesture_label].append(model)
-        return gesture_hmms
+        return ModelFactory.createHmm(expressions=gesture_expressions)
 
     def __comparison(self, sequence, dataset_label):
         """
@@ -189,15 +202,17 @@ class Test():
         """
         # Max probability
         max_norm_log_probability = -sys.maxsize
+        index_label = None
         # Compute log probability for each model
         for gesture_label, models in self.gesture_hmms.items():
             for model in models:
                 # Computes sequence's log-probability and normalized
                 log_probability = model.log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
-            # Checks which is the best result
-            if (norm_log_probability > max_norm_log_probability):
-                max_norm_log_probability = norm_log_probability
-                index_label = gesture_label
+                # Checks which is the best result
+                if (norm_log_probability > max_norm_log_probability):
+                    max_norm_log_probability = norm_log_probability
+                    index_label = gesture_label
         # Update results
-        self.result.update(row_label=dataset_label, column_label=index_label)
+        if index_label != None:
+            self.result.update(row_label=dataset_label, column_label=index_label)

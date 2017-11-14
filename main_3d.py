@@ -1,8 +1,5 @@
 # Libraries
-from gesture.datasetExample import Parse
-from model import *
-from dataset import *
-from gesture import *
+from config import Config
 from test import *
 import matplotlib.pyplot as plt
 import os
@@ -233,9 +230,9 @@ if debug_mode == 6:
     n_samples = 40
     hmms = dict()
     factory = ClassifierFactory()
-    factory.setLineSamplesPath(trainingDir)
-    factory.setClockwiseArcSamplesPath(arcClockWiseDir)
-    factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+    factory.setLineSamplesPath(Config.trainingDir)
+    factory.setClockwiseArcSamplesPath(Config.arcClockWiseDir)
+    factory.setCounterClockwiseArcSamplesPath(Config.arcCounterClockWiseDir)
     factory.states = n_states
     factory.spu = n_samples
     for k in gesture_models.keys():

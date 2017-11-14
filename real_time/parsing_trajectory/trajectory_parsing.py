@@ -9,6 +9,55 @@ import numpy as np
 # Plot
 import matplotlib.pyplot as plt
 
+class Point():
+    def __init__(self, coordinates):
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        self.label = None
+        self.descriptor = None
+    def setLabel(self, label):
+        self.label = label
+    def setDescriptor(self, descriptor):
+        self.descriptor= descriptor
+
+class Trajectory():
+    def __init__(self, sequence):
+        self.data = []
+        for point in sequence:
+            self.data.append(Point(point))
+
+
+
+class Triangle():
+
+    def __init__(self, point_a, point_b, point_c):
+        self.point_a = point_a
+        self.point_b = point_b
+        self.point_c = point_c
+
+    def curvature(self):
+        self.side_a = Parsing.distance(point_a=self.point_a, point_b=self.point_b)
+        self.side_b = Parsing.distance(point_a=self.point_b, point_b=self.point_c)
+        self.side_c = Parsing.distance(point_a=self.point_c, point_b=self.point_a)
+        surface = (self.side_a + self.side_b + self.side_c)/2
+        self.curvature = (4 * math.sqrt(surface*(surface-self.side_a)*(surface-self.side_b)*(surface-self.side_c))) \
+                   /(self.side_a*self.side_b*self.side_c)
+        return self.curvature
+
+class Tetrahedron():
+
+    def __init__(self, point_a, point_b, point_c, point_d, point_e):
+        self.prec_triangle = Triangle(point_a, point_b, point_c)
+        self.actual_triangle = Triangle(point_b, point_c, point_d)
+        self.next_triangle = Triangle(point_c, point_d, point_e)
+
+    def curvature(self):
+        return self.actual_triangle.curvature
+
+    def approssimationCurvature(self):
+        curvature_a = self.next_triangle
+        curvature_b = self.prec_triangle
+        self.approximations = 3*( (curvature_a - curvature_b)/(2*self.side_a+2*self.side_b+self.side_d+self.side_e))
 
 '''
     This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
@@ -22,6 +71,20 @@ class Parsing():
         if Parsing.singleton == None:
             Parsing.singleton = Parsing()
         return Parsing.singleton
+
+
+
+    def descriptionTrajectoryPrimitives(self, sequence):
+        _lambda = 1# average number of zero points in the primitives as the lambda value of a given dataset
+        for t in range(2, len(sequence)):
+            if sequence[t] == "A":
+                descriptor = (sequence, 1)
+            elif sequence[t] == "B":
+                tetrahedron = Tetrahedron(sequence[t-2], sequence[t-1], sequence[t], sequence[t+1], sequence[t+2])
+                k = tetrahedron.curvature()
+                ks = tetrahedron.approssimationCurvature()
+                descriptor = math.sqrt(math.pow(k, 2) + _lambda*math.pow(ks,2))
+
 
     # Methods #
     def algorithm1(self, sequence, threshold_a):
@@ -80,6 +143,7 @@ class Parsing():
                 list[t] = "O" # for label transition
 
         return list
+
 
     def parsingLine(self, sequence):
         """
@@ -178,15 +242,24 @@ class Parsing():
         plt.show()
 
     @staticmethod
-    def __magn(point):
+    def magn(point):
         return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
     @staticmethod
-    def __dot(point_a, point_b):
+    def dot(point_a, point_b):
         return point_a[0]*point_b[0] + point_a[1]*point_b[1]
     @staticmethod
-    def __sub(point_a, point_b):
+    def sub(point_a, point_b):
         vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
         return vector
     @staticmethod
-    def __distance(point_a, point_b):
+    def distance(point_a, point_b):
         return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
+
+
+
+
+
+
+
+
+

@@ -1,13 +1,5 @@
-from model import *
-from topology import *
-
-# todo rivedere path primitive
-#baseDir = '/home/sara/PycharmProjects/deictic/repository/'
-baseDir = '/home/ale/PycharmProjects/deictic/repository/'
-#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
-trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
-arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
-arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
+from gesture.declarativeModel import ClassifierFactory
+from config import Config
 
 class ModelFactory():
 
@@ -22,19 +14,22 @@ class ModelFactory():
         """
         # Check parameters
         if not isinstance(expressions, dict):
-            raise("expressions must be a dictionary of expresssions.")
-
-        hmms = dict()
+            raise Exception("expressions must be a dictionary of sequences defined through deictic primitives.")
+        if not isinstance(num_states, int):
+            raise Exception("num_states must be int.")
+        if not isinstance(num_samples, int):
+            raise Exception("num_samples must be int.")
+        # Create models
+        hmms = {}
         factory = ClassifierFactory()
-        factory.setLineSamplesPath(trainingDir)
-        factory.setClockwiseArcSamplesPath(arcClockWiseDir)
-        factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-        factory.states = n_states
-        factory.spu = n_samples
+        factory.setLineSamplesPath(Config.trainingDir)
+        factory.setClockwiseArcSamplesPath(Config.arcClockWiseDir)
+        factory.setCounterClockwiseArcSamplesPath(Config.arcCounterClockWiseDir)
+        factory.states = num_states
+        factory.spu = num_samples
         for gesture_label in expressions.keys():
             hmms[gesture_label] = []
             for expression in expressions[gesture_label]:
                 model, edges = factory.createClassifier(expression)
                 hmms[gesture_label].append(model)
-            print('Group {0} created'.format(k))
         return hmms
