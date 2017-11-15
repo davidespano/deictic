@@ -22,6 +22,7 @@ def plot_confusion_matrix(cm, classes,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
+    plt.rcParams.update({'font.size': 15})
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
@@ -446,6 +447,6 @@ def opPlot(matrix, names, title):
 #accuracy(deictic_multistroke, 600);
 
 
-plot_confusion_matrix(deictic_shrec_index_tip, classes=shrec_class_names, normalize=False,
-                       title='Confusion matrix', cmap=plt.cm.Greys)
+plot_confusion_matrix(deictic_shrec_palm, classes=shrec_class_names, normalize=False,
+                       title='Confusion matrix', cmap=plt.cm.Blues)
 plt.show()

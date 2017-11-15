@@ -1,3 +1,4 @@
+from enum import Enum
 # Imports
 import numpy
 # Kalman filter
@@ -9,55 +10,165 @@ import numpy as np
 # Plot
 import matplotlib.pyplot as plt
 
-class Point():
-    def __init__(self, coordinates):
-        self.x = coordinates[0]
-        self.y = coordinates[1]
-        self.label = None
-        self.descriptor = None
-    def setLabel(self, label):
-        self.label = label
-    def setDescriptor(self, descriptor):
-        self.descriptor= descriptor
+class MathUtils():
+    @staticmethod
+    def surfaceTriangle(side_a, side_b, side_c):
+        return (side_a+side_b+side_c)/2
+    @staticmethod
+    def curvature(side_a, side_b, side_c):
+        surface = MathUtils.surfaceTriangle(side_a, side_b, side_c)
+        return (4 * math.sqrt(surface * (surface - side_a) * (surface - side_b) * (surface - side_c))) \
+                               / (side_a * side_b * side_c)
+    @staticmethod
+    def magn(point):
+        return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
+    @staticmethod
+    def dot(point_a, point_b):
+        return point_a[0]*point_b[0] + point_a[1]*point_b[1]
+    @staticmethod
+    def sub(point_a, point_b):
+        vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
+        return vector
+    @staticmethod
+    def distance(point_a, point_b):
+        return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
+
 
 class Trajectory():
+
+    class TypePrimitive(Enum):
+        NONE = "0"
+        LINE = "A"
+        ARC = "B"
+        BOUNDARY = "O"
+
+
     def __init__(self, sequence):
-        self.data = []
-        for point in sequence:
-            self.data.append(Point(point))
+        """
+
+        :param sequence:
+        """
+        # Check parameters
+        if not isinstance(sequence, numpy.ndarray):
+            raise Exception("sequence must be a numpy array.")
+        # Inizialization
+        #
+        self.__sequence = sequence
+        #
+        self.__labels = ["0" for x in range(len(sequence))]
+        #
+        self.__trajectory = numpy.zeros((len(sequence)),dtype=float)
+        #
+        self.__curvatures = [None for x in range(len(sequence))]
+
+    # Methods #
+    def algorithm1(self, threshold_a):
+        """
+            algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
+        :param threshold_a:
+        :return: list of label
+        """
+        threshold_a = 0.002
+        # Parsing line
+        for t in range(1, len(self.__sequence) - 1, 1):
+            # Compute delta
+            num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+            num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+            num = MathUtils.dot(num1, num2)
+            den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+            den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+            den = den1 * den2
+            delta = 1 - (num / den)
+            # Check delta
+            if delta < threshold_a:
+                self.__labels[t] = ("A")
+        return self.__labels
+
+    def algorithm2(self, threshold_b = None):
+        """
+            algorithm2 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
+        :param threshold_b:
+        :return:
+        """
+        for t in range(1, len(self.__sequence)-2):
+            if self.__labels[t] == "0" and self.__labels[t+1] == "0":
+                # compute volume
+                self.__labels[t] = "B"
+                self.__labels[t + 1] = "B"
+        return self.__labels
+
+    def algorithm3(self):
+        """
+            algorithm3 provides to label the sequence's points, in accordance with the Algorithm 3 proposed in "Parsing 3D motion trajectory for gesture recognition"
+            in order to localize the boundary points (isolated points or label transition).
+        :param
+        :return:
+        """
+        for t in range(2, len(self.__sequence)-2):
+            if self.__labels[t] == "0":
+                self.__labels[t] = "O" # isolated points
+            elif self.__labels[t+1] != "0" and self.__labels[t] != self.__labels[t+1]:
+                self.__labels[t] = "O" # for label transition
+        return self.__labels
+
+    def descriptorTrajectory(self):
+        """
+
+        :return:
+        """
+        #
+        for t in range(2, len(self.__sequence)-2):
+            if self.__labels[t] == "A":
+                self.__trajectory[t] = 1
+            elif self.__labels[t] == "B":
+                _lambda = 1
+                ### get descriptor ###
+                # curvature
+                k = self.__computeCurvature(t)
+                # approssimation curvature
+                k_s = self.__approximationCurvature(t)
+                # descriptor
+                self.__trajectory[t] = math.sqrt(math.pow(k,2) + _lambda*math.pow(k_s, 2))
+        return self.__trajectory
+
+    # private methods #
+    def __computeCurvature(self, index):
+        """
+
+        :param index:
+        :return:
+        """
+        if self.__curvatures[index] == None:
+            point_b = self.__sequence[index - 1]
+            point_t = self.__sequence[index]
+            point_c = self.__sequence[index + 1]
+            side_a = MathUtils.distance(point_a=point_b, point_b=point_t)
+            side_b = MathUtils.distance(point_a=point_t, point_b=point_c)
+            side_c = MathUtils.distance(point_a=point_b, point_b=point_c)
+            self.__curvatures[index] = MathUtils.curvature(side_a, side_b, side_c)
+        return self.__curvatures[index]
+
+    def __approximationCurvature(self, index):
+        """
+
+        :param index:
+        :return:
+        """
+        point_a = self.__sequence[index - 2]
+        point_b = self.__sequence[index - 1]
+        point_t = self.__sequence[index]
+        point_c = self.__sequence[index + 1]
+        point_d = self.__sequence[index + 2]
+        side_a = MathUtils.distance(point_a=point_b, point_b=point_t)
+        side_b = MathUtils.distance(point_a=point_t, point_b=point_c)
+        side_d = MathUtils.distance(point_a=point_a, point_b=point_t)
+        side_g = MathUtils.distance(point_a=point_c, point_b=point_d)
+        curvature_prec = self.__computeCurvature(index - 1)
+        curvature_next = self.__computeCurvature(index + 1)
+        return 3 * ((curvature_prec - curvature_next) / (
+                              2 * side_a + 2 * side_b + side_d + side_g))
 
 
-
-class Triangle():
-
-    def __init__(self, point_a, point_b, point_c):
-        self.point_a = point_a
-        self.point_b = point_b
-        self.point_c = point_c
-
-    def curvature(self):
-        self.side_a = Parsing.distance(point_a=self.point_a, point_b=self.point_b)
-        self.side_b = Parsing.distance(point_a=self.point_b, point_b=self.point_c)
-        self.side_c = Parsing.distance(point_a=self.point_c, point_b=self.point_a)
-        surface = (self.side_a + self.side_b + self.side_c)/2
-        self.curvature = (4 * math.sqrt(surface*(surface-self.side_a)*(surface-self.side_b)*(surface-self.side_c))) \
-                   /(self.side_a*self.side_b*self.side_c)
-        return self.curvature
-
-class Tetrahedron():
-
-    def __init__(self, point_a, point_b, point_c, point_d, point_e):
-        self.prec_triangle = Triangle(point_a, point_b, point_c)
-        self.actual_triangle = Triangle(point_b, point_c, point_d)
-        self.next_triangle = Triangle(point_c, point_d, point_e)
-
-    def curvature(self):
-        return self.actual_triangle.curvature
-
-    def approssimationCurvature(self):
-        curvature_a = self.next_triangle
-        curvature_b = self.prec_triangle
-        self.approximations = 3*( (curvature_a - curvature_b)/(2*self.side_a+2*self.side_b+self.side_d+self.side_e))
 
 '''
     This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
@@ -65,6 +176,7 @@ class Tetrahedron():
 class Parsing():
     # Attribute
     singleton = None
+    __trajectories = []
 
     @staticmethod
     def getInstance():
@@ -73,78 +185,7 @@ class Parsing():
         return Parsing.singleton
 
 
-
-    def descriptionTrajectoryPrimitives(self, sequence):
-        _lambda = 1# average number of zero points in the primitives as the lambda value of a given dataset
-        for t in range(2, len(sequence)):
-            if sequence[t] == "A":
-                descriptor = (sequence, 1)
-            elif sequence[t] == "B":
-                tetrahedron = Tetrahedron(sequence[t-2], sequence[t-1], sequence[t], sequence[t+1], sequence[t+2])
-                k = tetrahedron.curvature()
-                ks = tetrahedron.approssimationCurvature()
-                descriptor = math.sqrt(math.pow(k, 2) + _lambda*math.pow(ks,2))
-
-
     # Methods #
-    def algorithm1(self, sequence, threshold_a):
-        """
-            algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
-        :param sequence: original user's trajectory
-        :return: list of label
-        """
-        list = []
-        threshold_a = 0.002
-        # Parsing line
-        for t in range(1, len(sequence)-1, 1):
-
-            # Compute delta
-            num1 = Parsing.__sub(sequence[t], sequence[t-1])
-            num2 = Parsing.__sub(sequence[t+1], sequence[t])
-            num = Parsing.__dot(num1,num2)
-            den1 = Parsing.__magn(self.__sub(sequence[t], sequence[t-1]))
-            den2 = Parsing.__magn(self.__sub(sequence[t+1], sequence[t]))
-            den = den1 * den2
-
-            delta = 1-(num/den)
-            # Check delta
-            if delta < threshold_a:
-                list.append("A")
-            else:
-                list.append("0")
-        return list
-
-    def algorithm2(self, sequence, list, threshold_b = None):
-        """
-            algorithm2 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
-        :param sequence: original user's trajectory
-        :param list: list of label recived from algorithm1
-        :return:
-        """
-        for t in range(1, len(list)-1):
-            if list[t] == "0" and list[t+1] == "0":
-                # compute volume
-                list[t] = "B"
-                list[t + 1] = "B"
-
-        return list
-
-    def algorithm3(self, list):
-        """
-            algorithm3 provides to label the sequence's points, in accordance with the Algorithm 3 proposed in "Parsing 3D motion trajectory for gesture recognition"
-            in order to localize the boundary points (isolated points or label transition).
-        :param list:
-        :return:
-        """
-        for t in range(2, len(list)-1):
-            if list[t] == "0":
-                list[t] = "O" # isolated points
-            elif list[t+1] != "0" and list[t] != list[t+1]:
-                list[t] = "O" # for label transition
-
-        return list
-
-
     def parsingLine(self, sequence):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
@@ -153,15 +194,22 @@ class Parsing():
         """
         # Kalmar smoother and threshold for algorithm 1
         smoothed_sequence, threshold_a = self.__kalmanSmoother(sequence)
+        # trajectory
+        trajectory = Trajectory(smoothed_sequence)
         # Algorithm 1 (find straight linear)
-        list = self.algorithm1(smoothed_sequence, threshold_a)
+        list = trajectory.algorithm1(threshold_a=threshold_a)
         # Algorithm 2 (find plane arc)
-        list = self.algorithm2(smoothed_sequence, list)
+        list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
-        list = self.algorithm3(list)
+        list = trajectory.algorithm3()
+        # Descriptor
+        f = trajectory.descriptorTrajectory()
 
+        # append
+        self.__trajectories.append(Trajectory)
         # Plot data
         self.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
+        return
 
 
     def __kalmanSmoother(self, original_sequence):
@@ -175,7 +223,7 @@ class Parsing():
         # Compute the mean square distance of original sequence with respect to the smoothed sequence
         distances = 0
         for index in range(0, len(original_sequence)):
-            distances+= math.pow(Parsing.__distance(original_sequence[index], smoothed_sequence[index]),2)
+            distances+= math.pow(MathUtils.distance(original_sequence[index], smoothed_sequence[index]),2)
 
         mean_square_distance = (math.sqrt(distances))/len(original_sequence)
 
@@ -241,19 +289,6 @@ class Parsing():
         plt.axis('equal')
         plt.show()
 
-    @staticmethod
-    def magn(point):
-        return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
-    @staticmethod
-    def dot(point_a, point_b):
-        return point_a[0]*point_b[0] + point_a[1]*point_b[1]
-    @staticmethod
-    def sub(point_a, point_b):
-        vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
-        return vector
-    @staticmethod
-    def distance(point_a, point_b):
-        return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
 
 
 
