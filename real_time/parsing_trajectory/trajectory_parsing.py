@@ -68,7 +68,7 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-        threshold_a = 0.002
+        threshold_a = 0.0028
         # Parsing line
         for t in range(1, len(self.__sequence) - 1, 1):
             # Compute delta
@@ -168,6 +168,9 @@ class Trajectory():
         return 3 * ((curvature_prec - curvature_next) / (
                               2 * side_a + 2 * side_b + side_d + side_g))
 
+    def quantization(self, beta):
+        for i in self.__trajectory:
+            print(i)
 
 
 '''
@@ -204,6 +207,8 @@ class Parsing():
         list = trajectory.algorithm3()
         # Descriptor
         f = trajectory.descriptorTrajectory()
+        # Quantization
+        trajectory.quantization(beta=None)
 
         # append
         self.__trajectories.append(Trajectory)
