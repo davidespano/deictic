@@ -7,12 +7,11 @@ random.seed(0)
 class Model():
 
     def __init__(self, n_states = 0, n_features = 0, name=None):
-        emission = DiscreteDistribution({'A': 0.40, 'B': 0.40, 'O': 0.2})
 
         # Model
         model = HiddenMarkovModel(name)
 
-        states = self.__fix_parameters(name, n_states, emission, [], model);
+        states = self.__fix_parameters(name, n_states, [], [], model);
         for i in range(0, n_states - 1):
             model.add_transition(states[i], states[i], 0.5)
             model.add_transition(states[i], states[i + 1], 0.5)
@@ -20,6 +19,7 @@ class Model():
         model.add_transition(model.start, states[0], 1)
         model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
         model.add_transition(states[n_states - 1], model.end, 0.5)
+        model.bake()
         self.model = model
 
     def train(self, samples):
@@ -28,6 +28,9 @@ class Model():
 
     # Private Models #
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
+        # default init of missing emission distributions
+        for i in range(len(emissions), n_States):
+            emissions.append(DiscreteDistribution({'A': 0.40, 'B': 0.40, 'O': 0.199, '0':0.001}))
         # default init of missing state names
         cl_state = state_names[:]
         for i in range(len(state_names), n_States):

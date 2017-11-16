@@ -85,7 +85,7 @@ if debug == 1:
         # start
         print("Start "+directory)
         sequences = dataset.readDataset()
-        for index in range(0,100):
+        for index in range(0,5):
             sequence = sequences[index]
             # Get original sequence 2D
             original_sequence = sequence[0][:,[0,1]]
@@ -101,7 +101,7 @@ if debug == 1:
         # create hmm
         model = Model(n_states = 6, n_features = 1, name = directory)
         # get samples
-        num_samples_train = (len(files[directory])*6)/10
+        num_samples_train = int((len(files[directory])*6)/10)
         samples = []
         for index in range(0, num_samples_train):
             samples.append(files[directory][index])

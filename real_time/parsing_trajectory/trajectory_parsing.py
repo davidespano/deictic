@@ -273,10 +273,10 @@ class Parsing():
         # Descriptor
         f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list = trajectory.findSubPrimitives(beta=4)
+        #list = trajectory.findSubPrimitives(beta=4)
 
         # Plot data
-        #self.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
+        #Parsing.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
         return list
 
     @staticmethod
