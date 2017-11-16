@@ -1,6 +1,6 @@
 # Libs
 from test.testModels import test
-from axel import *
+from axel import Event
 
 # Copy
 import copy

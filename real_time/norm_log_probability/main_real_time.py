@@ -9,12 +9,8 @@ import collections
 from axel import Event
 # Transforms
 from dataset.normaliseSamplesDataset import *
-
-# Imports
 import matplotlib.pyplot as plt
-import numpy as np
-import plotly.plotly as py
-import os
+
 
 
 class CsvDatasetRealTime(CsvDataset):
@@ -67,10 +63,6 @@ class CsvDatasetRealTime(CsvDataset):
             For each sequences contained in the dataset
             the system fire each frame of sequence.
         """
-        # Takes gesture name from the variable 'dir'
-        gesture_name = self.dir.split('/')
-        gesture_name = gesture_name[len(gesture_name) - 2]
-
         for sequence in self.readDataset():
             if filename == None or filename == sequence[1]:
                 self.__start(sequence[1])
@@ -89,8 +81,10 @@ class CsvDatasetRealTime(CsvDataset):
         if len(self.__buffer) > 5:
             # Applies transforms
             self.buffer = self.applyTransforms()
-            # Sends a single frame
+            # # Sends a single frame
             self.__fire(frame)
+            # plt.plot(self.buffer[:, 0], self.buffer[:, 1], color='r')
+            # plt.show()
 
     # Firing events methods
     def __start(self, filename):

@@ -3,8 +3,117 @@ from model import *
 # Enum
 from enum import Enum
 
+from gesture import ClassifierFactory
+from model import *
+from topology import *
 
-class Parse(datasetExpressions.Parse):
+#baseDir = '/home/sara/PycharmProjects/deictic/repository/'
+baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+#baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
+arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
+arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
+
+class HmmFactory:
+
+    class TypeOperator(Enum):
+        disabling = 0
+        iterative = 1
+        sequence = 2
+        parallel = 3
+        choice = 4
+        unistroke = 5
+        multistroke = 6
+        unica = 7
+        shrec = 8
+
+    @staticmethod
+    def factory(gesture, n_states, n_samples):
+        factory = ClassifierFactory()
+        factory.setLineSamplesPath(trainingDir)
+        factory.setClockwiseArcSamplesPath(arcClockWiseDir)
+        factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
+        factory.states = n_states
+        factory.spu = n_samples
+        model, edges = factory.createClassifier(gesture)
+        return model
+
+class Parse:
+
+    def __init__(self, n_states=6, n_samples=20):
+        # Num of states and num of samples #
+        if isinstance(n_states, int):
+            self.n_states = n_states
+        if isinstance(n_samples, int):
+            self.n_samples = n_samples
+        # Stack for parsing #
+        self.stack = []
+
+    def parseExpression(self, expression):
+        """
+            Manages parsing expression.
+        :param expression: the expression to parse
+        :return: the obtained hmm
+        """
+        # Split expression
+        splitted = expression.split('-');
+        rev = reversed(splitted)
+
+        for exp in rev:
+            # Gestit binary operators
+            if exp in [HmmFactory.TypeOperator.disabling.name, HmmFactory.TypeOperator.sequence.name,
+                       HmmFactory.TypeOperator.parallel.name, HmmFactory.TypeOperator.choice.name]:
+                self.__binaryOperators(exp)
+            # Gestit unary operators
+            if exp in [HmmFactory.TypeOperator.iterative.name]:
+                self.__unaryOperators(exp)
+            # Gesture Expression
+            if exp in [HmmFactory.TypeOperator.unistroke.name,
+                       HmmFactory.TypeOperator.multistroke.name,
+                       HmmFactory.TypeOperator.unica.name,
+                       HmmFactory.TypeOperator.shrec.name]:
+                self.__gestureComponents(exp)
+            else:
+                # Add exp expression
+                self.stack.append(exp)
+        return self.stack.pop()
+
+    def __binaryOperators(self):
+        """
+            Manages parsing gestit binary/multiple operators (disabling, sequence, parallel and choice).
+        :param exp: the expression to parse
+        :return: none
+        """
+        # Take operands
+        new_hmm = self.stack.pop()
+        while self.stack:
+            op = self.stack.pop()
+            # Sequence
+            if op == HmmFactory.TypeOperator.sequence.name:
+                new_hmm, seq = HiddenMarkovModelTopology.sequence([new_hmm, op], [])
+            # Parallel
+            elif op == HmmFactory.TypeOperator.parallel.name:
+                new_hmm, seq = HiddenMarkovModelTopology.parallel(new_hmm, op, [])
+            # Choice
+            elif op == HmmFactory.TypeOperator.choice.name:
+                new_hmm, seq = HiddenMarkovModelTopology.choice([new_hmm, op], [])
+        # Add new hmm
+        self.stack.append(new_hmm)
+
+    def __unaryOperators(self, exp):
+        """
+            Manages parsing gestit unary operators (iterative)
+        :param exp: the expression to parse
+        :return: none
+        """
+        # Take operand
+        op1 = self.stack.pop()
+        # Iterative
+        if (exp == HmmFactory.TypeOperator.iterative.name):
+            new_hmm, seq = HiddenMarkovModelTopology.iterative(op1, [])
+        # Add hmm
+        self.stack.append(new_hmm)
+
     def __gestureComponents(self, exp):
         """
             Manages parsing gesture components (from three different dataset)
@@ -15,17 +124,17 @@ class Parse(datasetExpressions.Parse):
         op1 = self.stack.pop()
         expression = None
         # Takes gesture expression
-        if (exp == datasetExpressions.HmmFactory.TypeOperator.unistroke.name):
+        if (exp == HmmFactory.TypeOperator.unistroke.name):
             expression = OneDollarGestures.getModel(op1)
         # Adds gesture expressions
-        gesture = datasetExpressions.HmmFactory.factory(expression, self.n_states, self.n_samples)
+        gesture = HmmFactory.factory(expression, self.n_states, self.n_samples)
         self.stack.append(gesture)
         # for exp in expression:
         #    primitive = modellingGesture.HmmFactory.factory(exp, self.n_states, self.n_samples)
         #    self.stack.append(primitive)
 
 
-class OneDollarGestures(datasetExpressions.OneDollarGestures):
+class OneDollarGestures():
     class TypeGesture(Enum):
         # Primitives
         circle_1 = 0,

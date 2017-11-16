@@ -6,6 +6,7 @@ from dataset.csvDataset import CsvDataset
 from pykalman import KalmanFilter
 # Parsing trajectory definition
 from real_time.parsing_trajectory.trajectory_parsing import Parsing
+from real_time.parsing_trajectory.model_factory import Model
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -74,14 +75,39 @@ if debug == 0:
 
 if debug == 1:
     # Get dataset
-    dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/rectangle/"
-    dataset = CsvDataset(dir)
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+    directories = ["circle/","rectangle/"]
+    files = {}
 
-    for sequence in dataset.readDataset():
-        # Get original sequence 2D
-        original_sequence = sequence[0][:,[0,1]]
+    for directory in directories:
+        dataset = CsvDataset(base_dir+directory)
+        files[directory] = []
+        # start
+        print("Start "+directory)
+        sequences = dataset.readDataset()
+        for index in range(0,100):
+            sequence = sequences[index]
+            # Get original sequence 2D
+            original_sequence = sequence[0][:,[0,1]]
 
-        # Result parsing
-        Parsing.getInstance().parsingLine(original_sequence)
+            # Result parsing
+            files[directory].append(Parsing.parsingLine(original_sequence))
+        # end
+        print("End "+directory)
+
+    # Create and train hmm
+    hmm = []
+    for directory in files.keys():
+        # create hmm
+        model = Model(n_states = 6, n_features = 1, name = directory)
+        # get samples
+        num_samples_train = (len(files[directory])*6)/10
+        samples = []
+        for index in range(0, num_samples_train):
+            samples.append(files[directory][index])
+        # train
+        model.train(samples)
+
+    # Test
 
 
