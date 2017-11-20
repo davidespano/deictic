@@ -64,15 +64,14 @@ def thirdExample():
         'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
         'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
         'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'line': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
+        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
+        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
+        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
+        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
+        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
+        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
+        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
     }
 
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)

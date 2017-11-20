@@ -115,22 +115,25 @@ if debug == 2:
     }
 
     # Create and train hmm
-    hmm = {}
+    gesture_hmms = {}
+    gesture_datasets = {}
     for directory in directories.keys():
-        hmm[directory] = []
         for dataset in directories[directory]:
             sequences = dataset.readDataset(type=str)
             # create hmm
             model = Model(n_states = 6, n_features = 1, name = directory)
-            # get samples
+            # get train samples
             num_samples_train = int((len(sequences)*quantity_train)/10)
-            samples = (sequence[0] for sequence in sequences[0:num_samples_train])
+            samples = [sequence[0] for sequence in sequences[0:num_samples_train]]
             # train
             model.train(samples)
+            # get test samples
+            gesture_datasets[directory] = [sequence[0] for sequence in sequences[num_samples_train+1:-1]]
             # add hmm to dictionary
-            hmm[directory].append(model.getModel())
-    # Test
-    result = Test.getInstance().offlineTest(gesture_hmms=hmm, gesture_datasets=directories, type=str)
+            gesture_hmms[directory] = [model.getModel()]
+
+    result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=str)
+    result.plot()
 
 
 

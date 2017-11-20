@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import itertools
 from gesture import ModelFactory
+from dataset import CsvDataset
 
 class Result():
     """
@@ -160,13 +161,20 @@ class Test():
         self.gesture_datasets = gesture_datasets
         # comparison results
         self.result = Result(list(self.gesture_hmms.keys()))
+
         # comparasing gesture_hmms
-        for gesture_label, gesture_datasets in self.gesture_datasets.items():
+        for gesture_label, datasets in self.gesture_datasets.items():
             # for each dataset
-            for gesture_dataset in gesture_datasets:
-                # for each dataset's file
-                for sequence in gesture_dataset.readDataset(type=type):
-                    self.__comparison(sequence=sequence[0], dataset_label=gesture_label)
+            for dataset in datasets:
+                # csvDataset or list of sequences?
+                if isinstance(dataset, CsvDataset):
+                    sequences = [sequence[0] for sequence in dataset.readDataset(type=type)]
+                elif isinstance(dataset, numpy.ndarray):
+                    sequences = [dataset]
+                else:
+                    raise Exception("gesture dataset must be a CsvDataset object or a numpy ndarray!")
+                # Comparison
+                self.__comparison(sequences=sequences, dataset_label=gesture_label)
         # return comparison results
         return self.result
 
@@ -193,18 +201,33 @@ class Test():
         """
         return ModelFactory.createHmm(expressions=gesture_expressions)
 
-    def __comparison(self, sequence, dataset_label):
+    def __comparison(self, sequences, dataset_label):
         """
-            given a sequence, this methods computes the log probability for each model.
-        :param sequence: a sequence of frames.
-        :param dataset_label: the list of gesture labesl.
+            given a list of sequence, this method updates the result array based on the comparison of each model.
+        :param sequences: a list of sequence frames.
+        :param dataset_label: the list of gesture labels.
+        :return:
+        """
+        # Get each sequence
+        for sequence in sequences:
+            index_label = Test.__compare(sequence, self.gesture_hmms)
+            # Update results
+            if index_label != None:
+                self.result.update(row_label=dataset_label, column_label=index_label)
+
+    @staticmethod
+    def __compare(sequence, gesture_hmms):
+        """
+            given a sequence, this method computes the log probability for each model and returns the model with the highest norm log probability.
+        :param sequence:
+        :param gesture_hmms:
         :return:
         """
         # Max probability
         max_norm_log_probability = -sys.maxsize
         index_label = None
         # Compute log probability for each model
-        for gesture_label, models in self.gesture_hmms.items():
+        for gesture_label, models in gesture_hmms.items():
             for model in models:
                 # Computes sequence's log-probability and normalized
                 log_probability = model.log_probability(sequence)
@@ -213,6 +236,4 @@ class Test():
                 if (norm_log_probability > max_norm_log_probability):
                     max_norm_log_probability = norm_log_probability
                     index_label = gesture_label
-        # Update results
-        if index_label != None:
-            self.result.update(row_label=dataset_label, column_label=index_label)
+        return index_label

@@ -112,6 +112,39 @@ class DatasetExpressions:
                                                                                                                cw=False) + Arc(
                     3, 3, cw=False)),
             ],
+            'I': [
+                (Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)),
+                (Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0) + Point(0, 4) + Line(4, 0)),
+                (Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0) + Point(2, 0) + Line(0, 4)),
+                (Point(2, 4) + Line(0, -4) + Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0))
+            ],
+            'N': [
+                (Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
+            ],
+            'null': [
+                (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(4, 1) + Line(-8, -8)),  # 410
+                (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(-4, -7) + Line(8, 8)),  # 118
+            ],
+            'P': [
+                #Point(0, 0) + Line(0, 8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
+                Point(0, 8) + Line(0, -8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
+                #Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
+                #Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 8)
+            ],
+            'pitchfork': [
+                (Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False) + Point(0, 4) + Line(0, -4)),
+                (Point(0, 4) + Line(0, -4) + Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False))
+            ],
+            'six_point_star': [
+                (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2,4)),
+                (Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2,4)),
+                (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2,4)),
+                (Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0)),
+                (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
+                (Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0)),
+                (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
+                (Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4))
+            ],
             'T': [
                 Point(-2, 0) + Line(4, 0) + Point(0, 0) + Line(0, -4),
                 #Point(-2, 0) + Line(4, 0) + Point(-4, 2) + Line(0, 4),
@@ -122,18 +155,6 @@ class DatasetExpressions:
                 #Point(-4, 2) + Line(0, 4) + Point(-2, 0) + Line(4, 0),
                 #Point(-4, 2) + Line(0, 4) + Point(2, 0) + Line(-4, 0)
             ],
-
-            'N': [
-                (Point(0, 4) + Line(0, -4) + Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(0, -4))
-            ],
-
-            'P': [
-                #Point(0, 0) + Line(0, 8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-                Point(0, 8) + Line(0, -8) + Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0),
-                #Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 8) + Line(0, -8),
-                #Point(0, 8) + Line(2, 0) + Arc(2, -2, cw=True) + Arc(-2, -2, cw=True) + Line(-2, 0) + Point(0, 0) + Line(0, 8)
-            ],
-
             'X': [
                 # (Point(0, 0) + Line(4, 4) + Point(4, 0) + Line(-4, 4)), NO
                 (Point(0, 0) + Line(4, 4) + Point(0, 4) + Line(4, -4)),  # 33
@@ -144,32 +165,6 @@ class DatasetExpressions:
                 (Point(0, 4) + Line(4, -4) + Point(0, 0) + Line(4, 4)), # 44
                 (Point(0, 4) + Line(4, -4) + Point(4, 4) + Line(-4, -4))  # 368
             ],
-            'I': [
-                (Point(0, 4) + Line(4, 0) + Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0)),
-                (Point(2, 4) + Line(0, -4) + Point(0, 0) + Line(4, 0) + Point(0, 4) + Line(4, 0)),
-                (Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0) + Point(2, 0) + Line(0, 4)),
-                (Point(2, 4) + Line(0, -4) + Point(0, 4) + Line(4, 0) + Point(0, 0) + Line(4, 0))
-            ],
-
-            'null': [
-                (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(4, 1) + Line(-8, -8)),  # 410
-                (Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False) + Point(-4, -7) + Line(8, 8)),  # 118
-            ],
-            'pitchfork': [
-                (Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False) + Point(0, 4) + Line(0, -4)),
-                (Point(0, 4) + Line(0, -4) + Point(-2, 4) + Arc(2, -2, cw=False) + Arc(2, 2, cw=False))
-            ],
-
-            'six_point_star': [
-                (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2,4)),
-                (Point(-2, -1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2,4)),
-                (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2,4)),
-                (Point(-2, 1) + Line(4, 0) + Line(-2, -4) + Line(-2, 4) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0)),
-                (Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0) + Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
-                (Point(-2, 1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(-2, -2) + Line(2, 4) + Line(2, -4) + Line(-4, 0)),
-                (Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4) + Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0)),
-                (Point(-2, -1) + Line(2, -4) + Line(2, 4) + Line(-4, 0) + Point(0, 0) + Line(-2, -4) + Line(4, 0) + Line(-2, 4))
-            ]
         }
 
     @staticmethod
