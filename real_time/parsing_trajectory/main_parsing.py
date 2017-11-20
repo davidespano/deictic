@@ -2,6 +2,8 @@
 # Csvdataset
 #from real_time.parsing_trajectory.csv_dataset import CsvDataset
 from dataset.csvDataset import CsvDataset
+# Test
+from test.test import Test, Result
 # Kalman filter
 from pykalman import KalmanFilter
 # Parsing trajectory definition
@@ -9,9 +11,10 @@ from real_time.parsing_trajectory.trajectory_parsing import Parsing
 from real_time.parsing_trajectory.model_factory import Model
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
-debug = 1
+debug = 2
 
 if debug == 0:
 
@@ -75,39 +78,59 @@ if debug == 0:
 
 if debug == 1:
     # Get dataset
-    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
+    input_dir = base_dir + "raw/"
+    output_dir = base_dir + "parsed/"
     directories = ["circle/","rectangle/"]
-    files = {}
 
     for directory in directories:
-        dataset = CsvDataset(base_dir+directory)
-        files[directory] = []
+        dataset = CsvDataset(input_dir+directory)
         # start
         print("Start "+directory)
         sequences = dataset.readDataset()
-        for index in range(0,5):
+        len_files = len(sequences)
+        for index in range(0,len_files):
             sequence = sequences[index]
             # Get original sequence 2D
             original_sequence = sequence[0][:,[0,1]]
-
-            # Result parsing
-            files[directory].append(Parsing.parsingLine(original_sequence))
+            # Get file name
+            name = sequence[1]
+            # Parse the sequence and save it
+            if not os.path.exists(output_dir+directory):
+                os.makedirs(output_dir+directory)
+            Parsing.parsingLine(original_sequence, flag_save=True, path=output_dir+directory+name)
         # end
         print("End "+directory)
 
-    # Create and train hmm
-    hmm = []
-    for directory in files.keys():
-        # create hmm
-        model = Model(n_states = 6, n_features = 1, name = directory)
-        # get samples
-        num_samples_train = int((len(files[directory])*6)/10)
-        samples = []
-        for index in range(0, num_samples_train):
-            samples.append(files[directory][index])
-        # train
-        model.train(samples)
 
+if debug == 2:
+    # % Num train and num test
+    quantity_train = 6
+    quantity_test = 10-quantity_train
+    # Get dataset
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
+    directories = {
+        "circle/": [CsvDataset(base_dir+"circle/")],
+        "rectangle/": [CsvDataset(base_dir+"rectangle/")]
+    }
+
+    # Create and train hmm
+    hmm = {}
+    for directory in directories.keys():
+        hmm[directory] = []
+        for dataset in directories[directory]:
+            sequences = dataset.readDataset(type=str)
+            # create hmm
+            model = Model(n_states = 6, n_features = 1, name = directory)
+            # get samples
+            num_samples_train = int((len(sequences)*quantity_train)/10)
+            samples = (sequence[0] for sequence in sequences[0:num_samples_train])
+            # train
+            model.train(samples)
+            # add hmm to dictionary
+            hmm[directory].append(model.getModel())
     # Test
+    result = Test.getInstance().offlineTest(gesture_hmms=hmm, gesture_datasets=directories, type=str)
+
 
 

@@ -125,7 +125,7 @@ class Test():
             Test.__singleton = Test()
         return Test.__singleton
 
-    def offlineTestExpression(self, gesture_expressions, gesture_datasets):
+    def offlineTestExpression(self, gesture_expressions, gesture_datasets, type=float):
         """
             offlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
@@ -138,9 +138,9 @@ class Test():
         # creates models
         gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
         # start comparison
-        return self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        return self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def offlineTest(self, gesture_hmms, gesture_datasets):
+    def offlineTest(self, gesture_hmms, gesture_datasets, type=float):
         """
             offlineTest compares gesture hmms each one and return the resulted confusion matrix.
         :param gesture_hmms: a dictionary of hidden markov models (key is the gesture label, values are his expression models).
@@ -165,12 +165,12 @@ class Test():
             # for each dataset
             for gesture_dataset in gesture_datasets:
                 # for each dataset's file
-                for sequence in gesture_dataset.readDataset():
+                for sequence in gesture_dataset.readDataset(type=type):
                     self.__comparison(sequence=sequence[0], dataset_label=gesture_label)
         # return comparison results
         return self.result
 
-    def onlineTestExpression(self, gesture_expressions, gesture_datasets):
+    def onlineTestExpression(self, gesture_expressions, gesture_datasets, type=float):
         """
             onlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
@@ -180,9 +180,9 @@ class Test():
         # creates models
         gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
         # start comparison
-        return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, gesture_hmms, gesture_datasets): pass
+    def onlineTest(self, gesture_hmms, gesture_datasets, type=float): pass
 
     ### Private methods ###
     def __createModel(self, gesture_expressions):

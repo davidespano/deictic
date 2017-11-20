@@ -23,14 +23,29 @@ class Model():
         self.model = model
 
     def train(self, samples):
+        """
+
+        :param samples:
+        :return:
+        """
+        # Check parameters
         # Train
-        self.model.fit(samples, use_pseudocount=True)
+        for sample in samples:
+            self.model.fit(sample, use_pseudocount=True)
+
+    def plot_sample(self, n_samples = 1):
+        for i in range(1, n_samples):
+            sequence = self.model.sample()
+            print(sequence)
+
+    def getModel(self):
+        return self.model
 
     # Private Models #
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
         # default init of missing emission distributions
         for i in range(len(emissions), n_States):
-            emissions.append(DiscreteDistribution({'A': 0.40, 'B': 0.40, 'O': 0.199, '0':0.001}))
+            emissions.append(DiscreteDistribution({'A0': 0.40, 'B0': 0.10, 'B1': 0.10, 'B2': 0.10, 'B3': 0.10, 'O0': 0.2}))
         # default init of missing state names
         cl_state = state_names[:]
         for i in range(len(state_names), n_States):
@@ -41,7 +56,6 @@ class Model():
             states.append(State(emissions[i], cl_state[i]))
             model.add_state(states[i])
         return states
-
 
 
 ########## Emissions #########

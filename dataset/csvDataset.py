@@ -48,7 +48,7 @@ class CsvDataset:
         """ Returns an iterator on all csv files in a dataset """
         return DatasetIterator(self.dir)
 
-    def readDataset(self, d=False):
+    def readDataset(self, d=False, type=float):
         """ Returns a list of sequences, containing the samples in each file of the dataset"
 
         Returns
@@ -60,7 +60,7 @@ class CsvDataset:
         sequences = [];
         i = 0
         for filename in self.getDatasetIterator():
-            seq = self.readFile(filename);
+            seq = self.readFile(filename=filename, type=type);
             # Creates tuple
             tuple = [seq, filename]
             # Add tuple in sequences
@@ -70,7 +70,7 @@ class CsvDataset:
             i += 1
         return sequences;
 
-    def readFile(self, filename):
+    def readFile(self, filename, type=float):
         """ Reads a single file, returning the samples in a list
 
         Parameters
@@ -87,7 +87,7 @@ class CsvDataset:
         with open(self.dir + filename, "r") as f:
             reader = csv.reader(f, delimiter=',')
             vals = list(reader)
-            result = numpy.array(vals).astype('float')
+            result = numpy.array(vals).astype(type)
             return result
 
     def read_ten_cross_validation_dataset(self, inputDir, type, k = 0, model_index = None):

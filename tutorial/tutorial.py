@@ -62,15 +62,17 @@ def thirdExample():
         'asterisk': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/asterisk/")],
         'D': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/D/")],
         'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
-        'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/H/")],
+        'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
         'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'line': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
     }
 
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
@@ -78,7 +80,7 @@ def thirdExample():
     # show result through confusion matrix
     results.plot()
     # save result on csv file
-    #results.save(path=None)
+    results.save(path=None)
 
 
 

@@ -8,6 +8,7 @@ import numpy as np
 # Plot
 import matplotlib.pyplot as plt
 
+
 class MathUtils():
     # todo: check parameters
     @staticmethod
@@ -74,35 +75,36 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-        #threshold_a = 0.009
+        threshold_a = 0.0025
         # Parsing line
-        for t in range(1, len(self.__sequence) - 1, 1):
+        for t in range(1, len(self.__sequence)-1, 1):
             # Compute delta
-            # num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
-            # num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
-            # num = MathUtils.dot(num1, num2)
-            # den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
-            # den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
-            # den = den1 * den2
-            # delta = 1 - (num / den)
+            num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+            num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+            num = MathUtils.dot(num1, num2)
+            den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+            den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+            den = den1 * den2
+            delta = 1 - (num / den)
 
             # compute area
-            a = self.__sequence[t-1]
-            b = self.__sequence[t]
-            c = self.__sequence[t + 1]
-            point_x = [a[0], b[0], c[0]]
-            point_y = [a[1], b[1], c[1]]
-            max_x = max(point_x)
-            min_x=min(point_x)
-            max_y=max(point_y)
-            min_y=min(point_y)
-            area = (a[0] * (b[1]-c[1])) + (b[0] * (c[1]-a[1])) + (c[0] * (a[1]-b[1]))
-            delta = math.fabs(area/2) / math.fabs((max_x-min_x) * (max_y-min_y))
+            # a = self.__sequence[t-1]
+            # b = self.__sequence[t]
+            # c = self.__sequence[t + 1]
+            # point_x = [a[0], b[0], c[0]]
+            # point_y = [a[1], b[1], c[1]]
+            # max_x = max(point_x)
+            # min_x=min(point_x)
+            # max_y=max(point_y)
+            # min_y=min(point_y)
+            # area = (a[0] * (b[1]-c[1])) + (b[0] * (c[1]-a[1])) + (c[0] * (a[1]-b[1]))
+            # delta = math.fabs(area/2) / math.fabs((max_x-min_x) * (max_y-min_y))
 
             #print(str(max_x) + " - " + str(min_x)+ " - " + str(max_y)+ " - " + str(min_y)+" - " + str(delta))
+
             # Check delta
             if delta < threshold_a:
-                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
+                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
         return self.__labels
 
     def algorithm2(self, threshold_b = None):
@@ -111,7 +113,7 @@ class Trajectory():
         :param threshold_b:
         :return:
         """
-        for t in range(1, len(self.__sequence)-2):
+        for t in range(1, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
                 # assigned label
@@ -126,7 +128,7 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(2, len(self.__sequence)-2):
+        for t in range(1, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
@@ -139,7 +141,7 @@ class Trajectory():
         :return:
         """
         #
-        for t in range(2, len(self.__sequence)-2):
+        for t in range(1, len(self.__sequence)-2):
             if self.__labels[t] == Trajectory.TypePrimitive.LINE.value:
                 self.__descriptors[t] = 1
             elif self.__labels[t] == Trajectory.TypePrimitive.ARC.value:
@@ -167,7 +169,7 @@ class Trajectory():
         # return self.__primitives
         indexes = []
         indexes.append(1)
-        for index in range(2, len(self.__sequence) - 1):
+        for index in range(2, len(self.__sequence)):
             if self.__labels[index] != self.__labels[index - 1] or index == len(self.__sequence)-2:
                 self.__quantizationIntervals(indexes=indexes, beta=beta)
                 indexes.clear()
@@ -246,7 +248,6 @@ class Trajectory():
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             self.__labels[index] = self.__labels[index]+str(interval_index)
 
-
 '''
     This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
 '''
@@ -254,12 +255,18 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence):
+    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
-        :param sequence:
+        :param sequence: the sequence to be parsed.
+        :param flag_plot: does the user want to plot the obtained sequence?
+        :param flag_save: does the user want to save the obtained sequence?
         :return:
         """
+        # Check parameters
+        if not isinstance(sequence, np.ndarray):
+            raise Exception("sequence must be a numpy ndarray.")
+
         # Kalmar smoother and threshold for algorithm 1
         smoothed_sequence, threshold_a = Parsing.__kalmanSmoother(sequence)
         # trajectory
@@ -273,11 +280,14 @@ class Parsing():
         # Descriptor
         f = trajectory.descriptorTrajectory()
         # Sub primitives
-        #list = trajectory.findSubPrimitives(beta=4)
+        list = trajectory.findSubPrimitives(beta=4)
 
         # Plot data
-        #Parsing.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
-        return list
+        if flag_plot:
+            Parsing.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
+        if flag_save:
+            Parsing.__save(label_list=list, path=path)
+        return trajectory
 
     @staticmethod
     def __kalmanSmoother(original_sequence):
@@ -346,16 +356,38 @@ class Parsing():
         # Plotting #
         fig, ax = plt.subplots(figsize=(10, 15))
         # plot original sequence
-        #original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
+        original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
         # plot smoothed sequence
         smooth = plt.plot(smoothed_sequence[:, 0], smoothed_sequence[:,1], color='r')
         # label
         for i in range(1, len(smoothed_sequence)-1):
             ax.annotate(label_list[i-1], (smoothed_sequence[i, 0], smoothed_sequence[i, 1]))
         # legend
-        #plt.legend((original[0], smooth[0]), ('true', 'smooth'), loc='lower right')
+        plt.legend((original[0], smooth[0]), ('true', 'smooth'), loc='lower right')
         plt.axis('equal')
         plt.show()
+
+    @staticmethod
+    def __save(label_list, path):
+        """
+
+        :param label_list:
+        :param path:
+        :return:
+        """
+        # Check parameters
+        if not isinstance(path, str):
+            raise Exception("The parameter path must be string.")
+        if not isinstance(label_list, list):
+            raise Exception("label_list must be a list of string.")
+        # Remove first and last element from label list
+        del label_list[0]
+        del label_list[-1]
+        del label_list[-1]
+        # Open and write file
+        file = open(path, 'w')
+        for item in label_list:
+            file.write(item+"\n")
 
 
 
