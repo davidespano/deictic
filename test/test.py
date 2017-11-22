@@ -1,8 +1,10 @@
 import numpy
 import sys
+# Plotting
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import itertools
+# Deictic
 from gesture import ModelFactory
 from dataset import CsvDataset
 
@@ -17,7 +19,7 @@ class Result():
         if not isinstance(gesture_labels, list):
             raise Exception("name_gestures must be a list of object.")
         # gesture_labels
-        self.labels = gesture_labels
+        self.labels = sorted(gesture_labels)
         # array (the core of the confusion matrix)
         self.array = numpy.zeros((len(self.labels), len(self.labels)), dtype=int)
 
@@ -54,7 +56,7 @@ class Result():
         # Save confusion matrix
         array_to_save.tofile(path)
 
-    def plot(self, normalize=False, title="Confusion Matrix", cmap=plt.cm.Greens):
+    def plot(self, normalize=False, title="Confusion Matrix", cmap=plt.cm.Blues):
         """
             This function prints and plots the confusion matrix.
             Normalization can be applied by setting `normalize=True`.
@@ -169,7 +171,7 @@ class Test():
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
                     sequences = [sequence[0] for sequence in dataset.readDataset(type=type)]
-                elif isinstance(dataset, numpy.ndarray):
+                elif isinstance(dataset, (numpy.ndarray, list)):
                     sequences = [dataset]
                 else:
                     raise Exception("gesture dataset must be a CsvDataset object or a numpy ndarray!")
@@ -210,30 +212,48 @@ class Test():
         """
         # Get each sequence
         for sequence in sequences:
-            index_label = Test.__compare(sequence, self.gesture_hmms)
+            index_label = Test.compare(sequence, self.gesture_hmms)
             # Update results
             if index_label != None:
                 self.result.update(row_label=dataset_label, column_label=index_label)
 
     @staticmethod
-    def __compare(sequence, gesture_hmms):
+    def compare(sequence, gesture_hmms, return_log_probabilities = False):
         """
             given a sequence, this method computes the log probability for each model and returns the model with the highest norm log probability.
-        :param sequence:
-        :param gesture_hmms:
-        :return:
+        :param sequence: a sequence of frame which describes an user movement.
+        :param gesture_hmms: a dictionary of hidden markov models ({'gesture_label':[hmm_1, hmm_2, ....]).
+        :param return_log_probabilities: this boolean indicates the label of the best compared model or also the norm log probabilities of each model for the passed sequence.
+        :return: the model label with the best norm log probability,
         """
-        # Max probability
+        # Max probability "global"
         max_norm_log_probability = -sys.maxsize
+        local_norm_log_probabilty = -sys.maxsize
+        # Model label with the best norm log proability for that sequence
         index_label = None
+        # Log probability values
+        log_probabilities = {}
+
         # Compute log probability for each model
         for gesture_label, models in gesture_hmms.items():
+            # Max probability "local"
+            local_norm_log_probabilty = -sys.maxsize
             for model in models:
-                # Computes sequence's log-probability and normalized
+                # Compute sequence's log-probability and normalized
                 log_probability = model.log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
-                # Checks which is the best result
-                if (norm_log_probability > max_norm_log_probability):
-                    max_norm_log_probability = norm_log_probability
-                    index_label = gesture_label
-        return index_label
+                # Check which is the best 'local' model
+                if norm_log_probability > local_norm_log_probabilty:
+                    local_norm_log_probabilty = norm_log_probability
+            # Collect additional data, if necessary (whether additional_data is true)
+            if return_log_probabilities:
+                log_probabilities[gesture_label] = local_norm_log_probabilty
+            # Check which is the best model
+            if (local_norm_log_probabilty > max_norm_log_probability):
+                max_norm_log_probability = norm_log_probability
+                index_label = gesture_label
+        # Comparison completed, index_label contains the best global model while log_probabilities the norm log probabilities of each model for the passed sequence.
+        if not return_log_probabilities:
+            return index_label
+        else:
+            return index_label, log_probabilities

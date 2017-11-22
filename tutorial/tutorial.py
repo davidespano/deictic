@@ -9,14 +9,14 @@ def firstExample():
         shows how to describe a gesture with Deictic and create its model.
     '''
     # describe gesture swipe_right through deictic
-    gesture_expressions = {
+    expressions = {
             'swipe_right':
                 [
                     Point(0,0)+Line(3,0)
                 ]
             }
     # create deictic model for swipe_right
-    hmm_swipe_right = ModelFactory.createHmm(gesture_expressions = gesture_expressions, num_states = 6, num_samples = 20)
+    hmm_swipe_right = ModelFactory.createHmm(expressions = expressions, num_states = 6, num_samples = 20)
     print(hmm_swipe_right)
 
 
@@ -54,7 +54,7 @@ def thirdExample():
         in addition to 1$ multistroke, 1$ unistroke dataset (http://depts.washington.edu/madlab/proj/dollar/index.html),
         leap motion unica dataset (from the University of Cagliari and created by prof. Lucio Davide Spano) and Shrec2017(http://www-rech.telecom-lille.fr/shrec2017-hand/).
     '''
-    # get the gesture expressions which describe 1$ unistroke dataset
+    # get the gesture expressions which describe 1$ multistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset= DatasetExpressions.TypeDataset.multistroke_1dollar)
     # get gesture datasets
     gesture_dataset = {
@@ -64,14 +64,14 @@ def thirdExample():
         'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
         'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
         'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
-        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
-        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
-        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
-        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
-        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
-        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
-        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
+        # 'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
+        # 'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
+        # 'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
+        # 'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
+        # 'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
+        # 'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
+        # 'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
+        # 'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
     }
 
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
@@ -81,7 +81,22 @@ def thirdExample():
     # save result on csv file
     results.save(path=None)
 
+def fourthExample():
+    '''
+
+    :return:
+    '''
+    # get the gesture expressions which describe 1$ unistroke dataset
+    gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
+    # create hmms
+    gesture_hmms = ModelFactory.createHmm(expressions=gesture_expressions)
+    # get sequence test (by using the first model of circle for generating a sample)
+    sequence_test = gesture_hmms['circle'][0].sample()
+    # compare hmms and show the computed log probabilities for each gesture
+    index_label, log_probabilities = Test.compare(sequence=sequence_test, gesture_hmms=gesture_hmms, return_log_probabilities=True)
+    print("The gesture with the highest log probabilities value is " +index_label)
+    print(log_probabilities)
 
 
-
-thirdExample()
+# Start example
+fourthExample()

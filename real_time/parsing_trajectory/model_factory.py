@@ -31,10 +31,10 @@ class Model():
         # Check parameters
         # Train
         for sample in samples:
-            self.model.fit(sample, use_pseudocount=True)
+            self.model.fit(sample, use_pseudocount=False)
 
     def plot_sample(self, n_samples = 1):
-        for i in range(1, n_samples):
+        for i in range(0, n_samples):
             sequence = self.model.sample()
             print(sequence)
 
@@ -45,7 +45,7 @@ class Model():
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
         # default init of missing emission distributions
         for i in range(len(emissions), n_States):
-            emissions.append(DiscreteDistribution({'A0': 0.40, 'B0': 0.10, 'B1': 0.10, 'B2': 0.10, 'B3': 0.10, 'O0': 0.2}))
+            emissions.append(DiscreteDistribution({'A':0.40, 'B':0.40, 'O':0.2}))#{'A0':0.40, 'B0':0.10, 'B1':0.10, 'B2':0.10, 'B3':0.10, 'O0':0.2}
         # default init of missing state names
         cl_state = state_names[:]
         for i in range(len(state_names), n_States):

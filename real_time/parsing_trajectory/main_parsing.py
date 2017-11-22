@@ -104,6 +104,14 @@ if debug == 1:
 
 
 if debug == 2:
+    def convertList(list_label):
+        new_list = []
+        for item in list_label:
+            new_list.append(str(item[0]))
+            #c = ord(item[0])
+            #new_list.append([c])
+        return new_list
+
     # % Num train and num test
     quantity_train = 6
     quantity_test = 10-quantity_train
@@ -124,16 +132,26 @@ if debug == 2:
             model = Model(n_states = 6, n_features = 1, name = directory)
             # get train samples
             num_samples_train = int((len(sequences)*quantity_train)/10)
-            samples = [sequence[0] for sequence in sequences[0:num_samples_train]]
+            samples = [convertList(sequence[0]) for sequence in sequences[0:num_samples_train]]
             # train
-            model.train(samples)
-            # get test samples
-            gesture_datasets[directory] = [sequence[0] for sequence in sequences[num_samples_train+1:-1]]
+            if "rectangle/" in directory:
+                print("train "+directory)
+                model.train(samples)
             # add hmm to dictionary
             gesture_hmms[directory] = [model.getModel()]
+            # get test samples
+            gesture_datasets[directory] = [convertList(sequence[0]) for sequence in sequences[num_samples_train+1:-1]]
 
-    result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=str)
-    result.plot()
+    #result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=str)
+    #result.plot()
+    for key, values in gesture_datasets.items():
+        for value in values:
+            label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
+            print("Gesture recognized is " + label + " - gesture tested " + label)
+            print(array)
+
+
+
 
 
 

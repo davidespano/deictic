@@ -14,7 +14,7 @@ class ModelFactory():
         """
         # Check parameters
         if not isinstance(expressions, dict):
-            raise Exception("expressions must be a dictionary of sequences defined through deictic primitives.")
+            raise Exception("expressions must be a dictionary of sequences defined through deictic primitives:'gesture_name':[exp1, exp2, ...]")
         if not isinstance(num_states, int):
             raise Exception("num_states must be int.")
         if not isinstance(num_samples, int):

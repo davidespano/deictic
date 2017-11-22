@@ -278,9 +278,9 @@ class Parsing():
         # Algorithm 3 (localizing boundary points)
         list = trajectory.algorithm3()
         # Descriptor
-        f = trajectory.descriptorTrajectory()
+        #f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list = trajectory.findSubPrimitives(beta=4)
+        #list = trajectory.findSubPrimitives(beta=4)
 
         # Plot data
         if flag_plot:
