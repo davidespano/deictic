@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 
 
 class MathUtils():
+    directionCos = [np.float64(i) for i in range(-180,180,45)]
     # todo: check parameters
     @staticmethod
     def findNearest(array, value):
-        idx = (np.abs(array - value)).argmin()
+        idx = (np.abs(array - value).argmin())
         return idx
     @staticmethod
     def surfaceTriangle(side_a, side_b, side_c):
@@ -46,9 +47,8 @@ class Trajectory():
     class TypePrimitive(Enum):
         NONE = "0"
         LINE = "A"
-        ARC = "B"
+        ARC = "B" # intervals
         BOUNDARY = "O"
-
 
     def __init__(self, sequence):
         """
@@ -171,7 +171,10 @@ class Trajectory():
         indexes.append(1)
         for index in range(2, len(self.__sequence)):
             if self.__labels[index] != self.__labels[index - 1] or index == len(self.__sequence)-2:
-                self.__quantizationIntervals(indexes=indexes, beta=beta)
+                if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
+                    self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
+                elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
+                    self.__quantizationIntervalsLine(indexes=indexes)
                 indexes.clear()
             indexes.append(index)
         return self.__labels
@@ -213,6 +216,7 @@ class Trajectory():
         return 3 * ((curvature_prec - curvature_next) / (
                               2 * side_a + 2 * side_b + side_d + side_g))
 
+    #### not used
     def __groupLabels(self, beta):
         """
 
@@ -224,11 +228,11 @@ class Trajectory():
         for index in range(2, len(self.__sequence) - 1):
             if self.__labels[index] != self.__labels[index - 1]:
                 #self.__primitives.append(Primitive(points=points, label=self.__labels[index-1]))
-
                 points.clear()
             points.append(index)
+    #### not used
 
-    def __quantizationIntervals(self, indexes=[], beta=1):
+    def __quantizationIntervalsArc(self, indexes=[], beta=1):
         """
 
         :param beta:
@@ -246,7 +250,39 @@ class Trajectory():
         # assign interval
         for index in indexes:
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
-            self.__labels[index] = self.__labels[index]+str(interval_index)
+            self.__labels[index] = chr(ord(self.__labels[index])+interval_index+17)
+            #print(self.__labels[index] + " - " + str(interval_index))
+
+    def __quantizationIntervalsLine(self, indexes=[]):
+        """
+
+        :param indexes:
+        :param beta:
+        :return:
+        """
+        # Get points
+        start_point = self.__sequence[indexes[0]-1]
+        end_point = self.__sequence[indexes[-1]]
+        # compute angle
+        # a = MathUtils.dot(pre_point, start_point)
+        # i = MathUtils.magn(pre_point)
+        # e = MathUtils.magn(start_point)
+        # c = i * e
+        # interval_cos = math.acos(np.float64(a / c))
+        # interval_sen = math
+        # interval_direction = MathUtils.findNearest(MathUtils.directionCos, interval_cos)
+        point = MathUtils.sub(end_point, start_point)
+        degree = math.degrees(math.atan2(point[1], point[0]))
+        interval = np.float64(degree)
+        interval_direction = MathUtils.findNearest(MathUtils.directionCos, interval)
+        for index in indexes:
+            string = chr(ord(self.__labels[index])+interval_direction+4)
+            print(string+" - "+str(interval_direction)+" - "+str(interval))
+            self.__labels[index] = string
+
+
+
+
 
 '''
     This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
@@ -278,9 +314,9 @@ class Parsing():
         # Algorithm 3 (localizing boundary points)
         list = trajectory.algorithm3()
         # Descriptor
-        #f = trajectory.descriptorTrajectory()
+        f = trajectory.descriptorTrajectory()
         # Sub primitives
-        #list = trajectory.findSubPrimitives(beta=4)
+        list = trajectory.findSubPrimitives(beta=4)
 
         # Plot data
         if flag_plot:

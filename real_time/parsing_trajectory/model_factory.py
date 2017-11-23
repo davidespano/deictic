@@ -102,23 +102,22 @@ class Model():
         # model.add_transition(s1, s6, 0.5)
 
         # Ergodic
-        states = self.__fix_parameters(name, n_states, [], [], model);
-        p_tr = 1 / (n_states + 2)
-        for i in range(0, n_states):
-            model.add_transition(model.start, states[i], p_tr)
-            model.add_transition(states[i], model.end, p_tr)
-            for j in range(0, n_states):
-                model.add_transition(states[i], states[j], p_tr)
-
-           # Forward
         # states = self.__fix_parameters(name, n_states, [], [], model);
-        # for i in range(0, n_states - 1):
-        #     model.add_transition(model.start, states[i], n_states/1)
-        #     for j in range(0, n_states - 1):
-        #         model.add_transition(states[i], states[j], n_states/1)
+        # p_tr = 1 / (n_states + 2)
+        # for i in range(0, n_states):
+        #     model.add_transition(model.start, states[i], p_tr)
+        #     model.add_transition(states[i], model.end, p_tr)
+        #     for j in range(0, n_states):
+        #         model.add_transition(states[i], states[j], p_tr)
+
+        # Forward
+        states = self.__fix_parameters(name, n_states, [], [], model);
+        for i in range(0, n_states - 1):
+            model.add_transition(model.start, states[i], n_states/1)
+            for j in range(0, n_states - 1):
+                model.add_transition(states[i], states[j], n_states/1)
 
         model.bake()
-        model.plot()
         self.model = model
 
     def train(self, samples):
@@ -129,8 +128,7 @@ class Model():
         """
         # Check parameters
         # Train
-        for sample in samples:
-            self.model.fit(sample)#,use_pseudocount=True)
+        self.model.fit(samples,use_pseudocount=True)
 
     def plot_sample(self, n_samples = 1):
         for i in range(0, n_samples):
@@ -144,8 +142,14 @@ class Model():
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
         # default init of missing emission distributions - {'A': 0.40, 'B': 0.40, 'O': 0.20} - {'A':0.40, 'U':0.10, 'V':0.10, 'Z':0.10, 'X':0.10, 'O':0.2}
         for i in range(len(emissions), n_States):
-            emissions.append(DiscreteDistribution({'A': 0.40, 'B': 0.40, 'O': 0.20}))
-            #emissions.append(DiscreteDistribution({'A':0.40, 'U':0.10, 'V':0.10, 'Z':0.10, 'X':0.10, 'O':0.2}))
+            # 3 caratteri
+            #distribution_values = numpy.random.dirichlet(numpy.ones(3), size=1)[0]
+            #emissions.append(DiscreteDistribution({'A': distribution_values[0], 'B':distribution_values[1], 'O':distribution_values[2]}))
+            # 6 caratteri
+            distribution_values = numpy.random.dirichlet(numpy.ones(6), size=1)
+            emissions.append(DiscreteDistribution({'A':distribution_values[0][0], 'B':distribution_values[0][1],
+                                                   'C':distribution_values[0][2], 'D':distribution_values[0][3],
+                                                   'E':distribution_values[0][4], 'O':distribution_values[0][5]}))
 
         # default init of missing state names
         cl_state = state_names[:]

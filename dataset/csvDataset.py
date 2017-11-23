@@ -90,7 +90,7 @@ class CsvDataset:
             result = numpy.array(vals).astype(type)
             return result
 
-    #######
+    ####### rivedere
     def read_ten_cross_validation_dataset(self, inputDir, type, k = 0, model_index = None):
         files = open(inputDir+type+'_ten-cross-validation_{}.txt'.format(str(k))).readlines()
         files = files[0].split('/')
@@ -99,7 +99,7 @@ class CsvDataset:
             seq = self.readFile(filename);
             sequences.append(seq)
         return  sequences
-    #######
+    ####### rivedere
 
     def addTransform(self, transform):
         self.compositeTransform.addTranform(transform)
