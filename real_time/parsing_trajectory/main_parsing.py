@@ -17,7 +17,7 @@ import math
 
 import time
 
-debug = 1
+debug = 2
 
 if debug == 0:
 
@@ -84,9 +84,9 @@ if debug == 1:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
     input_dir = base_dir + "raw/"
     output_dir = base_dir + "parsed/"
-    directories = ["rectangle"]
-    #directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
-    #               "right_curly_brace", "right_sq_bracket", "star", "swipe", "triangle", "v", "x"]
+    #directories = ["rectangle"]
+    directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
+                   "right_curly_brace", "right_sq_bracket", "star", "swipe", "triangle", "v", "x"]
 
     for directory in directories:
         dataset = CsvDataset(input_dir+directory+"/")
@@ -103,7 +103,7 @@ if debug == 1:
             # Parse the sequence and save it
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
-            Parsing.parsingLine(original_sequence, flag_plot=True, path=output_dir+directory+"/"+name)
+            Parsing.parsingLine(original_sequence, flag_save=True, path=output_dir+directory+"/"+name)
         # end
         print("End "+directory)
 

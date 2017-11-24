@@ -5,13 +5,81 @@ from pykalman import KalmanFilter
 import math
 # Numpy
 import numpy as np
+import numpy.linalg as la
 # Plot
 import matplotlib.pyplot as plt
 
 
 class MathUtils():
-    directionCos = [np.float64(i) for i in range(-180,180,45)]
+
+    class Directions(Enum):
+        East = 0
+        NorthEast = 1
+        North = 2
+        NorthWest = 3
+        West = 4
+        SouthWest = 5
+        South = 6
+        SouthEast = 7
+
+    directionsVect = {
+        Directions.North:[0,1],
+        Directions.South:[0,-1],
+        Directions.West:[-1,0],
+        Directions.East:[1,0],
+        Directions.NorthEast:[.5,.5],
+        Directions.NorthWest:[-.5,.5],
+        Directions.SouthEast:[.5,-.5],
+        Directions.SouthWest:[-.5,-.5]
+    }
+
     # todo: check parameters
+    @staticmethod
+    def findDirection(point):
+        north = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.North])
+        north_east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.NorthEast])
+        north_west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.NorthWest])
+        south = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.South])
+        south_east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.SouthEast])
+        south_west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.SouthWest])
+        east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.East])
+        west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.West])
+        # North
+        if north > south and north > east and north > west:
+            if north > north_west and north > north_east:
+                return MathUtils.Directions.North.value
+            if north_west >= north and north_west > north_east:
+                return MathUtils.Directions.NorthWest.value
+            if north_east >= north and north_east > north_west:
+                return MathUtils.Directions.NorthEast.value
+
+        # South
+        if south > north and south > east and south > west:
+            if south > south_west and south > south_east:
+                return MathUtils.Directions.South.value
+            if south_west >= south and south_west > south_east:
+                return MathUtils.Directions.SouthWest.value
+            if south_east >= south and south_east > south_west:
+                return MathUtils.Directions.SouthEast.value
+        # East
+        if east > north and east > south and east > west:
+            if east > north_east and east > south_east:
+                return MathUtils.Directions.East.value
+            if north_east >= east and north_east > south_east:
+                return MathUtils.Directions.NorthEast.value
+            if south_east >= east and south_east > north_east:
+                return MathUtils.Directions.SouthEast.value
+        # West
+        if west > north and west > south and west > east:
+            if west > south_west and west > north_west:
+                return MathUtils.Directions.West.value
+            if south_west >= west and south_west > north_west:
+                return MathUtils.Directions.SouthWest.value
+            if north_west >= west and north_west > south_west:
+                return MathUtils.Directions.NorthWest.value
+        # error
+        return None
+
     @staticmethod
     def findNearest(array, value):
         idx = (np.abs(array - value).argmin())
@@ -37,6 +105,12 @@ class MathUtils():
     @staticmethod
     def distance(point_a, point_b):
         return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
+    @staticmethod
+    def normalize(point):
+        length = MathUtils.magn(point)
+        for index in range(0, len(point)):
+            point[index] = point[index]/length
+        return point
 
 
 
@@ -216,22 +290,6 @@ class Trajectory():
         return 3 * ((curvature_prec - curvature_next) / (
                               2 * side_a + 2 * side_b + side_d + side_g))
 
-    #### not used
-    def __groupLabels(self, beta):
-        """
-
-        :return:
-        """
-        self.__primitives = []
-        points = []
-        points.append(self.__sequence[1])
-        for index in range(2, len(self.__sequence) - 1):
-            if self.__labels[index] != self.__labels[index - 1]:
-                #self.__primitives.append(Primitive(points=points, label=self.__labels[index-1]))
-                points.clear()
-            points.append(index)
-    #### not used
-
     def __quantizationIntervalsArc(self, indexes=[], beta=1):
         """
 
@@ -263,22 +321,11 @@ class Trajectory():
         # Get points
         start_point = self.__sequence[indexes[0]-1]
         end_point = self.__sequence[indexes[-1]]
-        # compute angle
-        # a = MathUtils.dot(pre_point, start_point)
-        # i = MathUtils.magn(pre_point)
-        # e = MathUtils.magn(start_point)
-        # c = i * e
-        # interval_cos = math.acos(np.float64(a / c))
-        # interval_sen = math
-        # interval_direction = MathUtils.findNearest(MathUtils.directionCos, interval_cos)
-        point = MathUtils.sub(end_point, start_point)
-        degree = math.degrees(math.atan2(point[1], point[0]))
-        interval = np.float64(degree)
-        interval_direction = MathUtils.findNearest(MathUtils.directionCos, interval)
+        point_direction = MathUtils.sub(end_point, start_point)
+        interval_direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         for index in indexes:
-            string = chr(ord(self.__labels[index])+interval_direction+4)
-            print(string+" - "+str(interval_direction)+" - "+str(interval))
-            self.__labels[index] = string
+            #print(string+" - "+str(interval_direction)+" - "+str(point_direction))
+            self.__labels[index] = chr(ord(self.__labels[index])+interval_direction+4)
 
 
 

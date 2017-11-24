@@ -6,100 +6,11 @@ random.seed(0)
 
 class Model():
 
+    __chars = ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'O', 'R', 'S', 'T', 'U', 'V']
+
     def __init__(self, n_states = 0, n_features = 0, name=None):
         # Model
         model = HiddenMarkovModel(name)
-        # 3 states
-        # distributions - {'A': 0.40, 'B': 0.40, 'O': 0.20}
-        # a = DiscreteDistribution({'A': 0.795, 'B': 0.01, 'O': 0.195})
-        # b = DiscreteDistribution({'A': 0.01, 'B': 0.795, 'O': 0.195})
-        # o = DiscreteDistribution({'A': 0.495, 'B': 0.495, 'O': 0.01})
-        # # states
-        # s1 = State(a, name="A")
-        # s2 = State(b, name="U")
-        # s3 = State(o, name="V")
-        # model.add_states(s1, s2, s3)
-        #
-        # # transitions
-        # # start
-        # model.add_transition(model.start, s1, 0.45)
-        # model.add_transition(model.start, s2, 0.45)
-        # model.add_transition(model.start, s3, 0.1)
-        # # s1
-        # model.add_transition(s1, s1, 0.4)
-        # model.add_transition(s1, s2, 0.05)
-        # model.add_transition(s1, s3, 0.4)
-        # # s2
-        # model.add_transition(s2, s1, 0.05)
-        # model.add_transition(s2, s2, 0.5)
-        # model.add_transition(s2, s3, 0.45)
-        # # s3
-        # model.add_transition(s3, s1, 0.45)
-        # model.add_transition(s3, s2, 0.45)
-        # model.add_transition(s3, s3, 0.1)
-        # end
-
-        # 6 states
-        # # distributions - {'A': 0.40, 'U': 0.10, 'V': 0.10, 'Z': 0.10, 'X': 0.10, 'O': 0.2}
-        # a = DiscreteDistribution({'A': 0.50, 'U': 0.0, 'V': 0.0, 'Z': 0.0, 'X': 0.0, 'O': 0.5})
-        # u = DiscreteDistribution({'A': 0.0, 'U': 0.20, 'V': 0.10, 'Z': 0.10, 'X': 0.10, 'O': 0.5})
-        # v = DiscreteDistribution({'A': 0.0, 'U': 0.10, 'V': 0.20, 'Z': 0.10, 'X': 0.10, 'O': 0.5})
-        # z = DiscreteDistribution({'A': 0.0, 'U': 0.10, 'V': 0.10, 'Z': 0.20, 'X': 0.10, 'O': 0.5})
-        # x = DiscreteDistribution({'A': 0.0, 'U': 0.10, 'V': 0.10, 'Z': 0.10, 'X': 0.20, 'O': 0.5})
-        # o = DiscreteDistribution({'A': 0.40, 'U': 0.10, 'V': 0.10, 'Z': 0.10, 'X': 0.10, 'O': 0.2})
-        #
-        # # states
-        # s1 = State(a, name="A")
-        # s2 = State(u, name="U")
-        # s3 = State(v, name="V")
-        # s4 = State(z, name="Z")
-        # s5 = State(x, name="X")
-        # s6 = State(o, name="O")
-        #
-        # model.add_states(s1, s2, s3, s4, s5, s6)
-        #
-        # # transitions
-        # d = 1/ 8
-        # # start
-        # model.add_transition(model.start, s1, 0.2)
-        # model.add_transition(model.start, s2, 0.2)
-        # model.add_transition(model.start, s3, 0.2)
-        # model.add_transition(model.start, s4, 0.2)
-        # model.add_transition(model.start, s5, 0.2)
-        # # s1
-        # model.add_transition(s1, s1, 0.5)
-        # # s2
-        # model.add_transition(s2, s2, 0.2)
-        # model.add_transition(s2, s3, 0.2)
-        # model.add_transition(s2, s4, 0.2)
-        # model.add_transition(s2, s5, 0.2)
-        # model.add_transition(s2, s6, 0.2)
-        # # s3
-        # model.add_transition(s3, s2, 0.2)
-        # model.add_transition(s3, s3, 0.2)
-        # model.add_transition(s3, s4, 0.2)
-        # model.add_transition(s3, s5, 0.2)
-        # model.add_transition(s3, s6, 0.2)
-        # # s4
-        # model.add_transition(s4, s2, 0.2)
-        # model.add_transition(s4, s3, 0.2)
-        # model.add_transition(s4, s4, 0.2)
-        # model.add_transition(s4, s5, 0.2)
-        # model.add_transition(s4, s6, 0.2)
-        # # s5
-        # model.add_transition(s5, s2, 0.2)
-        # model.add_transition(s5, s3, 0.2)
-        # model.add_transition(s5, s4, 0.2)
-        # model.add_transition(s5, s5, 0.2)
-        # model.add_transition(s5, s6, 0.2)
-        # # s6
-        # model.add_transition(s6, s1, 1/6)
-        # model.add_transition(s6, s2, 1/6)
-        # model.add_transition(s6, s3, 1/6)
-        # model.add_transition(s6, s4, 1/6)
-        # model.add_transition(s6, s5, 1/6)
-        # model.add_transition(s6, s6, 1/6)
-        # model.add_transition(s1, s6, 0.5)
 
         # Ergodic
         # states = self.__fix_parameters(name, n_states, [], [], model);
@@ -140,16 +51,12 @@ class Model():
 
     # Private Models #
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
-        # default init of missing emission distributions - {'A': 0.40, 'B': 0.40, 'O': 0.20} - {'A':0.40, 'U':0.10, 'V':0.10, 'Z':0.10, 'X':0.10, 'O':0.2}
         for i in range(len(emissions), n_States):
-            # 3 caratteri
-            #distribution_values = numpy.random.dirichlet(numpy.ones(3), size=1)[0]
-            #emissions.append(DiscreteDistribution({'A': distribution_values[0], 'B':distribution_values[1], 'O':distribution_values[2]}))
-            # 6 caratteri
-            distribution_values = numpy.random.dirichlet(numpy.ones(6), size=1)
-            emissions.append(DiscreteDistribution({'A':distribution_values[0][0], 'B':distribution_values[0][1],
-                                                   'C':distribution_values[0][2], 'D':distribution_values[0][3],
-                                                   'E':distribution_values[0][4], 'O':distribution_values[0][5]}))
+            distribution_values = numpy.random.dirichlet(numpy.ones(len(Model.__chars)), size=1)[0]
+            values = {}
+            for index in range(0, len(Model.__chars)):
+                values[Model.__chars[index]] = distribution_values[index]
+            emissions.append(DiscreteDistribution(values))
 
         # default init of missing state names
         cl_state = state_names[:]
