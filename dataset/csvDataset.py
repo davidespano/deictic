@@ -206,6 +206,7 @@ class CsvDataset:
         for filename in files:
             if sampleName == None or filename == sampleName:
                 with open(self.dir + filename, "r") as f:
+                    fig, ax = plt.subplots(figsize=(10, 15))
                     reader = csv.reader(f, delimiter=',')
                     vals = list(reader)
                     result = numpy.array(vals).astype('float')

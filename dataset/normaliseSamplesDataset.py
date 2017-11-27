@@ -1,5 +1,5 @@
 import csv
-import numpy
+import numpy as np
 import scipy
 import scipy.signal
 import re
@@ -7,6 +7,8 @@ from copy import copy, deepcopy
 from math import sin, cos, radians
 from .csvDataset import *
 from .geometry import *
+# Kalman filter
+from pykalman import KalmanFilter
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
@@ -377,7 +379,51 @@ class ResampleInSpaceTransform(DatasetTransform):
 
         return numpy.array(resampled)
 
+# Kalman
+class KalmanFilterTransform(DatasetTransform):
+    def __init__(self):
+        self.dir = None
 
+    def transform(self, sequence):
+        # Check parameters
+        # Apply kalmar smooth to original sequence
+        original_sequence = sequence[:,[0,1]]
+        return numpy.array(KalmanFilterTransform.setFilter(original_sequence[0]).smooth(original_sequence)[0])
+
+    @staticmethod
+    def setFilter(initial_point):
+        # Kalman filther
+        # specify parameters
+        random_state = np.random.RandomState(0)
+
+        # Transition matrix
+        transition_matrix = [
+            [1, 0],
+            [0, 1]
+        ]
+        transition_offset = [0, 0]
+        transition_covariance = np.eye(2)
+        # Observation matrix
+        observation_matrix = [
+            [1, 0],
+            [0, 1]
+        ]
+        observation_offset = [0, 0]
+        observation_covariance = np.eye(2) + random_state.randn(2, 2) * 0.1
+        # Initial state
+        initial_state_mean = [initial_point[0], initial_point[1]]
+        initial_state_covariance = [
+            [1, 0],
+            [0, 1]
+        ]
+        # Create Kalman Filter
+        kalman = KalmanFilter(
+            transition_matrix, observation_matrix, transition_covariance,
+            observation_covariance, transition_offset, observation_offset,
+            initial_state_mean, initial_state_covariance,
+            random_state=random_state
+        )
+        return kalman
 
 
 

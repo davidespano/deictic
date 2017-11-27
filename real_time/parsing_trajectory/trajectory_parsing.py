@@ -143,6 +143,9 @@ class Trajectory():
         self.__curvatures = [None for x in range(len(sequence))]
 
     # Methods #
+    def getSequences(self):
+        return self.__labels
+
     def algorithm1(self, threshold_a):
         """
             algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
@@ -202,11 +205,13 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(1, len(self.__sequence)-1):
-            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
+        for t in range(0, len(self.__sequence)-1):
+            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value or self.__labels[t] == 0:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
+        self.__labels[-1] = Trajectory.TypePrimitive.BOUNDARY.value
+
         return self.__labels
 
     def descriptorTrajectory(self):

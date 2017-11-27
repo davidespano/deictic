@@ -127,7 +127,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        #transform4 = RotateCenterTransform(traslationMode=True)
+        transform4 = RotateCenterTransform(traslationMode=True)
         if unistroke_mode:
             transform5 = ResampleInSpaceTransform(samples=gesture[1])
         else:
@@ -136,7 +136,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         dataset.addTransform(transform1)
         dataset.addTransform(transform2)
         dataset.addTransform(transform3)
-        #dataset.addTransform(transform4)
+        dataset.addTransform(transform4)
         dataset.addTransform(transform5)
 
         dataset.applyTransforms(output_dir)
@@ -150,8 +150,8 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
 baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 3
-n_sample = 20
+mode = 2
+n_sample = 10
 
 ########################################## Deictic Dataset ##########################################################
 # Unica
