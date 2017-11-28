@@ -27,10 +27,10 @@ class MathUtils():
         Directions.South:[0,-1],
         Directions.West:[-1,0],
         Directions.East:[1,0],
-        Directions.NorthEast:[.5,.5],
-        Directions.NorthWest:[-.5,.5],
-        Directions.SouthEast:[.5,-.5],
-        Directions.SouthWest:[-.5,-.5]
+        Directions.NorthEast:[math.sqrt(2)/2, math.sqrt(2)/2],
+        Directions.NorthWest:[-math.sqrt(2)/2, math.sqrt(2)/2],
+        Directions.SouthEast:[math.sqrt(2)/2, -math.sqrt(2)/2],
+        Directions.SouthWest:[-math.sqrt(2)/2, -math.sqrt(2)/2]
     }
 
     # todo: check parameters
@@ -343,7 +343,7 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
+    def parsingLine(sequence, sequence_resampled = None, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.
@@ -368,11 +368,30 @@ class Parsing():
         # Descriptor
         f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list = trajectory.findSubPrimitives(beta=4)
+        list_1 = trajectory.findSubPrimitives(beta=4)
+
+        if not sequence_resampled == None:
+            # Kalmar smoother and threshold for algorithm 1
+            sm_seq, threshold_a = Parsing.__kalmanSmoother(sequence_resampled)
+            # trajectory
+            trajectory = Trajectory(sm_seq)
+            # Algorithm 1 (find straight linear)
+            list = trajectory.algorithm1(threshold_a=threshold_a)
+            # Algorithm 2 (find plane arc)
+            list = trajectory.algorithm2(threshold_b=None)
+            # Algorithm 3 (localizing boundary points)
+            list = trajectory.algorithm3()
+            # Descriptor
+            f = trajectory.descriptorTrajectory()
+            # Sub primitives
+            list_2 = trajectory.findSubPrimitives(beta=4)
+
+
 
         # Plot data
         if flag_plot:
             Parsing.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
+            #Parsing.__plot(sequence, smoothed_sequence, list_1, sequence_resampled, list_2)
         if flag_save:
             Parsing.__save(label_list=list, path=path)
         return trajectory
@@ -456,6 +475,30 @@ class Parsing():
         plt.show()
 
     @staticmethod
+    def __plot(original_sequence, smoothed_sequence, label_list1, resampled_sequence, label_list2):
+        """
+
+        :return:
+        """
+        # Plotting #
+        fig, ax = plt.subplots(figsize=(10, 15))
+        # plot original sequence
+        original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
+        # plot smoothed sequence
+        smooth = plt.plot(smoothed_sequence[:, 0]+200, smoothed_sequence[:,1], color='r')
+        # plot resampled sequence
+        resampled = plt.plot(resampled_sequence[:, 0], resampled_sequence[:,1], color='g')
+        # label
+        for i in range(1, len(smoothed_sequence)-1):
+            ax.annotate(label_list1[i-1], (smoothed_sequence[i, 0]+200, smoothed_sequence[i, 1]))
+        for i in range(1, len(resampled_sequence)-1):
+            ax.annotate(label_list2[i-1], (resampled_sequence[i, 0], resampled_sequence[i, 1]))
+        # legend
+        plt.legend((original[0], smooth[0], resampled[0]), ('true', 'smooth', 'resampled'), loc='lower right')
+        plt.axis('equal')
+        plt.show()
+
+    @staticmethod
     def __save(label_list, path):
         """
 
@@ -468,10 +511,7 @@ class Parsing():
             raise Exception("The parameter path must be string.")
         if not isinstance(label_list, list):
             raise Exception("label_list must be a list of string.")
-        # Remove first and last element from label list
-        del label_list[0]
-        del label_list[-1]
-        del label_list[-1]
+
         # Open and write file
         file = open(path, 'w')
         for item in label_list:

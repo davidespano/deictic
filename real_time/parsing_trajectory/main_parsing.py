@@ -84,30 +84,40 @@ if debug == 0:
 if debug == 1:
     # Get dataset
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
-    #input_dir = base_dir + "raw/"
-    input_dir = base_dir + "resampled/"
+    input_dir = base_dir + "raw/"
+    #input_dir = base_dir + "resampled/"
     output_dir = base_dir + "parsed/"
-    directories = ["triangle"]
-    #directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
-    #               "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
+    #directories = ["triangle"]
+    directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
+                   "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
 
-    x = 40
     for directory in directories:
-        dataset = CsvDataset(input_dir+directory+"/")
+        # original
+        dataset_original = CsvDataset(input_dir+directory+"/")
+        sequence_original = dataset_original.readDataset()
+        # resampled
+        dataset_resampled = CsvDataset(input_dir+directory+"/")
+        resampledTransform = ResampleInSpaceTransform(samples=40)
+        dataset_resampled.addTransform(resampledTransform)
+        sequence_resampled = dataset_resampled.applyTransforms()
+
         # start
         print("Start "+directory)
-        sequences = dataset.readDataset()
-        len_files = len(sequences)
-        for index in range(0,len_files):
-            sequence = sequences[index]
+        #sequences = dataset.readDataset()
+        #len_files = len(sequences)
+        #for index in range(0,len_files):
+        for index in range(len(sequence_original)):
+            sequence = sequence_original[index]
             # Get original sequence 2D
             original_sequence = sequence[0][:,[0,1]]
+            # Get resampled sequence 2D
+            resampled_sequence = sequence_resampled[index][:,[0,1]]
             # Get file name
             name = sequence[1]
             # Parse the sequence and save it
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
-            Parsing.parsingLine(original_sequence, flag_plot=True, path=output_dir+directory+"/"+name)
+            Parsing.parsingLine(original_sequence, flag_save=True, path=output_dir+directory+"/"+name)
         # end
         print("End "+directory)
 
@@ -122,63 +132,45 @@ if debug == 2:
 
 
     # % Num train and num test
-    quantity_train = 1
+    quantity_train = 9
     # Get dataset
-    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
-        "arrow": [CsvDataset(base_dir + "arrow/")],
-        "caret": [CsvDataset(base_dir + "caret/")],
-        "check": [CsvDataset(base_dir+"check/")],
-        "circle": [CsvDataset(base_dir+"circle/")],
-        "delete_mark": [CsvDataset(base_dir + "delete_mark/")],
-        "left_curly_brace": [CsvDataset(base_dir + "left_curly_brace/")],
-        "left_sq_bracket": [CsvDataset(base_dir + "left_sq_bracket/")],
-        "pigtail": [CsvDataset(base_dir + "pigtail/")],
-        "question_mark": [CsvDataset(base_dir + "question_mark/")],
-        "rectangle": [CsvDataset(base_dir + "rectangle/")],
-        "right_curly_brace": [CsvDataset(base_dir + "right_curly_brace/")],
-        "right_sq_bracket": [CsvDataset(base_dir + "right_sq_bracket/")],
-        "star": [CsvDataset(base_dir + "star/")],
-        "triangle": [CsvDataset(base_dir + "triangle/")],
-        "v": [CsvDataset(base_dir + "v/")],
-        "x": [CsvDataset(base_dir + "x/")]
+        "arrow": CsvDataset(base_dir + "arrow/"),
+        "caret": CsvDataset(base_dir + "caret/"),
+        "check": CsvDataset(base_dir+"check/"),
+        "circle": CsvDataset(base_dir+"circle/"),
+        "delete_mark": CsvDataset(base_dir + "delete_mark/"),
+        "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/"),
+        "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/"),
+        "pigtail": CsvDataset(base_dir + "pigtail/"),
+        "question_mark": CsvDataset(base_dir + "question_mark/"),
+        "rectangle": CsvDataset(base_dir + "rectangle/"),
+        "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/"),
+        "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/"),
+        "star": CsvDataset(base_dir + "star/"),
+        "triangle": CsvDataset(base_dir + "triangle/"),
+        "v": CsvDataset(base_dir + "v/"),
+        "x": CsvDataset(base_dir + "x/")
     }
-    directories = {
-        "arrow": [CsvDataset(base_dir + "arrow/")],
-    }
-
-    # Create dataset
-    x = 20
-    datasets = {}
-    for directory in directories.keys():
-        # Init
-        datasets[directory] = []
-        for dataset in directories[directory]:
-            transform = KalmanFilterTransform()
-            transformResampling = ResampleInSpaceTransform(samples=x)
-            dataset.addTransform(transform)
-            dataset.addTransform(transformResampling)
-            for sequence in dataset.applyTransforms():
-            # Get original sequence 2D
-                datasets[directory].append(Parsing.parsingLine(sequence).getSequences())
 
     # Create and train hmm
     start_time = time.time()#### debug time
     gesture_hmms = {}
     gesture_datasets = {}
     for directory in directories.keys():
-            sequences = datasets[directory]#datasets[directory].readDataset(type=str)
+            sequences = directories[directory].readDataset(type=str)
             # create hmm
-            model = Model(n_states = 2, n_features = 1, name = directory)
+            model = Model(n_states = 15, n_features = 1, name = directory)
             # get train samples
             num_samples_train = int((len(sequences)*quantity_train)/10)
-            samples = [sequence for sequence in sequences[0:num_samples_train]]
+            samples = [convertList(sequence[0]) for sequence in sequences[0:num_samples_train]]
             # train
             model.train(samples)
             # add hmm to dictionary
             gesture_hmms[directory] = [model.getModel()]
             # get test samples
-            gesture_datasets[directory] = [sequence for sequence in sequences[num_samples_train+1:-1]] #[convertList(sequence[0], directory) for sequence in sequences[0:num_samples_train]]
+            gesture_datasets[directory] = [convertList(sequence[0]) for sequence in sequences[num_samples_train+1:-1]] #[convertList(sequence[0], directory) for sequence in sequences[0:num_samples_train]]
             # debug
             print("Label: " + str(directory) + " - Train :"+str(num_samples_train) + " - Test: "+ str(len(gesture_datasets[directory])))
 
@@ -191,24 +183,3 @@ if debug == 2:
     #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
     #         print("Gesture recognized is " + str(label) + " - gesture tested " + key)
     #         print(array)
-
-
-if debug == 3:
-    # Get dataset
-    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-    dataset = CsvDataset(base_dir+"triangle"+"/")
-    transform = KalmanFilterTransform()
-    transformResampling = ResampleInSpaceTransform(samples=10)
-    dataset.addTransform(transform)
-    dataset.addTransform(transformResampling)
-    for sequence in dataset.applyTransforms():
-        fig, ax = plt.subplots(figsize=(10, 15))
-        ax.scatter(sequence[:,0], sequence[:,1])
-        for i in range(0, len(sequence)):
-            ax.annotate(str(i), (sequence[i,0], sequence[i,1]))
-        plt.axis('equal')
-        plt.plot(sequence[:,0], sequence[:,1], color='b')
-        plt.show()
-
-
-
