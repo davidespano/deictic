@@ -8,7 +8,8 @@ import numpy as np
 import numpy.linalg as la
 # Plot
 import matplotlib.pyplot as plt
-
+# Copy
+import copy
 
 class MathUtils():
 
@@ -21,6 +22,8 @@ class MathUtils():
         SouthWest = 5
         South = 6
         SouthEast = 7
+
+    angle_directions = np.array([x for x in range(0, 360, 45)])
 
     directionsVect = {
         Directions.North:[0,1],
@@ -167,22 +170,6 @@ class Trajectory():
             den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
             den = den1 * den2
             delta = 1 - (num / den)
-
-            # compute area
-            # a = self.__sequence[t-1]
-            # b = self.__sequence[t]
-            # c = self.__sequence[t + 1]
-            # point_x = [a[0], b[0], c[0]]
-            # point_y = [a[1], b[1], c[1]]
-            # max_x = max(point_x)
-            # min_x=min(point_x)
-            # max_y=max(point_y)
-            # min_y=min(point_y)
-            # area = (a[0] * (b[1]-c[1])) + (b[0] * (c[1]-a[1])) + (c[0] * (a[1]-b[1]))
-            # delta = math.fabs(area/2) / math.fabs((max_x-min_x) * (max_y-min_y))
-
-            #print(str(max_x) + " - " + str(min_x)+ " - " + str(max_y)+ " - " + str(min_y)+" - " + str(delta))
-
             # Check delta
             if delta < threshold_a:
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
@@ -244,12 +231,6 @@ class Trajectory():
         :param beta:
         :return:
         """
-        # Group labels
-        # self.__groupLabels()
-        # # Subprimitives
-        # for primitive in self.__primitives:
-        #     primitive.quantizationIntervals(beta=beta)
-        # return self.__primitives
         indexes = []
         indexes.append(1)
         for index in range(2, len(self.__sequence)):
@@ -318,8 +299,6 @@ class Trajectory():
         for index in indexes:
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             self.__labels[index] = chr(ord(self.__labels[index])+interval_index+17)
-            #print(self.__labels[index] + " - " + str(interval_index))
-
     def __quantizationIntervalsLine(self, indexes=[]):
         """
 
@@ -327,14 +306,23 @@ class Trajectory():
         :param beta:
         :return:
         """
+        # Compute angle
+        # start_point = self.__sequence[indexes[0]-1]
+        # end_point = self.__sequence[indexes[-1]]
+        # cosang = np.dot(start_point, end_point)
+        # sinang = la.norm(np.cross(start_point, end_point))
+        # angle = math.degrees(np.arctan2(sinang, cosang))
+        # interval_direction = MathUtils.findNearest(MathUtils.angle_directions, angle)
         # Get points
         start_point = self.__sequence[indexes[0]-1]
         end_point = self.__sequence[indexes[-1]]
         point_direction = MathUtils.sub(end_point, start_point)
         interval_direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         for index in indexes:
-            #print(string+" - "+str(interval_direction)+" - "+str(point_direction))
-            self.__labels[index] = chr(ord(self.__labels[index])+interval_direction+4)
+            self.__labels[index] = chr(ord(self.__labels[index]) + interval_direction + 4)      #
+
+
+
 
 
 
@@ -372,7 +360,7 @@ class Parsing():
         # Descriptor
         f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list_1 = trajectory.findSubPrimitives(beta=4)
+        list = trajectory.findSubPrimitives(beta=4)
 
         if not sequence_resampled == None:
             # Kalmar smoother and threshold for algorithm 1
@@ -394,8 +382,7 @@ class Parsing():
 
         # Plot data
         if flag_plot:
-            Parsing.__plot(original_sequence=sequence, smoothed_sequence=smoothed_sequence, label_list=list)
-            #Parsing.__plot(sequence, smoothed_sequence, list_1, sequence_resampled, list_2)
+            Parsing.__plot(sequence=sequence, label_list=list)
         if flag_save:
             Parsing.__save(label_list=list, path=path)
         return trajectory
@@ -459,7 +446,7 @@ class Parsing():
         return kalman_filter
 
     @staticmethod
-    def __plot(original_sequence, smoothed_sequence, label_list):
+    def __plot(sequence, label_list):
         """
 
         :return:
@@ -467,40 +454,38 @@ class Parsing():
         # Plotting #
         fig, ax = plt.subplots(figsize=(10, 15))
         # plot original sequence
-        original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
-        # plot smoothed sequence
-        smooth = plt.plot(smoothed_sequence[:, 0], smoothed_sequence[:,1], color='r')
+        original = plt.plot(sequence[:,0], sequence[:,1], color='b')
         # label
-        for i in range(1, len(smoothed_sequence)-1):
-            ax.annotate(label_list[i-1], (smoothed_sequence[i, 0], smoothed_sequence[i, 1]))
+        for i in range(1, len(sequence)-1):
+            ax.annotate(label_list[i-1], (sequence[i, 0], sequence[i, 1]))
         # legend
-        plt.legend((original[0], smooth[0]), ('true', 'smooth'), loc='lower right')
+        #plt.legend((original[0]), ('sequence'), loc='lower right')
         plt.axis('equal')
         plt.show()
 
-    @staticmethod
-    def __plot(original_sequence, smoothed_sequence, label_list1, resampled_sequence, label_list2):
-        """
-
-        :return:
-        """
-        # Plotting #
-        fig, ax = plt.subplots(figsize=(10, 15))
-        # plot original sequence
-        original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
-        # plot smoothed sequence
-        smooth = plt.plot(smoothed_sequence[:, 0]+200, smoothed_sequence[:,1], color='r')
-        # plot resampled sequence
-        resampled = plt.plot(resampled_sequence[:, 0], resampled_sequence[:,1], color='g')
-        # label
-        for i in range(1, len(smoothed_sequence)-1):
-            ax.annotate(label_list1[i-1], (smoothed_sequence[i, 0]+200, smoothed_sequence[i, 1]))
-        for i in range(1, len(resampled_sequence)-1):
-            ax.annotate(label_list2[i-1], (resampled_sequence[i, 0], resampled_sequence[i, 1]))
-        # legend
-        plt.legend((original[0], smooth[0], resampled[0]), ('true', 'smooth', 'resampled'), loc='lower right')
-        plt.axis('equal')
-        plt.show()
+    #@staticmethod
+    # def __plot(original_sequence, smoothed_sequence, label_list1, resampled_sequence, label_list2):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # Plotting #
+    #     fig, ax = plt.subplots(figsize=(10, 15))
+    #     # plot original sequence
+    #     original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
+    #     # plot smoothed sequence
+    #     smooth = plt.plot(smoothed_sequence[:, 0]+200, smoothed_sequence[:,1], color='r')
+    #     # plot resampled sequence
+    #     resampled = plt.plot(resampled_sequence[:, 0], resampled_sequence[:,1], color='g')
+    #     # label
+    #     for i in range(1, len(smoothed_sequence)-1):
+    #         ax.annotate(label_list1[i-1], (smoothed_sequence[i, 0]+200, smoothed_sequence[i, 1]))
+    #     for i in range(1, len(resampled_sequence)-1):
+    #         ax.annotate(label_list2[i-1], (resampled_sequence[i, 0], resampled_sequence[i, 1]))
+    #     # legend
+    #     plt.legend((original[0], smooth[0], resampled[0]), ('true', 'smooth', 'resampled'), loc='lower right')
+    #     plt.axis('equal')
+    #     plt.show()
 
     @staticmethod
     def __save(label_list, path):

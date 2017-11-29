@@ -148,7 +148,7 @@ class DeicticRealTime():
 
                         # "unistroke-star_1","unistroke-star_2","unistroke-star_3","unistroke-star_4","unistroke-star_5",
 
-                        # "unistroke-triangle_1","unistroke-triangle_2","unistroke-triangle_3",
+                        # "unistroke-triangle_1","unistroke-triangle","unistroke-triangle_3",
 
                         "unistroke-v_1", "unistroke-v_2",
 

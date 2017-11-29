@@ -19,9 +19,9 @@ class Result():
         if not isinstance(gesture_labels, list):
             raise Exception("name_gestures must be a list of object.")
         # gesture_labels
-        self.labels = sorted(gesture_labels)
+        self.__labels = sorted(gesture_labels)
         # array (the core of the confusion matrix)
-        self.array = numpy.zeros((len(self.labels), len(self.labels)), dtype=int)
+        self.__array = numpy.zeros((len(self.__labels), len(self.__labels)), dtype=int)
 
     def update(self, row_label, column_label):
         """
@@ -34,7 +34,37 @@ class Result():
             raise Exception("The parameters must be string.")
         row = self.__getLabelIndex(wanted_label=row_label)
         column = self.__getLabelIndex(wanted_label=column_label)
-        self.array[row][column]+=1
+        self.__array[row][column]+=1
+
+    def detailedResults(self):
+        """
+            this methods computes and returns a more detailed analysis about the results obtained for each model.
+        :return: a triple of [the number of elements recognized correctly, the number of elements used for the test and mean and the accuracy]
+        """
+        means = {}
+        # for each models
+        for model_name in self.__labels:
+            # get row index
+            row = self.__getLabelIndex(model_name)
+            # compute true and false results
+            total = self.__array[row,:].sum()
+            true = self.__array[row][row]
+            # save mean
+            means[model_name] = [true, total, true/total]
+        return means
+
+    def meanAccuracy(self):
+        """
+            this methods computes and returns the mean accuracy obtained from the test.
+        :return:
+        """
+        mean_accuracy = 0
+        # The mean accurancy is computed by using the data returned from self.detailedResults
+        means = self.detailedResults()
+        for model_name in self.__labels:
+            mean_accuracy+=means[model_name][-1]
+        return mean_accuracy/len(self.__labels)
+
 
     def save(self, path):
         """
@@ -44,14 +74,14 @@ class Result():
         """
         if not isinstance(path, str):
             raise Exception("The parameter path must be string.")
-        array_to_save = numpy.chararray((len(self.labels)+1, len(self.labels)+1))
+        array_to_save = numpy.chararray((len(self.__labels)+1, len(self.__labels)+1))
         # Gesture labels
-        for index in range(0, len(self.labels)):
-            array_to_save[index+1,index+1] = self.labels[index]
+        for index in range(0, len(self.__labels)):
+            array_to_save[index+1,index+1] = self.__labels[index]
             index+1
         # Array values
-        for row in range(0,len(self.labels)):
-            for column in range(0,len(self.labels)):
+        for row in range(0,len(self.__labels)):
+            for column in range(0,len(self.__labels)):
                 array_to_save[row+1, column+1] = self.array[row,column]
         # Save confusion matrix
         array_to_save.tofile(path)
@@ -73,31 +103,32 @@ class Result():
             raise Exception("cmap must be a LinearSegmentedColormap object.")
 
         plt.rcParams.update({'font.size': 8})
-        plt.imshow(self.array, interpolation='nearest', cmap=cmap)
+        plt.imshow(self.__array, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.colorbar()
-        tick_marks = numpy.arange(len(self.labels))
-        plt.xticks(tick_marks, self.labels, rotation=45)
-        plt.yticks(tick_marks, self.labels)
+        tick_marks = numpy.arange(len(self.__labels))
+        plt.xticks(tick_marks, self.__labels, rotation=45)
+        plt.yticks(tick_marks, self.__labels)
 
         if normalize:
-            den = self.array.sum(axis=1)[:, numpy.newaxis]
+            den = self.__array.sum(axis=1)[:, numpy.newaxis]
             print(den)
-            self.array = self.array.astype('float') / den[0]
+            self.__array = self.__array.astype('float') / den[0]
             print("Normalized confusion matrix")
         else:
             print('Confusion matrix, without normalization')
-        print(self.array)
+        print(self.__array)
 
-        thresh = self.array.max() / 2.
-        for i, j in itertools.product(range(self.array.shape[0]), range(self.array.shape[1])):
-            if (self.array[i, j] >= 0.01):
-                plt.text(j, i, self.array[i, j],
+        thresh = self.__array.max() / 2.
+        for i, j in itertools.product(range(self.__array.shape[0]), range(self.__array.shape[1])):
+            if (self.__array[i, j] >= 0.01):
+                plt.text(j, i, self.__array[i, j],
                          horizontalalignment="center",
-                         color="white" if self.array[i, j] > thresh else "black")
+                         color="white" if self.__array[i, j] > thresh else "black")
         plt.tight_layout()
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
+        plt.title('Accuracy '+str(self.meanAccuracy()))
         plt.show()
 
     ### Private methods ###
@@ -108,7 +139,7 @@ class Result():
         :return: the corresponding index or raise an exception if labels does not contain wanted_label.
         """
         index = 0
-        for label in self.labels:
+        for label in self.__labels:
             if label == wanted_label:
                 return index
             index+=1
