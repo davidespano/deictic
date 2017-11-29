@@ -90,8 +90,12 @@ class MathUtils():
     @staticmethod
     def curvature(side_a, side_b, side_c):
         surface = MathUtils.surfaceTriangle(side_a, side_b, side_c)
-        return (4 * math.sqrt(surface * (surface - side_a) * (surface - side_b) * (surface - side_c))) \
-                               / (side_a * side_b * side_c)
+        try:
+            val = (4 * math.sqrt(surface * (surface - side_a) * (surface - side_b) * (surface - side_c))) \
+                / (side_a * side_b * side_c)
+        except:
+            val = 1
+        return val
     @staticmethod
     def magn(point):
         return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
@@ -356,11 +360,11 @@ class Parsing():
             raise Exception("sequence must be a numpy ndarray.")
 
         # Kalmar smoother and threshold for algorithm 1
-        smoothed_sequence, threshold_a = Parsing.__kalmanSmoother(sequence)
+        #smoothed_sequence, threshold_a = Parsing.__kalmanSmoother(sequence)
         # trajectory
-        trajectory = Trajectory(smoothed_sequence)
+        trajectory = Trajectory(sequence)
         # Algorithm 1 (find straight linear)
-        list = trajectory.algorithm1(threshold_a=threshold_a)
+        list = trajectory.algorithm1(threshold_a=0)#threshold_a)
         # Algorithm 2 (find plane arc)
         list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)

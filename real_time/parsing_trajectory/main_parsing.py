@@ -92,32 +92,32 @@ if debug == 1:
                    "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
 
     for directory in directories:
-        # original
+        # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
-        sequence_original = dataset_original.readDataset()
-        # resampled
-        dataset_resampled = CsvDataset(input_dir+directory+"/")
+        kalmanTransform = KalmanFilterTransform()
         resampledTransform = ResampleInSpaceTransform(samples=40)
-        dataset_resampled.addTransform(resampledTransform)
-        sequence_resampled = dataset_resampled.applyTransforms()
+        dataset_original.addTransform(kalmanTransform)
+        dataset_original.addTransform(resampledTransform)
+        sequence_original = dataset_original.applyTransforms()
+        # # resampled
+        # dataset_resampled = CsvDataset(input_dir+directory+"/")
+        # resampledTransform = ResampleInSpaceTransform(samples=40)
+        # dataset_resampled.addTransform(resampledTransform)
+        # sequence_resampled = dataset_resampled.applyTransforms()
 
         # start
         print("Start "+directory)
-        #sequences = dataset.readDataset()
-        #len_files = len(sequences)
-        #for index in range(0,len_files):
         for index in range(len(sequence_original)):
-            sequence = sequence_original[index]
             # Get original sequence 2D
-            original_sequence = sequence[0][:,[0,1]]
+            sequence = sequence_original[index][:,[0,1]]
             # Get resampled sequence 2D
-            resampled_sequence = sequence_resampled[index][:,[0,1]]
+            #resampled_sequence = sequence_resampled[index][:,[0,1]]
             # Get file name
             name = sequence[1]
             # Parse the sequence and save it
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
-            Parsing.parsingLine(original_sequence, flag_save=True, path=output_dir+directory+"/"+name)
+            Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+str(index))
         # end
         print("End "+directory)
 
