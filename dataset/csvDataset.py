@@ -40,15 +40,25 @@ class CsvDataset:
     """
     Class for dataset reading and plotting
     """
-    def __init__(self, dir):
+    def __init__(self, dir, type=float):
+        """
+
+        :param dir: the path of the directory wich contains the files.
+        :param type: the type of data.
+        """
+        # Check parameters
+        if not isinstance(dir, str):
+            raise TypeError
+        # Initialize parameters
         self.dir = dir
+        self.type = type
         self.compositeTransform = CompositeTransform()
 
     def getDatasetIterator(self):
         """ Returns an iterator on all csv files in a dataset """
         return DatasetIterator(self.dir)
 
-    def readDataset(self, d=False, type=float):
+    def readDataset(self, d=False):
         """ Returns a list of sequences, containing the samples in each file of the dataset"
 
         Returns
@@ -60,7 +70,7 @@ class CsvDataset:
         sequences = [];
         i = 0
         for filename in self.getDatasetIterator():
-            seq = self.readFile(filename=filename, type=type);
+            seq = self.readFile(filename=filename);
             # Creates tuple
             tuple = [seq, filename]
             # Add tuple in sequences
@@ -70,7 +80,7 @@ class CsvDataset:
             i += 1
         return sequences;
 
-    def readFile(self, filename, type=float):
+    def readFile(self, filename):
         """ Reads a single file, returning the samples in a list
 
         Parameters
@@ -87,7 +97,7 @@ class CsvDataset:
         with open(self.dir + filename, "r") as f:
             reader = csv.reader(f, delimiter=',')
             vals = list(reader)
-            result = numpy.array(vals).astype(type)
+            result = numpy.array(vals).astype(self.type)
             return result
 
     ####### rivedere
@@ -194,6 +204,14 @@ class CsvDataset:
     # Plot
     # Plots input dataset's files
     def plot(self, dimensions = 2, sampleName = None, model = None, singleMode = False):
+        """
+
+        :param dimensions:
+        :param sampleName:
+        :param model:
+        :param singleMode:
+        :return:
+        """
         fig = plt.figure(2);
         ax = None
         if dimensions == 3:
@@ -237,6 +255,25 @@ class CsvDataset:
             plt.title(sampleName)
         if not singleMode:
             plt.show()
+
+    ### Private methods ###
+    @staticmethod
+    def __plot(sequence, dimensions=2, filename = ""):
+        """
+            plot the given sequence into the specified canvas.
+        :param sequence: the sequence to plot.
+        :param dimensions: x,y or x,y and z.
+        :param filename: the name of the sequence.
+        :return:
+        """
+        # Check parameters
+        if not isinstance(sequence, numpy.array):
+            raise TypeError
+        # Plot sequence
+        if dimensions == 2:
+            return plt.plot(result[:, 0], result[:, 1], label=filename)
+        else:
+            return plt.plot(result[:, 0], result[:, 1], result[:, 1], label=filename)
 
 
 

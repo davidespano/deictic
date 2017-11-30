@@ -102,7 +102,7 @@ class Result():
         if not isinstance(cmap, LinearSegmentedColormap):
             raise Exception("cmap must be a LinearSegmentedColormap object.")
 
-        plt.rcParams.update({'font.size': 8})
+        plt.rcParams.update({'font.size': 5})
         plt.imshow(self.__array, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.colorbar()

@@ -6,6 +6,8 @@ import math
 # Numpy
 import numpy as np
 import numpy.linalg as la
+# Operator
+import operator
 # Plot
 import matplotlib.pyplot as plt
 # Copy
@@ -25,7 +27,7 @@ class MathUtils():
 
     angle_directions = np.array([x for x in range(0, 360, 45)])
 
-    directionsVect = {
+    __directionsVect = {
         Directions.North:[0,1],
         Directions.South:[0,-1],
         Directions.West:[-1,0],
@@ -38,15 +40,37 @@ class MathUtils():
 
     # todo: check parameters
     @staticmethod
+    def findWay(points):
+        """
+
+        :param points:
+        :return:
+        """
+        if MathUtils.areaPolygon(points) > 0:
+            return True # Clockwise
+        else:
+            return False # Anticlockwise
+    @staticmethod
+    def areaPolygon(points):
+        """
+            -Shoelace formula-
+        :param points:
+        :return: bool
+        """
+        sum = 0
+        for index in range(len(points)):
+            sum += (points[index][0]*points[(index+1)%len(points)][1]) - points[(index+1)%len(points)][0]*points[index][1]
+        return sum
+    @staticmethod
     def findDirection(point):
-        north = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.North])
-        north_east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.NorthEast])
-        north_west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.NorthWest])
-        south = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.South])
-        south_east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.SouthEast])
-        south_west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.SouthWest])
-        east = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.East])
-        west = MathUtils.dot(point, MathUtils.directionsVect[MathUtils.Directions.West])
+        north = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.North])
+        north_east = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.NorthEast])
+        north_west = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.NorthWest])
+        south = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.South])
+        south_east = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.SouthEast])
+        south_west = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.SouthWest])
+        east = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.East])
+        west = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.West])
         # North
         if north > south and north > east and north > west:
             if north > north_west and north > north_east:
@@ -55,7 +79,6 @@ class MathUtils():
                 return MathUtils.Directions.NorthWest.value
             if north_east >= north and north_east > north_west:
                 return MathUtils.Directions.NorthEast.value
-
         # South
         if south > north and south > east and south > west:
             if south > south_west and south > south_east:
@@ -82,7 +105,6 @@ class MathUtils():
                 return MathUtils.Directions.NorthWest.value
         # error
         return None
-
     @staticmethod
     def findNearest(array, value):
         idx = (np.abs(array - value).argmin())
@@ -150,7 +172,7 @@ class Trajectory():
         self.__curvatures = [None for x in range(len(sequence))]
 
     # Methods #
-    def getSequences(self):
+    def getLabelSequences(self):
         return self.__labels
 
     def algorithm1(self, threshold_a):
@@ -184,9 +206,11 @@ class Trajectory():
         for t in range(1, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
+                # compute direction (clockwise or counterclockwise)
+                dir1 = MathUtils.findWay([self.__sequence[t-1], self.__sequence[t], self.__sequence[t+1]])
                 # assigned label
-                self.__labels[t] = Trajectory.TypePrimitive.ARC.value
-                self.__labels[t + 1] = Trajectory.TypePrimitive.ARC.value
+                self.__labels[t] = Trajectory.TypePrimitive.ARC.value+str(dir1)
+                self.__labels[t + 1] = Trajectory.TypePrimitive.ARC.value+str(dir1)
         return self.__labels
 
     def algorithm3(self):
@@ -286,19 +310,22 @@ class Trajectory():
         :param beta:
         :return:
         """
-        points = []
+        descriptors = []
         for index in indexes:
-            points.append(self.__descriptors[index])
+            descriptors.append(self.__descriptors[index])
         # Get min and max value from its points
-        min_value = min(points)
-        max_value = max(points)
-        # quantization
+        min_value = min(descriptors)
+        max_value = max(descriptors)
+        # comput interval values
         interval_value = (max_value-min_value)/beta
         interval_values = [min_value+(interval_value*x) for x in range(beta)]
+        # find direction clockwise or counter-clockwise
+        #indexes = [indexes[0]-1]+indexes
+        #interval_direction = MathUtils.findWay([item for item in operator.itemgetter(indexes)(self.__sequence)])
         # assign interval
         for index in indexes:
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
-            self.__labels[index] = chr(ord(self.__labels[index])+interval_index+17)
+            self.__labels[index] = self.__labels[index]+str(interval_index) #chr(ord(self.__labels[index])+interval_index+17)
     def __quantizationIntervalsLine(self, indexes=[]):
         """
 
@@ -317,9 +344,9 @@ class Trajectory():
         start_point = self.__sequence[indexes[0]-1]
         end_point = self.__sequence[indexes[-1]]
         point_direction = MathUtils.sub(end_point, start_point)
-        interval_direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
+        direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         for index in indexes:
-            self.__labels[index] = chr(ord(self.__labels[index]) + interval_direction + 4)      #
+            self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
 
 
 
@@ -385,6 +412,7 @@ class Parsing():
             Parsing.__plot(sequence=sequence, label_list=list)
         if flag_save:
             Parsing.__save(label_list=list, path=path)
+
         return trajectory
 
     @staticmethod
