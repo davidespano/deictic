@@ -206,11 +206,9 @@ class Trajectory():
         for t in range(1, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
-                # compute direction (clockwise or counterclockwise)
-                dir1 = MathUtils.findWay([self.__sequence[t-1], self.__sequence[t], self.__sequence[t+1]])
                 # assigned label
-                self.__labels[t] = Trajectory.TypePrimitive.ARC.value+str(dir1)
-                self.__labels[t + 1] = Trajectory.TypePrimitive.ARC.value+str(dir1)
+                self.__labels[t] = Trajectory.TypePrimitive.ARC.value
+                self.__labels[t + 1] = Trajectory.TypePrimitive.ARC.value
         return self.__labels
 
     def algorithm3(self):
@@ -319,13 +317,12 @@ class Trajectory():
         # comput interval values
         interval_value = (max_value-min_value)/beta
         interval_values = [min_value+(interval_value*x) for x in range(beta)]
-        # find direction clockwise or counter-clockwise
-        #indexes = [indexes[0]-1]+indexes
-        #interval_direction = MathUtils.findWay([item for item in operator.itemgetter(indexes)(self.__sequence)])
-        # assign interval
         for index in indexes:
+            # assign interval
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
-            self.__labels[index] = self.__labels[index]+str(interval_index) #chr(ord(self.__labels[index])+interval_index+17)
+            # find direction clockwise or counter-clockwise
+            interval_direction = MathUtils.findWay([item for item in operator.itemgetter([index-1, index, index+1])(self.__sequence)])
+            self.__labels[index] = self.__labels[index]+str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
     def __quantizationIntervalsLine(self, indexes=[]):
         """
 

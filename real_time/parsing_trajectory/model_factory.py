@@ -6,7 +6,7 @@ random.seed(0)
 
 class Model():
 
-    __chars = ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'O', 'R', 'S', 'T', 'U', 'V']
+    __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
 
     def __init__(self, n_states = 0, n_features = 0, name=None):
         # Model
