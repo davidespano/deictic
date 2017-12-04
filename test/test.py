@@ -22,10 +22,14 @@ class Result():
         self.__labels = sorted(gesture_labels)
         # array (the core of the confusion matrix)
         self.__array = numpy.zeros((len(self.__labels), len(self.__labels)), dtype=int)
+        # array (if the sequences have a name it contains, for each model, the list of wrong recognized files)
+        self.__dictionary = {}
+        for item in self.__labels:
+            self.__dictionar[item] = []
 
-    def update(self, row_label, column_label):
+    def update(self, row_label, column_label, id_sequence = None):
         """
-            this method autoincrements the specified index.
+            this method autoincrements the specified index of the matrix confusion and, eventually, updates the dictionary.
         :param row: the dataset from which the file came (str).
         :param coloumn: the gesture which recognized this file (str).
         :return:
@@ -35,6 +39,9 @@ class Result():
         row = self.__getLabelIndex(wanted_label=row_label)
         column = self.__getLabelIndex(wanted_label=column_label)
         self.__array[row][column]+=1
+        # update dictionary of wrong recognized files
+        if id_sequence != None and row_label != column_label:
+            self.__dictionary[row].append(id_sequence)
 
     def detailedResults(self):
         """
@@ -203,7 +210,7 @@ class Test():
             for dataset in datasets:
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
-                    sequences = [sequence[0] for sequence in dataset.readDataset(type=type)]
+                    sequences = [sequence for sequence in dataset.readDataset(type=type)]
                 elif isinstance(dataset, (numpy.ndarray, list)):
                     sequences = [dataset]
                 else:
@@ -245,10 +252,10 @@ class Test():
         """
         # Get each sequence
         for sequence in sequences:
-            index_label = Test.compare(sequence, self.gesture_hmms)
+            index_label = Test.compare(sequence[0], self.gesture_hmms)
             # Update results
             if index_label != None:
-                self.result.update(row_label=dataset_label, column_label=index_label)
+                self.result.update(row_label=dataset_label, column_label=index_label, id_sequence=sequence[1])
 
     @staticmethod
     def compare(sequence, gesture_hmms, return_log_probabilities = False):
@@ -261,7 +268,6 @@ class Test():
         """
         # Max probability "global"
         max_norm_log_probability = -sys.maxsize
-        local_norm_log_probabilty = -sys.maxsize
         # Model label with the best norm log proability for that sequence
         index_label = None
         # Log probability values

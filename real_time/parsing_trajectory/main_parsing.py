@@ -18,14 +18,16 @@ import math
 
 import time
 
-debug = 2
+debug = 0
+
 
 if debug == 0:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-    directories = ["left_curly_brace", "right_curly_brace"]
-    #directories = ["circle"]
-    #directories = ["left_curly_brace"]
-    #directories = ["right_curly_brace"]
+    directories = ["caret", "v"]
+    #directories = ["left_curly_brace", "right_curly_brace"]
+    # directories = ["circle"]
+    # directories = ["left_curly_brace"]
+    # directories = ["right_curly_brace"]
     dataset_kalman_resampled = {}
 
     # Raw data with kalman and resampling
@@ -44,11 +46,12 @@ if debug == 0:
 
     for index in range(len(dataset_kalman_resampled[directory])):
         # left
-        data_left = dataset_kalman_resampled["left_curly_brace"][index]
+        data_left = dataset_kalman_resampled["caret"][index]
         label_left = Parsing.parsingLine(sequence=data_left).getLabelSequences()
         # right
-        data_right = dataset_kalman_resampled["right_curly_brace"][index]
-        label_right = (Parsing.parsingLine(sequence=data_right)).getLabelSequences()
+        data_right = dataset_kalman_resampled["v"][index]
+        label_right = (Parsing.parsingLine(sequence=data_right
+                                           )).getLabelSequences()
         # circle
         #data_circle = dataset_kalman_resampled["circle"][index]
         #label_circle = Parsing.parsingLine(sequence=data_circle).getLabelSequences()
@@ -56,16 +59,19 @@ if debug == 0:
         # plotting
         fig, ax = plt.subplots(figsize=(10, 15))
         left_curly_brace_plot = plt.plot(data_left[:, 0], data_left[:, 1], color='r')
-        right_curly_brace_plot = plt.plot(data_right[:, 0]+50, data_right[:, 1], color='b')
+        right_curly_brace_plot = plt.plot(data_right[:, 0]+100, data_right[:, 1], color='b')
         #circle = plt.plot(data_circle[:, 0], data_circle[:, 1], color='g')
-        #plt.legend((left_curly_brace_plot[0], right_curly_brace_plot[0]), ('left_curly_brace', "right_curly_brace"), loc='lower right')
+
+        # Legend
+        plt.legend((left_curly_brace_plot[0], right_curly_brace_plot[0]), ('caret', "v"), loc='lower right')
+
         # scatter
         ax.scatter(data_left[:, 0], data_left[:, 1])
         for i in range(0, len(label_left)):#[0])):
             ax.annotate(str(label_left[i]), (data_left[i][0], data_left[i][1]))
-        ax.scatter(data_right[:, 0]+50, data_right[:, 1])
+        ax.scatter(data_right[:, 0]+100, data_right[:, 1])
         for i in range(0, len(label_right)):#[0])):
-            ax.annotate(str(label_right[i]), (data_right[i][0]+50, data_right[i][1]))
+            ax.annotate(str(label_right[i]), (data_right[i][0]+100, data_right[i][1]))
         #ax.scatter(data_circle[:, 0], data_circle[:, 1])
         #for i in range(0, len(label_circle)):  # [0])):
         #    ax.annotate(str(label_circle[i]), (data_circle[i][0], data_circle[i][1]))
