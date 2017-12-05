@@ -1,8 +1,7 @@
 from gesture import *
 from topology import *
 import random
-
-random.seed(0)
+import datetime
 
 class Model():
 
@@ -38,6 +37,9 @@ class Model():
         :return:
         """
         # Check parameters
+
+        # get sequence
+        samples = (sample[0] for sample in samples)
         # Train
         self.model.fit(samples,use_pseudocount=True)
 
@@ -54,6 +56,7 @@ class Model():
         for i in range(len(emissions), n_States):
             distribution_values = numpy.random.dirichlet(numpy.ones(len(Model.__chars)), size=1)[0]
             values = {}
+            random.seed(datetime.datetime.now())
             for index in range(0, len(Model.__chars)):
                 values[Model.__chars[index]] = distribution_values[index]
             emissions.append(DiscreteDistribution(values))

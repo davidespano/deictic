@@ -13,12 +13,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from dataset import *
-
+import random
 import math
-
+import datetime
 import time
 
-debug = 0
+debug = 2
+
+if debug == -1:
+
+    random.seed(datetime.datetime.now())
+    for i in range(0,10):
+        print(random.randint(0,330))
 
 
 if debug == 0:
@@ -123,27 +129,25 @@ if debug == 2:
         return new_list
 
 
-    # % Num train and num test
-    quantity_train = 9
     # Get dataset
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
-        "arrow": CsvDataset(base_dir + "arrow/", type=str),
+        # "arrow": CsvDataset(base_dir + "arrow/", type=str),
         "caret": CsvDataset(base_dir + "caret/", type=str),
-        "check": CsvDataset(base_dir+"check/", type=str),
-        "circle": CsvDataset(base_dir+"circle/", type=str),
-        "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
-        "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
-        "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
-        "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
-        "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
-        "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
-        "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
-        "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
-        "star": CsvDataset(base_dir + "star/", type=str),
-        "triangle": CsvDataset(base_dir + "triangle/", type=str),
+        # "check": CsvDataset(base_dir+"check/", type=str),
+        # "circle": CsvDataset(base_dir+"circle/", type=str),
+        # "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
+        # "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
+        # "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
+        # "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
+        # "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
+        # "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
+        # "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
+        # "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
+        # "star": CsvDataset(base_dir + "star/", type=str),
+        # "triangle": CsvDataset(base_dir + "triangle/", type=str),
         "v": CsvDataset(base_dir + "v/", type=str),
-        "x": CsvDataset(base_dir + "x/", type=str)
+        # "x": CsvDataset(base_dir + "x/", type=str)
     }
 
     # Create and train hmm
@@ -151,25 +155,22 @@ if debug == 2:
     gesture_hmms = {}
     gesture_datasets = {}
     for directory in directories.keys():
-            sequences = directories[directory].readDataset()
             # create hmm
             model = Model(n_states = 15, n_features = 1, name = directory)
-            # get train samples
-            num_samples_train = int((len(sequences)*quantity_train)/10)
-            samples = [convertList(sequence[0]) for sequence in sequences[0:num_samples_train]]
-            # train
-            model.train(samples)
+            # get train and test samples
+            train_samples,test_samples = directories[directory].crossValidation()
+            model.train(train_samples)
+            gesture_datasets[directory] = test_samples
             # add hmm to dictionary
             gesture_hmms[directory] = [model.getModel()]
-            # get test samples
-            gesture_datasets[directory] = [convertList(sequence[0]) for sequence in sequences[num_samples_train+1:-1]] #[convertList(sequence[0], directory) for sequence in sequences[0:num_samples_train]]
             # debug
-            print("Label: " + str(directory) + " - Train :"+str(num_samples_train) + " - Test: "+ str(len(gesture_datasets[directory])))
+            print("Label: " + str(directory) + " - Train :"+str(len(train_samples)) + " - Test: "+ str(len(test_samples)))
 
 
     result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
     print("--- %s seconds ---" % (time.time() - start_time)) # debug time
     result.plot()
+    print(result.getWrongClassified())
     # for key, values in gesture_datasets.items():
     #     for value in values:
     #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)

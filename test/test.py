@@ -25,7 +25,10 @@ class Result():
         # array (if the sequences have a name it contains, for each model, the list of wrong recognized files)
         self.__dictionary = {}
         for item in self.__labels:
-            self.__dictionar[item] = []
+            self.__dictionary[item] = []
+
+    def getWrongClassified(self):
+        return self.__dictionary
 
     def update(self, row_label, column_label, id_sequence = None):
         """
@@ -41,7 +44,7 @@ class Result():
         self.__array[row][column]+=1
         # update dictionary of wrong recognized files
         if id_sequence != None and row_label != column_label:
-            self.__dictionary[row].append(id_sequence)
+            self.__dictionary[row_label].append([id_sequence,column_label])
 
     def detailedResults(self):
         """

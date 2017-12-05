@@ -9,8 +9,10 @@ import csv
 import numpy
 import matplotlib.pyplot as plt
 import os
-from random import randint
 from shutil import copyfile
+# random
+import datetime
+import random
 # HiddenMarkovModel
 from pomegranate import HiddenMarkovModel
 
@@ -96,8 +98,13 @@ class CsvDataset:
         with open(self.dir + filename, "r") as f:
             reader = csv.reader(f, delimiter=',')
             vals = list(reader)
-            result = numpy.array(vals).astype(self.type)
-            return result
+            if self.type == str:
+                result = []
+                for item in vals:
+                    result.append(item[0])
+            else:
+                result = numpy.array(vals).astype(self.type)
+        return result
 
     ####### rivedere
     def read_ten_cross_validation_dataset(self, inputDir, type, k = 0, model_index = None):
@@ -126,51 +133,25 @@ class CsvDataset:
 
         return sequences
 
-    def ten_cross_validation(self, outputDir, k = 0, rates = None, labels = None):
-        """ Selects the tenth part of the files in the dataset as test_real_time and uses the other ones for training
-
-        Parameters
-        ----------
-        outputDir: str
-            path where the list of files will be save
-        k: int
-        rates: list
-        labels: list
+    def crossValidation(self, x = 10):
         """
+            Selects the 'x' part of the files in the dataset as test and uses the other ones for the training phase.
 
-        testing_dataset = []
-        if(rates != None and labels != None):
-            length = int(len(labels)/10)
-            # test_real_time files
-            for index in range(0, len(rates)):
-                num_file_label = int((length * rates[index][1])/100)
-                for i in range(0, num_file_label):
-                    flag = False
-                    index_for_testing = -1
-                    while flag == False:
-                        index_for_testing = randint(0, len(labels)-1)
-                        if labels[index_for_testing][1] == index:
-                            flag = True
-                    file_test = labels.pop(index_for_testing)
-                    testing_dataset.append(file_test[0])
-            # Training files
-            training_dataset = []
-            for row in labels:
-                training_dataset.append(row[0]+'#'+str(row[1]))
-        else:
-            # Take all files
-            training_dataset = self.getDatasetIterator().filenames
-            # test_real_time files number (the tenth part of the files in the dataset)
-            length = int(len(training_dataset)/10)
-            for i in range(0, length):
-                index_for_testing = randint(0, len(training_dataset)-1)
-                testing_dataset.append(training_dataset.pop(index_for_testing))
+        :param x: specifies the portion of files to use in the test phase
+        :return: the two created list
+        """
+        train_files = self.readDataset()
+        test_files = []
+        num_test_files = int(len(train_files)/x)
 
-        # Save test_real_time and training files in csv file
-        with open(outputDir+'train_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
-            myfile.write('/'.join(training_dataset))
-        with open(outputDir+'test_ten-cross-validation_{}.txt'.format(str(k)), mode='wt', encoding='utf-8') as myfile:
-            myfile.write('/'.join(testing_dataset))
+        # Take test files from train list
+        random.seed(datetime.datetime.now())
+        for i in range(num_test_files):
+            # generate a random number
+            index = random.randint(0,len(train_files))
+            # push into test_files the file in position index and remove it from train_files
+            test_files.append(train_files.pop(index))
+        return train_files, test_files
 
     def leave_one_out(self, conditionFilename=None, leave_index = -1):
         """ Selects one of the files in the dataset as test_real_time and uses the other ones for training
