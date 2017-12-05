@@ -18,7 +18,7 @@ import math
 import datetime
 import time
 
-debug = 2
+debug = 1
 
 if debug == -1:
 
@@ -29,11 +29,8 @@ if debug == -1:
 
 if debug == 0:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-    directories = ["caret", "v"]
-    #directories = ["left_curly_brace", "right_curly_brace"]
-    # directories = ["circle"]
-    # directories = ["left_curly_brace"]
-    # directories = ["right_curly_brace"]
+    directories = ["check"]
+    files = ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
     dataset_kalman_resampled = {}
 
     # Raw data with kalman and resampling
@@ -46,44 +43,29 @@ if debug == 0:
         dataset_original.addTransform(resampledTransform)
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
 
-    # Parsed data
-    #sequences_left = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/left_curly_brace/", type=str).readDataset()
-    #sequences_right = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/left_curly_brace/", type=str).readDataset()
-
     for index in range(len(dataset_kalman_resampled[directory])):
-        # left
-        data_left = dataset_kalman_resampled["caret"][index]
-        label_left = Parsing.parsingLine(sequence=data_left).getLabelSequences()
-        # right
-        data_right = dataset_kalman_resampled["v"][index]
-        label_right = (Parsing.parsingLine(sequence=data_right
-                                           )).getLabelSequences()
-        # circle
-        #data_circle = dataset_kalman_resampled["circle"][index]
-        #label_circle = Parsing.parsingLine(sequence=data_circle).getLabelSequences()
-
+        data_plots = []
+        colors = ['r','b','g']
         # plotting
-        fig, ax = plt.subplots(figsize=(10, 15))
-        left_curly_brace_plot = plt.plot(data_left[:, 0], data_left[:, 1], color='r')
-        right_curly_brace_plot = plt.plot(data_right[:, 0]+100, data_right[:, 1], color='b')
-        #circle = plt.plot(data_circle[:, 0], data_circle[:, 1], color='g')
-
-        # Legend
-        plt.legend((left_curly_brace_plot[0], right_curly_brace_plot[0]), ('caret', "v"), loc='lower right')
-
-        # scatter
-        ax.scatter(data_left[:, 0], data_left[:, 1])
-        for i in range(0, len(label_left)):#[0])):
-            ax.annotate(str(label_left[i]), (data_left[i][0], data_left[i][1]))
-        ax.scatter(data_right[:, 0]+100, data_right[:, 1])
-        for i in range(0, len(label_right)):#[0])):
-            ax.annotate(str(label_right[i]), (data_right[i][0]+100, data_right[i][1]))
-        #ax.scatter(data_circle[:, 0], data_circle[:, 1])
-        #for i in range(0, len(label_circle)):  # [0])):
-        #    ax.annotate(str(label_circle[i]), (data_circle[i][0], data_circle[i][1]))
-
-        plt.axis('equal')
-        plt.show()
+        k = 0
+        plot = False
+        for directory in directories:
+            item = dataset_kalman_resampled[directory][index]
+            if item[1] in files or len(files) == 0:
+                fig, ax = plt.subplots(figsize=(10, 15))
+                data = item[0]
+                label = Parsing.parsingLine(sequence=data).getLabelSequences()
+                data_plots.append(plt.plot(data[:, 0]+(k*10), data[:, 1], color=colors[k]))
+                ax.scatter(data[:, 0]+(k*10), data[:, 1])
+                for i in range(0, len(label)):
+                    ax.annotate(str(label[i]), (data[i][0]+(k*10), data[i][1]))
+                k += 1
+                plot = True
+        if plot == True:
+            # Legend
+            plt.legend((data_plots), (directories), loc='lower right')
+            plt.axis('equal')
+            plt.show()
 
 
 if debug == 1:
@@ -109,13 +91,13 @@ if debug == 1:
         print("Start "+directory)
         for index in range(len(sequence_original)):
             # Get original sequence 2D
-            sequence = sequence_original[index][:,[0,1]]
+            sequence = sequence_original[index][0][:,[0,1]]
             # Get file name
             #name = sequence_original[index][1]
             # Parse the sequence and save it
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
-            Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+str(index)+".csv")
+            Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
         # end
         print("End "+directory)
 
@@ -133,8 +115,8 @@ if debug == 2:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
         # "arrow": CsvDataset(base_dir + "arrow/", type=str),
-        "caret": CsvDataset(base_dir + "caret/", type=str),
-        # "check": CsvDataset(base_dir+"check/", type=str),
+        #"caret": CsvDataset(base_dir + "caret/", type=str),
+        "check": CsvDataset(base_dir+"check/", type=str),
         # "circle": CsvDataset(base_dir+"circle/", type=str),
         # "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
         # "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
@@ -156,7 +138,7 @@ if debug == 2:
     gesture_datasets = {}
     for directory in directories.keys():
             # create hmm
-            model = Model(n_states = 15, n_features = 1, name = directory)
+            model = Model(n_states = 5, n_features = 1, name = directory)
             # get train and test samples
             train_samples,test_samples = directories[directory].crossValidation()
             model.train(train_samples)

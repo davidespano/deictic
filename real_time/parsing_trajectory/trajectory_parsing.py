@@ -338,11 +338,11 @@ class Trajectory():
         # angle = math.degrees(np.arctan2(sinang, cosang))
         # interval_direction = MathUtils.findNearest(MathUtils.angle_directions, angle)
         # Get points
-        start_point = self.__sequence[indexes[0]-1]
-        end_point = self.__sequence[indexes[-1]]
-        point_direction = MathUtils.sub(end_point, start_point)
-        direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         for index in indexes:
+            start_point = self.__sequence[index-1]
+            end_point = self.__sequence[index]
+            point_direction = MathUtils.sub(end_point, start_point)
+            direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
             self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
 
 

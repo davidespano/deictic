@@ -127,7 +127,7 @@ class CsvDataset:
         for file in self.getDatasetIterator():
             sequence = self.readFile(file)
             sequence = self.compositeTransform.transform(sequence)
-            sequences.append(sequence)
+            sequences.append([sequence, file])
             if not outputDir is None:
                 numpy.savetxt(outputDir + file, sequence, delimiter=',')
 
