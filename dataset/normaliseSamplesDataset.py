@@ -3,6 +3,7 @@ import numpy as np
 import scipy
 import scipy.signal
 import re
+import math
 from copy import copy, deepcopy
 from math import sin, cos, radians
 from .csvDataset import *
@@ -378,6 +379,45 @@ class ResampleInSpaceTransform(DatasetTransform):
                 resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
 
         return numpy.array(resampled)
+
+# Resampling other version
+class ResampleTransform(DatasetTransform):
+    """
+        this funciton resamples the sequences. Starting from computing the distance between the nth point and the previous (n-1), ResampleTransform checks if that distance is higher than delta or less:
+        in the first case the nth point is kept and still remains in the sequence, in the other case the nth point is deleted.
+    """
+    def __init__(self, delta=0, cols=[0,1]):
+        # Check parameters
+        if isinstance(delta, (bool, str, list, dict)):
+            raise TypeError
+        if not isinstance(cols, list):
+            raise TypeError
+        self.__cols = cols
+        self.__delta = delta
+
+    # Public methods
+    def transform(self, sequence):
+        # Check parameter
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        sequence = sequence.tolist()
+        for item in sequence:
+            # take points
+            point_a = self.__getPoint(sequence[sequence.index(item)-1])
+            point_b = self.__getPoint(item)
+            # distance
+            distance = math.hypot(point_b[0] - point_a[0], point_b[1] - point_a[1])
+            if distance < self.__delta:
+                sequence.remove(item)
+        return numpy.array(sequence)
+
+    # Private methods
+    def __getPoint(self, frame):
+        point = []
+        for index in self.__cols:
+            point.append(frame[index])
+        return point
 
 # Kalman
 class KalmanFilterTransform(DatasetTransform):

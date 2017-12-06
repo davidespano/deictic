@@ -147,8 +147,8 @@ class CsvDataset:
         # Take test files from train list
         random.seed(datetime.datetime.now())
         for i in range(num_test_files):
-            # generate a random number
-            index = random.randint(0,len(train_files))
+            # generate a random integer index such that 0 <= index <= lenght of train_files
+            index = random.randint(0,len(train_files)-1)
             # push into test_files the file in position index and remove it from train_files
             test_files.append(train_files.pop(index))
         return train_files, test_files

@@ -18,7 +18,7 @@ import math
 import datetime
 import time
 
-debug = 1
+debug = 2
 
 if debug == -1:
 
@@ -38,7 +38,7 @@ if debug == 0:
         # original kalman + resampled
         dataset_original = CsvDataset(base_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=3)#ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
@@ -74,15 +74,15 @@ if debug == 1:
     input_dir = base_dir + "raw/"
     #input_dir = base_dir + "resampled/"
     output_dir = base_dir + "parsed/"
-    #directories = ["triangle"]
-    directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
-                   "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
+    directories = ["check", "v"]
+    #directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
+    #               "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
 
     for directory in directories:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=3.6)#ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         sequence_original = dataset_original.applyTransforms()
@@ -138,7 +138,7 @@ if debug == 2:
     gesture_datasets = {}
     for directory in directories.keys():
             # create hmm
-            model = Model(n_states = 5, n_features = 1, name = directory)
+            model = Model(n_states = 15, n_features = 1, name = directory)
             # get train and test samples
             train_samples,test_samples = directories[directory].crossValidation()
             model.train(train_samples)
