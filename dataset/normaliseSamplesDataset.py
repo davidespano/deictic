@@ -401,16 +401,29 @@ class ResampleTransform(DatasetTransform):
         if not isinstance(sequence, numpy.ndarray):
             raise TypeError
 
-        sequence = sequence.tolist()
-        for item in sequence:
+        # initiliaze
+        new_sequence = [sequence[0]]#sequence.tolist()
+        last_index = 0
+        #c = len(sequence)
+        for index in range(1, len(sequence)):
             # take points
-            point_a = self.__getPoint(sequence[sequence.index(item)-1])
-            point_b = self.__getPoint(item)
-            # distance
+            point_a = new_sequence[last_index]
+            point_b = sequence[index][self.__cols]
             distance = math.hypot(point_b[0] - point_a[0], point_b[1] - point_a[1])
-            if distance < self.__delta:
-                sequence.remove(item)
-        return numpy.array(sequence)
+            if distance > self.__delta:
+                new_sequence.append(sequence[index])
+                last_index+=1
+        # for item in sequence:
+        #     # take points
+        #     point_a = self.__getPoint(sequence[sequence.index(item)-1])
+        #     point_b = self.__getPoint(item)
+        #     # distance
+        #     distance = math.hypot(point_b[0] - point_a[0], point_b[1] - point_a[1])
+        #     if distance < self.__delta:
+        #         sequence.remove(item)
+        #d = len(sequence)
+        #print("Before: "+str(c)+" Ater: "+str(d))
+        return numpy.array(new_sequence)
 
     # Private methods
     def __getPoint(self, frame):

@@ -183,7 +183,7 @@ class Trajectory():
         """
         threshold_a = 0.0025
         # Parsing line
-        for t in range(1, len(self.__sequence)-1, 1):
+        for t in range(1, len(self.__sequence)-1):
             # Compute delta
             num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
             num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
@@ -225,9 +225,6 @@ class Trajectory():
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
-        self.__labels[0] = Trajectory.TypePrimitive.BOUNDARY.value
-        self.__labels[-1] = Trajectory.TypePrimitive.BOUNDARY.value
-
         return self.__labels
 
     def descriptorTrajectory(self):
@@ -257,9 +254,9 @@ class Trajectory():
         :return:
         """
         indexes = []
-        indexes.append(1)
-        for index in range(2, len(self.__sequence)):
-            if self.__labels[index] != self.__labels[index - 1] or index == len(self.__sequence)-2:
+        indexes.append(0)
+        for index in range(1, len(self.__sequence)):
+            if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)-1):
                 if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
                     self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
                 elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
@@ -336,10 +333,8 @@ class Trajectory():
         # Compute angle
         # start_point = self.__sequence[indexes[0]-1]
         # end_point = self.__sequence[indexes[-1]]
-        # cosang = np.dot(start_point, end_point)
-        # sinang = la.norm(np.cross(start_point, end_point))
-        # angle = math.degrees(np.arctan2(sinang, cosang))
-        # interval_direction = MathUtils.findNearest(MathUtils.angle_directions, angle)
+        # point_direction = MathUtils.sub(end_point, start_point)
+        # direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         # Get points
         for index in indexes:
             start_point = self.__sequence[index-1]
@@ -528,7 +523,9 @@ class Parsing():
             raise Exception("The parameter path must be string.")
         if not isinstance(label_list, list):
             raise Exception("label_list must be a list of string.")
-
+        # Remove start and end point
+        label_list.pop(0)
+        label_list.pop(-1)
         # Open and write file
         file = open(path, 'w')
         for item in label_list:
