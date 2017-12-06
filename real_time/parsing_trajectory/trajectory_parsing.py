@@ -194,7 +194,9 @@ class Trajectory():
             delta = 1 - (num / den)
             # Check delta
             if delta < threshold_a:
+                self.__labels[t-1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
+                self.__labels[t+1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
         return self.__labels
 
     def algorithm2(self, threshold_b = None):
@@ -219,10 +221,11 @@ class Trajectory():
         :return:
         """
         for t in range(0, len(self.__sequence)-1):
-            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value or self.__labels[t] == 0:
+            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
+        self.__labels[0] = Trajectory.TypePrimitive.BOUNDARY.value
         self.__labels[-1] = Trajectory.TypePrimitive.BOUNDARY.value
 
         return self.__labels

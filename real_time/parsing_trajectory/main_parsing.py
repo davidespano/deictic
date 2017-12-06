@@ -30,7 +30,7 @@ if debug == -1:
 if debug == 0:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
     directories = ["check"]
-    files = ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
+    files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
     dataset_kalman_resampled = {}
 
     # Raw data with kalman and resampling
@@ -38,7 +38,7 @@ if debug == 0:
         # original kalman + resampled
         dataset_original = CsvDataset(base_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=3)#ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=3.4)#ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
@@ -82,7 +82,7 @@ if debug == 1:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=3.6)#ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=3.6) #ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         sequence_original = dataset_original.applyTransforms()
@@ -138,7 +138,7 @@ if debug == 2:
     gesture_datasets = {}
     for directory in directories.keys():
             # create hmm
-            model = Model(n_states = 15, n_features = 1, name = directory)
+            model = Model(n_states = 10, n_features = 1, name = directory)
             # get train and test samples
             train_samples,test_samples = directories[directory].crossValidation()
             model.train(train_samples)
