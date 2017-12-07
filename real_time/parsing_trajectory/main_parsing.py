@@ -26,15 +26,16 @@ if debug == 1:
     input_dir = base_dir + "raw/"
     #input_dir = base_dir + "resampled/"
     output_dir = base_dir + "parsed/"
-    directories = ["check", "v"]
-    #directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
-    #               "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
+    #directories = ["check", "v"]
+    directories = ["arrow", "caret", "check", "circle", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark", "rectangle",
+                   "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
 
     for directory in directories:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=5) #ResampleInSpaceTransform(samples=40)
+        #resampledTransform = ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=5)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         sequence_original = dataset_original.applyTransforms()
@@ -48,8 +49,9 @@ if debug == 1:
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
 
-            if "fast" in sequence_original[index][1]:
-                Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
+            #if "fast" in sequence_original[index][1]:
+            #    Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
+            Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
         # end
         print("End "+directory)
 
@@ -64,52 +66,60 @@ if debug == 2:
 
 
     # Get dataset
+    k_cross_validation = 10
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
-        # "arrow": CsvDataset(base_dir + "arrow/", type=str),
-        #"caret": CsvDataset(base_dir + "caret/", type=str),
+        "arrow": CsvDataset(base_dir + "arrow/", type=str),
+        "caret": CsvDataset(base_dir + "caret/", type=str),
         "check": CsvDataset(base_dir+"check/", type=str),
-        # "circle": CsvDataset(base_dir+"circle/", type=str),
-        # "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
-        # "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
-        # "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
-        # "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
-        # "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
-        # "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
-        # "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
-        # "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
-        # "star": CsvDataset(base_dir + "star/", type=str),
-        # "triangle": CsvDataset(base_dir + "triangle/", type=str),
+        "circle": CsvDataset(base_dir+"circle/", type=str),
+        "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
+        "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
+        "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
+        "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
+        "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
+        "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
+        "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
+        "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
+        "star": CsvDataset(base_dir + "star/", type=str),
+        "triangle": CsvDataset(base_dir + "triangle/", type=str),
         "v": CsvDataset(base_dir + "v/", type=str),
-        # "x": CsvDataset(base_dir + "x/", type=str)
+        "x": CsvDataset(base_dir + "x/", type=str)
     }
 
-    # Create and train hmm
+    sum = 0
+    # Get train and test folds
     start_time = time.time()#### debug time
-    gesture_hmms = {}
-    gesture_datasets = {}
-    for directory in directories.keys():
-            # create hmm
-            model = Model(n_states = 15, n_features = 1, name = directory)
-            # get train and test samples
-            train_samples,test_samples = directories[directory].crossValidation()
-            model.train(train_samples)
-            gesture_datasets[directory] = test_samples
-            # add hmm to dictionary
-            gesture_hmms[directory] = [model.getModel()]
-            # debug
-            print("Label: " + str(directory) + " - Train :"+str(len(train_samples)) + " - Test: "+ str(len(test_samples)))
+    for k in range(k_cross_validation):
+        gesture_hmms = {}
+        gesture_datasets = {}
+        for directory in directories.keys():
+                # create hmm
+                model = Model(n_states = 10, n_features = 1, name = directory)
+                # get train and test samples
+                train_samples,test_samples = directories[directory].crossValidation(iteration=k)
+                model.train(train_samples)
+                gesture_datasets[directory] = test_samples
+                # add hmm to dictionary
+                gesture_hmms[directory] = [model.getModel()]
+                # debug
+                print("Label: " + str(directory) + " - Train :"+str(len(train_samples)) + " - Test: "+ str(len(test_samples)))
 
 
-    result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
-    print("--- %s seconds ---" % (time.time() - start_time)) # debug time
-    result.plot()
-    print(result.getWrongClassified())
-    # for key, values in gesture_datasets.items():
-    #     for value in values:
-    #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
-    #         print("Gesture recognized is " + str(label) + " - gesture tested " + key)
-    #         print(array)
+        result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        print("--- %s seconds ---" % (time.time() - start_time)) # debug time
+        #result.plot()
+        sum += result.meanAccuracy()
+    print("Mean Accuracy: "+str(sum/k_cross_validation))
+
+
+
+        #print(result.getWrongClassified())
+        # for key, values in gesture_datasets.items():
+        #     for value in values:
+        #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
+        #         print("Gesture recognized is " + str(label) + " - gesture tested " + key)
+        #         print(array)
 
 
 
@@ -130,9 +140,9 @@ if debug == 0:
         # original kalman + resampled
         dataset_original = CsvDataset(base_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=6)#ResampleInSpaceTransform(samples=40)
+        #resampledTransform = ResampleTransform(delta=4.5)#ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
-        dataset_original.addTransform(resampledTransform)
+        #dataset_original.addTransform(resampledTransform)
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
 
     for index in range(len(dataset_kalman_resampled[directory])):
@@ -140,11 +150,13 @@ if debug == 0:
         colors = ['r','b','g']
         # plotting
         k = 0
-        plot = False
-        fig, ax = plt.subplots(figsize=(10, 15))
+        plot_multiple = True if len(directories)>1 else False
+
         for directory in directories:
             item = dataset_kalman_resampled[directory][index]
-            if item[1] in files or len(files) == 0:
+            plot = False
+            if "fast" in item[1]: #item[1] in files or len(files) == 0:
+                fig, ax = plt.subplots(figsize=(10, 15))
                 data = item[0]
                 label = Parsing.parsingLine(sequence=data).getLabelSequences()
                 data_plots.append(plt.plot(data[:, 0]+(k*10), data[:, 1], color=colors[k]))
@@ -153,8 +165,14 @@ if debug == 0:
                     ax.annotate(str(label[i]), (data[i][0]+(k*10), data[i][1]))
                 k += 1
                 plot = True
-        if plot == True:
+                print(label)
+            if plot_multiple != True and plot == True:
+                # Legend
+                plt.title(item[1])
+                plt.axis('equal')
+                plt.show()
+        if plot_multiple == True:
             # Legend
-            plt.legend((data_plots), (directories), loc='lower right')
+            plt.title(item[1])
             plt.axis('equal')
             plt.show()

@@ -133,24 +133,33 @@ class CsvDataset:
 
         return sequences
 
-    def crossValidation(self, x = 10):
+    def crossValidation(self, iteration=0, x = 10):
         """
             Selects the 'x' part of the files in the dataset as test and uses the other ones for the training phase.
 
         :param x: specifies the portion of files to use in the test phase
         :return: the two created list
         """
-        train_files = self.readDataset()
+        files = self.readDataset()
+        train_files = []
         test_files = []
-        num_test_files = int(len(train_files)/x)
+        num_test_files = int(len(files)/x)
 
         # Take test files from train list
-        random.seed(datetime.datetime.now())
-        for i in range(num_test_files):
-            # generate a random integer index such that 0 <= index <= lenght of train_files
-            index = random.randint(0,len(train_files)-1)
-            # push into test_files the file in position index and remove it from train_files
-            test_files.append(train_files.pop(index))
+        #random.seed(datetime.datetime.now())
+        #for i in range(num_test_files):
+        # generate nth unique indexes randomly, such that 0 <= index <= lenght of files
+        #indexes = random.sample(range(0, len(files)), len(files))
+
+        # push into test_files the file in position index and remove it from train_files
+        indexes = [index for index in range(iteration*num_test_files, (iteration+1)*num_test_files)]
+
+        for i in range(len(files)):
+            if i in indexes:
+                test_files.append(files[i])
+            else:
+                train_files.append(files[i])
+
         return train_files, test_files
 
     def leave_one_out(self, conditionFilename=None, leave_index = -1):

@@ -181,7 +181,7 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-        threshold_a = 0.0025
+        threshold_a = 2000#0.0025
         # Parsing line
         for t in range(1, len(self.__sequence)-1):
             # Compute delta
@@ -256,7 +256,7 @@ class Trajectory():
         indexes = []
         indexes.append(0)
         for index in range(1, len(self.__sequence)):
-            if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)-1):
+            if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)):
                 if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
                     self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
                 elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
@@ -376,11 +376,11 @@ class Parsing():
         # Algorithm 1 (find straight linear)
         list = trajectory.algorithm1(threshold_a=0)#threshold_a)
         # Algorithm 2 (find plane arc)
-        list = trajectory.algorithm2(threshold_b=None)
+        #list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
-        list = trajectory.algorithm3()
+        #list = trajectory.algorithm3()
         # Descriptor
-        f = trajectory.descriptorTrajectory()
+        #f = trajectory.descriptorTrajectory()
         # Sub primitives
         list = trajectory.findSubPrimitives(beta=4)
 

@@ -46,23 +46,6 @@ class Result():
         if id_sequence != None and row_label != column_label:
             self.__dictionary[row_label].append([id_sequence,column_label])
 
-    def detailedResults(self):
-        """
-            this methods computes and returns a more detailed analysis about the results obtained for each model.
-        :return: a triple of [the number of elements recognized correctly, the number of elements used for the test and mean and the accuracy]
-        """
-        means = {}
-        # for each models
-        for model_name in self.__labels:
-            # get row index
-            row = self.__getLabelIndex(model_name)
-            # compute true and false results
-            total = self.__array[row,:].sum()
-            true = self.__array[row][row]
-            # save mean
-            means[model_name] = [true, total, true/total]
-        return means
-
     def meanAccuracy(self):
         """
             this methods computes and returns the mean accuracy obtained from the test.
@@ -70,7 +53,7 @@ class Result():
         """
         mean_accuracy = 0
         # The mean accurancy is computed by using the data returned from self.detailedResults
-        means = self.detailedResults()
+        means = self.__getAccuracyModels()
         for model_name in self.__labels:
             mean_accuracy+=means[model_name][-1]
         return mean_accuracy/len(self.__labels)
@@ -155,6 +138,22 @@ class Result():
                 return index
             index+=1
         raise Exception(wanted_label+" is not present.")
+    def __getAccuracyModels(self):
+        """
+            this methods computes and returns a more detailed analysis about the results obtained for each model.
+        :return: a triple of [the number of elements recognized correctly, the number of elements used for the test and mean and the accuracy]
+        """
+        means = {}
+        # for each models
+        for model_name in self.__labels:
+            # get row index
+            row = self.__getLabelIndex(model_name)
+            # compute true and false results
+            total = self.__array[row,:].sum()
+            true = self.__array[row][row]
+            # save mean
+            means[model_name] = [true, total, true/total]
+        return means
 
 class Test():
 
@@ -276,6 +275,7 @@ class Test():
         # Log probability values
         log_probabilities = {}
 
+        #print("\n")
         # Compute log probability for each model
         for gesture_label, models in gesture_hmms.items():
             # Max probability "local"
@@ -284,6 +284,7 @@ class Test():
                 # Compute sequence's log-probability and normalized
                 log_probability = model.log_probability(sequence)
                 norm_log_probability = log_probability / len(sequence)
+                #print(gesture_label+": "+str(norm_log_probability))
                 # Check which is the best 'local' model
                 if norm_log_probability > local_norm_log_probabilty:
                     local_norm_log_probabilty = norm_log_probability
@@ -295,6 +296,7 @@ class Test():
                 max_norm_log_probability = norm_log_probability
                 index_label = gesture_label
         # Comparison completed, index_label contains the best global model while log_probabilities the norm log probabilities of each model for the passed sequence.
+        #print(index_label)
         if not return_log_probabilities:
             return index_label
         else:
