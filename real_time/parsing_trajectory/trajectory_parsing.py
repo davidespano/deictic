@@ -194,9 +194,9 @@ class Trajectory():
             delta = 1 - (num / den)
             # Check delta
             if delta < threshold_a:
-                self.__labels[t-1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
+                #self.__labels[t-1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
-                self.__labels[t+1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
+                #self.__labels[t+1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
         return self.__labels
 
     def algorithm2(self, threshold_b = None):

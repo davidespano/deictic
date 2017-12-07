@@ -20,47 +20,6 @@ import time
 
 debug = 2
 
-if debug == 0:
-    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-    directories = ["v"]
-    files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
-    dataset_kalman_resampled = {}
-
-    # Raw data with kalman and resampling
-    for directory in directories:
-        # original kalman + resampled
-        dataset_original = CsvDataset(base_dir+directory+"/")
-        kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=6)#ResampleInSpaceTransform(samples=40)
-        dataset_original.addTransform(kalmanTransform)
-        dataset_original.addTransform(resampledTransform)
-        dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
-
-    for index in range(len(dataset_kalman_resampled[directory])):
-        data_plots = []
-        colors = ['r','b','g']
-        # plotting
-        k = 0
-        plot = False
-        fig, ax = plt.subplots(figsize=(10, 15))
-        for directory in directories:
-            item = dataset_kalman_resampled[directory][index]
-            if item[1] in files or len(files) == 0:
-                data = item[0]
-                label = Parsing.parsingLine(sequence=data).getLabelSequences()
-                data_plots.append(plt.plot(data[:, 0]+(k*10), data[:, 1], color=colors[k]))
-                ax.scatter(data[:, 0]+(k*10), data[:, 1])
-                for i in range(0, len(label)):
-                    ax.annotate(str(label[i]), (data[i][0]+(k*10), data[i][1]))
-                k += 1
-                plot = True
-        if plot == True:
-            # Legend
-            plt.legend((data_plots), (directories), loc='lower right')
-            plt.axis('equal')
-            plt.show()
-
-
 if debug == 1:
     # Get dataset
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
@@ -75,7 +34,7 @@ if debug == 1:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=6) #ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=5) #ResampleInSpaceTransform(samples=40)
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         sequence_original = dataset_original.applyTransforms()
@@ -88,7 +47,9 @@ if debug == 1:
             # Parse the sequence and save it
             if not os.path.exists(output_dir+directory):
                 os.makedirs(output_dir+directory)
-            Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
+
+            if "fast" in sequence_original[index][1]:
+                Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
         # end
         print("End "+directory)
 
@@ -149,3 +110,51 @@ if debug == 2:
     #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
     #         print("Gesture recognized is " + str(label) + " - gesture tested " + key)
     #         print(array)
+
+
+
+
+
+
+
+
+
+if debug == 0:
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+    directories = ["v"]
+    files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
+    dataset_kalman_resampled = {}
+
+    # Raw data with kalman and resampling
+    for directory in directories:
+        # original kalman + resampled
+        dataset_original = CsvDataset(base_dir+directory+"/")
+        kalmanTransform = KalmanFilterTransform()
+        resampledTransform = ResampleTransform(delta=6)#ResampleInSpaceTransform(samples=40)
+        dataset_original.addTransform(kalmanTransform)
+        dataset_original.addTransform(resampledTransform)
+        dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
+
+    for index in range(len(dataset_kalman_resampled[directory])):
+        data_plots = []
+        colors = ['r','b','g']
+        # plotting
+        k = 0
+        plot = False
+        fig, ax = plt.subplots(figsize=(10, 15))
+        for directory in directories:
+            item = dataset_kalman_resampled[directory][index]
+            if item[1] in files or len(files) == 0:
+                data = item[0]
+                label = Parsing.parsingLine(sequence=data).getLabelSequences()
+                data_plots.append(plt.plot(data[:, 0]+(k*10), data[:, 1], color=colors[k]))
+                ax.scatter(data[:, 0]+(k*10), data[:, 1])
+                for i in range(0, len(label)):
+                    ax.annotate(str(label[i]), (data[i][0]+(k*10), data[i][1]))
+                k += 1
+                plot = True
+        if plot == True:
+            # Legend
+            plt.legend((data_plots), (directories), loc='lower right')
+            plt.axis('equal')
+            plt.show()
