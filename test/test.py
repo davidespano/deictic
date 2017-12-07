@@ -4,6 +4,8 @@ import sys
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import itertools
+# csv
+import csv
 # Deictic
 from gesture import ModelFactory
 from dataset import CsvDataset
@@ -67,17 +69,24 @@ class Result():
         """
         if not isinstance(path, str):
             raise Exception("The parameter path must be string.")
-        array_to_save = numpy.chararray((len(self.__labels)+1, len(self.__labels)+1))
+        array_to_save = numpy.empty([len(self.__labels)+1, len(self.__labels)+1], dtype=object)
         # Gesture labels
+        print(self.__labels[0])
         for index in range(0, len(self.__labels)):
-            array_to_save[index+1,index+1] = self.__labels[index]
+            array_to_save[index+1][index+1] = str(self.__labels[index])
             index+1
         # Array values
         for row in range(0,len(self.__labels)):
             for column in range(0,len(self.__labels)):
-                array_to_save[row+1, column+1] = self.array[row,column]
+                array_to_save[row+1][column+1] = self.__array[row,column]
         # Save confusion matrix
-        array_to_save.tofile(path)
+        #array_to_save.tofile(path)
+        # Save confusion matrix
+        with open(path, 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            for row in array_to_save:
+                spamwriter.writerow(row)
 
     def plot(self, normalize=False, title="Confusion Matrix", cmap=plt.cm.Blues):
         """

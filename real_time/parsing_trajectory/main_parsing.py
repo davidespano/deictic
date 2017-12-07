@@ -67,6 +67,7 @@ if debug == 2:
 
     # Get dataset
     k_cross_validation = 10
+    n_states = 2
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
         "arrow": CsvDataset(base_dir + "arrow/", type=str),
@@ -95,7 +96,7 @@ if debug == 2:
         gesture_datasets = {}
         for directory in directories.keys():
                 # create hmm
-                model = Model(n_states = 10, n_features = 1, name = directory)
+                model = Model(n_states = n_states, n_features = 1, name = directory)
                 # get train and test samples
                 train_samples,test_samples = directories[directory].crossValidation(iteration=k)
                 model.train(train_samples)
@@ -109,8 +110,9 @@ if debug == 2:
         result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
         print("--- %s seconds ---" % (time.time() - start_time)) # debug time
         #result.plot()
+        result.save(path="/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/iteration_"+str(k)+"-states_"+str(n_states)+".csv")
         sum += result.meanAccuracy()
-    print("Mean Accuracy: "+str(sum/k_cross_validation))
+    print("\nMean Accuracy: "+str(sum/k_cross_validation))
 
 
 
