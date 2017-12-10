@@ -308,6 +308,9 @@ class HiddenMarkovModelTopology :
 
         return states
 
+
+
+
     @staticmethod
     def __find_start_states(term):
         start = []

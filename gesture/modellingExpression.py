@@ -1,7 +1,37 @@
 from gesture.declarativeModel import ClassifierFactory
 from config import Config
+# Enum
+from enum import Enum
+
+
+class TypeRecognizer(Enum):
+    online = 0
+    offline = 1
 
 class ModelFactory():
+
+    @staticmethod
+    def createHmm(expressions, num_states = 6, type=TypeRecognizer.offline, distance=6, num_samples = 20):
+        """
+            Given a deictic expression, this method returns its online or offline hmm model.
+        :param expressions:
+        :param num_states:
+        :param type:
+        :param distance:
+        :param num_saples:
+        :return:
+        """
+        # Check parameters
+        if not isinstance(num_states, int):
+            raise TypeError
+        if not isinstance(type, TypeRecognizer):
+            raise TypeError
+        if not isinstance(distance, (int,float)):
+            raise TypeError
+        if not isinstance(num_samples, int):
+            raise TypeError
+
+
 
     @staticmethod
     def createHmm(expressions, num_states = 6, num_samples = 20):

@@ -34,8 +34,8 @@ if debug == 1:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        #resampledTransform = ResampleInSpaceTransform(samples=40)
-        resampledTransform = ResampleTransform(delta=5)
+        #resampledTransform = ResampleInSpaceTransform(samples=40) # accuracy = 0,9448
+        resampledTransform = ResampleTransform(delta=6) # accuracy = 0.93 with distance = 5 / accuracy =  with distance = 6 0,9325
         dataset_original.addTransform(kalmanTransform)
         dataset_original.addTransform(resampledTransform)
         sequence_original = dataset_original.applyTransforms()
@@ -89,9 +89,11 @@ if debug == 2:
     }
 
     sum = 0
+    cont_result = None
     # Get train and test folds
     start_time = time.time()#### debug time
     for k in range(k_cross_validation):
+        print("Iteration: "+str(k))
         gesture_hmms = {}
         gesture_datasets = {}
         for directory in directories.keys():
@@ -108,11 +110,15 @@ if debug == 2:
 
 
         result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+        if cont_result == None:
+            cont_result = result
+        else:
+            cont_result = cont_result + result
         print("--- %s seconds ---" % (time.time() - start_time)) # debug time
-        #result.plot()
-        result.save(path="/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/iteration_"+str(k)+"-states_"+str(n_states)+".csv")
+        #result.save(path="/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/iteration_"+str(k)+"-states_"+str(n_states)+".csv")
         sum += result.meanAccuracy()
     print("\nMean Accuracy: "+str(sum/k_cross_validation))
+    cont_result.save(path="/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/" + "states_" + str(n_states) + ".csv")
 
 
 

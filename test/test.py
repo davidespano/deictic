@@ -1,5 +1,6 @@
 import numpy
 import sys
+import collections
 # Plotting
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -71,10 +72,9 @@ class Result():
             raise Exception("The parameter path must be string.")
         array_to_save = numpy.empty([len(self.__labels)+1, len(self.__labels)+1], dtype=object)
         # Gesture labels
-        print(self.__labels[0])
         for index in range(0, len(self.__labels)):
-            array_to_save[index+1][index+1] = str(self.__labels[index])
-            index+1
+            array_to_save[0][index+1] = self.__labels[index]
+            array_to_save[index+1][0] = self.__labels[index]
         # Array values
         for row in range(0,len(self.__labels)):
             for column in range(0,len(self.__labels)):
@@ -133,6 +133,23 @@ class Result():
         plt.title('Mean Accuracy '+str(self.meanAccuracy()))
         print('Mean Accuracy: '+str(self.meanAccuracy()))
         plt.show()
+
+    def __add__(self, other):
+        """
+            The sum operator allows the developers to add the results of differents iterations (of course, the two objects have to go the same labels).
+        :param other:
+        :return:
+        """
+        # Check parameters
+        if not isinstance(other, Result):
+            raise TypeError
+        compare = lambda x, y: collections.Counter(x) == collections.Counter(y) # this function is used for comparing two list of objects
+        if not compare(other.__labels, self.__labels):
+            raise Exception
+        # add arrays
+        self.__array = numpy.sum([self.__array, other.__array], axis=0)
+        return self
+
 
     ### Private methods ###
     def __getLabelIndex(self, wanted_label):
