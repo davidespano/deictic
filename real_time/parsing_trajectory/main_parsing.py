@@ -17,8 +17,11 @@ import random
 import math
 import datetime
 import time
+###
+from gesture.modellingExpression import TypeRecognizer
 
-debug = 2
+
+debug = -1
 
 if debug == 1:
     # Get dataset

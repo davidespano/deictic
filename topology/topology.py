@@ -1,13 +1,75 @@
 import networkx
+# pomegranate
 from pomegranate import *
-
+# recognizer type
+from model.gestureModel import TypeRecognizer
+# random
+import random
 
 class HiddenMarkovModelTopology :
 
-    def ergodic(self, name='ergodic-model', n_States= 1, emissions = [], state_names = []):
-        model = HiddenMarkovModel(name)
+    # private classes
+    class __DistributionFactory():
+        '''
+            This class, given the recognizer type and the number of states, creates the distribution list, necessary
+            in the creation of hmm models.
+        '''
 
-        states = self.__fix_parameters(name, n_States, emissions, state_names);
+        # public methods
+        def __init__(self, type=None, chars=None):
+            """
+            :param type: specifies the recognizer type (online or offine) and, consequently, the distribution type.
+            :param chars: at the moment is used only for the online recognizer.
+            """
+            self.__function = {
+                TypeRecognizer.offline: self.__NormalDistribution,
+                TypeRecognizer.online: self.__DiscreteDistribution,
+            }
+            self.__type = type
+            self.__chars = chars
+        def getEmissions(self, num_states=0, emissions = []):
+            """
+                given the number of states, 'getEmissions' returns a set of distributions generated randomly.
+            :param num_states: the number of states which will compose the hidden markov model
+            :param emissions:
+            :return: the set of distributions
+            """
+            # check parameters
+            if not isinstance(num_states, int) or not isinstance(emissions, list):
+                raise TypeError
+
+            return self.__function[self.__type](emissions=[], num_states=num_states)
+
+        # private methods
+        def __DiscreteDistribution(self, num_states=0, emissions=[]):
+            for i in range(0, num_states):
+                random.seed(datetime.datetime.now())
+                distribution_values = numpy.random.dirichlet(numpy.ones(len(self.__chars)), size=1)[0]
+                emissions.append({self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))})
+            return emissions
+        def __NormalDistribution(self, num_states=0, emissions=[]):
+            for i in range(0, num_states):
+                emissions.append(NormalDistribution(0, 1.0))
+            return emissions
+
+    # Constructor
+    def __init__(self, recognizerType=TypeRecognizer.offline):
+        """
+
+        :param recognizerType: specifies the recognizer type (online or offine).
+        """
+        # Check parameters
+        if not isinstance(recognizerType, TypeRecognizer):
+            raise TypeError
+        # initialize distribution factory
+        self.__distributionFactory = HiddenMarkovModelTopology.__DistributionFactory(type=recognizerType)
+
+
+    # public methods
+    ### Ergodic ###
+    def ergodic(self, name='ergodic-model', n_states= 1, emissions=[], state_names = []):
+        model = HiddenMarkovModel(name)
+        states = self.__fix_parameters(name, n_states, state_names);
 
         #init transitions
         p_tr = 1 / (n_States + 2)
@@ -19,45 +81,37 @@ class HiddenMarkovModelTopology :
 
         model.bake()
         return model
-
-    def left_right(self, name='leftRight-model', n_states = 1, emissions = [], state_names = []):
-
+    ### Left to right###
+    def left_right(self, name='leftRight-model', num_states = 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
 
-        states = self.__fix_parameters(name, n_states, emissions, state_names, model);
-
+        states = self.__fix_parameters(name, num_states, emissions, state_names, model);
         #init transitions
         for i in range(0, n_states - 1):
-            for j in range(i, n_states):
+            for j in range(i, num_states):
                 model.add_transition(states[i], states[j], 1 / (n_states - i))
-
         model.add_transition(model.start, states[0], 1)
-        model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
-        model.add_transition(states[n_states - 1], model.end, 0.5)
+        model.add_transition(states[num_states - 1], states[num_states - 1], 0.5)
+        model.add_transition(states[num_states - 1], model.end, 0.5)
 
         model.bake()
         return model
-
-    def forward(self, name="forward-model", n_states = 1, emissions = [], state_names = []):
+    ### Forward ###
+    def forward(self, name="forward-model", num_states = 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
 
-
-
-        states = self.__fix_parameters(name, n_states, emissions, state_names, model);
-        for i in range(0, n_states - 1):
+        states = self.__fix_parameters(name, num_states, emissions, state_names, model);
+        for i in range(0, num_states - 1):
             model.add_transition(states[i], states[i], 0.5)
             model.add_transition(states[i], states[i+1], 0.5)
-
         model.add_transition(model.start, states[0], 1)
-        model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
-        model.add_transition(states[n_states - 1], model.end, 0.5)
-
-
+        model.add_transition(states[num_states - 1], states[num_states - 1], 0.5)
+        model.add_transition(states[num_states - 1], model.end, 0.5)
 
         model.bake()
-
         return model
 
+    # Staticmethods
     @staticmethod
     def sequence(operands, gt_edges = None):
         if len(operands) == 0:
@@ -286,31 +340,6 @@ class HiddenMarkovModelTopology :
         par.bake()
         return par, gt_edges
 
-
-
-
-    def __fix_parameters(self, name, n_States, emissions, state_names, model):
-        # default init of missing emission distributions
-        for i in range(len(emissions), n_States):
-            emissions.append(NormalDistribution(0, 1.0))
-
-
-        # default init of missing state names
-        cl_state = state_names[:]
-        for i in range(len(state_names), n_States):
-            cl_state.append(name + '-state-' + str(i))
-
-        # init states
-        states = []
-        for i in range(0, n_States):
-            states.append(State(emissions[i], cl_state[i]))
-            model.add_state(states[i])
-
-        return states
-
-
-
-
     @staticmethod
     def __find_start_states(term):
         start = []
@@ -318,7 +347,6 @@ class HiddenMarkovModelTopology :
             if edge[0] == term.start:
                 start.append(edge[1])
         return start
-
     @staticmethod
     def __find_end_states(term):
         end = []
@@ -326,3 +354,27 @@ class HiddenMarkovModelTopology :
             if edge[1] == term.end:
                 end.append(edge[0])
         return end
+
+    # private methods
+    def __fix_parameters(self, name, num_states, emissions, state_names, model):
+        """
+
+        :param name:
+        :param num_states:
+        :param emissions:
+        :param state_names:
+        :param model:
+        :return:
+        """
+        # default init of missing emission distributions
+        self.__distributionFactory.getEmissions(num_states=num_states, emissions=emissions)
+        # default init of missing state names
+        cl_state = state_names[:]
+        for i in range(len(state_names), num_states):
+            cl_state.append(name + '-state-' + str(i))
+        # init states
+        states = []
+        for i in range(0, num_states):
+            states.append(State(emissions[i], cl_state[i]))
+            model.add_state(states[i])
+        return states

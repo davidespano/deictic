@@ -16,7 +16,7 @@ def firstExample():
                 ]
             }
     # create deictic model for swipe_right
-    hmm_swipe_right = ModelFactory.createHmm(expressions = expressions, num_states = 6, num_samples = 20)
+    hmm_swipe_right = ModelFactory.generatedModels(expressions = expressions, num_states = 6, spu = 20)
     print(hmm_swipe_right)
 
 
@@ -38,7 +38,7 @@ def secondExample():
     # get swipe right and swipe left datasets
     gesture_dataset = None
     # create deictic model for swipe right and left
-    gesture_hmms = ModelFactory.createHmm(gesture_expressions)
+    gesture_hmms = ModelFactory.generatedModels(gesture_expressions)
     # start log-probability-based test
     results = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset)
     # show result through confusion matrix
@@ -89,7 +89,7 @@ def fourthExample():
     # get the gesture expressions which describe 1$ unistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
     # create hmms
-    gesture_hmms = ModelFactory.createHmm(expressions=gesture_expressions)
+    gesture_hmms = ModelFactory.generatedModels(expressions=gesture_expressions)
     # get sequence test (by using the first model of circle for generating a sample)
     sequence_test = gesture_hmms['circle'][0].sample()
     # compare hmms and show the computed log probabilities for each gesture

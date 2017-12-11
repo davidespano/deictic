@@ -1,65 +1,50 @@
+# classifier factory
 from gesture.declarativeModel import ClassifierFactory
-from config import Config
-# Enum
-from enum import Enum
-
-
-class TypeRecognizer(Enum):
-    online = 0
-    offline = 1
+# recognizer type
+from model.gestureModel import TypeRecognizer, GestureExp, CompositeExp
 
 class ModelFactory():
 
     @staticmethod
-    def createHmm(expressions, num_states = 6, type=TypeRecognizer.offline, distance=6, num_samples = 20):
+    def generatedModels(expressions, type=TypeRecognizer.offline, num_states = 6, spu = 20):
         """
             Given a deictic expression, this method returns its online or offline hmm model.
-        :param expressions:
-        :param num_states:
+        :param expressions: the deictic expressions which describes the models.
         :param type:
-        :param distance:
-        :param num_saples:
-        :return:
+        :param num_states: the number of states of the new model.
+        :param spu: samples per unit
+        :return: the models that implements the passed expression.
         """
         # Check parameters
-        if not isinstance(num_states, int):
+        if not isinstance(expressions, dict) or not all( (all(isinstance(exp,(GestureExp, CompositeExp)) for exp in expression) for expression in expressions.values())):
             raise TypeError
         if not isinstance(type, TypeRecognizer):
             raise TypeError
-        if not isinstance(distance, (int,float)):
-            raise TypeError
-        if not isinstance(num_samples, int):
-            raise TypeError
-
-
-
-    @staticmethod
-    def createHmm(expressions, num_states = 6, num_samples = 20):
-        """
-            Given a deictic expression, this method returns its model.
-        :param expression: the deictic expression which describes the model.
-        :param num_states: the number of states of the new model.
-        :param num_samples:
-        :return: the model that implements the passed expression.
-        """
-        # Check parameters
-        if not isinstance(expressions, dict):
-            raise Exception("expressions must be a dictionary of sequences defined through deictic primitives:'gesture_name':[exp1, exp2, ...]")
         if not isinstance(num_states, int):
-            raise Exception("num_states must be int.")
-        if not isinstance(num_samples, int):
-            raise Exception("num_samples must be int.")
-        # Create models
+            raise TypeError
+        if not isinstance(spu, (int,float)):
+            raise TypeError
+        # Classifier factory
+        factory = ClassifierFactory(type=type, num_states=num_states, spu=spu)
+        # Create hmms
         hmms = {}
-        factory = ClassifierFactory()
-        factory.setLineSamplesPath(Config.trainingDir)
-        factory.setClockwiseArcSamplesPath(Config.arcClockWiseDir)
-        factory.setCounterClockwiseArcSamplesPath(Config.arcCounterClockWiseDir)
-        factory.states = num_states
-        factory.spu = num_samples
         for gesture_label in expressions.keys():
             hmms[gesture_label] = []
             for expression in expressions[gesture_label]:
-                model, edges = factory.createClassifier(expression)
+                model, states = ModelFactory.createHmm(expression=expression, factory=factory)
                 hmms[gesture_label].append(model)
         return hmms
+
+
+    @staticmethod
+    def createHmm(expression, factory):
+        """
+            starting from a deictic expression and a classifier factory, that function returns the hmm which implements
+            the given expression.
+        :param expression:
+        :param factory:
+        :return:
+        """
+        return factory.createClassifier(expression)
+
+

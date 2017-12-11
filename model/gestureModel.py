@@ -13,6 +13,10 @@ import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.text import TextPath
 from matplotlib.transforms import Affine2D
 
+class TypeRecognizer(Enum):
+    online = 0
+    offline = 1
+
 class OpEnum(Enum):
     Undef = -1
     Point = 0
@@ -107,7 +111,6 @@ class GestureExp:
         pointList = list()
         self.get_points(pointList)
         return numpy.array(pointList)
-
 
 
 class CompositeExp(GestureExp):
