@@ -29,6 +29,7 @@ class ClassifierFactory:
         self.seq_edges = []
         self.stroke = -1
         self.strokeList = []
+        self.__transformPrimitive = ClassifierFactory.__TransformPrimitive(self.type, self.scale) # applied transforms to primitive samples
 
 
     # public methods
@@ -117,13 +118,11 @@ class ClassifierFactory:
             samples = round(distance * self.spu)
             n_states = round(distance * self.states + 0.5)
 
+            # get training samples
             dataset = CsvDataset(self.line) # reads the raw data
-
-            self.transformPrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
-
-            hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
-            samples = (sequence[0] for sequence in dataset.applyTransforms())
-
+            samples = self.__transformPrimitive.getSamplePrimitives(dataset, distance, alpha, startPoint, samples)
+            # create hmm
+            hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)
             #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
 
             if d:
@@ -139,47 +138,6 @@ class ClassifierFactory:
             startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
-
-        # Line 3D
-        if isinstance(exp, Line3D):
-            # Gets angles
-            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
-
-            #
-            #if exp.dy < 0:
-            #    alpha = -alpha
-
-            # Computes the distance between origin and the passed vector. The distance value is used
-            # to compute the correct number of samples and states.
-            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
-            samples = round(distance * self.spu)
-            n_states = round(distance * self.states + 0.5)
-
-            # Reads the raw data
-            dataset = CsvDataset(self.line)
-
-            # Creates the primitives transforms
-            self.transformLine3DPrimitive(dataset, distance, angles, startPoint, samples)
-
-            # Creates empty HMM
-            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
-            samples = (sequence[0] for sequence in dataset.applyTransforms())
-
-            if d:
-                self.debugPlot(samples, exp)
-
-            # Trains it with the transformed samples
-            hmm.fit(samples, use_pseudocount=True)
-
-            #
-            self.addStrokeIdDistribution(hmm)
-
-            #
-            startPoint[0] += exp.dx
-            startPoint[1] += exp.dy
-
-            return OpEnum.Line, [(hmm, None)]
-
         # Arc
         if isinstance(exp, Arc):
             exp.dz = 0;
@@ -232,19 +190,17 @@ class ClassifierFactory:
             else:
                 dataset = CsvDataset(self.arc_ccw)
 
+            # get training samples
             translate = [startPoint[0] + center[0], startPoint[1] + center[1]]
-            self.trasformArcPrimitive(dataset, startPoint, exp.dx, exp.dy, alpha, center, samples)
-
-
+            samples = self.trasformArcPrimitive(dataset, startPoint, exp.dx, exp.dy, alpha, center, samples)
+            # create hmm
             #hmm = self.createCleanArc(str(exp), startPoint, alpha, abs(exp.dx), abs(exp.dy), n_states, exp.cw)
             hmm = self.createCleanArc(str(exp), startPoint, exp, self.scale, n_states)
-            samples = (sequence[0] for sequence in dataset.applyTransforms())
-
             #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
 
             if d:
                 self.debugPlot(samples, exp)
-
+            # training
             hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
 
             self.addStrokeIdDistribution(hmm)
@@ -254,6 +210,48 @@ class ClassifierFactory:
             #startPoint[2] += exp.dz
 
             return OpEnum.Arc, [(hmm, None)]
+
+
+        # Line 3D
+        # todo - incomplete
+        if isinstance(exp, Line3D):
+            # Gets angles
+            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
+
+            #
+            #if exp.dy < 0:
+            #    alpha = -alpha
+
+            # Computes the distance between origin and the passed vector. The distance value is used
+            # to compute the correct number of samples and states.
+            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
+            samples = round(distance * self.spu)
+            n_states = round(distance * self.states + 0.5)
+
+            # Reads the raw data
+            dataset = CsvDataset(self.line)
+
+            # Creates the primitives transforms
+            self.__transformPrimitive(dataset, distance, angles, startPoint, samples)# needs to manage 3d
+
+            # Creates empty HMM
+            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
+            samples = (sequence[0] for sequence in dataset.applyTransforms())
+
+            if d:
+                self.debugPlot(samples, exp)
+
+            # Trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True)
+
+            #
+            self.addStrokeIdDistribution(hmm)
+
+            #
+            startPoint[0] += exp.dx
+            startPoint[1] += exp.dy
+
+            return OpEnum.Line, [(hmm, None)]
 
 
         # -----------------------------------------------
@@ -589,6 +587,119 @@ class ClassifierFactory:
 
         return None
 
+    # private classes
+    class __TransformPrimitive():
+        def __init__(self, type=None, scale=0):
+            """
+
+            :param type:
+            """
+            self.__function = {
+                TypeRecognizer.offline: self.__transformOffline,
+                TypeRecognizer.online: self.__transformOnline,
+            }
+            self.__type = type
+            self.scale = scale
+
+        def getSamplePrimitives(self, *args):
+            return self.__function[self.__type](*args)
+
+        def __transformOffline(self, dataset, distance, alpha, startPoint, samples):
+            """
+
+            :param dataset:
+            :param distance:
+            :param alpha:
+            :param startPoint:
+            :param samples:
+            :return:
+            """
+            # applying transforms for fitting the expression
+            centering = CenteringTransform()  # centering the line
+            normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
+            origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
+            rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)  # rotate the samples for getting the right slope
+            scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
+            resample = ResampleInSpaceTransform(samples=samples)  # resampling
+            translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
+            # add transforms to dataset
+            dataset.addTransform(centering)
+            dataset.addTransform(normalise)
+            dataset.addTransform(origin)
+            dataset.addTransform(scale)
+            dataset.addTransform(rotate)
+            dataset.addTransform(resample)
+            dataset.addTransform(translate)
+            # apply transforms and return files
+            return (sequence[0] for sequence in dataset.applyTransforms())
+
+        def __transformOnline(self, dataset, distance, alpha, startPoint, samples):
+            """
+
+            :param dataset:
+            :param distance:
+            :param alpha:
+            :param startPoint:
+            :param samples:
+            :return:
+            """
+            # applying transforms for fitting the expression
+            kalman = KalmanFilterTransform()
+            resampledTransform = ResampleTransform(delta=samples)
+            # resampledTransform = ResampleInSpaceTransform(samples=samples)
+            # add transforms to dataset
+            dataset.addTransform(kalman)
+            dataset.addTransform(resampledTransform)
+            # apply transforms, parse and return files
+            return (Parsing.parsingLine(sequence[0][:,[0,1]]) for sequence in dataset.applyTransforms())
+
+            # end
+            print("End " + directory)
+
+        # todo - incomplete
+        def transformLine3DPrimitive(self, dataset, distance, angles, startPoint, samples):
+            """
+                Applying transforms for fitting the expression.
+            :param dataset:
+            :param distance:
+            :param angles:
+            :param startPoint:
+            :param samples:
+            :return:
+            """
+            # Centering the line
+            centering = CenteringTransform()
+            # Normalise the length
+            normalise = NormaliseLengthTransform(axisMode=False)
+            # Put the first sample in the origin, the line goes left-to-right
+            origin = TranslateTransform(t=[0.5, 0])
+            # Rotation, first through alpha_xy then alpha_xz
+            rotate_z = RotateTransform(theta=angles[0],
+                                       unit=RotateTransform.radians)  # rotate the samples for getting the right slope
+            rotate_y = RotateTransform(theta=angles[1],
+                                       unit=RotateTransform.radians)
+            rotate_x = RotateTransform(theta=angles[2],
+                                       unit=RotateTransform.radians)
+            # Adjust the size
+            scale = ScaleDatasetTransform(scale=distance * self.scale)
+            # Resampling
+            resample = ResampleInSpaceTransform(samples=samples)
+            # Position the segment at its starting point
+            translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])
+
+            # Apply transforms
+            dataset.addTransform(centering)
+            dataset.addTransform(normalise)
+            dataset.addTransform(origin)
+            dataset.addTransform(scale)
+            dataset.addTransform(rotate_z)
+            dataset.addTransform(rotate_y)
+            dataset.addTransform(rotate_x)
+            dataset.addTransform(resample)
+            dataset.addTransform(translate)
+
+
+
 
 class ModelPreprocessor:
     """
@@ -651,108 +762,3 @@ class ModelPreprocessor:
                 x = transformed[i][0]
                 y = transformed[i][1]
                 z = transformed[i][2]
-
-
-
-
-# private classes
-class TransformPrimitive():
-    def __init__(self, type=None):
-        """
-
-        :param type:
-        """
-        self.__function = {
-            TypeRecognizer.offline: self.__transformOnline,
-            TypeRecognizer.online: self.__transformOffline,
-        }
-        self.__type = type
-
-    def getSamplePrimitives(self, *args):
-        return self.__function[self.__type](args)
-
-    def __transformOffline(self, dataset, distance, alpha, startPoint, samples):
-        """
-
-        :param dataset:
-        :param distance:
-        :param alpha:
-        :param startPoint:
-        :param samples:
-        :return:
-        """
-        # applying transforms for fitting the expression
-        centering = CenteringTransform()  # centering the line
-        normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
-        origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
-        rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)  # rotate the samples for getting the right slope
-        scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
-        resample = ResampleInSpaceTransform(samples=samples)  # resampling
-        translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
-        # add transforms to dataset
-        dataset.addTransform(centering)
-        dataset.addTransform(normalise)
-        dataset.addTransform(origin)
-        dataset.addTransform(scale)
-        dataset.addTransform(rotate)
-        dataset.addTransform(resample)
-        dataset.addTransform(translate)
-    def __transformOnline(self, dataset, distance):
-        """
-
-        :param dataset:
-        :param distance:
-        :param alpha:
-        :param startPoint:
-        :param samples:
-        :return:
-        """
-        # applying transforms for fitting the expression
-        kalman = KalmanFilterTransform()
-        resampledTransform = ResampleTransform(delta=distance)
-        #resampledTransform = ResampleInSpaceTransform(samples=distance)
-        # add transforms to dataset
-        dataset.addTransform(kalman)
-        dataset.addTransform(resampledTransform)
-
-    # todo - incomplete
-    def transformLine3DPrimitive(self, dataset, distance, angles, startPoint, samples):
-        """
-            Applying transforms for fitting the expression.
-        :param dataset:
-        :param distance:
-        :param angles:
-        :param startPoint:
-        :param samples:
-        :return:
-        """
-        # Centering the line
-        centering = CenteringTransform()
-        # Normalise the length
-        normalise = NormaliseLengthTransform(axisMode=False)
-        # Put the first sample in the origin, the line goes left-to-right
-        origin = TranslateTransform(t=[0.5, 0])
-        # Rotation, first through alpha_xy then alpha_xz
-        rotate_z = RotateTransform(theta=angles[0],
-                                   unit=RotateTransform.radians)  # rotate the samples for getting the right slope
-        rotate_y = RotateTransform(theta=angles[1],
-                                   unit=RotateTransform.radians)
-        rotate_x = RotateTransform(theta=angles[2],
-                                   unit=RotateTransform.radians)
-        # Adjust the size
-        scale = ScaleDatasetTransform(scale=distance * self.scale)
-        # Resampling
-        resample = ResampleInSpaceTransform(samples=samples)
-        # Position the segment at its starting point
-        translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])
-
-        # Apply transforms
-        dataset.addTransform(centering)
-        dataset.addTransform(normalise)
-        dataset.addTransform(origin)
-        dataset.addTransform(scale)
-        dataset.addTransform(rotate_z)
-        dataset.addTransform(rotate_y)
-        dataset.addTransform(rotate_x)
-        dataset.addTransform(resample)
-        dataset.addTransform(translate)

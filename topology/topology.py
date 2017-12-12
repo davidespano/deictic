@@ -5,6 +5,7 @@ from pomegranate import *
 from model.gestureModel import TypeRecognizer
 # random
 import random
+import datetime
 
 class HiddenMarkovModelTopology :
 
@@ -67,16 +68,15 @@ class HiddenMarkovModelTopology :
 
     # public methods
     ### Ergodic ###
-    def ergodic(self, name='ergodic-model', n_states= 1, emissions=[], state_names = []):
+    def ergodic(self, name='ergodic-model', num_states= 1, emissions=[], state_names = []):
         model = HiddenMarkovModel(name)
-        states = self.__fix_parameters(name, n_states, state_names);
-
+        states = self.__fix_parameters(name, num_states, state_names);
         #init transitions
-        p_tr = 1 / (n_States + 2)
-        for i in range(0, n_States):
+        p_tr = 1 / (num_states + 2)
+        for i in range(0, num_states):
             model.add_transition(model.start, states[i], p_tr)
             model.add_transition(states[i], model.end, p_tr)
-            for j in range (0, n_States):
+            for j in range (0, num_states):
                 model.add_transition(states[i], states[j], p_tr)
 
         model.bake()
@@ -87,9 +87,9 @@ class HiddenMarkovModelTopology :
 
         states = self.__fix_parameters(name, num_states, emissions, state_names, model);
         #init transitions
-        for i in range(0, n_states - 1):
+        for i in range(0, num_states - 1):
             for j in range(i, num_states):
-                model.add_transition(states[i], states[j], 1 / (n_states - i))
+                model.add_transition(states[i], states[j], 1 / (num_states - i))
         model.add_transition(model.start, states[0], 1)
         model.add_transition(states[num_states - 1], states[num_states - 1], 0.5)
         model.add_transition(states[num_states - 1], model.end, 0.5)

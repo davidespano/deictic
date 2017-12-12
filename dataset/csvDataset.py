@@ -106,17 +106,6 @@ class CsvDataset:
                 result = numpy.array(vals).astype(self.type)
         return result
 
-    ####### rivedere
-    def read_ten_cross_validation_dataset(self, inputDir, type, k = 0, model_index = None):
-        files = open(inputDir+type+'_ten-cross-validation_{}.txt'.format(str(k))).readlines()
-        files = files[0].split('/')
-        sequences = []
-        for filename in files:
-            seq = self.readFile(filename);
-            sequences.append(seq)
-        return  sequences
-    ####### rivedere
-
     def addTransform(self, transform):
         self.compositeTransform.addTranform(transform)
 
@@ -259,15 +248,15 @@ class CsvDataset:
         if not isinstance(sequence, numpy.ndarray):
             raise TypeError
         # Plot sequence
-        if dimensions == 2:
+        if dimensions == 2: # 2 dimensions
             plt.scatter(sequence[:, 0], sequence[:, 1])
             for i in range(0, len(sequence)):
                 plt.annotate(str(i), (sequence[i, 0], sequence[i, 1]))
             return plt.plot(sequence[:, 0], sequence[:, 1], label=filename)
-        else:
-            ax.scatter(sequence[:, 0], sequence[:, 1], sequence[:, 2])
+        else: # 3 dimensions
+            plt.scatter(sequence[:, 0], sequence[:, 1], sequence[:, 2])
             for i in range(0, len(sequence)):
-                ax.annotate(str(i), (sequence[i, 0], sequence[i, 1], sequence[i, 2]))
+                plt.annotate(str(i), (sequence[i, 0], sequence[i, 1], sequence[i, 2]))
             return plt.plot(sequence[:, 0], sequence[:, 1], sequence[:, 1], sequence[:, 2], label=filename)
 
 
