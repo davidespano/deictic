@@ -1,25 +1,24 @@
 #### Library ####
 # Csvdataset
 #from real_time.parsing_trajectory.csv_dataset import CsvDataset
-from dataset.csvDataset import CsvDataset
-# Test
-from test.test import Test, Result
-# Kalman filter
-from pykalman import KalmanFilter
-# Parsing trajectory definition
-from real_time.parsing_trajectory.trajectory_parsing import Parsing
-from real_time.parsing_trajectory.model_factory import Model
+import datetime
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from dataset import *
 import random
-import math
-import datetime
 import time
+# Kalman filter
+from pykalman import KalmanFilter
+from dataset import *
+from dataset.csvDataset import CsvDataset
 ###
-from gesture.modellingExpression import TypeRecognizer
-
+from gesture.datasetExpressions import DatasetExpressions
+from gesture.modellingExpression import ModelFactory
+from real_time.parsing_trajectory.model_factory import Model
+from real_time.parsing_trajectory.trajectory_parsing import Parsing
+# Test
+from test.test import Test, Result
 
 debug = -1
 

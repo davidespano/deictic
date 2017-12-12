@@ -35,13 +35,13 @@ class DatasetExpressions:
             'circle': [
                 Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False)
             ],
-            'delete mark': [
+            'delete_mark': [
                 Point(0, 0) + Line(2, -3) + Line(-2, 0) + Line(2, 3)
             ],
-            'left curly brace': [
+            'left_curly_brace': [
                 Point(0, 0) + Arc(-5, -5, cw=False) + Arc(-3, -3) + Arc(3, -3) + Arc(5, -5, cw=False)
             ],
-            'left square bracket': [
+            'left_sq_bracket': [
                 Point(0, 0) + Line(-4, 0) + Line(0, -5) + Line(4, 0)
             ],
             'triangle':[
@@ -56,13 +56,13 @@ class DatasetExpressions:
             'question_mark':[
                 Point(0,0) + Arc(4,4) + Arc(4,-4) + Arc(-4,-4) + Arc(-2,-2, cw=False) + Arc(2, -2, cw=False)
             ],
-            'right square bracket':[
+            'right_sq_bracket':[
                 Point(0,0) + Line(4,0) + Line(0, -5)  + Line(-4, 0)
             ],
             'v':[
                 Point(0,0) + Line(2,-3) + Line(2,3)
             ],
-            'right curly brace':[
+            'right_curly_brace':[
                 Point(0,0) + Arc(5,-5) +  Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Arc(-5,-5)
             ],
             'star':[

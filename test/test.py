@@ -238,7 +238,7 @@ class Test():
             for dataset in datasets:
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
-                    sequences = [sequence for sequence in dataset.readDataset(type=type)]
+                    sequences = [sequence for sequence in dataset.readDataset()]
                 elif isinstance(dataset, (numpy.ndarray, list)):
                     sequences = [dataset]
                 else:

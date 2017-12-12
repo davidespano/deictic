@@ -89,14 +89,13 @@ def fourthExample():
     # get the gesture expressions which describe 1$ unistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
     # create hmms
-    gesture_hmms = ModelFactory.generatedModels(expressions=gesture_expressions)
+    gesture_hmms = ModelFactory.createHmm(expressions=gesture_expressions)
     # get sequence test (by using the first model of circle for generating a sample)
     sequence_test = gesture_hmms['circle'][0].sample()
     # compare hmms and show the computed log probabilities for each gesture
     index_label, log_probabilities = Test.compare(sequence=sequence_test, gesture_hmms=gesture_hmms, return_log_probabilities=True)
     print("The gesture with the highest log probabilities value is " +index_label)
     print(log_probabilities)
-
 
 # Start example
 fourthExample()
