@@ -1,8 +1,11 @@
 import networkx
 from pomegranate import *
-
+# random
+import random
+import datetime
 
 class HiddenMarkovModelTopology :
+    __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O', '0']
 
     def ergodic(self, name='ergodic-model', n_States= 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
@@ -291,8 +294,14 @@ class HiddenMarkovModelTopology :
 
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
         # default init of missing emission distributions
-        for i in range(len(emissions), n_States):
-            emissions.append(NormalDistribution(0, 1.0))
+        # for i in range(len(emissions), n_States):
+        #     emissions.append(NormalDistribution(0, 1.0))
+        num_states = n_States
+        for i in range(0, num_states):
+            random.seed(datetime.datetime.now())
+            distribution_values = numpy.random.dirichlet(numpy.ones(len(self.__chars)), size=1)[0]
+            values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
+            emissions.append(DiscreteDistribution(values))
 
 
         # default init of missing state names

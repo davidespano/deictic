@@ -13,14 +13,47 @@ from pykalman import KalmanFilter
 from dataset import *
 from dataset.csvDataset import CsvDataset
 ###
+from model.gestureModel import TypeRecognizer
 from gesture.datasetExpressions import DatasetExpressions
-from gesture.modellingExpression import ModelFactory
+from gesture.modellingExpression import ModelExpression
 from real_time.parsing_trajectory.model_factory import Model
 from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
 from test.test import Test, Result
 
 debug = -1
+
+if debug == -1:
+    # get the gesture expressions which describe 1$ multistroke dataset
+    gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
+    # get gesture datasets
+    gesture_datasets = {
+        "arrow": [CsvDataset(base_dir + "arrow/", type=str)],
+        "caret": [CsvDataset(base_dir + "caret/", type=str)],
+        "check": [CsvDataset(base_dir+"check/", type=str)],
+        #"circle": [CsvDataset(base_dir+"circle/", type=str)],
+        # "delete_mark": [CsvDataset(base_dir + "delete_mark/", type=str)],
+        # "left_curly_brace": [CsvDataset(base_dir + "left_curly_brace/", type=str)],
+        # "left_sq_bracket": [CsvDataset(base_dir + "left_sq_bracket/", type=str)],
+        # "pigtail": [CsvDataset(base_dir + "pigtail/", type=str)],
+        # "question_mark": [CsvDataset(base_dir + "question_mark/", type=str)],
+        # "rectangle": [CsvDataset(base_dir + "rectangle/", type=str)],
+        # "right_curly_brace": [CsvDataset(base_dir + "right_curly_brace/", type=str)],
+        # "right_sq_bracket": [CsvDataset(base_dir + "right_sq_bracket/", type=str)],
+        # "star": [CsvDataset(base_dir + "star/", type=str)],
+        # "triangle": [CsvDataset(base_dir + "triangle/", type=str)],
+        # "v": [CsvDataset(base_dir + "v/", type=str)],
+        # "x": [CsvDataset(base_dir + "x/", type=str)]
+    }
+    # hmms
+    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions, type=TypeRecognizer.online, num_states=5, spu=40)
+    # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    results = Test.getInstance().offlineTest(gesture_hmms, gesture_datasets)
+    # show result through confusion matrix
+    results.plot()
+    # save result on csv file
+    results.save(path=None)
 
 if debug == 1:
     # Get dataset
@@ -122,14 +155,6 @@ if debug == 2:
     print("\nMean Accuracy: "+str(sum/k_cross_validation))
     cont_result.save(path="/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/" + "states_" + str(n_states) + ".csv")
 
-
-
-        #print(result.getWrongClassified())
-        # for key, values in gesture_datasets.items():
-        #     for value in values:
-        #         label, array = Test.compare(value, gesture_hmms, return_log_probabilities=True)
-        #         print("Gesture recognized is " + str(label) + " - gesture tested " + key)
-        #         print(array)
 
 
 

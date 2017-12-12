@@ -8,7 +8,7 @@ import itertools
 # csv
 import csv
 # Deictic
-from gesture import ModelFactory
+from gesture import ModelExpression
 from dataset import CsvDataset
 
 class Result():
@@ -196,7 +196,7 @@ class Test():
             Test.__singleton = Test()
         return Test.__singleton
 
-    def offlineTestExpression(self, gesture_expressions, gesture_datasets, type=float):
+    def offlineTestExpression(self, gesture_expressions, gesture_datasets):
         """
             offlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
@@ -211,7 +211,7 @@ class Test():
         # start comparison
         return self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def offlineTest(self, gesture_hmms, gesture_datasets, type=float):
+    def offlineTest(self, gesture_hmms, gesture_datasets):
         """
             offlineTest compares gesture hmms each one and return the resulted confusion matrix.
         :param gesture_hmms: a dictionary of hidden markov models (key is the gesture label, values are his expression models).
@@ -248,7 +248,7 @@ class Test():
         # return comparison results
         return self.result
 
-    def onlineTestExpression(self, gesture_expressions, gesture_datasets, type=float):
+    def onlineTestExpression(self, gesture_expressions, gesture_datasets):
         """
             onlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
@@ -269,7 +269,7 @@ class Test():
         :param gesture_expressions: a dictionary of deictic expression.
         :return: a dictionary of deictic hmms.
         """
-        return ModelFactory.createHmm(expressions=gesture_expressions)
+        return ModelExpression.generatedModels(expressions=gesture_expressions)
 
     def __comparison(self, sequences, dataset_label):
         """

@@ -73,6 +73,14 @@ class Model():
         return states
 
 
+
+
+
+
+
+
+
+
 ########## Emissions #########
 ## gesture_emissions
 # Defines the emissions for the hmm

@@ -1,3 +1,4 @@
 from .declarativeModel import *
 from .datasetExpressions import DatasetExpressions
-from .modellingExpression import ModelFactory
+from .modellingExpression import ModelExpression
+from .distributionsModel import DistributionFactory

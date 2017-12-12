@@ -357,7 +357,7 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, sequence_resampled = None, flag_plot=False, flag_save=False, path = None):
+    def parsingLine(sequence, name=None, dir=None, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.
@@ -383,24 +383,6 @@ class Parsing():
         #f = trajectory.descriptorTrajectory()
         # Sub primitives
         list = trajectory.findSubPrimitives(beta=4)
-
-        if not sequence_resampled == None:
-            # Kalmar smoother and threshold for algorithm 1
-            sm_seq, threshold_a = Parsing.__kalmanSmoother(sequence_resampled)
-            # trajectory
-            trajectory = Trajectory(sm_seq)
-            # Algorithm 1 (find straight linear)
-            list = trajectory.algorithm1(threshold_a=threshold_a)
-            # Algorithm 2 (find plane arc)
-            list = trajectory.algorithm2(threshold_b=None)
-            # Algorithm 3 (localizing boundary points)
-            list = trajectory.algorithm3()
-            # Descriptor
-            f = trajectory.descriptorTrajectory()
-            # Sub primitives
-            list_2 = trajectory.findSubPrimitives(beta=4)
-
-
 
         # Plot data
         if flag_plot:
@@ -485,30 +467,6 @@ class Parsing():
         #plt.legend((original[0]), ('sequence'), loc='lower right')
         plt.axis('equal')
         plt.show()
-
-    #@staticmethod
-    # def __plot(original_sequence, smoothed_sequence, label_list1, resampled_sequence, label_list2):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     # Plotting #
-    #     fig, ax = plt.subplots(figsize=(10, 15))
-    #     # plot original sequence
-    #     original = plt.plot(original_sequence[:,0], original_sequence[:,1], color='b')
-    #     # plot smoothed sequence
-    #     smooth = plt.plot(smoothed_sequence[:, 0]+200, smoothed_sequence[:,1], color='r')
-    #     # plot resampled sequence
-    #     resampled = plt.plot(resampled_sequence[:, 0], resampled_sequence[:,1], color='g')
-    #     # label
-    #     for i in range(1, len(smoothed_sequence)-1):
-    #         ax.annotate(label_list1[i-1], (smoothed_sequence[i, 0]+200, smoothed_sequence[i, 1]))
-    #     for i in range(1, len(resampled_sequence)-1):
-    #         ax.annotate(label_list2[i-1], (resampled_sequence[i, 0], resampled_sequence[i, 1]))
-    #     # legend
-    #     plt.legend((original[0], smooth[0], resampled[0]), ('true', 'smooth', 'resampled'), loc='lower right')
-    #     plt.axis('equal')
-    #     plt.show()
 
     @staticmethod
     def __save(label_list, path):

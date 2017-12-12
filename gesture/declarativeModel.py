@@ -2,46 +2,46 @@ from enum import Enum
 from dataset import *
 from model import *
 from topology import *
+# config
+from config import *
+# parsing
+from real_time.parsing_trajectory.trajectory_parsing import Parsing
 
 class ClassifierFactory:
     """
 
     """
 
-    def __init__(self):
-        self.line = None
-        self.arc_cw = None
-        self.arc_ccw = None
+    # constructor
+    def __init__(self, type=TypeRecognizer.offline, num_states=6, spu=20):
+        # check parameters
+        if not isinstance(type, TypeRecognizer):
+            raise TypeError
+        if not isinstance(num_states, int):
+            raise TypeError
+        if not isinstance(spu, (int, float)):
+            raise TypeError
+        # initialization parameters
+        self.line = Config.trainingDir  # path training files - line
+        self.arc_cw = Config.arcClockWiseDir  # path training files - arc clock wise
+        self.arc_ccw = Config.arcCounterClockWiseDir  # path training files - arc counter clock wise
+        self.type = type  # (offline or online?)
+        self.states = num_states  # state numbers of model
+        self.spu = spu  # samples per unit
         self.scale = 100
-        self.states = 6
-        self.spu = 20 # samples per unit
         self.seq_edges = []
         self.stroke = -1
         self.strokeList = []
+        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O', '0']
 
+    # public methods
+    def setLineSamplesPath(self, path):
+        self.line = path
     def setClockwiseArcSamplesPath(self, path):
-        """
-
-        :param path:
-        :return:
-        """
         self.arc_cw = path
-
     def setCounterClockwiseArcSamplesPath(self, path):
-        """
-
-        :param path:
-        :return:
-        """
         self.arc_ccw = path
 
-    def setLineSamplesPath(self, path):
-        """
-
-        :param path:
-        :return:
-        """
-        self.line = path
 
     def createClassifier(self, exp):
         """
@@ -120,18 +120,19 @@ class ClassifierFactory:
             samples = round(distance * self.spu)
             n_states = round(distance * self.states + 0.5)
 
+            # get samples
             dataset = CsvDataset(self.line) # reads the raw data
-
-            self.transformPrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
-
-            hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
-            samples = [sequence[0 ] for sequence in dataset.applyTransforms()]
-
-            #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
-
+            self.transformLinePrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
+            if self.type == TypeRecognizer.online:
+                # parsing
+                samples = [Parsing.parsingLine(sequence[0][:,[0,1]], sequence[1], dataset.dir).getLabelSequences() for sequence in dataset.applyTransforms()]
+            else:
+                samples = [sequence[0 ] for sequence in dataset.applyTransforms()]
             if d:
                 self.debugPlot(samples, exp)
-
+            # create hmm
+            hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
+            # training
             hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
 
 
@@ -142,47 +143,6 @@ class ClassifierFactory:
             startPoint[1] += exp.dy
 
             return OpEnum.Line, [(hmm, None)]
-
-        # Line 3D
-        if isinstance(exp, Line3D):
-            # Gets angles
-            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
-
-            #
-            #if exp.dy < 0:
-            #    alpha = -alpha
-
-            # Computes the distance between origin and the passed vector. The distance value is used
-            # to compute the correct number of samples and states.
-            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
-            samples = round(distance * self.spu)
-            n_states = round(distance * self.states + 0.5)
-
-            # Reads the raw data
-            dataset = CsvDataset(self.line)
-
-            # Creates the primitives transforms
-            self.transformLine3DPrimitive(dataset, distance, angles, startPoint, samples)
-
-            # Creates empty HMM
-            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
-            samples = dataset.applyTransforms()
-
-            if d:
-                self.debugPlot(samples, exp)
-
-            # Trains it with the transformed samples
-            hmm.fit(samples, use_pseudocount=True)
-
-            #
-            self.addStrokeIdDistribution(hmm)
-
-            #
-            startPoint[0] += exp.dx
-            startPoint[1] += exp.dy
-
-            return OpEnum.Line, [(hmm, None)]
-
         # Arc
         if isinstance(exp, Arc):
             exp.dz = 0;
@@ -235,20 +195,19 @@ class ClassifierFactory:
             else:
                 dataset = CsvDataset(self.arc_ccw)
 
+            # get samples
             translate = [startPoint[0] + center[0], startPoint[1] + center[1]]
             self.trasformArcPrimitive(dataset, startPoint, exp.dx, exp.dy, alpha, center, samples)
-
-
-            #hmm = self.createCleanArc(str(exp), startPoint, alpha, abs(exp.dx), abs(exp.dy), n_states, exp.cw)
-            hmm = self.createCleanArc(str(exp), startPoint, exp, self.scale, n_states)
-
-            samples = [sequence[0] for sequence in dataset.applyTransforms()]
-
-            #samples = self.addStrokeId(samples) # adds the stroke id for multistroke gestures
-
+            if self.type == TypeRecognizer.online:
+                # parsing
+                samples = [Parsing.parsingLine(sequence[0][:,0,1] for sequence in dataset.applyTransforms())]
+            else:
+                samples = [sequence[0 ] for sequence in dataset.applyTransforms()]
             if d:
                 self.debugPlot(samples, exp)
-
+            # create hmm
+            hmm = self.createCleanArc(str(exp), startPoint, exp, self.scale, n_states)
+            # training
             hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
 
             self.addStrokeIdDistribution(hmm)
@@ -259,6 +218,46 @@ class ClassifierFactory:
 
             return OpEnum.Arc, [(hmm, None)]
 
+        # todo - incomplete
+        # Line 3D
+        if isinstance(exp, Line3D):
+            # Gets angles
+            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
+
+            #
+            #if exp.dy < 0:
+            #    alpha = -alpha
+
+            # Computes the distance between origin and the passed vector. The distance value is used
+            # to compute the correct number of samples and states.
+            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
+            samples = round(distance * self.spu)
+            n_states = round(distance * self.states + 0.5)
+
+            # Reads the raw data
+            dataset = CsvDataset(self.line)
+
+            # Creates the primitives transforms
+            self.transformLine3DPrimitive(dataset, distance, angles, startPoint, samples)
+
+            # Creates empty HMM
+            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
+            samples = dataset.applyTransforms()
+
+            if d:
+                self.debugPlot(samples, exp)
+
+            # Trains it with the transformed samples
+            hmm.fit(samples, use_pseudocount=True)
+
+            #
+            self.addStrokeIdDistribution(hmm)
+
+            #
+            startPoint[0] += exp.dx
+            startPoint[1] += exp.dy
+
+            return OpEnum.Line, [(hmm, None)]
 
         # -----------------------------------------------
         #       composite terms
@@ -297,13 +296,9 @@ class ClassifierFactory:
             return OpEnum.Iterative, [(operand, seq_edge)]
 
         return None
-
     def addStrokeIdDistribution(self, hmm):
-
         if len(self.strokeList) > 1:
-
             step = 0.5 / len(hmm.states) +1
-
             for i in range(0, len(hmm.states)):
                 state = hmm.states[i]
                 if not state.distribution is None:
@@ -315,51 +310,7 @@ class ClassifierFactory:
 
 
 
-    def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
-        """
-
-        :param dataset:
-        :param startPoint:
-        :param radiusX:
-        :param radiusY:
-        :param alpha:
-        :param center:
-        :param samples:
-        :return:
-        """
-        # applying transforms for fitting
-        centering = CenteringTransform()  # centering the line
-        normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
-        origin = TranslateTransform(t=[0.5, 0.5])
-        rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)
-        centerTranslate = TranslateTransform(t=[center[0], center[1]])
-        radiusScale = ScaleDatasetTransform(scale=[abs(radiusX), abs(radiusY)])
-        startPointTranslate = TranslateTransform(t=startPoint)
-        scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
-        resample = ResampleInSpaceTransform(samples=samples)  # resampling
-
-        dataset.addTransform(centering)
-        dataset.addTransform(normalise)
-        dataset.addTransform(origin)
-        dataset.addTransform(rotate)
-        dataset.addTransform(centerTranslate)
-        dataset.addTransform(radiusScale)
-        dataset.addTransform(startPointTranslate)
-        dataset.addTransform(scale)
-        dataset.addTransform(resample)
-        return None
-
-
-    def transformPrimitive(self, dataset, distance, alpha, startPoint, samples):
-        """
-
-        :param dataset:
-        :param distance:
-        :param alpha:
-        :param startPoint:
-        :param samples:
-        :return:
-        """
+    def transformLinePrimitive(self, dataset, distance, alpha, startPoint, samples):
         # applying transforms for fitting the expression
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
@@ -370,7 +321,7 @@ class ClassifierFactory:
         resample = ResampleInSpaceTransform(samples=samples)  # resampling
         translate = TranslateTransform(
             t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
-
+        # adding transforms to dataset
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
@@ -378,7 +329,36 @@ class ClassifierFactory:
         dataset.addTransform(rotate)
         dataset.addTransform(resample)
         dataset.addTransform(translate)
+    def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
+        # applying transforms for fitting
+        centering = CenteringTransform()  # centering the line
+        normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
+        origin = TranslateTransform(t=[0.5, 0.5])
+        rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)
+        centerTranslate = TranslateTransform(t=[center[0], center[1]])
+        radiusScale = ScaleDatasetTransform(scale=[abs(radiusX), abs(radiusY)])
+        startPointTranslate = TranslateTransform(t=startPoint)
+        scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
+        resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        # adding transforms to dataset
+        dataset.addTransform(centering)
+        dataset.addTransform(normalise)
+        dataset.addTransform(origin)
+        dataset.addTransform(rotate)
+        dataset.addTransform(centerTranslate)
+        dataset.addTransform(radiusScale)
+        dataset.addTransform(startPointTranslate)
+        dataset.addTransform(scale)
+        dataset.addTransform(resample)
+    def transformOnline(self, dataset):
+        # applying transforms for fitting
+        kalman = KalmanFilterTransform()
+        dataset.addTransform(kalman)
 
+
+
+
+    # todo - incomplete
     def transformLine3DPrimitive(self, dataset, distance, angles, startPoint, samples):
         """
             Applying transforms for fitting the expression.
@@ -453,6 +433,21 @@ class ClassifierFactory:
             return new_samples
         return samples
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def createStrokeDiscreteDistribution(self):
         """
 
@@ -479,56 +474,19 @@ class ClassifierFactory:
         """
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
-
-
-        step_x = dx / max(samples - 1, 1)
-        step_y = dy / max(samples - 1, 1)
-
-        for i in range(0, samples ):
-            a = (startPoint[0] + (i * step_x)) * scale
-            b = (startPoint[1] + (i * step_y)) * scale
-
-            gaussianX = NormalDistribution(a, self.scale * 0.01)
-            gaussianY = NormalDistribution(b, self.scale * 0.01)
-
-
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
-
-
-        return topology_factory.forward(name, samples, distributions)
-
-    def createCleanLine3D(self, name, startPoint, dx, dy, dz, scale, samples):
-        """
-
-        :param name:
-        :param startPoint:
-        :param dx:
-        :param dy:
-        :param dz:
-        :param scale:
-        :param samples:
-        :return:
-        """
-        topology_factory = HiddenMarkovModelTopology()  # Topology
-        distributions = []
-
-        #
-        step_x = dx / max(samples - 1, 1)
-        step_y = dy / max(samples - 1, 1)
-        step_z = dz / max(samples - 1, 1)
-
-        #
-        for i in range(0, samples):
-            a = (startPoint[0] + (i * step_x)) * scale
-            b = (startPoint[1] + (i * step_y)) * scale
-            c = (startPoint[2] + (i * step_z)) * scale
-
-            gaussianX = NormalDistribution(a, self.scale * 0.01)
-            gaussianY = NormalDistribution(b, self.scale * 0.01)
-            gaussianZ = NormalDistribution(c, self.scale * 0.01)
-
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY, gaussianZ]))
-
+        if self.type == TypeRecognizer.offline:
+            # offline
+            step_x = dx / max(samples - 1, 1)
+            step_y = dy / max(samples - 1, 1)
+            for i in range(0, samples ):
+                a = (startPoint[0] + (i * step_x)) * scale
+                b = (startPoint[1] + (i * step_y)) * scale
+                gaussianX = NormalDistribution(a, self.scale * 0.01)
+                gaussianY = NormalDistribution(b, self.scale * 0.01)
+                distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+        else:
+            # online
+            distributions = self.__DiscreteDistribution(samples, distributions)
 
         return topology_factory.forward(name, samples, distributions)
 
@@ -545,56 +503,83 @@ class ClassifierFactory:
         topology_factory = HiddenMarkovModelTopology()  # Topology
         distributions = []
 
-        step = 0.5 * math.pi / max(n_states - 1, 1)
+        if self.type == TypeRecognizer.offline:
+            # offline
+            step = 0.5 * math.pi / max(n_states - 1, 1)
 
-        beta = 0
-        alpha = 0
+            beta = 0
+            alpha = 0
 
-        # TODO this may be better coded
-        if exp.cw:
-            if exp.dy > 0:
-                if exp.dx > 0:
-                    alpha = 0
-                else:
-                    alpha = 0.5 * math.pi
-            else:
-                if exp.dx > 0:
-                    alpha = 1.5 * math.pi
-                else:
-                    alpha =  math.pi
-        else:
-            if exp.dy > 0:
-                if exp.dx > 0:
-                    alpha = 0.5 * math.pi
-                else:
-                    alpha = math.pi
-            else:
-                if exp.dx > 0:
-                    alpha = 0
-                else:
-                    alpha = 1.5 * math.pi
-
-        beta = alpha + math.pi
-
-
-        for i in range(0, n_states):
-            a = (cos(beta) + cos(alpha)) * abs(exp.dx) + startPoint[0]
-            b = (sin(beta) + sin(alpha)) * abs(exp.dy) + startPoint[1]
-
-            gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
-            gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
-
-
+            # TODO this may be better coded
             if exp.cw:
-                beta -= step
+                if exp.dy > 0:
+                    if exp.dx > 0:
+                        alpha = 0
+                    else:
+                        alpha = 0.5 * math.pi
+                else:
+                    if exp.dx > 0:
+                        alpha = 1.5 * math.pi
+                    else:
+                        alpha =  math.pi
             else:
-                beta += step
-
-
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
-
+                if exp.dy > 0:
+                    if exp.dx > 0:
+                        alpha = 0.5 * math.pi
+                    else:
+                        alpha = math.pi
+                else:
+                    if exp.dx > 0:
+                        alpha = 0
+                    else:
+                        alpha = 1.5 * math.pi
+            beta = alpha + math.pi
+            for i in range(0, n_states):
+                a = (cos(beta) + cos(alpha)) * abs(exp.dx) + startPoint[0]
+                b = (sin(beta) + sin(alpha)) * abs(exp.dy) + startPoint[1]
+                gaussianX = NormalDistribution(a * scale, self.scale * 0.01)
+                gaussianY = NormalDistribution(b * scale, self.scale * 0.01)
+                if exp.cw:
+                    beta -= step
+                else:
+                    beta += step
+                distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
+        else:
+            # online
+            distributions = self.__DiscreteDistribution(n_states, distributions)
 
         return topology_factory.forward(name, n_states, distributions)
+
+    # todo - incomplete
+    def createCleanLine3D(self, name, startPoint, dx, dy, dz, scale, samples):
+        topology_factory = HiddenMarkovModelTopology()  # Topology
+        distributions = []
+        #
+        step_x = dx / max(samples - 1, 1)
+        step_y = dy / max(samples - 1, 1)
+        step_z = dz / max(samples - 1, 1)
+        #
+        for i in range(0, samples):
+            a = (startPoint[0] + (i * step_x)) * scale
+            b = (startPoint[1] + (i * step_y)) * scale
+            c = (startPoint[2] + (i * step_z)) * scale
+            gaussianX = NormalDistribution(a, self.scale * 0.01)
+            gaussianY = NormalDistribution(b, self.scale * 0.01)
+            gaussianZ = NormalDistribution(c, self.scale * 0.01)
+            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY, gaussianZ]))
+        return topology_factory.forward(name, samples, distributions)
+
+    def __DiscreteDistribution(self, num_states=0, emissions=[]):
+        for i in range(0, num_states):
+            random.seed(datetime.datetime.now())
+            distribution_values = numpy.random.dirichlet(numpy.ones(len(self.__chars)), size=1)[0]
+            values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
+            emissions.append(DiscreteDistribution(values))
+        return emissions
+
+
+
+
 
 
     def debugPlot(self, samples, exp):

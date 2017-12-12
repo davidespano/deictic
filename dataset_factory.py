@@ -124,7 +124,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         dataset = CsvDataset(input_dir)
 
         # Transform
-        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform1 = NormaliseLengthTransform(axisMode=False)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
         transform4 = RotateCenterTransform(traslationMode=True)
@@ -151,7 +151,7 @@ baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
 mode = 2
-n_sample = 10
+n_sample = 40
 
 ########################################## Deictic Dataset ##########################################################
 # Unica
