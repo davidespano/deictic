@@ -32,7 +32,7 @@ class ClassifierFactory:
         self.seq_edges = []
         self.stroke = -1
         self.strokeList = []
-        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O', '0']
+        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True', 'B1True', 'B2True', 'B3True', 'B4True', 'B0False', 'B1False', 'B2False', 'B3False', 'B4False']
 
     # public methods
     def setLineSamplesPath(self, path):
@@ -124,12 +124,42 @@ class ClassifierFactory:
             dataset = CsvDataset(self.line) # reads the raw data
             self.transformLinePrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
             if self.type == TypeRecognizer.online:
-                # parsing
-                samples = [Parsing.parsingLine(sequence[0][:,[0,1]], sequence[1], dataset.dir).getLabelSequences() for sequence in dataset.applyTransforms()]
-            else:
-                samples = [sequence[0 ] for sequence in dataset.applyTransforms()]
+                self.transformOnline(dataset)
+            samples = [sequence[0] for sequence in dataset.applyTransforms()]
+            for i in range(3):
+                samples.extend(samples)
+            ### Debug ###
             if d:
-                self.debugPlot(samples, exp)
+                # dataset example
+                base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+                dataset_original = CsvDataset(base_dir + "arrow/")
+                kalmanTransform = KalmanFilterTransform()
+                resampledTransform = ResampleInSpaceTransform(samples=20*4)
+                # resampledTransform = ResampleTransform(delta=6)
+                dataset_original.addTransform(kalmanTransform)
+                dataset_original.addTransform(resampledTransform)
+                sequence_original = dataset_original.applyTransforms()
+                sequence = sequence_original[0][0][:, [0, 1]]
+                parsed = Parsing.parsingLine(sequence)
+                s = parsed.getPointsSequence()
+                l = parsed.getLabelsSequence()
+                # plot original sequence
+                original = plt.plot(s[:, 0], s[:, 1], color='r')
+                # label
+                for i in range(1, len(s) - 1):
+                    plt.annotate(str(i), (s[i, 0], s[i, 1]))
+                ########### Plotting ########################
+                sample = samples[0]
+                sequence = sample.getPointsSequence()
+                label_list = sample.getLabelsSequence()
+                # plot original sequence
+                syntethic = plt.plot(sequence[:, 0], sequence[:, 1], color='b')
+                # label
+                for i in range(1, len(sequence) - 1):
+                    plt.annotate(str(i), (sequence[i, 0], sequence[i, 1]))
+                plt.axis('equal')
+            ### Debug ###
+
             # create hmm
             hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
             # training
@@ -199,10 +229,10 @@ class ClassifierFactory:
             translate = [startPoint[0] + center[0], startPoint[1] + center[1]]
             self.trasformArcPrimitive(dataset, startPoint, exp.dx, exp.dy, alpha, center, samples)
             if self.type == TypeRecognizer.online:
-                # parsing
-                samples = [Parsing.parsingLine(sequence[0][:,0,1] for sequence in dataset.applyTransforms())]
-            else:
-                samples = [sequence[0 ] for sequence in dataset.applyTransforms()]
+                self.transformOnline(dataset)
+            samples = [sequence[0] for sequence in dataset.applyTransforms()]
+            for i in range(3):
+                samples.extend(samples)
             if d:
                 self.debugPlot(samples, exp)
             # create hmm
@@ -312,25 +342,30 @@ class ClassifierFactory:
 
     def transformLinePrimitive(self, dataset, distance, alpha, startPoint, samples):
         # applying transforms for fitting the expression
+        # kalman
+        kalman = KalmanFilterTransform()
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
         origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
-        rotate = RotateTransform(theta=alpha,
-                                 unit=RotateTransform.radians)  # rotate the samples for getting the right slope
+        rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)  # rotate the samples for getting the right slope
         scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
-        resample = ResampleInSpaceTransform(samples=samples)  # resampling
-        translate = TranslateTransform(
-            t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
+        #resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        #resample = ResampleTransform(delta=samples)
+        translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
         # adding transforms to dataset
+        dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
         dataset.addTransform(scale)
         dataset.addTransform(rotate)
-        dataset.addTransform(resample)
+        #dataset.addTransform(resample)
         dataset.addTransform(translate)
+
     def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
         # applying transforms for fitting
+        # kalman
+        kalman = KalmanFilterTransform()
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
         origin = TranslateTransform(t=[0.5, 0.5])
@@ -339,8 +374,10 @@ class ClassifierFactory:
         radiusScale = ScaleDatasetTransform(scale=[abs(radiusX), abs(radiusY)])
         startPointTranslate = TranslateTransform(t=startPoint)
         scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
-        resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        #resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        #resample = ResampleTransform(delta=samples)
         # adding transforms to dataset
+        dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
@@ -349,11 +386,13 @@ class ClassifierFactory:
         dataset.addTransform(radiusScale)
         dataset.addTransform(startPointTranslate)
         dataset.addTransform(scale)
-        dataset.addTransform(resample)
+        #dataset.addTransform(resample)
     def transformOnline(self, dataset):
         # applying transforms for fitting
-        kalman = KalmanFilterTransform()
-        dataset.addTransform(kalman)
+        parse = ParseSamples()
+        remove = RemoveZero()
+        dataset.addTransform(parse)
+        dataset.addTransform(remove)
 
 
 
@@ -437,17 +476,6 @@ class ClassifierFactory:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     def createStrokeDiscreteDistribution(self):
         """
 
@@ -460,6 +488,54 @@ class ClassifierFactory:
                 p = 1
             d[self.strokeList[i]] = p
         return DiscreteDistribution(d)
+
+    class __DistributionPrimitive():
+        # chars
+        __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O', '0']
+        # singleton
+        __singleton = None
+
+        # public methods
+        def getInstance(self):
+            if self.singleton == None:
+                self.__function= {
+                    TypeRecognizer.online: self.__DiscreteDistribution,
+                    TypeRecognizer.offline: self.__NormalDistribution,
+                    Arc: self.__NormalDistributionArc,
+                    Line: self.__NormalDistributionLine,
+                }
+            return self.singleton
+
+        def getDistribution(self, type, *args):
+            return self.__function[type](*args)
+
+        # private methods
+        def __DistributionDiscrete(self, num_states=0, *args, distributions=[]):
+            for i in range(0, num_states):
+                random.seed(datetime.datetime.now())
+                distribution_values = numpy.random.dirichlet(numpy.ones(len(self. __chars)), size=1)[0]
+                values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
+                distributions.append(DiscreteDistribution(values))
+            return distributions
+        def __NormalDistrbution(self, operator, num_states, *args):
+            distributions = []
+            for index in range(0, num_states):
+                distributions.append(IndependentComponentsDistribution([self.__function[operator](index, *args)]))
+            return distributions
+        def __NormalDistributionArc(self, beta, alpha, exp, step, scale, startPoint):
+            a = (cos(beta) + cos(alpha)) * abs(exp.dx) + startPoint[0]
+            b = (sin(beta) + sin(alpha)) * abs(exp.dy) + startPoint[1]
+            gaussianX = NormalDistribution(a * scale, scale * 0.01)
+            gaussianY = NormalDistribution(b * scale, scale * 0.01)
+            if exp.cw:
+                beta -= step
+            else:
+                beta += step
+            return gaussianX, gaussianY
+        def __NormalDistributionLine(self, index, step_x, step_y, scale, startPoint):
+            a = (startPoint[0] + (index * step_x)) * scale
+            b = (startPoint[1] + (index * step_y)) * scale
+            return NormalDistribution(a, scale * 0.01), NormalDistribution(b, scale * 0.01)
 
     def createCleanLine(self, name, startPoint, dx, dy, scale, samples):
         """
@@ -478,7 +554,7 @@ class ClassifierFactory:
             # offline
             step_x = dx / max(samples - 1, 1)
             step_y = dy / max(samples - 1, 1)
-            for i in range(0, samples ):
+            for i in range(0, samples):
                 a = (startPoint[0] + (i * step_x)) * scale
                 b = (startPoint[1] + (i * step_y)) * scale
                 gaussianX = NormalDistribution(a, self.scale * 0.01)
@@ -521,7 +597,7 @@ class ClassifierFactory:
                     if exp.dx > 0:
                         alpha = 1.5 * math.pi
                     else:
-                        alpha =  math.pi
+                        alpha = math.pi
             else:
                 if exp.dy > 0:
                     if exp.dx > 0:
@@ -547,7 +623,6 @@ class ClassifierFactory:
         else:
             # online
             distributions = self.__DiscreteDistribution(n_states, distributions)
-
         return topology_factory.forward(name, n_states, distributions)
 
     # todo - incomplete
@@ -576,7 +651,6 @@ class ClassifierFactory:
             values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
             emissions.append(DiscreteDistribution(values))
         return emissions
-
 
 
 
@@ -648,9 +722,19 @@ class ClassifierFactory:
             disabling.name = name
             return disabling, edges
 
-
-
         return None
+
+
+
+
+
+    def plot(self):
+        plt.show()
+
+
+
+
+
 
 
 class ModelPreprocessor:

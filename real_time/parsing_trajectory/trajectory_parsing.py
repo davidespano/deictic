@@ -10,8 +10,7 @@ import numpy.linalg as la
 import operator
 # Plot
 import matplotlib.pyplot as plt
-# Copy
-import copy
+
 
 class MathUtils():
 
@@ -172,8 +171,10 @@ class Trajectory():
         self.__curvatures = [None for x in range(len(sequence))]
 
     # Methods #
-    def getLabelSequences(self):
+    def getLabelsSequence(self):
         return self.__labels
+    def getPointsSequence(self):
+        return self.__sequence
 
     def algorithm1(self, threshold_a):
         """
@@ -181,7 +182,7 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-        threshold_a = 2000#0.0025
+        threshold_a = 0.0025
         # Parsing line
         for t in range(1, len(self.__sequence)-1):
             # Compute delta
@@ -191,12 +192,10 @@ class Trajectory():
             den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
             den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
             den = den1 * den2
-            delta = 1 - (num / den)
+            delta = 1 - (num/den)
             # Check delta
             if delta < threshold_a:
-                #self.__labels[t-1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
-                #self.__labels[t+1] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
         return self.__labels
 
     def algorithm2(self, threshold_b = None):
@@ -357,7 +356,7 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, name=None, dir=None, flag_plot=False, flag_save=False, path = None):
+    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.
@@ -374,15 +373,15 @@ class Parsing():
         # trajectory
         trajectory = Trajectory(sequence)
         # Algorithm 1 (find straight linear)
-        list = trajectory.algorithm1(threshold_a=0)#threshold_a)
+        list = trajectory.algorithm1(threshold_a=0)
         # Algorithm 2 (find plane arc)
-        #list = trajectory.algorithm2(threshold_b=None)
+        list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
         #list = trajectory.algorithm3()
         # Descriptor
-        #f = trajectory.descriptorTrajectory()
+        f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list = trajectory.findSubPrimitives(beta=4)
+        list = trajectory.findSubPrimitives(beta=5)
 
         # Plot data
         if flag_plot:
@@ -478,12 +477,9 @@ class Parsing():
         """
         # Check parameters
         if not isinstance(path, str):
-            raise Exception("The parameter path must be string.")
+            raise TypeError
         if not isinstance(label_list, list):
-            raise Exception("label_list must be a list of string.")
-        # Remove start and end point
-        label_list.pop(0)
-        label_list.pop(-1)
+            raise TypeError
         # Open and write file
         file = open(path, 'w')
         for item in label_list:

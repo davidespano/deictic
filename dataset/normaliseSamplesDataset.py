@@ -10,6 +10,8 @@ from .csvDataset import *
 from .geometry import *
 # Kalman filter
 from pykalman import KalmanFilter
+# Parsing
+from real_time.parsing_trajectory.trajectory_parsing import Parsing
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
@@ -478,7 +480,30 @@ class KalmanFilterTransform(DatasetTransform):
         )
         return kalman
 
+# Parsing trajectory
+class ParseSamples(DatasetTransform):
+    #
+    def __init__(self):
+        self.dir=None
+    #
+    def transform(self, sequence):
+        return Parsing.parsingLine(sequence=sequence[:,[0,1]]).getLabelsSequence()
 
+# Remove zero from parsing
+class RemoveZero(DatasetTransform):
+    #
+    def __init(self):
+        self.dir = None
+    #
+    def transform(self, sequence):
+        # check parameter
+        if not isinstance(sequence, list) and all(isinstance(label, str) for label in sequence):
+            raise TypeError
+        new_list = []
+        for index in range(len(sequence)):
+            if(sequence[index] != '0' and  sequence[index] != 'B' and  sequence[index] != 'A'):
+                new_list.append(sequence[index])
+        return new_list
 
 class NormaliseSamples:
 

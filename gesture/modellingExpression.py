@@ -45,5 +45,7 @@ class ModelExpression():
         :param factory:
         :return:
         """
-        return factory.createClassifier(expression)
+        model,states = factory.createClassifier(expression)
+        factory.plot()
+        return model,states
 

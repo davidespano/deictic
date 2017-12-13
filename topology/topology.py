@@ -5,13 +5,10 @@ import random
 import datetime
 
 class HiddenMarkovModelTopology :
-    __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O', '0']
-
+    # ergodic
     def ergodic(self, name='ergodic-model', n_States= 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
-
         states = self.__fix_parameters(name, n_States, emissions, state_names);
-
         #init transitions
         p_tr = 1 / (n_States + 2)
         for i in range(0, n_States):
@@ -19,46 +16,35 @@ class HiddenMarkovModelTopology :
             model.add_transition(states[i], model.end, p_tr)
             for j in range (0, n_States):
                 model.add_transition(states[i], states[j], p_tr)
-
+        # update model
         model.bake()
         return model
-
+    # left right
     def left_right(self, name='leftRight-model', n_states = 1, emissions = [], state_names = []):
-
         model = HiddenMarkovModel(name)
-
         states = self.__fix_parameters(name, n_states, emissions, state_names, model);
-
         #init transitions
         for i in range(0, n_states - 1):
             for j in range(i, n_states):
                 model.add_transition(states[i], states[j], 1 / (n_states - i))
-
         model.add_transition(model.start, states[0], 1)
         model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
         model.add_transition(states[n_states - 1], model.end, 0.5)
-
+        # update model
         model.bake()
         return model
-
+    # forward
     def forward(self, name="forward-model", n_states = 1, emissions = [], state_names = []):
         model = HiddenMarkovModel(name)
-
-
-
         states = self.__fix_parameters(name, n_states, emissions, state_names, model);
         for i in range(0, n_states - 1):
             model.add_transition(states[i], states[i], 0.5)
             model.add_transition(states[i], states[i+1], 0.5)
-
         model.add_transition(model.start, states[0], 1)
         model.add_transition(states[n_states - 1], states[n_states - 1], 0.5)
         model.add_transition(states[n_states - 1], model.end, 0.5)
-
-
-
+        # update model
         model.bake()
-
         return model
 
     @staticmethod
@@ -92,7 +78,6 @@ class HiddenMarkovModelTopology :
         sequence.bake();
 
         return sequence, seq_edges
-
     @staticmethod
     def choice(operands, gt_edges = None):
         if len(operands) == 0:
@@ -131,7 +116,6 @@ class HiddenMarkovModelTopology :
 
         choice.bake()
         return choice, gt_edges
-
     @staticmethod
     def iterative(operand, gt_edges = None):
         if operand is None:
@@ -154,7 +138,6 @@ class HiddenMarkovModelTopology :
 
         operand.bake()
         return operand, seq_edges
-
     @staticmethod
     def disabling(disabling_term, right_operand, gt_edges = None):
 
@@ -191,16 +174,12 @@ class HiddenMarkovModelTopology :
                 disabling_term.add_transition(l_end[i], r_start[j], prob)
                 seq_edges.append((l_end[i], r_start[i]))
             disabling_term.graph.remove_edge(l_end[i], disabling_term.end)
-
-
-
         # add a transition from all final states in the right operand to the end state
         for i in range(0, len(r_end)):
             prob = numpy.exp(disabling_term.graph[r_end[i]][right_operand.end]['probability'])
             disabling_term.add_transition(r_end[i], disabling_term.end, prob)
         disabling_term.bake()
         return disabling_term, seq_edges
-
     @staticmethod
     def parallel(first, second, gt_edges = None):
 
@@ -285,7 +264,6 @@ class HiddenMarkovModelTopology :
                                   second.graph.edge[second.states[j]][second.end]['probability'])
                     par.add_transition(par_sf, par.end, l)
 
-
         par.bake()
         return par, gt_edges
 
@@ -294,15 +272,8 @@ class HiddenMarkovModelTopology :
 
     def __fix_parameters(self, name, n_States, emissions, state_names, model):
         # default init of missing emission distributions
-        # for i in range(len(emissions), n_States):
-        #     emissions.append(NormalDistribution(0, 1.0))
-        num_states = n_States
-        for i in range(0, num_states):
-            random.seed(datetime.datetime.now())
-            distribution_values = numpy.random.dirichlet(numpy.ones(len(self.__chars)), size=1)[0]
-            values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
-            emissions.append(DiscreteDistribution(values))
-
+        for i in range(len(emissions), n_States):
+            emissions.append(NormalDistribution(0, 1.0))
 
         # default init of missing state names
         cl_state = state_names[:]
@@ -316,7 +287,6 @@ class HiddenMarkovModelTopology :
             model.add_state(states[i])
 
         return states
-
     @staticmethod
     def __find_start_states(term):
         start = []
@@ -324,7 +294,6 @@ class HiddenMarkovModelTopology :
             if edge[0] == term.start:
                 start.append(edge[1])
         return start
-
     @staticmethod
     def __find_end_states(term):
         end = []
