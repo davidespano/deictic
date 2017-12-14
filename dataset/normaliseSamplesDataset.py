@@ -499,11 +499,8 @@ class RemoveZero(DatasetTransform):
         # check parameter
         if not isinstance(sequence, list) and all(isinstance(label, str) for label in sequence):
             raise TypeError
-        new_list = []
-        for index in range(len(sequence)):
-            if(sequence[index] != '0' and  sequence[index] != 'B' and  sequence[index] != 'A'):
-                new_list.append(sequence[index])
-        return new_list
+
+        return [item for item in sequence if item != '0' and item!='B' and item!='A']
 
 class NormaliseSamples:
 

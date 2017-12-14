@@ -182,7 +182,6 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-        threshold_a = 0.0025
         # Parsing line
         for t in range(1, len(self.__sequence)-1):
             # Compute delta
@@ -204,7 +203,7 @@ class Trajectory():
         :param threshold_b:
         :return:
         """
-        for t in range(1, len(self.__sequence)-1):
+        for t in range(0, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
                 # assigned label
@@ -252,17 +251,26 @@ class Trajectory():
         :param beta:
         :return:
         """
-        indexes = []
-        indexes.append(0)
-        for index in range(1, len(self.__sequence)):
-            if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)):
-                if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
-                    self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
-                elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
-                    self.__quantizationIntervalsLine(indexes=indexes)
+        indexes=[]
+        for index in range(len(self.__sequence)-1):
+            if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
+                self.__quantizationIntervalsLine(indexes=[index])
                 indexes.clear()
-            indexes.append(index)
+            elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
+                indexes.append(index)
+                self.__quantizationIntervalsArc(indexes=indexes)
         return self.__labels
+
+        # indexes.append(0)
+        # for index in range(1, len(self.__sequence)):
+        #     if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)):
+        #         if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
+        #             self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
+        #         elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
+        #             self.__quantizationIntervalsLine(indexes=indexes)
+        #         indexes.clear()
+        #     indexes.append(index)
+        # return self.__labels
 
     # private methods #
     def __computeCurvature(self, index):
@@ -321,7 +329,7 @@ class Trajectory():
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             # find direction clockwise or counter-clockwise
             interval_direction = MathUtils.findWay([item for item in operator.itemgetter([index-1, index, index+1])(self.__sequence)])
-            self.__labels[index] = self.__labels[index]+str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
+            self.__labels[index] = Trajectory.TypePrimitive.ARC.value +str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
     def __quantizationIntervalsLine(self, indexes=[]):
         """
 
@@ -368,18 +376,17 @@ class Parsing():
         if not isinstance(sequence, np.ndarray):
             raise Exception("sequence must be a numpy ndarray.")
 
-        # Kalmar smoother and threshold for algorithm 1
-        #smoothed_sequence, threshold_a = Parsing.__kalmanSmoother(sequence)
+        threshold_a = 100#0.0025
         # trajectory
         trajectory = Trajectory(sequence)
         # Algorithm 1 (find straight linear)
-        list = trajectory.algorithm1(threshold_a=0)
+        list = trajectory.algorithm1(threshold_a=threshold_a)
         # Algorithm 2 (find plane arc)
-        list = trajectory.algorithm2(threshold_b=None)
+        #list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
         #list = trajectory.algorithm3()
         # Descriptor
-        f = trajectory.descriptorTrajectory()
+        #f = trajectory.descriptorTrajectory()
         # Sub primitives
         list = trajectory.findSubPrimitives(beta=5)
 

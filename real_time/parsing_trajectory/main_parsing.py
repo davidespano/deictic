@@ -21,14 +21,14 @@ from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
 from test.test import Test, Result
 
-debug = -1
+debug = 0
 
 #dataset = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/arrow/")
 #dataset2 = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/arrow/")
 #dataset.plot(compared_dataset=dataset2, singleMode=True)
 
 
-if debug == -1:
+if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
@@ -67,15 +67,15 @@ if debug == -1:
     results.plot()
 
 if debug == 1:
-    n_sample = 20
+    num_sample = 20
     # Get dataset
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
     input_dir = base_dir + "raw/"
     output_dir = base_dir + "parsed/"
-    directories = [("arrow", 4*n_sample), ("caret", 2*n_sample), ("circle", 4*n_sample), ("check", 2*n_sample), ("delete_mark", 3*n_sample),
-                    ("left_curly_brace", 6*n_sample), ("left_sq_bracket", 3*n_sample), ("pigtail", 4*n_sample), ("question_mark", 4*n_sample),
-                    ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
-                    ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)]
+    directories = [("arrow", 4 * num_sample), ("caret", 2 * num_sample), ("circle", 4 * num_sample), ("check", 2 * num_sample), ("delete_mark", 3 * num_sample),
+                   ("left_curly_brace", 6 * num_sample), ("left_sq_bracket", 3 * num_sample), ("pigtail", 4 * num_sample), ("question_mark", 4 * num_sample),
+                   ("rectangle", 4 * num_sample), ("right_curly_brace", 6 * num_sample), ("right_sq_bracket", 3 * num_sample), ("star", 5 * num_sample),
+                   ("triangle", 3 * num_sample), ("v", 2 * num_sample), ("x", 3 * num_sample)]
 
     for item in directories:
         directory = item[0]
@@ -182,7 +182,7 @@ if debug == 2:
 
 
 
-if debug == 0:
+if debug == 4:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
     directories = ["v"]
     files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
