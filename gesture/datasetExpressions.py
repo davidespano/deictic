@@ -29,9 +29,9 @@ class DatasetExpressions:
             'caret': [
                 Point(0, 0) + Line(2, 3) + Line(2, -3)
             ],
-            'check': [
-                Point(0, 0) + Line(2, -2) + Line(4, 6)
-            ],
+            # 'check': [
+            #     Point(0, 0) + Line(2, -2) + Line(4, 6)
+            # ],
             'circle': [
                 Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False)
             ],
@@ -44,9 +44,9 @@ class DatasetExpressions:
             'left_sq_bracket': [
                 Point(0, 0) + Line(-4, 0) + Line(0, -5) + Line(4, 0)
             ],
-            'pigtail':[
-                Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False)
-            ],
+            # 'pigtail':[
+            #     Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False)
+            # ],
             'question_mark':[
                 Point(0,0) + Arc(4,4) + Arc(4,-4) + Arc(-4,-4) + Arc(-2,-2, cw=False) + Arc(2, -2, cw=False)
             ],

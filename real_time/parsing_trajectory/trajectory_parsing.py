@@ -166,6 +166,8 @@ class Trajectory():
         #
         self.__labels = [Trajectory.TypePrimitive.NONE.value for x in range(len(sequence))]
         #
+        self.__indices = [index for index in range(len(self.__sequence))]
+        #
         self.__descriptors = np.zeros((len(sequence)), dtype=float)
         #
         self.__curvatures = [None for x in range(len(sequence))]
@@ -176,6 +178,15 @@ class Trajectory():
     def getPointsSequence(self):
         return self.__sequence
 
+    def parse(self, threshold_a = None, threshold_b = None):
+        change = True
+        while change:
+            self.algorithm1(threshold_a)
+            self.algorithm2(threshold_b)
+            change = self.__removeNoise()
+        self.algorithm3()
+        print(self.__labels)
+
     def algorithm1(self, threshold_a):
         """
             algorithm1 labels the sequence's points in accordance with the Algorithm 1 proposed in "Parsing 3D motion trajectory for gesture recognition".
@@ -183,7 +194,8 @@ class Trajectory():
         :return: list of label
         """
         # Parsing line
-        for t in range(1, len(self.__sequence)-1):
+        for index in range(1, len(self.__indices)-1):
+            t = self.__indices[index]
             # Compute delta
             num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
             num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
@@ -195,7 +207,20 @@ class Trajectory():
             # Check delta
             if delta < threshold_a:
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
-        return self.__labels
+
+        # for t in range(1, len(self.__sequence)-1):
+        #     # Compute delta
+        #     num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+        #     num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+        #     num = MathUtils.dot(num1, num2)
+        #     den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+        #     den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+        #     den = den1 * den2
+        #     delta = 1 - (num/den)
+        #     # Check delta
+        #     if delta < threshold_a:
+        #         self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
+        # return self.__labels
 
     def algorithm2(self, threshold_b = None):
         """
@@ -225,7 +250,57 @@ class Trajectory():
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
         return self.__labels
 
-    def descriptorTrajectory(self):
+    def findSubPrimitives(self, beta):
+        """
+            starting from the list of basic primitives, that function scans the all label in order to find the subprimitives
+        :param beta:
+        :return:
+        """
+        self.__descriptorTrajectory()
+        indices=[]
+        for index in range(len(self.__sequence)-1):
+            if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
+                self.__quantizationIntervalsLine(indices=[index])
+                indices.clear()
+            elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
+                indices.append(index)
+                self.__quantizationIntervalsArc(indices=indices)
+        # # Remove first and last labels
+        # del self.__labels[0]
+        # del self.__labels[-1]
+        return self.__labels
+
+
+    # private methods #
+    def __removeNoise(self):
+
+        change = False
+        #print(self.__labels)
+        #
+        len_list = len(self.__sequence)
+        indices = []
+        t = 0
+        while t < len_list:
+            # remove primitives too short
+            if indices and self.__labels[t] != self.__labels[indices[-1]]:
+                # check
+                if len(indices) <= 2:
+                    for index in indices:
+                        #self.__labels[index] = self.__labels[t]
+                        del self.__labels[index]
+                        del self.__sequence[index]
+                        len_list-=1
+                        t-=1
+                        change = True
+                indices.clear()
+            indices.append(t)
+            t+=1
+        #print(self.__labels)
+        return change
+
+
+
+    def __descriptorTrajectory(self):
         """
 
         :return:
@@ -245,34 +320,6 @@ class Trajectory():
                 self.__descriptors[t] = math.sqrt(math.pow(k, 2) + _lambda * math.pow(k_s, 2))
         return self.__descriptors
 
-    def findSubPrimitives(self, beta):
-        """
-
-        :param beta:
-        :return:
-        """
-        indexes=[]
-        for index in range(len(self.__sequence)-1):
-            if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
-                self.__quantizationIntervalsLine(indexes=[index])
-                indexes.clear()
-            elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
-                indexes.append(index)
-                self.__quantizationIntervalsArc(indexes=indexes)
-        return self.__labels
-
-        # indexes.append(0)
-        # for index in range(1, len(self.__sequence)):
-        #     if self.__labels[index] != self.__labels[index - 1] or index == (len(self.__sequence)):
-        #         if self.__labels[index-1] == Trajectory.TypePrimitive.ARC.value:
-        #             self.__quantizationIntervalsArc(indexes=indexes, beta=beta)
-        #         elif self.__labels[index-1] == Trajectory.TypePrimitive.LINE.value:
-        #             self.__quantizationIntervalsLine(indexes=indexes)
-        #         indexes.clear()
-        #     indexes.append(index)
-        # return self.__labels
-
-    # private methods #
     def __computeCurvature(self, index):
         """
 
@@ -309,14 +356,14 @@ class Trajectory():
         return 3 * ((curvature_prec - curvature_next) / (
                               2 * side_a + 2 * side_b + side_d + side_g))
 
-    def __quantizationIntervalsArc(self, indexes=[], beta=1):
+    def __quantizationIntervalsArc(self, indices=[], beta=1):
         """
 
         :param beta:
         :return:
         """
         descriptors = []
-        for index in indexes:
+        for index in indices:
             descriptors.append(self.__descriptors[index])
         # Get min and max value from its points
         min_value = min(descriptors)
@@ -324,26 +371,26 @@ class Trajectory():
         # comput interval values
         interval_value = (max_value-min_value)/beta
         interval_values = [min_value+(interval_value*x) for x in range(beta)]
-        for index in indexes:
+        for index in indices:
             # assign interval
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             # find direction clockwise or counter-clockwise
-            interval_direction = MathUtils.findWay([item for item in operator.itemgetter([index-1, index, index+1])(self.__sequence)])
+            interval_direction = MathUtils.findWay([item for item in operator.itemgetter(index-1, index, index+1)(self.__sequence)])
             self.__labels[index] = Trajectory.TypePrimitive.ARC.value +str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
-    def __quantizationIntervalsLine(self, indexes=[]):
+    def __quantizationIntervalsLine(self, indices=[]):
         """
 
-        :param indexes:
+        :param indices:
         :param beta:
         :return:
         """
         # Compute angle
-        # start_point = self.__sequence[indexes[0]-1]
-        # end_point = self.__sequence[indexes[-1]]
+        # start_point = self.__sequence[indices[0]-1]
+        # end_point = self.__sequence[indices[-1]]
         # point_direction = MathUtils.sub(end_point, start_point)
         # direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         # Get points
-        for index in indexes:
+        for index in indices:
             start_point = self.__sequence[index-1]
             end_point = self.__sequence[index]
             point_direction = MathUtils.sub(end_point, start_point)
@@ -376,23 +423,23 @@ class Parsing():
         if not isinstance(sequence, np.ndarray):
             raise Exception("sequence must be a numpy ndarray.")
 
-        threshold_a = 100#0.0025
+        threshold_a = 0.0055#0.00025#100
         # trajectory
         trajectory = Trajectory(sequence)
+        list = trajectory.parse(threshold_a=threshold_a, threshold_b=None)
         # Algorithm 1 (find straight linear)
-        list = trajectory.algorithm1(threshold_a=threshold_a)
+        #list = trajectory.algorithm1(threshold_a=threshold_a)
         # Algorithm 2 (find plane arc)
         #list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
         #list = trajectory.algorithm3()
         # Descriptor
-        #f = trajectory.descriptorTrajectory()
         # Sub primitives
-        list = trajectory.findSubPrimitives(beta=5)
+        #list = trajectory.findSubPrimitives(beta=5)
 
         # Plot data
         if flag_plot:
-            Parsing.__plot(sequence=sequence, label_list=list)
+            Parsing.__plot(trajectory)
         if flag_save:
             Parsing.__save(label_list=list, path=path)
 
@@ -457,18 +504,20 @@ class Parsing():
         return kalman_filter
 
     @staticmethod
-    def __plot(sequence, label_list):
+    def __plot(trajectory):
         """
 
         :return:
         """
+        sequence = np.array(trajectory.getPointsSequence())
+        labels = trajectory.getLabelsSequence()
         # Plotting #
         fig, ax = plt.subplots(figsize=(10, 15))
         # plot original sequence
         original = plt.plot(sequence[:,0], sequence[:,1], color='b')
         # label
         for i in range(1, len(sequence)-1):
-            ax.annotate(label_list[i-1], (sequence[i, 0], sequence[i, 1]))
+            ax.annotate(labels[i-1], (sequence[i, 0], sequence[i, 1]))
         # legend
         #plt.legend((original[0]), ('sequence'), loc='lower right')
         plt.axis('equal')

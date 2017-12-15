@@ -282,6 +282,21 @@ class HiddenMarkovModelTopology :
 
         # init states
         states = []
+
+        # distribution_values = []
+        # chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True', 'B1True', 'B2True', 'B3True', 'B4True', 'B0False',
+        #  'B1False', 'B2False', 'B3False', 'B4False', '0']
+        # for index in range(len(chars)):
+        #     if chars[index] == '0':
+        #         value = 1
+        #     else:
+        #         value = 0
+        #     distribution_values.append(value)
+        # distribution_values = numpy.random.dirichlet(numpy.ones(len(chars)), size=1)[0]
+        # values = {chars[index]: distribution_values[index] for index in range(0, len(chars))}
+        # distr = DiscreteDistribution(values)
+        # states.append(State(distr, "state_0"))
+
         for i in range(0, n_States):
             states.append(State(emissions[i], cl_state[i]))
             model.add_state(states[i])

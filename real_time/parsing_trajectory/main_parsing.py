@@ -21,7 +21,7 @@ from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
 from test.test import Test, Result
 
-debug = 0
+debug = 1
 
 #dataset = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/arrow/")
 #dataset2 = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/arrow/")
@@ -36,12 +36,12 @@ if debug == 0:
     gesture_datasets = {
         "arrow": [CsvDataset(base_dir + "arrow/", type=str)],
         "caret": [CsvDataset(base_dir + "caret/", type=str)],
-        "check": [CsvDataset(base_dir+"check/", type=str)],
+        #"check": [CsvDataset(base_dir+"check/", type=str)],
         "circle": [CsvDataset(base_dir+"circle/", type=str)],
         "delete_mark": [CsvDataset(base_dir + "delete_mark/", type=str)],
         "left_curly_brace": [CsvDataset(base_dir + "left_curly_brace/", type=str)],
         "left_sq_bracket": [CsvDataset(base_dir + "left_sq_bracket/", type=str)],
-        "pigtail": [CsvDataset(base_dir + "pigtail/", type=str)],
+        #"pigtail": [CsvDataset(base_dir + "pigtail/", type=str)],
         "question_mark": [CsvDataset(base_dir + "question_mark/", type=str)],
         "rectangle": [CsvDataset(base_dir + "rectangle/", type=str)],
         "right_curly_brace": [CsvDataset(base_dir + "right_curly_brace/", type=str)],
@@ -52,72 +52,54 @@ if debug == 0:
         "x": [CsvDataset(base_dir + "x/", type=str)]
     }
     # hmms
-    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions, type=TypeRecognizer.online, num_states=3)
-
+    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions, type=TypeRecognizer.online, num_states=1)
+    ### Debug ###
     # for i in range(0, 10):
-    #     sample = gesture_hmms["arrow"][0].sample()
-    #     print("sample n°"+str(i) + " len:"+str(len(sample)))
+    #     sample = gesture_hmms["caret"][0].sample()
+    #     sample2 = gesture_hmms["question_mark"][0].sample()
+    #     print("test: "+str(i))
+    #     print("caret:")
     #     print(sample)
+    #     print("question_mark:")
+    #     print(sample2)
     #     print("\n")
-
-
+    ### ### ###
+    ### Test ###
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().offlineTest(gesture_hmms, gesture_datasets)
     # show result through confusion matrix
     results.plot()
+    ### ### ###
 
 if debug == 1:
-    num_sample = 20
-    # Get dataset
+    # datasets path
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
     input_dir = base_dir + "raw/"
     output_dir = base_dir + "parsed/"
-    directories = [("arrow", 4 * num_sample), ("caret", 2 * num_sample), ("circle", 4 * num_sample), ("check", 2 * num_sample), ("delete_mark", 3 * num_sample),
-                   ("left_curly_brace", 6 * num_sample), ("left_sq_bracket", 3 * num_sample), ("pigtail", 4 * num_sample), ("question_mark", 4 * num_sample),
-                   ("rectangle", 4 * num_sample), ("right_curly_brace", 6 * num_sample), ("right_sq_bracket", 3 * num_sample), ("star", 5 * num_sample),
-                   ("triangle", 3 * num_sample), ("v", 2 * num_sample), ("x", 3 * num_sample)]
+    # datasets list
+    directories = ["arrow", "caret", "circle", "check", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark",
+                   "rectangle", "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
+    directories = ['v']
 
-    for item in directories:
-        directory = item[0]
-        samples = item[1]
+    for directory in directories:
 
         print("Start " + directory)
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
         #resampledTransform = ResampleInSpaceTransform(samples=samples) # accuracy = 0,9448
-        resampledTransform = ResampleTransform(delta=6) # accuracy = 0.93 with distance = 5 / accuracy =  with distance = 6 0,9325
+        #resampledTransform = ResampleTransform(delta=6) # accuracy = 0.93 with distance = 5 / accuracy =  with distance = 6 0,9325
         # parse + remove zero
         parse = ParseSamples()
-        remove = RemoveZero()
         dataset_original.addTransform(kalmanTransform)
-        dataset_original.addTransform(resampledTransform)
+        #dataset_original.addTransform(resampledTransform)
         dataset_original.addTransform(parse)
-        dataset_original.addTransform(remove)
         sequence_original = dataset_original.applyTransforms(output_dir=(output_dir+directory+"/"))
-
         print("End " + directory)
-
-        # for index in range(len(sequence_original)):
-        #     # Get original sequence 2D
-        #     sequence = sequence_original[index][0][:,[0,1]]
-        #     # Parse the sequence and save it
-        #     if not os.path.exists(output_dir+directory):
-        #         os.makedirs(output_dir+directory)
-        #     #if "fast" in sequence_original[index][1]:
-        #     Parsing.parsingLine(sequence, flag_save=True, path=output_dir+directory+"/"+sequence_original[index][1])
 
 
 
 if debug == 2:
-    def convertList(list_label):
-        new_list = []
-        for item in list_label:
-            string = str(item[0])
-            new_list.append(string)
-        return new_list
-
-
     # Get dataset
     k_cross_validation = 10
     n_states = 2
@@ -161,7 +143,6 @@ if debug == 2:
                 # debug
                 print("Label: " + str(directory) + " - Train :"+str(len(train_samples)) + " - Test: "+ str(len(test_samples)))
 
-
         result = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
         if cont_result == None:
             cont_result = result
@@ -177,12 +158,8 @@ if debug == 2:
 
 
 
-
-
-
-
-
-if debug == 4:
+######################## Debug
+if debug == 3:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
     directories = ["v"]
     files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
@@ -229,3 +206,4 @@ if debug == 4:
             plt.title(item[1])
             plt.axis('equal')
             plt.show()
+######################## Debug
