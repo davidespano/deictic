@@ -11,12 +11,9 @@ import operator
 # Plot
 import matplotlib.pyplot as plt
 
-import dataset as dt
-
-
-
 
 class MathUtils():
+
     class Directions(Enum):
         East = 0
         NorthEast = 1
@@ -30,14 +27,14 @@ class MathUtils():
     angle_directions = np.array([x for x in range(0, 360, 45)])
 
     __directionsVect = {
-        Directions.North: [0, 1],
-        Directions.South: [0, -1],
-        Directions.West: [-1, 0],
-        Directions.East: [1, 0],
-        Directions.NorthEast: [math.sqrt(2) / 2, math.sqrt(2) / 2],
-        Directions.NorthWest: [-math.sqrt(2) / 2, math.sqrt(2) / 2],
-        Directions.SouthEast: [math.sqrt(2) / 2, -math.sqrt(2) / 2],
-        Directions.SouthWest: [-math.sqrt(2) / 2, -math.sqrt(2) / 2]
+        Directions.North:[0,1],
+        Directions.South:[0,-1],
+        Directions.West:[-1,0],
+        Directions.East:[1,0],
+        Directions.NorthEast:[math.sqrt(2)/2, math.sqrt(2)/2],
+        Directions.NorthWest:[-math.sqrt(2)/2, math.sqrt(2)/2],
+        Directions.SouthEast:[math.sqrt(2)/2, -math.sqrt(2)/2],
+        Directions.SouthWest:[-math.sqrt(2)/2, -math.sqrt(2)/2]
     }
 
     # todo: check parameters
@@ -49,10 +46,9 @@ class MathUtils():
         :return:
         """
         if MathUtils.areaPolygon(points) > 0:
-            return True  # Clockwise
+            return True # Clockwise
         else:
-            return False  # Anticlockwise
-
+            return False # Anticlockwise
     @staticmethod
     def areaPolygon(points):
         """
@@ -62,10 +58,8 @@ class MathUtils():
         """
         sum = 0
         for index in range(len(points)):
-            sum += (points[index][0] * points[(index + 1) % len(points)][1]) - points[(index + 1) % len(points)][0] * \
-                   points[index][1]
+            sum += (points[index][0]*points[(index+1)%len(points)][1]) - points[(index+1)%len(points)][0]*points[index][1]
         return sum
-
     @staticmethod
     def findDirection(point):
         north = MathUtils.dot(point, MathUtils.__directionsVect[MathUtils.Directions.North])
@@ -110,56 +104,52 @@ class MathUtils():
                 return MathUtils.Directions.NorthWest.value
         # error
         return None
-
     @staticmethod
     def findNearest(array, value):
         idx = (np.abs(array - value).argmin())
         return idx
-
     @staticmethod
     def surfaceTriangle(side_a, side_b, side_c):
-        return (side_a + side_b + side_c) / 2
-
+        return (side_a+side_b+side_c)/2
     @staticmethod
     def curvature(side_a, side_b, side_c):
         surface = MathUtils.surfaceTriangle(side_a, side_b, side_c)
         try:
             val = (4 * math.sqrt(surface * (surface - side_a) * (surface - side_b) * (surface - side_c))) \
-                  / (side_a * side_b * side_c)
+                / (side_a * side_b * side_c)
         except:
             val = 1
         return val
-
     @staticmethod
     def magn(point):
-        return math.sqrt(math.pow(point[0], 2) + math.pow(point[1], 2))
-
+        return math.sqrt(math.pow(point[0],2)+math.pow(point[1],2))
     @staticmethod
     def dot(point_a, point_b):
-        return point_a[0] * point_b[0] + point_a[1] * point_b[1]
-
+        return point_a[0]*point_b[0] + point_a[1]*point_b[1]
     @staticmethod
     def sub(point_a, point_b):
-        vector = [point_a[0] - point_b[0], point_a[1] - point_b[1]]
+        vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
         return vector
-
     @staticmethod
     def distance(point_a, point_b):
-        return math.hypot(point_b[0] - point_a[0], point_b[1] - point_a[1])
-
+        return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
     @staticmethod
     def normalize(point):
         length = MathUtils.magn(point)
         for index in range(0, len(point)):
-            point[index] = point[index] / length
+            point[index] = point[index]/length
         return point
 
 
+
+
+
 class Trajectory():
+
     class TypePrimitive(Enum):
         NONE = "0"
         LINE = "A"
-        ARC = "B"  # intervals
+        ARC = "B" # intervals
         BOUNDARY = "O"
 
     def __init__(self, sequence):
@@ -183,7 +173,6 @@ class Trajectory():
     # Methods #
     def getLabelsSequence(self):
         return self.__labels
-
     def getPointsSequence(self):
         return self.__sequence
 
@@ -193,37 +182,29 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
-
         # Parsing line
-        for t in range(1, len(self.__sequence) - 1):
+        for t in range(1, len(self.__sequence)-1):
             # Compute delta
-            # num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
-            # num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
-            # num = MathUtils.dot(num1, num2)
-            # den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
-            # den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
-            # den = den1 * den2
-            # delta = 1 - (num/den)
+            num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+            num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+            num = MathUtils.dot(num1, num2)
+            den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+            den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+            den = den1 * den2
+            delta = 1 - (num/den)
             # Check delta
-            # if delta < threshold_a:
-            if dt.Geometry2D.Collinear(
-                    dt.Point2D(self.__sequence[t][0], self.__sequence[t][1]),
-                    dt.Point2D(self.__sequence[t - 1][0], self.__sequence[t - 1][1]),
-                    dt.Point2D(self.__sequence[t + 1][0], self.__sequence[t + 1][1]),
-                    threshold_a
-            ):
-                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
+            if delta < threshold_a:
+                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
         return self.__labels
 
-    def algorithm2(self, threshold_b=None):
+    def algorithm2(self, threshold_b = None):
         """
             algorithm2 labels the sequence's points in accordance with the Algorithm 2 proposed in "Parsing 3D motion trajectory for gesture recognition".
         :param threshold_b:
         :return:
         """
-        for t in range(0, len(self.__sequence) - 1):
-            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[
-                t + 1] == Trajectory.TypePrimitive.NONE.value:
+        for t in range(0, len(self.__sequence)-1):
+            if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
                 # assigned label
                 self.__labels[t] = Trajectory.TypePrimitive.ARC.value
@@ -237,12 +218,11 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(0, len(self.__sequence) - 1):
+        for t in range(0, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
-                self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value  # isolated points
-            elif self.__labels[t + 1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[
-                t + 1]:
-                self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value  # for label transition
+                self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
+            elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
+                self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
         return self.__labels
 
     def descriptorTrajectory(self):
@@ -251,7 +231,7 @@ class Trajectory():
         :return:
         """
         #
-        for t in range(1, len(self.__sequence) - 2):
+        for t in range(1, len(self.__sequence)-2):
             if self.__labels[t] == Trajectory.TypePrimitive.LINE.value:
                 self.__descriptors[t] = 1
             elif self.__labels[t] == Trajectory.TypePrimitive.ARC.value:
@@ -271,8 +251,8 @@ class Trajectory():
         :param beta:
         :return:
         """
-        indexes = []
-        for index in range(len(self.__sequence) - 1):
+        indexes=[]
+        for index in range(len(self.__sequence)-1):
             if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
                 self.__quantizationIntervalsLine(indexes=[index])
                 indexes.clear()
@@ -327,7 +307,7 @@ class Trajectory():
         curvature_prec = self.__computeCurvature(index - 1)
         curvature_next = self.__computeCurvature(index + 1)
         return 3 * ((curvature_prec - curvature_next) / (
-                2 * side_a + 2 * side_b + side_d + side_g))
+                              2 * side_a + 2 * side_b + side_d + side_g))
 
     def __quantizationIntervalsArc(self, indexes=[], beta=1):
         """
@@ -342,17 +322,14 @@ class Trajectory():
         min_value = min(descriptors)
         max_value = max(descriptors)
         # comput interval values
-        interval_value = (max_value - min_value) / beta
-        interval_values = [min_value + (interval_value * x) for x in range(beta)]
+        interval_value = (max_value-min_value)/beta
+        interval_values = [min_value+(interval_value*x) for x in range(beta)]
         for index in indexes:
             # assign interval
             interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             # find direction clockwise or counter-clockwise
-            interval_direction = MathUtils.findWay(
-                [item for item in operator.itemgetter([index - 1, index, index + 1])(self.__sequence)])
-            self.__labels[index] = Trajectory.TypePrimitive.ARC.value + str(interval_index) + str(
-                interval_direction)  # chr(ord(self.__labels[index])+interval_index+17)
-
+            interval_direction = MathUtils.findWay([item for item in operator.itemgetter([index-1, index, index+1])(self.__sequence)])
+            self.__labels[index] = Trajectory.TypePrimitive.ARC.value +str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
     def __quantizationIntervalsLine(self, indexes=[]):
         """
 
@@ -367,27 +344,27 @@ class Trajectory():
         # direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         # Get points
         for index in indexes:
-            start_point = self.__sequence[index - 1]
+            start_point = self.__sequence[index-1]
             end_point = self.__sequence[index]
             point_direction = MathUtils.sub(end_point, start_point)
             direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
-            self.__labels[index] = self.__labels[index] + str(
-                direction)  # chr(ord(self.__labels[index]) + interval_direction + 4)      #
+            self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
+
+
+
+
+
+
 
 
 '''
     This class implements the class necessary to parse a trajectory into two primitives (straight line or plane arc) by labelling each frame. 
 '''
-
-
 class Parsing():
-
-
-    threshold_a = 0.001
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, flag_plot=False, flag_save=False, path=None):
+    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.
@@ -399,17 +376,17 @@ class Parsing():
         if not isinstance(sequence, np.ndarray):
             raise Exception("sequence must be a numpy ndarray.")
 
-
+        threshold_a = 100#0.0025
         # trajectory
         trajectory = Trajectory(sequence)
         # Algorithm 1 (find straight linear)
-        list = trajectory.algorithm1(threshold_a= Parsing.threshold_a)
+        list = trajectory.algorithm1(threshold_a=threshold_a)
         # Algorithm 2 (find plane arc)
-        # list = trajectory.algorithm2(threshold_b=None)
+        #list = trajectory.algorithm2(threshold_b=None)
         # Algorithm 3 (localizing boundary points)
-        # list = trajectory.algorithm3()
+        #list = trajectory.algorithm3()
         # Descriptor
-        # f = trajectory.descriptorTrajectory()
+        #f = trajectory.descriptorTrajectory()
         # Sub primitives
         list = trajectory.findSubPrimitives(beta=5)
 
@@ -433,9 +410,9 @@ class Parsing():
         # Compute the mean square distance of original sequence with respect to the smoothed sequence
         distances = 0
         for index in range(0, len(original_sequence)):
-            distances += math.pow(MathUtils.distance(original_sequence[index], smoothed_sequence[index]), 2)
+            distances+= math.pow(MathUtils.distance(original_sequence[index], smoothed_sequence[index]),2)
 
-        mean_square_distance = (math.sqrt(distances)) / len(original_sequence)
+        mean_square_distance = (math.sqrt(distances))/len(original_sequence)
 
         return smoothed_sequence, mean_square_distance
 
@@ -488,12 +465,12 @@ class Parsing():
         # Plotting #
         fig, ax = plt.subplots(figsize=(10, 15))
         # plot original sequence
-        original = plt.plot(sequence[:, 0], sequence[:, 1], color='b')
+        original = plt.plot(sequence[:,0], sequence[:,1], color='b')
         # label
-        for i in range(1, len(sequence) - 1):
-            ax.annotate(label_list[i - 1], (sequence[i, 0], sequence[i, 1]))
+        for i in range(1, len(sequence)-1):
+            ax.annotate(label_list[i-1], (sequence[i, 0], sequence[i, 1]))
         # legend
-        # plt.legend((original[0]), ('sequence'), loc='lower right')
+        #plt.legend((original[0]), ('sequence'), loc='lower right')
         plt.axis('equal')
         plt.show()
 
@@ -513,4 +490,14 @@ class Parsing():
         # Open and write file
         file = open(path, 'w')
         for item in label_list:
-            file.write(item + "\n")
+            file.write(item+"\n")
+
+
+
+
+
+
+
+
+
+
