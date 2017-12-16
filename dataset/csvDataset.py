@@ -140,14 +140,14 @@ class CsvDataset:
         # Take test files from train list
         #random.seed(datetime.datetime.now())
         #for i in range(num_test_files):
-        # generate nth unique indexes randomly, such that 0 <= index <= lenght of files
-        #indexes = random.sample(range(0, len(files)), len(files))
+        # generate nth unique indices randomly, such that 0 <= index <= lenght of files
+        #indices = random.sample(range(0, len(files)), len(files))
 
         # push into test_files the file in position index and remove it from train_files
-        indexes = [index for index in range(iteration*num_test_files, (iteration+1)*num_test_files)]
+        indices = [index for index in range(iteration*num_test_files, (iteration+1)*num_test_files)]
 
         for i in range(len(files)):
-            if i in indexes:
+            if i in indices:
                 test_files.append(files[i])
             else:
                 train_files.append(files[i])
