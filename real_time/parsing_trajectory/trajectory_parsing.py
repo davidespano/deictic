@@ -10,7 +10,7 @@ import numpy.linalg as la
 import operator
 # Plot
 import matplotlib.pyplot as plt
-
+import dataset as dt
 
 class MathUtils():
 
@@ -184,17 +184,26 @@ class Trajectory():
         """
         # Parsing line
         for t in range(1, len(self.__sequence)-1):
+            # [davide] inizio vecchio labelling
             # Compute delta
-            num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
-            num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
-            num = MathUtils.dot(num1, num2)
-            den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
-            den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
-            den = den1 * den2
-            delta = 1 - (num/den)
+            #num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+            #num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+            #num = MathUtils.dot(num1, num2)
+            #den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+            #den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+            #den = den1 * den2
+            #delta = 1 - (num/den)
             # Check delta
-            if delta < threshold_a:
-                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
+            #if delta < threshold_a:
+            #    self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
+            # [davide] fine vecchio labelling
+            if dt.Geometry2D.Collinear(
+                    dt.Point2D(self.__sequence[t][0], self.__sequence[t][1]),
+                    dt.Point2D(self.__sequence[t - 1][0], self.__sequence[t - 1][1]),
+                    dt.Point2D(self.__sequence[t + 1][0], self.__sequence[t + 1][1]),
+                    threshold_a
+            ):
+                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)  # str(delta)
         return self.__labels
 
     def algorithm2(self, threshold_b = None):
