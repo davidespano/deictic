@@ -21,12 +21,7 @@ from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
 from test.test import Test, Result
 
-debug = 1
-
-#dataset = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/arrow/")
-#dataset2 = CsvDataset("/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/resampled/arrow/")
-#dataset.plot(compared_dataset=dataset2, singleMode=True)
-
+debug = 0
 
 if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
@@ -52,7 +47,7 @@ if debug == 0:
         # "x": [CsvDataset(base_dir + "x/", type=str)]
     }
     # hmms
-    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions, type=TypeRecognizer.online, num_states=1)
+    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions, type=TypeRecognizer.online, num_states=4)
     ### Debug ###
     # for i in range(0, 10):
     #     sample = gesture_hmms["caret"][0].sample()
@@ -79,7 +74,7 @@ if debug == 1:
     # datasets list
     directories = ["arrow", "caret", "circle", "check", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark",
                    "rectangle", "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
-    directories = ['circle']
+    directories = ['v','circle']
 
     for directory in directories:
 
@@ -87,8 +82,7 @@ if debug == 1:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        #resampledTransform = ResampleInSpaceTransform(samples=40) # accuracy = 0,9448
-        #resampledTransform = ResampleTransform(delta=6) # accuracy = 0.93 with distance = 5 / accuracy =  with distance = 6 0,9325
+        #resampledTransform = ResampleTransform(delta=5)
         # parse + remove zero
         parse = ParseSamples()
         dataset_original.addTransform(kalmanTransform)
@@ -105,22 +99,22 @@ if debug == 2:
     n_states = 2
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/parsed/"
     directories = {
-        "arrow": CsvDataset(base_dir + "arrow/", type=str),
-        "caret": CsvDataset(base_dir + "caret/", type=str),
-        "check": CsvDataset(base_dir+"check/", type=str),
+        # "arrow": CsvDataset(base_dir + "arrow/", type=str),
+        # "caret": CsvDataset(base_dir + "caret/", type=str),
+        # "check": CsvDataset(base_dir+"check/", type=str),
         "circle": CsvDataset(base_dir+"circle/", type=str),
-        "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
-        "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
-        "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
-        "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
-        "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
-        "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
-        "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
-        "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
-        "star": CsvDataset(base_dir + "star/", type=str),
-        "triangle": CsvDataset(base_dir + "triangle/", type=str),
+        # "delete_mark": CsvDataset(base_dir + "delete_mark/", type=str),
+        # "left_curly_brace": CsvDataset(base_dir + "left_curly_brace/", type=str),
+        # "left_sq_bracket": CsvDataset(base_dir + "left_sq_bracket/", type=str),
+        # "pigtail": CsvDataset(base_dir + "pigtail/", type=str),
+        # "question_mark": CsvDataset(base_dir + "question_mark/", type=str),
+        # "rectangle": CsvDataset(base_dir + "rectangle/", type=str),
+        # "right_curly_brace": CsvDataset(base_dir + "right_curly_brace/", type=str),
+        # "right_sq_bracket": CsvDataset(base_dir + "right_sq_bracket/", type=str),
+        # "star": CsvDataset(base_dir + "star/", type=str),
+        # "triangle": CsvDataset(base_dir + "triangle/", type=str),
         "v": CsvDataset(base_dir + "v/", type=str),
-        "x": CsvDataset(base_dir + "x/", type=str)
+        # "x": CsvDataset(base_dir + "x/", type=str)
     }
 
     sum = 0
@@ -170,9 +164,10 @@ if debug == 3:
         # original kalman + resampled
         dataset_original = CsvDataset(base_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        #resampledTransform = ResampleTransform(delta=4.5)#ResampleInSpaceTransform(samples=40)
+        #resampledTransform = ResampleInSpaceTransform(samples=20)
+        resampledTransform = ResampleTransform(delta=18)
         dataset_original.addTransform(kalmanTransform)
-        #dataset_original.addTransform(resampledTransform)
+        dataset_original.addTransform(resampledTransform)
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
 
     for index in range(len(dataset_kalman_resampled[directory])):
@@ -185,22 +180,20 @@ if debug == 3:
         for directory in directories:
             item = dataset_kalman_resampled[directory][index]
             plot = False
-            if "fast" in item[1]: #item[1] in files or len(files) == 0:
+            if "slow" in item[1]:
                 fig, ax = plt.subplots(figsize=(10, 15))
                 data = item[0]
-                label = Parsing.parsingLine(sequence=data).getLabelSequences()
+                label = Parsing.parsingLine(sequence=data).getLabelsSequence()
                 data_plots.append(plt.plot(data[:, 0]+(k*10), data[:, 1], color=colors[k]))
                 ax.scatter(data[:, 0]+(k*10), data[:, 1])
                 for i in range(0, len(label)):
                     ax.annotate(str(label[i]), (data[i][0]+(k*10), data[i][1]))
-                k += 1
                 plot = True
                 print(label)
-            if plot_multiple != True and plot == True:
-                # Legend
                 plt.title(item[1])
                 plt.axis('equal')
                 plt.show()
+
         if plot_multiple == True:
             # Legend
             plt.title(item[1])

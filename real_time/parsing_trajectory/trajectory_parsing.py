@@ -179,18 +179,22 @@ class Trajectory():
 
     # Methods #
     def getLabelsSequence(self):
-        return self.__labels# __groupPrimitives()# self.__labels
+        return self.__labels
+    def getLabels(self):
+        return self.__groupPrimitives()
     def getPointsSequence(self):
         return self.__sequence
 
     def parse(self, threshold_a = None, threshold_b = None):
 
         self.algorithm1(threshold_a)
-        #self.algorithm2(threshold_b)
-        #self.algorithm3()
+        self.algorithm2(threshold_b)
+        self.algorithm3()
+        self.findSubPrimitives(beta=4)
         #self.__removeNoise3()
         #self.__removeShortPrimitives()
         #print(self.__groupPrimitives())
+        #print(self.getLabels())
 
 
     def algorithm1(self, threshold_a):
@@ -263,7 +267,9 @@ class Trajectory():
                 indices.clear()
             elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
                 indices.append(index)
-                self.__quantizationIntervalsArc(indices=indices)
+                self.__quantizationIntervalsArc(indices=indices, beta=beta)
+            else:
+                indices.clear()
         # # Remove first and last labels
         # del self.__labels[0]
         # del self.__labels[-1]
@@ -348,30 +354,6 @@ class Trajectory():
     def __nthItem(self, n, list, item = TypePrimitive.BOUNDARY.value):
         indicies = compress(count(), map(partial(eq, item), list))
         return next(islice(indicies, n, None), None)
-
-
-
-
-
-        # while t < len_list:
-        #     # remove primitives too short
-        #     if indices and self.__labels[t] != self.__labels[indices[-1]]:
-        #         # check
-        #         if len(indices) <= 2:
-        #             for index in indices:
-        #                 #self.__labels[index] = self.__labels[t]
-        #                 del self.__labels[index]
-        #                 del self.__sequence[index]
-        #                 len_list-=1
-        #                 t-=1
-        #                 change = True
-        #         indices.clear()
-        #     indices.append(t)
-        #     t+=1
-        # #print(self.__labels)
-        # return change
-
-
 
     def __descriptorTrajectory(self):
         """
@@ -471,8 +453,8 @@ class Trajectory():
             self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
 
     def __groupPrimitives(self):
-        list_ = filter(lambda x,y: x != self.TypePrimitive.BOUNDARY.value, self.__labels)
-        return [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index] != '0']
+        #list_ = filter(lambda x,y: y != self.TypePrimitive.NONE.value, self.__labels)
+        return [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1]]# and self.__labels[index] != '0']
 
 
 
@@ -486,7 +468,7 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, flag_plot=True, flag_save=False, path = None):
+    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.

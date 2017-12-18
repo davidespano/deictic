@@ -487,7 +487,7 @@ class ParseSamples(DatasetTransform):
         self.dir=None
     #
     def transform(self, sequence):
-        return Parsing.parsingLine(sequence=sequence[:,[0,1]]).getLabelsSequence()
+        return Parsing.parsingLine(sequence=sequence[:,[0,1]]).getLabels()
 
 # Remove zero from parsing
 class RemoveZero(DatasetTransform):

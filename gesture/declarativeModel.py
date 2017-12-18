@@ -32,7 +32,7 @@ class ClassifierFactory:
         self.seq_edges = []
         self.stroke = -1
         self.strokeList = []
-        self.__chars = ['A', 'B', 'O']#'B0True', 'B1True', 'B2True', 'B3True', 'B4True', 'B0False', 'B1False', 'B2False', 'B3False', 'B4False']
+        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
 
     # public methods
     def setLineSamplesPath(self, path):
@@ -349,7 +349,7 @@ class ClassifierFactory:
         rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)  # rotate the samples for getting the right slope
         scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
         #resample = ResampleInSpaceTransform(samples=samples)  # resampling
-        #resample = ResampleTransform(delta=samples)
+        #resample = ResampleTransform(delta=5)
         translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
         # adding transforms to dataset
         dataset.addTransform(kalman)
@@ -374,7 +374,7 @@ class ClassifierFactory:
         startPointTranslate = TranslateTransform(t=startPoint)
         scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
         #resample = ResampleInSpaceTransform(samples=samples)  # resampling
-        #resample = ResampleTransform(delta=samples)
+        #resample = ResampleTransform(delta=5)
         # adding transforms to dataset
         dataset.addTransform(kalman)
         dataset.addTransform(centering)
@@ -389,9 +389,7 @@ class ClassifierFactory:
     def transformOnline(self, dataset):
         # applying transforms for fitting
         parse = ParseSamples()
-        remove = RemoveZero()
         dataset.addTransform(parse)
-        #dataset.addTransform(remove)
 
 
 
