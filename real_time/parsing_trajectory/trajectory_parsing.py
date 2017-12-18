@@ -179,7 +179,7 @@ class Trajectory():
 
     # Methods #
     def getLabelsSequence(self):
-        return self.__labels
+        return self.__labels# __groupPrimitives()# self.__labels
     def getPointsSequence(self):
         return self.__sequence
 
@@ -188,8 +188,6 @@ class Trajectory():
         self.algorithm1(threshold_a)
         #self.algorithm2(threshold_b)
         #self.algorithm3()
-        #self.__removeNoise()
-        #self.__removeNoise2()
         #self.__removeNoise3()
         #self.__removeShortPrimitives()
         #print(self.__groupPrimitives())
@@ -244,7 +242,7 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(1, len(self.__sequence)-2):
+        for t in range(0, len(self.__sequence)-2):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
@@ -274,16 +272,17 @@ class Trajectory():
 
     # private methods #
     def __removeShortPrimitives(self):
-        change = False
+
         len_list = len(self.__labels)
+
+        t = 0
         indices = []
-        t = 1
         while t < len_list:
             if indices and (self.__labels[t] != self.__labels[indices[-1]]):
                 if len(indices) < 5:
-                    for index in indices:
-                        del self.__labels[index]
-                        del self.__sequence[index]
+                    for index in range(len(indices)):
+                        del self.__labels[indices[0]]
+                        del self.__sequence[indices[0]]
                         t -= 1
                         len_list -= 1
                 indices.clear()
@@ -331,13 +330,9 @@ class Trajectory():
         print("\n")
 
     def __removeNoise3(self):
-        delta = 4
-
-        len_list = len(self.__labels)
+        delta = 5
         t = 0
-
         rec = True
-
         while rec:
             first_ = self.__nthItem(t, self.__labels)
             second_ = self.__nthItem(t+1, self.__labels)
