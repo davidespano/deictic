@@ -10,7 +10,12 @@ import numpy.linalg as la
 import operator
 # Plot
 import matplotlib.pyplot as plt
-
+# geometry
+from dataset.geometry import Geometry2D, Point2D
+# find n-th occurrence
+from itertools import compress, count, islice
+from functools import partial
+from operator import eq
 
 class MathUtils():
 
@@ -162,7 +167,7 @@ class Trajectory():
             raise Exception("sequence must be a numpy array.")
         # Inizialization
         #
-        self.__sequence = sequence
+        self.__sequence = sequence.tolist()
         #
         self.__labels = [Trajectory.TypePrimitive.NONE.value for x in range(len(sequence))]
         #
@@ -179,13 +184,16 @@ class Trajectory():
         return self.__sequence
 
     def parse(self, threshold_a = None, threshold_b = None):
-        change = True
-        while change:
-            self.algorithm1(threshold_a)
-            self.algorithm2(threshold_b)
-            change = self.__removeNoise()
-        self.algorithm3()
-        print(self.__labels)
+
+        self.algorithm1(threshold_a)
+        #self.algorithm2(threshold_b)
+        #self.algorithm3()
+        #self.__removeNoise()
+        #self.__removeNoise2()
+        #self.__removeNoise3()
+        #self.__removeShortPrimitives()
+        #print(self.__groupPrimitives())
+
 
     def algorithm1(self, threshold_a):
         """
@@ -194,33 +202,26 @@ class Trajectory():
         :return: list of label
         """
         # Parsing line
-        for index in range(1, len(self.__indices)-1):
-            t = self.__indices[index]
-            # Compute delta
-            num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
-            num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
-            num = MathUtils.dot(num1, num2)
-            den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
-            den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
-            den = den1 * den2
-            delta = 1 - (num/den)
+        for t in range(1, len(self.__sequence)-1):
+            # # Compute delta
+            # num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
+            # num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
+            # num = MathUtils.dot(num1, num2)
+            # den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
+            # den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
+            # den = den1 * den2
+            # delta = 1 - (num/den)
             # Check delta
-            if delta < threshold_a:
-                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
+            # if delta < threshold_a:
+            #     self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
 
-        # for t in range(1, len(self.__sequence)-1):
-        #     # Compute delta
-        #     num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
-        #     num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
-        #     num = MathUtils.dot(num1, num2)
-        #     den1 = MathUtils.magn(MathUtils.sub(self.__sequence[t], self.__sequence[t - 1]))
-        #     den2 = MathUtils.magn(MathUtils.sub(self.__sequence[t + 1], self.__sequence[t]))
-        #     den = den1 * den2
-        #     delta = 1 - (num/den)
-        #     # Check delta
-        #     if delta < threshold_a:
-        #         self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)#str(delta)
-        # return self.__labels
+            point_t = Point2D(self.__sequence[t][0], self.__sequence[t][1])
+            point_0 = Point2D(self.__sequence[t-1][0], self.__sequence[t-1][1])
+            point_1 = Point2D(self.__sequence[t+1][0], self.__sequence[t+1][1])
+
+            if Geometry2D.Collinear(point_0, point_t, point_1, threshold_a):
+                self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
+
 
     def algorithm2(self, threshold_b = None):
         """
@@ -228,7 +229,7 @@ class Trajectory():
         :param threshold_b:
         :return:
         """
-        for t in range(0, len(self.__sequence)-1):
+        for t in range(1, len(self.__sequence)-2):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value and self.__labels[t+1] == Trajectory.TypePrimitive.NONE.value:
                 # compute volume
                 # assigned label
@@ -243,7 +244,7 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(0, len(self.__sequence)-1):
+        for t in range(1, len(self.__sequence)-2):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
@@ -272,31 +273,108 @@ class Trajectory():
 
 
     # private methods #
-    def __removeNoise(self):
-
+    def __removeShortPrimitives(self):
         change = False
-        #print(self.__labels)
-        #
-        len_list = len(self.__sequence)
+        len_list = len(self.__labels)
         indices = []
-        t = 0
+        t = 1
         while t < len_list:
-            # remove primitives too short
-            if indices and self.__labels[t] != self.__labels[indices[-1]]:
-                # check
-                if len(indices) <= 2:
+            if indices and (self.__labels[t] != self.__labels[indices[-1]]):
+                if len(indices) < 5:
                     for index in indices:
-                        #self.__labels[index] = self.__labels[t]
                         del self.__labels[index]
                         del self.__sequence[index]
-                        len_list-=1
-                        t-=1
-                        change = True
+                        t -= 1
+                        len_list -= 1
                 indices.clear()
-            indices.append(t)
+            if self.__labels[t] in [self.TypePrimitive.ARC.value, self.TypePrimitive.LINE.value]:
+                indices.append(t)
+            t += 1
+        return None
+
+    def __removeNoise(self):
+        change = False
+        len_list = len(self.__labels)-1
+        indices = []
+        t = 1
+        while t < len_list:
+            if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1]:
+                del self.__labels[t]
+                del self.__sequence[t]
+                t-=1
+                len_list-=1
             t+=1
-        #print(self.__labels)
         return change
+
+    def __removeNoise2(self):
+
+        delta = 4
+        len_list = len(self.__labels)-delta
+        t = 0
+
+        print(self.__labels)
+
+        while t < len_list:
+            indices = [index for index in range(t, delta+t)]
+            checking_items = [self.__labels[index] for index in indices]
+            if len(list(filter(lambda x: x is self.TypePrimitive.BOUNDARY.value, checking_items))) > 1:
+                for index in indices:
+                    del self.__labels[index]
+                    del self.__sequence[index]
+                self.__labels[t] = self.TypePrimitive.BOUNDARY.value
+                len_list -= len(indices)
+                self.__indices.clear()
+            else:
+                t += 1
+
+        print(self.__labels)
+        print("\n")
+
+    def __removeNoise3(self):
+        delta = 4
+
+        len_list = len(self.__labels)
+        t = 0
+
+        rec = True
+
+        while rec:
+            first_ = self.__nthItem(t, self.__labels)
+            second_ = self.__nthItem(t+1, self.__labels)
+            if second_ != None and (second_-first_< delta):
+                for index in range(first_, second_+1):
+                    del self.__labels[first_+1]
+                    del self.__sequence[first_+1]
+            else:
+                t+=1
+            if second_ == None:
+                rec = False
+        return self.__labels
+    def __nthItem(self, n, list, item = TypePrimitive.BOUNDARY.value):
+        indicies = compress(count(), map(partial(eq, item), list))
+        return next(islice(indicies, n, None), None)
+
+
+
+
+
+        # while t < len_list:
+        #     # remove primitives too short
+        #     if indices and self.__labels[t] != self.__labels[indices[-1]]:
+        #         # check
+        #         if len(indices) <= 2:
+        #             for index in indices:
+        #                 #self.__labels[index] = self.__labels[t]
+        #                 del self.__labels[index]
+        #                 del self.__sequence[index]
+        #                 len_list-=1
+        #                 t-=1
+        #                 change = True
+        #         indices.clear()
+        #     indices.append(t)
+        #     t+=1
+        # #print(self.__labels)
+        # return change
 
 
 
@@ -397,7 +475,9 @@ class Trajectory():
             direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
             self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
 
-
+    def __groupPrimitives(self):
+        list_ = filter(lambda x,y: x != self.TypePrimitive.BOUNDARY.value, self.__labels)
+        return [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index] != '0']
 
 
 
@@ -411,7 +491,7 @@ class Parsing():
 
     # Methods #
     @staticmethod
-    def parsingLine(sequence, flag_plot=False, flag_save=False, path = None):
+    def parsingLine(sequence, flag_plot=True, flag_save=False, path = None):
         """
             parsingLine provides to: apply a kalmar smoother to the sequence and label it in accordance with "Parsing 3D motion trajectory for gesture recognition"
         :param sequence: the sequence to be parsed.
@@ -423,7 +503,7 @@ class Parsing():
         if not isinstance(sequence, np.ndarray):
             raise Exception("sequence must be a numpy ndarray.")
 
-        threshold_a = 0.0055#0.00025#100
+        threshold_a = 0.005#0.00025#100
         # trajectory
         trajectory = Trajectory(sequence)
         list = trajectory.parse(threshold_a=threshold_a, threshold_b=None)

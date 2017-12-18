@@ -500,7 +500,8 @@ class RemoveZero(DatasetTransform):
         if not isinstance(sequence, list) and all(isinstance(label, str) for label in sequence):
             raise TypeError
 
-        return [item for item in sequence if item != '0' and item!='B' and item!='A']
+        #return [item for item in sequence if item != '0' and item!='B' and item!='A']
+        return [item for item in sequence if item != '0' and item != 'A']
 
 class NormaliseSamples:
 

@@ -286,7 +286,6 @@ class Test():
         for sequence in sequences:
             index_label = Test.compare(sequence[0], self.gesture_hmms)
             # Update results
-            #print(index_label + " - " + sequence[1])
             if index_label != None:
                 self.result.update(row_label=dataset_label, column_label=index_label, id_sequence=sequence[1])
 
