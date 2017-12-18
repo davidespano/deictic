@@ -1,5 +1,5 @@
-var width = 1000;
-var height = 800;
+var width = 800;
+var height = 600;
 
 var stage = new Konva.Stage({
     container: 'container',
@@ -23,41 +23,59 @@ for (var ix = 0; ix < width / BOX_SIZE; ix++) {
             fill: 'white',
             stroke: 'lightgray'
         });
+
         layer.add(box);
     }
 }
 
 
- var redLine = new Konva.Line({
-      points: [5, 70, 140, 23, 250, 60, 300, 20],
-      stroke: 'red',
-      strokeWidth: 15,
-      lineCap: 'round',
-      lineJoin: 'round',
+var redLine = new Konva.Line({
+    points: [],
+    stroke: 'red',
+    strokeWidth: 10,
+    lineCap: 'round',
+    lineJoin: 'round',
 
-    });
+});
 
 layer.add(redLine);
 
 layer.draw();
 
+var drawing = false;
+layer.on('mousedown touchstart', function (event) {
+    drawing = true;
+    redLine.points().splice(0, redLine.points().length);
+    redLine.points().push(event.evt.x, event.evt.y);
+    layer.draw();
 
-layer.on('mousedown', function(event){
-    if(event.evt.button === 0){
-        redLine.points().splice(0, redLine.points().length);
-        redLine.points().push(event.evt.x, event.evt.y);
-        layer.draw();
-    }
+
 });
 
-layer.on('mousemove', function(event){
-    if(event.evt.buttons === 1 &&
-        event.evt.button === 0 &&
-        (event.evt.movementX > 0 && event.evt.movementY > 0)) {
-        //console.log(redLine.points())
-        redLine.points().push(event.evt.x, event.evt.y);
+
+layer.on('mousemove touchmove', function (event) {
+
+    if (drawing) {
+        switch(event.type){
+            case 'touchmove':
+                redLine.points().push(
+                    event.evt.changedTouches[0].clientX,
+                    event.evt.changedTouches[0].clientY
+                )
+                break;
+            case 'mousemove':
+                redLine.points().push(event.evt.x, event.evt.y);
+                break;
+        }
+
         redLine.draw();
     }
+
+
+});
+
+layer.on('mouseup touchend', function (event) {
+    drawing = false;
 });
 
 function fitStageIntoParentContainer() {
@@ -75,7 +93,22 @@ function fitStageIntoParentContainer() {
     stage.draw();
 }
 
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function () {
+        var context = this, args = arguments;
+        var later = function () {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
+};
 
-fitStageIntoParentContainer();
+
+//fitStageIntoParentContainer();
 // adapt the stage on any window resize
-window.addEventListener('resize', fitStageIntoParentContainer);
+//window.addEventListener('resize', fitStageIntoParentContainer);
