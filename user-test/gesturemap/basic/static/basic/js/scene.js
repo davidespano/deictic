@@ -7,8 +7,39 @@ var stage = new Konva.Stage({
     height: height
 });
 
+var redLine = new Konva.Line({
+    points: [],
+    stroke: 'red',
+    strokeWidth: 10,
+    lineCap: 'round',
+    lineJoin: 'round',
+
+});
+
 var layer = new Konva.Layer();
+var imgLayer = new Konva.Layer();
 stage.add(layer);
+stage.add(imgLayer);
+
+
+
+var imageObj = new Image();
+imageObj.onload = function () {
+
+    var yoda = new Konva.Image({
+        x: 50,
+        y: 50,
+        image: imageObj,
+        width: 106,
+        height: 118
+    });
+
+    // add the shape to the layer
+    layer.add(yoda);
+    layer.draw();
+};
+imageObj.src = '/static/basic/img/monster.png';
+
 
 var BOX_SIZE = 200;
 var box;
@@ -29,54 +60,13 @@ for (var ix = 0; ix < width / BOX_SIZE; ix++) {
 }
 
 
-var redLine = new Konva.Line({
-    points: [],
-    stroke: 'red',
-    strokeWidth: 10,
-    lineCap: 'round',
-    lineJoin: 'round',
-
-});
-
 layer.add(redLine);
 
 layer.draw();
 
-var drawing = false;
-layer.on('mousedown touchstart', function (event) {
-    drawing = true;
-    redLine.points().splice(0, redLine.points().length);
-    redLine.points().push(event.evt.x, event.evt.y);
-    layer.draw();
+var input = new Deictic.StrokeInput(layer);
+var lineFeedback = new Deictic.LineFeedback(layer, redLine);
 
-
-});
-
-
-layer.on('mousemove touchmove', function (event) {
-
-    if (drawing) {
-        switch(event.type){
-            case 'touchmove':
-                redLine.points().push(
-                    event.evt.changedTouches[0].clientX,
-                    event.evt.changedTouches[0].clientY
-                )
-                break;
-            case 'mousemove':
-                redLine.points().push(event.evt.x, event.evt.y);
-                break;
-        }
-
-        redLine.draw();
-    }
-
-
-});
-
-layer.on('mouseup touchend', function (event) {
-    drawing = false;
-});
 
 function fitStageIntoParentContainer() {
     var container = document.querySelector('#stage-parent');
