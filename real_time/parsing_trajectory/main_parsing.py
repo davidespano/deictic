@@ -20,8 +20,11 @@ from real_time.parsing_trajectory.model_factory import Model
 from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
 from test.test import Test, Result
+# Levenshtein
+from real_time.parsing_trajectory.levenshtein_distance import LevenshteinDistance
+import sys
 
-debug = 0
+debug = 4
 
 if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
@@ -74,7 +77,7 @@ if debug == 1:
     # datasets list
     directories = ["arrow", "caret", "circle", "check", "delete_mark", "left_curly_brace", "left_sq_bracket", "pigtail", "question_mark",
                    "rectangle", "right_curly_brace", "right_sq_bracket", "star", "triangle", "v", "x"]
-    directories = ['v','circle']
+    directories = ['v']
 
     for directory in directories:
 
@@ -82,11 +85,14 @@ if debug == 1:
         # original kalman + resampled
         dataset_original = CsvDataset(input_dir+directory+"/")
         kalmanTransform = KalmanFilterTransform()
-        #resampledTransform = ResampleTransform(delta=5)
-        # parse + remove zero
+
         parse = ParseSamples()
         dataset_original.addTransform(kalmanTransform)
+
+        #resampledTransform = ResampleTransform
+        #resampledTransform = ResampleTransform(delta=5)
         #dataset_original.addTransform(resampledTransform)
+
         dataset_original.addTransform(parse)
         sequence_original = dataset_original.applyTransforms(output_dir=(output_dir+directory+"/"))
         print("End " + directory)
@@ -155,19 +161,22 @@ if debug == 2:
 ######################## Debug
 if debug == 3:
     base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-    directories = ["v"]
-    files =[]# ["9_fast_check_09.csv", "5_fast_check_10.csv", "6_fast_check_06.csv", "3_medium_check_01.csv", "11_medium_check_04.csv", "9_medium_check_01.csv", "3_fast_check_07.csv", "3_fast_check_01.csv"]
+    directories = ["circle"]
+    files =[]#['1_medium_left_sq_bracket_08.csv']
     dataset_kalman_resampled = {}
 
     # Raw data with kalman and resampling
     for directory in directories:
         # original kalman + resampled
         dataset_original = CsvDataset(base_dir+directory+"/")
+
         kalmanTransform = KalmanFilterTransform()
-        #resampledTransform = ResampleInSpaceTransform(samples=20)
-        resampledTransform = ResampleTransform(delta=18)
         dataset_original.addTransform(kalmanTransform)
+
+        #resampledTransform = ResampleInSpaceTransform(samples=40)
+        resampledTransform = ResampleTransform(delta=10)
         dataset_original.addTransform(resampledTransform)
+
         dataset_kalman_resampled[directory] = dataset_original.applyTransforms()
 
     for index in range(len(dataset_kalman_resampled[directory])):
@@ -180,7 +189,7 @@ if debug == 3:
         for directory in directories:
             item = dataset_kalman_resampled[directory][index]
             plot = False
-            if "slow" in item[1]:
+            if not files or item[1] in files:
                 fig, ax = plt.subplots(figsize=(10, 15))
                 data = item[0]
                 label = Parsing.parsingLine(sequence=data).getLabelsSequence()
@@ -199,4 +208,66 @@ if debug == 3:
             plt.title(item[1])
             plt.axis('equal')
             plt.show()
+
+
+
+if debug == 4:
+    def test(sequence):
+        min_dist = sys.maxsize
+        label = None
+
+        for key, values in ideal_sequences.items():
+            dist = LevenshteinDistance.levenshtein(ideal_sequences[key], sequence[0])
+            if dist < min_dist:
+                min_dist = dist
+                label = key
+        return label
+    def get_index(name):
+        index = 0
+        for label in __classes:
+            if label == name:
+                return index
+            index += 1
+        return index
+
+    ideal_sequences = {
+        'arrow'                     : ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O'],
+        'caret'                     : ['O', 'A1', 'O', 'A7', 'O'],
+        'delete_mark'               : ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
+        'left_sq_bracket'           : ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
+        'rectangle'                 : ['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],
+        'right_sq_bracket'          : ['O', 'A0', 'O', 'A6', 'O', 'A4', 'O'],
+        'star'                      : ['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O'],
+        'triangle'                  : ['O', 'A5', 'O', 'A0', 'O', 'A3', 'O'],
+        'v'                         : ['O', 'A7', 'O', 'A1', 'O'],
+        'x'                         : ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
+    }
+    directories = ['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x']
+
+    base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
+    # matrix
+    __array = numpy.zeros((len(ideal_sequences), len(ideal_sequences)), dtype=int)
+    __classes = list(ideal_sequences.keys())
+
+    for directory in directories:
+        # original kalman + resampled
+        dataset = CsvDataset(base_dir+directory+"/")
+        # kalman
+        kalmanTransform = KalmanFilterTransform()
+        dataset.addTransform(kalmanTransform)
+        # resampling
+        #resampledTransform = ResampleTransform
+        resampledTransform = ResampleTransform(delta=10)
+        dataset.addTransform(resampledTransform)
+        # parse
+        parse = ParseSamples()
+        dataset.addTransform(parse)
+        # apply transforms
+        for sequence in dataset.applyTransforms():
+            print(sequence)
+            label = test(sequence)
+            __array[get_index(directory)][get_index(label)] += 1
+
+    print(__array)
 ######################## Debug
+

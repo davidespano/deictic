@@ -16,6 +16,8 @@ from dataset.geometry import Geometry2D, Point2D
 from itertools import compress, count, islice
 from functools import partial
 from operator import eq
+# levenshtein
+from real_time.parsing_trajectory.levenshtein_distance import LevenshteinDistance
 
 class MathUtils():
 
@@ -188,11 +190,14 @@ class Trajectory():
     def parse(self, threshold_a = None, threshold_b = None):
 
         self.algorithm1(threshold_a)
-        self.algorithm2(threshold_b)
+        #self.algorithm2(threshold_b)
         self.algorithm3()
         self.findSubPrimitives(beta=4)
-        #self.__removeNoise3()
+        self.__removeNoise()
         #self.__removeShortPrimitives()
+        #self.__removeNoise3()
+
+        return self.__groupPrimitives()
         #print(self.__groupPrimitives())
         #print(self.getLabels())
 
@@ -203,9 +208,15 @@ class Trajectory():
         :param threshold_a:
         :return: list of label
         """
+
+        lenght = len(self.__sequence)-1
+        a = 0
+        t = 2
         # Parsing line
-        for t in range(1, len(self.__sequence)-1):
-            # # Compute delta
+        while t < lenght:
+
+            # # First # #
+            #for t in range(1, len(self.__labels)-1):
             # num1 = MathUtils.sub(self.__sequence[t], self.__sequence[t - 1])
             # num2 = MathUtils.sub(self.__sequence[t + 1], self.__sequence[t])
             # num = MathUtils.dot(num1, num2)
@@ -217,12 +228,29 @@ class Trajectory():
             # if delta < threshold_a:
             #     self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
 
+            # # Second # #
+            #point_t = Point2D(self.__sequence[t][0], self.__sequence[t][1])
+            #point_0 = Point2D(self.__sequence[t-1][0], self.__sequence[t-1][1])
+            #point_1 = Point2D(self.__sequence[t+1][0], self.__sequence[t+1][1])
+            #if Geometry2D.Collinear(point_0, point_t, point_1, threshold_a):
+            #    self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
+
+            # # Third # #
+            c = t-int(round((t - a) / 2))
+            point_a = Point2D(self.__sequence[a][0], self.__sequence[a][1])
+            point_c = Point2D(self.__sequence[c][0], self.__sequence[c][1])
             point_t = Point2D(self.__sequence[t][0], self.__sequence[t][1])
+
             point_0 = Point2D(self.__sequence[t-1][0], self.__sequence[t-1][1])
             point_1 = Point2D(self.__sequence[t+1][0], self.__sequence[t+1][1])
 
-            if Geometry2D.Collinear(point_0, point_t, point_1, threshold_a):
+            if Geometry2D.Collinear(point_0, point_t, point_1, threshold_a) and Geometry2D.Collinear(point_a, point_c, point_t, threshold_a):
                 self.__labels[t] = (Trajectory.TypePrimitive.LINE.value)
+                t+=1
+            else:
+                a = t-1
+                t+=1
+
 
 
     def algorithm2(self, threshold_b = None):
@@ -246,11 +274,14 @@ class Trajectory():
         :param
         :return:
         """
-        for t in range(0, len(self.__sequence)-2):
+        for t in range(0, len(self.__sequence)-1):
             if self.__labels[t] == Trajectory.TypePrimitive.NONE.value:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # isolated points
             elif self.__labels[t+1] != Trajectory.TypePrimitive.NONE.value and self.__labels[t] != self.__labels[t+1]:
                 self.__labels[t] = Trajectory.TypePrimitive.BOUNDARY.value # for label transition
+        # # Remove first and last labels
+        self.__labels[0] = self.TypePrimitive.BOUNDARY.value
+        self.__labels[-1] = self.TypePrimitive.BOUNDARY.value
         return self.__labels
 
     def findSubPrimitives(self, beta):
@@ -263,16 +294,13 @@ class Trajectory():
         indices=[]
         for index in range(len(self.__sequence)-1):
             if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
-                self.__quantizationIntervalsLine(indices=[index])
-                indices.clear()
+                indices.append(index)
+                self.__quantizationIntervalsLine(indices=indices)
             elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
                 indices.append(index)
                 self.__quantizationIntervalsArc(indices=indices, beta=beta)
             else:
                 indices.clear()
-        # # Remove first and last labels
-        # del self.__labels[0]
-        # del self.__labels[-1]
         return self.__labels
 
 
@@ -298,18 +326,11 @@ class Trajectory():
         return None
 
     def __removeNoise(self):
-        change = False
-        len_list = len(self.__labels)-1
-        indices = []
-        t = 1
-        while t < len_list:
-            if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1]:
-                del self.__labels[t]
-                del self.__sequence[t]
-                t-=1
-                len_list-=1
-            t+=1
-        return change
+
+        for t in range(len(self.__labels)-1):
+            if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1] and self.__labels[t-1] in ['A0','A1','A2','A3','A4','A5','A6','A7']:
+                self.__labels[t] = self.__labels[t-1]
+
 
     def __removeNoise2(self):
 
@@ -343,7 +364,7 @@ class Trajectory():
             first_ = self.__nthItem(t, self.__labels)
             second_ = self.__nthItem(t+1, self.__labels)
             if second_ != None and (second_-first_< delta):
-                for index in range(first_, second_+1):
+                for index in range(first_, second_):
                     del self.__labels[first_+1]
                     del self.__sequence[first_+1]
             else:
@@ -445,16 +466,23 @@ class Trajectory():
         # point_direction = MathUtils.sub(end_point, start_point)
         # direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         # Get points
+
+        start_point = self.__sequence[indices[0]-1]
+        end_point = self.__sequence[indices[-1]]
+        point_direction = MathUtils.sub(end_point, start_point)
+        direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
         for index in indices:
-            start_point = self.__sequence[index-1]
-            end_point = self.__sequence[index]
-            point_direction = MathUtils.sub(end_point, start_point)
-            direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
-            self.__labels[index] = self.__labels[index]+str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
+            #start_point = self.__sequence[index-1]
+            #end_point = self.__sequence[index]
+            #point_direction = MathUtils.sub(end_point, start_point)
+            #direction = MathUtils.findDirection(MathUtils.normalize(point_direction))
+            self.__labels[index] = self.TypePrimitive.LINE.value + str(direction) #chr(ord(self.__labels[index]) + interval_direction + 4)      #
 
     def __groupPrimitives(self):
         #list_ = filter(lambda x,y: y != self.TypePrimitive.NONE.value, self.__labels)
-        return [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1]]# and self.__labels[index] != '0']
+        l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1]]
+        l.append(self.TypePrimitive.BOUNDARY.value)
+        return l
 
 
 
@@ -480,19 +508,11 @@ class Parsing():
         if not isinstance(sequence, np.ndarray):
             raise Exception("sequence must be a numpy ndarray.")
 
-        threshold_a = 0.005#0.00025#100
+        threshold_a = 0.1#0.00025#100
         # trajectory
         trajectory = Trajectory(sequence)
         list = trajectory.parse(threshold_a=threshold_a, threshold_b=None)
-        # Algorithm 1 (find straight linear)
-        #list = trajectory.algorithm1(threshold_a=threshold_a)
-        # Algorithm 2 (find plane arc)
-        #list = trajectory.algorithm2(threshold_b=None)
-        # Algorithm 3 (localizing boundary points)
-        #list = trajectory.algorithm3()
-        # Descriptor
-        # Sub primitives
-        #list = trajectory.findSubPrimitives(beta=5)
+
 
         # Plot data
         if flag_plot:
