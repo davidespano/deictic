@@ -2,63 +2,128 @@ from gesture import *
 from topology import *
 import random
 import datetime
+# copy
+import copy
 
-class Model():
+class ModelFactory():
 
-    __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
+    __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7','O']# 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
 
-    def __init__(self, n_states = 0, n_features = 0, name=None):
-        # Model
+    @staticmethod
+    def ergodic(nome=None, n_states=0):
         model = HiddenMarkovModel(name)
-
         # Ergodic
-        # states = self.__fix_parameters(name, n_states, [], [], model);
-        # p_tr = 1 / (n_states + 2)
-        # for i in range(0, n_states):
-        #     model.add_transition(model.start, states[i], p_tr)
-        #     model.add_transition(states[i], model.end, p_tr)
-        #     for j in range(0, n_states):
-        #         model.add_transition(states[i], states[j], p_tr)
-
-        # Forward
-        states = self.__fix_parameters(name, n_states, [], [], model);
-        for i in range(0, n_states - 1):
-            model.add_transition(model.start, states[i], n_states/1)
-            for j in range(0, n_states - 1):
-                model.add_transition(states[i], states[j], n_states/1)
-
+        states = self.__fix_parameters(self.name, n_states, [], [], self.model);
+        p_tr = 1 / (n_states + 2)
+        for i in range(0, n_states):
+            self.model.add_transition(self.model.start, states[i], p_tr)
+            self.model.add_transition(states[i], self.model.end, p_tr)
+            for j in range(0, n_states):
+                self.model.add_transition(states[i], states[j], p_tr)
+        # bake
         model.bake()
-        self.model = model
+        return model
 
-    def train(self, samples):
-        """
+    @staticmethod
+    def forward(name=None, n_states=0):
+        model = HiddenMarkovModel(name)
+        # Forward
+        states = ModelFactory.__fix_parameters(name, n_states, [], [], model);
+        for i in range(0, n_states - 1):
+            model.add_transition(model.start, states[i], n_states / 1)
+            for j in range(0, n_states - 1):
+                model.add_transition(states[i], states[j], n_states / 1)
+        # bake
+        model.bake()
+        return model
 
-        :param samples:
-        :return:
-        """
+    @staticmethod
+    def sequenceAlignment(name=None, ideal_sequence=None):
+        model = HiddenMarkovModel(name)
+        ### create distribution
+        # Define the distribution for insertions
+        i_d = DiscreteDistribution(
+            {'A0': 0.1111, 'A1': 0.1111, 'A2': 0.1111, 'A3': 0.1111, 'A4': 0.1111,
+             'A5': 0.1111, 'A6': 0.1111, 'A7': 0.1111, 'O': 0.1112}
+        )
+        s_d = {'A0': 0.00, 'A1': 0.00, 'A2': 0.00, 'A3': 0.00, 'A4': 0.00,
+             'A5': 0.00, 'A6': 0.00, 'A7': 0.00, 'O': 0.00}
+
+        ### create states
+        # Create the insert states
+        insert_states = []
+        for index in range(len(ideal_sequence)+1):
+            insert_states.append(State(i_d, name="I"+str(index)))
+        # Create the match states
+        match_states = []
+        for index in range(len(ideal_sequence)):
+            n_d = deepcopy(s_d)
+            n_d[ideal_sequence[index]] = 1.0
+            match_states.append(State((DiscreteDistribution(n_d)), name="M" + str(index + 1)))
+        # Create the match and the delete states
+        delete_states = []
+        for index in range(len(ideal_sequence)):
+            delete_states.append(State(None, name="D"+str(index+1)))
+        # add states
+        states = [state for state in insert_states]
+        states = states + [state for state in match_states]
+        states = states + [state for state in delete_states]
+        model.add_states(states)
+
+        ### create transitions
+        # Create transitions from match states
+        model.add_transition(model.start, match_states[0], 0.9)
+        model.add_transition(model.start, insert_states[0], 0.1)
+        for index_state in range(0, len(match_states)-1):
+            model.add_transition(match_states[index_state], match_states[index_state+1], 0.9)
+            model.add_transition(match_states[index_state], insert_states[index_state + 1], 0.05)
+            model.add_transition(match_states[index_state], delete_states[index_state + 1], 0.05)
+        model.add_transition(match_states[-1], model.end, 0.9)
+        model.add_transition(match_states[-1], insert_states[-1], 0.1)
+        # Create transitions from insert states
+        for index_state in range(0, len(insert_states)-1):
+            model.add_transition(insert_states[index_state], insert_states[index_state], 0.7)
+            model.add_transition(insert_states[index_state], delete_states[index_state], 0.15)
+            model.add_transition(insert_states[index_state], match_states[index_state], 0.15)
+        model.add_transition(insert_states[-1], insert_states[-1], 0.85)
+        model.add_transition(insert_states[-1], model.end, 0.15)
+        # Create transitions from delete states
+        for index_state in range(0, len(delete_states)-1):
+            model.add_transition(delete_states[index_state], delete_states[index_state+1], 0.15)
+            model.add_transition(delete_states[index_state], insert_states[index_state+1], 0.15)
+            model.add_transition(delete_states[index_state], match_states[index_state+1], 0.70)
+        model.add_transition(delete_states[-1], insert_states[-1], 0.30)
+        model.add_transition(delete_states[-1], model.end, 0.70)
+
+        # bake
+        model.bake()
+        return model
+
+
+    @staticmethod
+    def train(model, samples):
         # Check parameters
-
-        # get sequence
+        # get sequence and train
         samples = (sample[0] for sample in samples)
-        # Train
-        self.model.fit(samples,use_pseudocount=True)
+        model.fit(samples, transition_pseudocount=10, use_pseudocount=True)
 
+    @staticmethod
     def plot_sample(self, n_samples = 1):
+        # check parameters
+        # plot
         for i in range(0, n_samples):
             sequence = self.model.sample()
             print(sequence)
 
-    def getModel(self):
-        return self.model
-
-    # Private Models #
-    def __fix_parameters(self, name, n_States, emissions, state_names, model):
+    # private methods #
+    @staticmethod
+    def __fix_parameters(name, n_States, emissions, state_names, model):
         for i in range(len(emissions), n_States):
-            distribution_values = numpy.random.dirichlet(numpy.ones(len(Model.__chars)), size=1)[0]
+            distribution_values = numpy.random.dirichlet(numpy.ones(len(ModelFactory.__chars)), size=1)[0]
             values = {}
             random.seed(datetime.datetime.now())
-            for index in range(0, len(Model.__chars)):
-                values[Model.__chars[index]] = distribution_values[index]
+            for index in range(0, len(ModelFactory.__chars)):
+                values[ModelFactory.__chars[index]] = distribution_values[index]
             emissions.append(DiscreteDistribution(values))
 
         # default init of missing state names

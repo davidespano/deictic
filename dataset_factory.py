@@ -121,7 +121,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         print('Making '+gesture[0]+' dataset')
         input_dir = inputDir+gesture[0]+'/'
         output_dir = outputDir+gesture[0]+'/'
-        dataset = CsvDataset(input_dir)
+        dataset = CsvDataset(input_dir, type=float)
 
         # Transform
         transform1 = NormaliseLengthTransform(axisMode=True)

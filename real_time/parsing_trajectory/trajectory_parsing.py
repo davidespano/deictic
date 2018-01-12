@@ -33,16 +33,20 @@ class MathUtils():
 
     angle_directions = np.array([x for x in range(0, 360, 45)])
 
-    __directionsVect = {
-        Directions.North:[0,1],
-        Directions.South:[0,-1],
-        Directions.West:[-1,0],
-        Directions.East:[1,0],
-        Directions.NorthEast:[math.sqrt(2)/2, math.sqrt(2)/2],
-        Directions.NorthWest:[-math.sqrt(2)/2, math.sqrt(2)/2],
-        Directions.SouthEast:[math.sqrt(2)/2, -math.sqrt(2)/2],
-        Directions.SouthWest:[-math.sqrt(2)/2, -math.sqrt(2)/2]
-    }
+
+    __directionsName = [Directions.East, Directions.NorthEast, Directions.North, Directions.NorthWest, Directions.West, Directions.SouthWest, Directions.South, Directions.SouthEast]
+    __directionsValue = [(math.cos(math.radians(x)),math.sin(math.radians(x))) for x in range (-22, 338, 45)]
+    __directionsVect = dict(zip(__directionsName, __directionsValue))
+    # __directionsVect = {
+    #     Directions.North:[0,1],
+    #     Directions.South:[0,-1],
+    #     Directions.West:[-1,0],
+    #     Directions.East:[1,0],
+    #     Directions.NorthEast:[math.sqrt(2)/2, math.sqrt(2)/2],
+    #     Directions.NorthWest:[-math.sqrt(2)/2, math.sqrt(2)/2],
+    #     Directions.SouthEast:[math.sqrt(2)/2, -math.sqrt(2)/2],
+    #     Directions.SouthWest:[-math.sqrt(2)/2, -math.sqrt(2)/2]
+    # }
 
     # todo: check parameters
     @staticmethod
@@ -198,8 +202,6 @@ class Trajectory():
         #self.__removeNoise3()
 
         return self.__groupPrimitives()
-        #print(self.__groupPrimitives())
-        #print(self.getLabels())
 
 
     def algorithm1(self, threshold_a):

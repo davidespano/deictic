@@ -19,8 +19,10 @@ class Result():
     ### Public methods ###
     def __init__(self, gesture_labels = []):
         # Check parameters
-        if not isinstance(gesture_labels, list):
+        if not isinstance(gesture_labels, (list, dict)):
             raise Exception("name_gestures must be a list of object.")
+        if isinstance(gesture_labels, dict):
+            gesture_labels = [key for key in gesture_labels]
         # gesture_labels
         self.__labels = sorted(gesture_labels)
         # array (the core of the confusion matrix)
@@ -156,7 +158,7 @@ class Result():
         """
             this methods finds and returns the index links to the passed label.
         :param label: a gesture label
-        :return: the corresponding index or raise an exception if labels does not contain wanted_label.
+        :return: the corresponding index
         """
         index = 0
         for label in self.__labels:
@@ -228,8 +230,6 @@ class Test():
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         if not isinstance(gesture_datasets, dict):
             raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
-        if len(gesture_hmms) != len(gesture_datasets):
-            raise Exception("gesture_hmms and gesture_datasets must have the same lenght.")
 
         self.gesture_hmms = gesture_hmms
         self.gesture_datasets = gesture_datasets
@@ -289,6 +289,7 @@ class Test():
             if index_label != None:
                 self.result.update(row_label=dataset_label, column_label=index_label, id_sequence=sequence[1])
 
+    ### Static methods ###
     @staticmethod
     def compare(sequence, gesture_hmms, return_log_probabilities = False):
         """
@@ -298,6 +299,12 @@ class Test():
         :param return_log_probabilities: this boolean indicates the label of the best compared model or also the norm log probabilities of each model for the passed sequence.
         :return: the model label with the best norm log probability,
         """
+        # check parameters
+        if isinstance(gesture_hmms, list):
+            # convert gesture_hmms list to dictionary
+            gesture_hmms = {hmm.name:[hmm] for hmm in gesture_hmms}
+
+        # setting parameters
         # Max probability "global"
         max_norm_log_probability = -sys.maxsize
         # Model label with the best norm log proability for that sequence
@@ -310,9 +317,7 @@ class Test():
             # Max probability "local"
             local_norm_log_probabilty = -sys.maxsize
             for model in models:
-                # Compute sequence's log-probability and normalized
-                log_probability = model.log_probability(sequence)
-                norm_log_probability = log_probability / len(sequence)
+                norm_log_probability = Test.findLogProbability(sequence, model)
                 # Check which is the best 'local' model
                 if norm_log_probability > local_norm_log_probabilty:
                     local_norm_log_probabilty = norm_log_probability
@@ -321,10 +326,23 @@ class Test():
                 log_probabilities[gesture_label] = local_norm_log_probabilty
             # Check which is the best model
             if (local_norm_log_probabilty > max_norm_log_probability):
-                max_norm_log_probability = norm_log_probability
+                max_norm_log_probability = local_norm_log_probabilty
                 index_label = gesture_label
         # Comparison completed, index_label contains the best global model while log_probabilities the norm log probabilities of each model for the passed sequence.
         if not return_log_probabilities:
             return index_label
         else:
             return index_label, log_probabilities
+
+    @staticmethod
+    def findLogProbability(sequence, model):
+        """
+            :returns the log probability of the model for the given sequence.
+        :param sequence:
+        :param model:
+        :return:
+        """
+        # Compute sequence's log-probability and its normalized
+        log_probability = model.log_probability(sequence)
+        norm_log_probability = log_probability/len(sequence)
+        return norm_log_probability

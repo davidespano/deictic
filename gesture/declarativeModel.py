@@ -32,7 +32,7 @@ class ClassifierFactory:
         self.seq_edges = []
         self.stroke = -1
         self.strokeList = []
-        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
+        self.__chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'O']
 
     # public methods
     def setLineSamplesPath(self, path):
@@ -126,8 +126,11 @@ class ClassifierFactory:
             if self.type == TypeRecognizer.online:
                 self.transformOnline(dataset)
             samples = [sequence[0] for sequence in dataset.applyTransforms()]
-            for i in range(3):
-                samples.extend(samples)
+
+            # add more samples
+            #for i in range(3):
+            #    samples.extend(samples)
+
             ### Debug ###
             if d:
                 # # dataset example
@@ -162,7 +165,7 @@ class ClassifierFactory:
             # create hmm
             hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
             # training
-            hmm.fit(samples, use_pseudocount=True) # trains it with the transformed samples
+            hmm.fit(samples)#, use_pseudocount=True) # trains it with the transformed samples
 
 
             self.addStrokeIdDistribution(hmm)
@@ -230,14 +233,16 @@ class ClassifierFactory:
             if self.type == TypeRecognizer.online:
                 self.transformOnline(dataset)
             samples = [sequence[0] for sequence in dataset.applyTransforms()]
-            for i in range(3):
-                samples.extend(samples)
+            # add more samples
+            # for i in range(3):
+            #     samples.extend(samples)
+
             #if d:
             #    self.debugPlot(samples, exp)
             # create hmm
             hmm = self.createCleanArc(str(exp), startPoint, exp, self.scale, n_states)
             # training
-            hmm.fit(samples, use_pseudocount=True)  # trains it with the transformed samples
+            hmm.fit(samples)#, use_pseudocount=True)  # trains it with the transformed samples
 
             self.addStrokeIdDistribution(hmm)
 
@@ -348,17 +353,17 @@ class ClassifierFactory:
         origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
         rotate = RotateTransform(theta=alpha, unit=RotateTransform.radians)  # rotate the samples for getting the right slope
         scale = ScaleDatasetTransform(scale=distance * self.scale)  # adjust the size
-        #resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        resample = ResampleInSpaceTransform(samples=samples)  # resampling
         #resample = ResampleTransform(delta=5)
         translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
         # adding transforms to dataset
-        dataset.addTransform(kalman)
+        #dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
         dataset.addTransform(scale)
         dataset.addTransform(rotate)
-        #dataset.addTransform(resample)
+        dataset.addTransform(resample)
         dataset.addTransform(translate)
 
     def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
@@ -373,10 +378,10 @@ class ClassifierFactory:
         radiusScale = ScaleDatasetTransform(scale=[abs(radiusX), abs(radiusY)])
         startPointTranslate = TranslateTransform(t=startPoint)
         scale = ScaleDatasetTransform(scale=[self.scale, self.scale])  # adjust the size
-        #resample = ResampleInSpaceTransform(samples=samples)  # resampling
+        resample = ResampleInSpaceTransform(samples=samples)  # resampling
         #resample = ResampleTransform(delta=5)
         # adding transforms to dataset
-        dataset.addTransform(kalman)
+        #dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
@@ -385,7 +390,7 @@ class ClassifierFactory:
         dataset.addTransform(radiusScale)
         dataset.addTransform(startPointTranslate)
         dataset.addTransform(scale)
-        #dataset.addTransform(resample)
+        dataset.addTransform(resample)
     def transformOnline(self, dataset):
         # applying transforms for fitting
         parse = ParseSamples()

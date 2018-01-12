@@ -1,7 +1,6 @@
 from dataset import *
-from gesture.datasetExpressions import Parse
 from test import *
-
+from gesture.modellingExpression import ModelExpression
 
 
 # Main
@@ -12,7 +11,7 @@ baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 n_states = 6 # Numero stati
 n_samples = 20
 iterations = 10 # k-fold cross-validation
-mode = 1
+mode = 0
 
 trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
 arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
@@ -29,12 +28,31 @@ if mode in [-1, 0, 1]:
         type = 'unica-'
     # 1Dollar
     elif mode == 0:
-        folders = [ 'triangle', 'x', 'rectangle', 'circle', 'check', 'caret', 'question_mark', 'arrow',
-                    'left_sq_bracket', 'right_sq_bracket', 'v', 'delete_mark', 'left_curly_brace', 'right_curly_brace',
-                    'star', 'pigtail']
-
-        gestureDir = baseDir + 'deictic/1dollar-dataset/resampled/'
-        type = 'unistroke-'
+        base_dir = 'deictic/1dollar-dataset/resampled/'
+        # get the gesture expressions which describe 1$ multistroke dataset
+        gesture_hmms = ModelExpression.generatedModels(expressions=DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar),
+                                                              num_states=n_states,
+                                                              spu=n_samples)
+        # get gesture datasets
+        gesture_dataset = {
+            'arrow': [CsvDataset(Config.baseDir +base_dir+ "arrow/")],
+            'caret': [CsvDataset(Config.baseDir +base_dir+ "caret/")],
+            'check': [CsvDataset(Config.baseDir +base_dir+ "check/")],
+            'circle': [CsvDataset(Config.baseDir +base_dir+ "circle/")],
+            'delete_mark': [CsvDataset(Config.baseDir +base_dir+ "delete_mark/")],
+            'left_curly_brace': [CsvDataset(Config.baseDir +base_dir+ "left_curly_brace/")],
+            'left_sq_bracket': [CsvDataset(Config.baseDir +base_dir+ "left_sq_bracket/")],
+            'pigtail': [CsvDataset(Config.baseDir +base_dir+ "pigtail/")],
+            'question_mark': [CsvDataset(Config.baseDir +base_dir+ "question_mark/")],
+            'rectangle': [CsvDataset(Config.baseDir +base_dir+ "rectangle/")],
+            'right_curly_brace': [CsvDataset(Config.baseDir +base_dir+ "right_curly_brace/")],
+            'right_sq_bracket': [CsvDataset(Config.baseDir + base_dir + "right_sq_bracket/")],
+            'star': [CsvDataset(Config.baseDir +base_dir+ "star/")],
+            'triangle': [CsvDataset(Config.baseDir +base_dir+ "triangle/")],
+            'v': [CsvDataset(Config.baseDir +base_dir+ "v/")],
+            'x': [CsvDataset(Config.baseDir +base_dir+ "x/")],
+        }
+        #gesture_dataset['circle'][0].plot(singleMode=True, compared_model=gesture_hmms['circle'][0])
     # MDollar
     else:
         folders = ['D', 'H', 'I', 'N', 'P', 'T', 'X', 'arrowhead',
@@ -43,15 +61,14 @@ if mode in [-1, 0, 1]:
         gestureDir = baseDir + 'deictic/mdollar-dataset/resampled/'
         type = 'multistroke-'
 
-    hmms = []
-    parse = Parse(n_states, n_samples)
-    for folder in folders:
-        str = type+folder
-        model = parse.parseExpression(str)
-        hmms.append(model)
 
-    t = test(hmms, folders, gestureDir, plot_result=False, file_path_results="/home/ale/")
-    results = t.all_files()
+    # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    results = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms,
+                                                       gesture_datasets=gesture_dataset)
+    # show result through confusion matrix
+    results.plot()
+    # save result on csv file
+    results.save(path=None)
 
 ############################################################ DEICTIC Synthetic HMM ###########################################################
 if mode in [2,3]:

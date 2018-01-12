@@ -89,7 +89,7 @@ def fourthExample():
     # get the gesture expressions which describe 1$ unistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
     # create hmms
-    gesture_hmms = ModelExpression.createHmm(expressions=gesture_expressions)
+    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
     # get sequence test (by using the first model of circle for generating a sample)
     sequence_test = gesture_hmms['circle'][0].sample()
     # compare hmms and show the computed log probabilities for each gesture
