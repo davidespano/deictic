@@ -116,7 +116,7 @@ base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset
 #parse_datasets(directories=['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x'])
 #plot_debug(directories=['v'], files=['1_medium_v_02.csv'])
 #  mode
-debug = 7
+debug = 3
 
 if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
@@ -224,8 +224,8 @@ if debug == 2:
 if debug == 3:
     # models
     ideal_sequences = {
-        'arrow'                     : ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O'],
-        'caret'                     : ['O', 'A1', 'O', 'A7', 'O'],
+        'arrow'                     : [['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],['O','A1','O','A5','O','A1','O'],['O','A1','O','A4','O','A0','O','A6','O'],['O','A1','O','A5','O','A1','O','A7','O'],['O','A1','O','A4','O','A0','O','A5','O']],
+        'caret'                     : ['O', 'A2', 'O', 'A7', 'O'],
         'delete_mark'               : ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
         'left_sq_bracket'           : ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
         'rectangle'                 : ['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],
@@ -237,12 +237,13 @@ if debug == 3:
     }
     models = []
     for key,value in ideal_sequences.items():
-        models.append(ModelFactory.sequenceAlignment(name=key, ideal_sequence=value))
+        for item in value:
+            models.append(ModelFactory.sequenceAlignment(name=key, ideal_sequence=item))
 
     # test
     directories = [m.name for m in models]
     # debug #
-    #directories = ['v']
+    directories = ['arrow']
     # debug #
 
     result = Result(ideal_sequences)
@@ -257,17 +258,17 @@ if debug == 3:
 
             if column_label != directory:
                 print("\n\nGesture recognized:{} ---- file:{}".format(column_label, sequence[1]))
-                if column_label != directory:
-                    for m in models:
-                            logp, path = m.viterbi(sequence[0])
-                            logp = (m.log_probability(sequence[0])/len(sequence[0]))
-                            x, y = path_to_alignment(''.join(ideal_sequences[m.name]), ''.join(sequence[0]), path)
-
-                            print("Gesture:'{}' -- Described Sequence: {} -- Log_Probability: {}".format(''.join(m.name), ideal_sequences[m.name], logp))
-                            print("--------Sequence            {}".format(sequence[0]))
-                            print("--------Path:               {}".format([state.name for idx, state in path[1:-1]]))
-                            print(x)
-                            print(y)
+                # if column_label != directory:
+                #     for m in models:
+                #             logp, path = m.viterbi(sequence[0])
+                #             logp = (m.log_probability(sequence[0])/len(sequence[0]))
+                #             x, y = path_to_alignment(''.join(ideal_sequences[m.name]), ''.join(sequence[0]), path)
+                #
+                #             print("Gesture:'{}' -- Described Sequence: {} -- Log_Probability: {}".format(''.join(m.name), ideal_sequences[m.name], logp))
+                #             print("--------Sequence            {}".format(sequence[0]))
+                #             print("--------Path:               {}".format([state.name for idx, state in path[1:-1]]))
+                #             print(x)
+                #             print(y)
     result.plot()
 
 
@@ -624,17 +625,28 @@ if debug == 6:
 
 ######################## Debug
 if debug == 7:
+    ideal_sequences = {
+        'arrow':[['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],['O','A1','O','A5','O','A1','O'],['O','A1','O','A4','O','A0','O','A6','O'],['O','A1','O','A5','O','A1','O','A7','O'],['O','A1','O','A4','O','A0','O','A5','O']],
+        'caret': ['O', 'A2', 'O', 'A7', 'O'],
+        'delete_mark': ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
+        'left_sq_bracket': ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
+        'rectangle': ['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],
+        'right_sq_bracket': ['O', 'A0', 'O', 'A6', 'O', 'A4', 'O'],
+        'star': ['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O'],
+        'triangle': ['O', 'A5', 'O', 'A0', 'O', 'A3', 'O'],
+        'v': ['O', 'A7', 'O', 'A2', 'O'],
+        'x': ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
+    }
 
-    directories = ['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x']
+    directories = ['arrow']#, 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x']
 
     for directory in directories:
         # original kalman + resampled + parsing
         dataset = transforms_set(directory, parsing=True)
 
         # apply transforms and create dict
-        parsed_sequences = [sequence[0] for sequence in dataset.applyTransforms()]
+        parsed_sequences = [''.join(sequence[0]) for sequence in dataset.applyTransforms()]
         print('Gesture:{}'.format(directory))
-        print(parsed_sequences)
         distinct_parsed_sequences = {item:parsed_sequences.count(item) for item in set(parsed_sequences)}
-        print (distinct_parsed_sequences)
+        print (sorted(distinct_parsed_sequences.items(), key=lambda x: x[1], reverse=True))
         print('\n')
