@@ -327,11 +327,9 @@ class Trajectory():
         return None
 
     def __removeNoise(self):
-
         for t in range(len(self.__labels)-1):
-            if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1] and self.__labels[t-1] in ['A0','A1','A2','A3','A4','A5','A6','A7']:
+            if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1] and self.__labels[t-1] in ['A0','A1','A2','A3','A4','A5','A6','A7', 'BCW', 'BCCW']:
                 self.__labels[t] = self.__labels[t-1]
-
 
     def __removeNoise2(self):
 
@@ -439,21 +437,26 @@ class Trajectory():
         :param beta:
         :return:
         """
-        descriptors = []
-        for index in indices:
-            descriptors.append(self.__descriptors[index])
+        #descriptors = []
+        #for index in indices:
+        #    descriptors.append(self.__descriptors[index])
         # Get min and max value from its points
-        min_value = min(descriptors)
-        max_value = max(descriptors)
+        #min_value = min(descriptors)
+        #max_value = max(descriptors)
         # comput interval values
-        interval_value = (max_value-min_value)/beta
-        interval_values = [min_value+(interval_value*x) for x in range(beta)]
+        #interval_value = (max_value-min_value)/beta
+        #interval_values = [min_value+(interval_value*x) for x in range(beta)]
+        # find direction clockwise or counter-clockwise
+        interval_direction = MathUtils.findWay(
+            [item for item in operator.itemgetter(indices[0]-1, indices[int(len(indices)/2)], indices[-1]+1)(self.__sequence)])
+        if interval_direction == 0:
+            interval_direction = 'CW'
+        else:
+            interval_direction = 'CCW'
         for index in indices:
             # assign interval
-            interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
-            # find direction clockwise or counter-clockwise
-            interval_direction = MathUtils.findWay([item for item in operator.itemgetter(index-1, index, index+1)(self.__sequence)])
-            self.__labels[index] = Trajectory.TypePrimitive.ARC.value +str(interval_index)+str(interval_direction) #chr(ord(self.__labels[index])+interval_index+17)
+            #interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
+            self.__labels[index] = Trajectory.TypePrimitive.ARC.value+str(interval_direction)
     def __quantizationIntervalsLine(self, indices=[]):
         """
 
