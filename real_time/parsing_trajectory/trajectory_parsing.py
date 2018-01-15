@@ -12,6 +12,8 @@ import operator
 import matplotlib.pyplot as plt
 # geometry
 from dataset.geometry import Geometry2D, Point2D
+# reduce
+from functools import reduce
 # find n-th occurrence
 from itertools import compress, count, islice
 from functools import partial
@@ -197,7 +199,7 @@ class Trajectory():
         self.algorithm3()
         self.findSubPrimitives(beta=4)
         self.__removeNoise()
-        #self.__removeShortPrimitives()
+        self.__removeShortPrimitives()
         #self.__removeNoise3()
 
         return self.__groupPrimitives()
@@ -307,24 +309,24 @@ class Trajectory():
 
     # private methods #
     def __removeShortPrimitives(self):
-
-        len_list = len(self.__labels)
-
-        t = 0
-        indices = []
-        while t < len_list:
-            if indices and (self.__labels[t] != self.__labels[indices[-1]]):
-                if len(indices) < 5:
-                    for index in range(len(indices)):
-                        del self.__labels[indices[0]]
-                        del self.__sequence[indices[0]]
-                        t -= 1
-                        len_list -= 1
-                indices.clear()
-            if self.__labels[t] in [self.TypePrimitive.ARC.value, self.TypePrimitive.LINE.value]:
-                indices.append(t)
-            t += 1
-        return None
+        # len_list = len(self.__labels)
+        # t = 0
+        # indices = []
+        # while t < len_list:
+        #     if indices and (self.__labels[t] != self.__labels[indices[-1]]):
+        #         if len(indices) < 5:
+        #             for index in range(len(indices)):
+        #                 del self.__labels[indices[0]]
+        #                 del self.__sequence[indices[0]]
+        #                 t -= 1
+        #                 len_list -= 1
+        #         indices.clear()
+        #     if self.__labels[t] in [self.TypePrimitive.ARC.value, self.TypePrimitive.LINE.value]:
+        #         indices.append(t)
+        #     t += 1
+        # return None
+        print(self.__labels)
+        print(self.__labels)
 
     def __removeNoise(self):
         for t in range(len(self.__labels)-1):

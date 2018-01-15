@@ -55,7 +55,7 @@ class ModelFactory():
         #      'A5': 0.00, 'A6': 0.00, 'A7': 0.00, 'O': 0.00}
         s_d = {'A0': 0.00, 'A1': 0.00, 'A2': 0.00, 'A3': 0.00, 'A4': 0.00,
                'A5': 0.00, 'A6': 0.00, 'A7': 0.00, 'O': 0.00,
-               'BCW':0.00, 'BCCW':0.09}
+               'BCW':0.00, 'BCCW':0.00}
 
         ### create states
         # Create the insert states
