@@ -342,6 +342,9 @@ class Test():
         :param model:
         :return:
         """
+        # Check parameters
+        # if not isinstance(model, HiddenMarkovModel):
+        #     raise TypeError
         # Compute sequence's log-probability and its normalized
         log_probability = model.log_probability(sequence)
         norm_log_probability = log_probability/len(sequence)

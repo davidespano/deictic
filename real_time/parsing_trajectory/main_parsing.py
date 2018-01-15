@@ -223,27 +223,48 @@ if debug == 2:
 
 if debug == 3:
     # models
+    # ideal_sequences = {
+    #     'arrow'                     : [['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],['O','A1','O','A5','O','A1','O'],['O','A1','O','A4','O','A0','O','A6','O'],['O','A1','O','A5','O','A1','O','A7','O'],
+    #                                    ['O','A1','O','A4','O','A0','O','A5','O']],
+    #     'caret'                     : [['O', 'A2', 'O', 'A7', 'O'],['O', 'A2', 'O', 'A6', 'O'],['O', 'A1', 'O', 'A7', 'O']],
+    #     'delete_mark'               : [['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],['O', 'A7', 'O', 'A5', 'O', 'A2', 'O'],['O', 'A7', 'O', 'A4', 'O', 'A2', 'O'],['O', 'A7', 'O', 'A5', 'O', 'A1', 'O'],['O', 'A0', 'O', 'A5', 'O', 'A1', 'O']],
+    #     'left_sq_bracket'           : [['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],['O', 'A5', 'O', 'A7', 'O', 'A1', 'O'],['O', 'A5', 'O', 'A6', 'O', 'A1', 'O'],['O', 'A4', 'O', 'A7', 'O', 'A1', 'O'],['O', 'A4', 'O', 'A6', 'O', 'A1', 'O'],
+    #                                    ['O', 'A5', 'O', 'A6', 'O', 'A0', 'O'],['O', 'A4', 'O', 'A7', 'O', 'A0', 'O']],
+    #     'rectangle'                 : [['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],['O', 'A7', 'O', 'A1', 'O', 'A3', 'O', 'A5', 'O'],['O', 'A6', 'O', 'A1', 'O', 'A3', 'O', 'A5', 'O'],['O', 'A6', 'O', 'A1', 'O', 'A2', 'O', 'A5', 'O'],
+    #                                    ['O', 'A7', 'O', 'A0', 'O', 'A3', 'O', 'A5', 'O'],['O', 'A7', 'O', 'A1', 'O', 'A3', 'O', 'A4', 'O'],['O', 'A7', 'O', 'A0', 'O', 'A2', 'O', 'A5', 'O'],['O', 'A7', 'O', 'A1', 'O', 'A2', 'O', 'A5', 'O'],
+    #                                    ['O', 'A6', 'O', 'A0', 'O', 'A3', 'O', 'A5', 'O'],['O', 'A7', 'O', 'A0', 'O', 'A3', 'O', 'A4', 'O']],
+    #     'right_sq_bracket'          : [['O', 'A0', 'O', 'A6', 'O', 'A4', 'O'],['O', 'A1', 'O', 'A6', 'O', 'A5', 'O'],['O', 'A1', 'O', 'A6', 'O', 'A4', 'O'],['O', 'A1', 'O', 'A7', 'O', 'A5', 'O'],
+    #                                    ['O', 'A0', 'O', 'A6', 'O', 'A5', 'O'],['O', 'A1', 'O', 'A7', 'O', 'A4', 'O'],['O', 'A0', 'O', 'A7', 'O', 'A5', 'O'],['O', 'A0', 'O', 'A7', 'O', 'A4', 'O']],
+    #     'star'                      : [['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O'],['O', 'A2', 'O', 'A7', 'O', 'A4', 'O', 'A1', 'O', 'A5', 'O'],
+    #                                    ['O', 'A2', 'O', 'A7', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O'],['O', 'A2', 'O', 'A7', 'O', 'A3', 'O', 'A1', 'O', 'A5', 'O'],
+    #                                    ['O', 'A2', 'O', 'A7', 'O', 'A4', 'O', 'A1', 'O', 'A6', 'O'],['O', 'A2', 'O', 'A6', 'O', 'A4', 'O', 'A1', 'O', 'A5', 'O']],
+    #     'triangle'                  : [['O', 'A5', 'O', 'A0', 'O', 'A3', 'O'],['O', 'A6', 'O', 'A1', 'O', 'A3', 'O'],['O', 'A6', 'O', 'A0', 'O', 'A3', 'O'],['O', 'A5', 'O', 'A1', 'O', 'A3', 'O'],
+    #                                    ['O', 'A6', 'O', 'A1', 'O', 'A4', 'O'],['O', 'A5', 'O', 'A1', 'O', 'A4', 'O']],
+    #     'v'                         : [['O', 'A7', 'O', 'A2', 'O'],['O', 'A7', 'O', 'A1', 'O'],['O', 'A6', 'O', 'A1', 'O']],
+    #     'x'                         : [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O'],['O', 'A7', 'O', 'A2', 'O', 'A6', 'O'],['O', 'A7', 'O', 'A3', 'O', 'A6', 'O'],['O', 'A0', 'O', 'A3', 'O', 'A6', 'O'],
+    #                                    ['O', 'A0', 'O', 'A2', 'O', 'A6', 'O']]
+    # }
     ideal_sequences = {
-        'arrow'                     : [['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],['O','A1','O','A5','O','A1','O'],['O','A1','O','A4','O','A0','O','A6','O'],['O','A1','O','A5','O','A1','O','A7','O'],['O','A1','O','A4','O','A0','O','A5','O']],
-        'caret'                     : ['O', 'A2', 'O', 'A7', 'O'],
-        'delete_mark'               : ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
-        'left_sq_bracket'           : ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
-        'rectangle'                 : ['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],
-        'right_sq_bracket'          : ['O', 'A0', 'O', 'A6', 'O', 'A4', 'O'],
-        'star'                      : ['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O'],
-        'triangle'                  : ['O', 'A5', 'O', 'A0', 'O', 'A3', 'O'],
-        'v'                         : ['O', 'A7', 'O', 'A2', 'O'],
-        'x'                         : ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
+        'arrow': [['O', 'A1', 'O', 'A5', 'O', 'A0', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A6', 'O'],
+                  ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O']],
+        'caret': [['O', 'A2', 'O', 'A7', 'O'], ['O', 'A1', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A7', 'O'],
+                  ['O', 'A2', 'O', 'A6', 'O']],
+        'delete_mark': [['O', 'A7', 'O', 'A4', 'O', 'A1', 'O']],
+        'left_sq_bracket': [['O', 'A4', 'O', 'A6', 'O', 'A0', 'O']],
+        'rectangle': [['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O']],
+        'right_sq_bracket': [['O', 'A0', 'O', 'A6', 'O', 'A4', 'O']],
+        'star': [['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O']],
+        'triangle': [['O', 'A5', 'O', 'A0', 'O', 'A3', 'O']],
+        'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],
+              ['O', 'A6', 'O', 'A2', 'O']],
+        'x': [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']]
     }
-    models = []
-    for key,value in ideal_sequences.items():
-        for item in value:
-            models.append(ModelFactory.sequenceAlignment(name=key, ideal_sequence=item))
+    models = {key:[ModelFactory.sequenceAlignment(name=key, ideal_sequence=item) for item in values] for key,values in ideal_sequences.items()}
 
     # test
-    directories = [m.name for m in models]
+    directories = [m for m in ideal_sequences]
     # debug #
-    directories = ['arrow']
+    #directories = ['arrow']
     # debug #
 
     result = Result(ideal_sequences)
@@ -256,8 +277,8 @@ if debug == 3:
             column_label = Test.compare(sequence=sequence[0], gesture_hmms=models)
             result.update(row_label=directory, column_label=column_label)
 
-            if column_label != directory:
-                print("\n\nGesture recognized:{} ---- file:{}".format(column_label, sequence[1]))
+            # if column_label != directory:
+            #     print("\n\nGesture recognized:{} ---- file:{}".format(column_label, sequence[1]))
                 # if column_label != directory:
                 #     for m in models:
                 #             logp, path = m.viterbi(sequence[0])
@@ -626,7 +647,7 @@ if debug == 6:
 ######################## Debug
 if debug == 7:
     ideal_sequences = {
-        'arrow':[['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],['O','A1','O','A5','O','A1','O'],['O','A1','O','A4','O','A0','O','A6','O'],['O','A1','O','A5','O','A1','O','A7','O'],['O','A1','O','A4','O','A0','O','A5','O']],
+        'arrow':['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],
         'caret': ['O', 'A2', 'O', 'A7', 'O'],
         'delete_mark': ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
         'left_sq_bracket': ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
@@ -638,7 +659,7 @@ if debug == 7:
         'x': ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
     }
 
-    directories = ['arrow']#, 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x']
+    directories = ['x']
 
     for directory in directories:
         # original kalman + resampled + parsing
