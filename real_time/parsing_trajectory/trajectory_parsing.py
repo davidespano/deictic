@@ -156,10 +156,10 @@ class MathUtils():
 
 class StateMachineParser(Machine):
 
-    def __init__(self, txt=""):
+    def __init__(self, sequence=[]):
         # check parameters
-        if not isinstance(txt, str):
-            raise TypeError
+        if not isinstance(sequence, list):
+            sequence = list(sequence)
         # states machine
         states = [
             State(name='start'),
@@ -178,19 +178,19 @@ class StateMachineParser(Machine):
         ]
         self.machine = Machine.__init__(self, states=states, transitions=transitions, initial='start')
         # parameters
-        self.txt = list(txt)
-        self.seq = ""
+        self.txt = sequence
+        self.seq = []
 
     def flow_sequence(self):
         if self.txt and StateMachineParser.fun(self.txt[0]):# find b
             self.find_b()
         elif self.txt:# not find b
-            self.seq=self.seq+self.txt.pop(0)
+            self.seq.append(self.txt.pop(0))
             self.not_b()
     def check_b(self):
-        tmp = ""
+        tmp = []
         if self.txt and StateMachineParser.fun(self.txt[0]):
-            tmp.join(self.txt.pop(0))
+            tmp.append(self.txt.pop(0))
             self.check_b()
         else:
             self.write_b(tmp)
@@ -368,7 +368,7 @@ class Trajectory():
     # private methods #
     def __removeShortPrimitives(self):
         # define a state machine for deleting short primitive sequences
-        st_m = StateMachineParser(txt=''.join(self.__labels))
+        st_m = StateMachineParser(sequence=self.__labels)
         st_m.run()
         self.__labels = st_m.seq
 
