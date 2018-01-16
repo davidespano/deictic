@@ -80,26 +80,54 @@ def neg_state(txt):
     return ("neg_state", "")
 
 
-def check(txt):
-    if 'B' in txt:
-        newState = "Seq"
+def start(txt, fun):
+    return ("first", txt, "", fun)
 
+def pair(txt, seq, fun):
+    if txt:
+        item = txt.pop()
+        if fun(item):
+            txt.join(item)
+            return ("buffer", txt, seq, fun)
+        else:
+            seq.join(item)
+    return ("end", seq)
+
+def second(txt, seq, fun):
+    temp = ""
+    while txt:
+        item = txt.pop()
+        if fun(item):
+            temp.join(item)
+            if len(temp) > 3:
+                seq.join(temp)
+        else:
+            return ("first", txt, seq, fun)
+    return ("end", seq)
+
+def f(a):
+    if a == 'B':
+        return True
+    else:
+        return False
 
 try_m = StateMachine()
-try_m.add_state("Start", check)
-try_m.add_state("Middle", check)
-try_m.add_state("End", check)
-try_m.set_start("Start")
+try_m.add_state("start", start)
+try_m.add_state("first", first)
+try_m.add_state("second", second)
+try_m.add_state("end", None, end_state=1)
+try_m.set_start("start")
+try_m.run(("AAABBBAA0B", f))
 
-m = StateMachine()
-m.add_state("Start", start_transitions)
-m.add_state("Python_state", python_state_transitions)
-m.add_state("is_state", is_state_transitions)
-m.add_state("not_state", not_state_transitions)
-m.add_state("neg_state", None, end_state=1)
-m.add_state("pos_state", None, end_state=1)
-m.add_state("error_state", None, end_state=1)
-m.set_start("Start")
-m.run("Python is great")
-m.run("Python is difficult")
-m.run("Perl is ugly")
+# m = StateMachine()
+# m.add_state("Start", start_transitions)
+# m.add_state("Python_state", python_state_transitions)
+# m.add_state("is_state", is_state_transitions)
+# m.add_state("not_state", not_state_transitions)
+# m.add_state("neg_state", None, end_state=1)
+# m.add_state("pos_state", None, end_state=1)
+# m.add_state("error_state", None, end_state=1)
+# m.set_start("Start")
+# m.run("Python is great")
+# m.run("Python is difficult")
+# m.run("Perl is ugly")
