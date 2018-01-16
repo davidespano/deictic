@@ -79,6 +79,18 @@ def neg_state(txt):
     print("Hallo")
     return ("neg_state", "")
 
+
+def check(txt):
+    if 'B' in txt:
+        newState = "Seq"
+
+
+try_m = StateMachine()
+try_m.add_state("Start", check)
+try_m.add_state("Middle", check)
+try_m.add_state("End", check)
+try_m.set_start("Start")
+
 m = StateMachine()
 m.add_state("Start", start_transitions)
 m.add_state("Python_state", python_state_transitions)
