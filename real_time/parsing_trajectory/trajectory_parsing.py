@@ -12,8 +12,9 @@ import operator
 import matplotlib.pyplot as plt
 # geometry
 from dataset.geometry import Geometry2D, Point2D
-# reduce
-from functools import reduce
+# state machine
+from transitions import Machine, State
+
 # find n-th occurrence
 from itertools import compress, count, islice
 from functools import partial
@@ -153,6 +154,63 @@ class MathUtils():
         return point
 
 
+class StateMachineParser(Machine):
+
+    def __init__(self, txt=""):
+        # check parameters
+        if not isinstance(txt, str):
+            raise TypeError
+        # states machine
+        states = [
+            State(name='start'),
+            State(name='pair',      on_enter="flow_sequence"),
+            State(name='buffer',    on_enter="check_b"),
+            State(name='write',     on_enter="fun_write"),
+        ]
+        transitions = [
+            {'trigger': 'run',      'source':'start',   'dest': 'pair'},
+            {'trigger': 'not_b',    'source':'pair',    'dest': 'pair'},
+            {'trigger': 'find_b',   'source':'pair',    'dest': 'buffer'},
+            {'trigger': 'not_b',    'source':'buffer',  'dest': 'pair'},
+            {'trigger': 'find_b',   'source':'buffer',  'dest': 'buffer'},
+            {'trigger': 'write_b',    'source':'buffer',  'dest': 'write'},
+            {'trigger': 'not_b',    'source':'write',   'dest': 'pair'}
+        ]
+        self.machine = Machine.__init__(self, states=states, transitions=transitions, initial='start')
+        # parameters
+        self.txt = list(txt)
+        self.seq = ""
+
+    def flow_sequence(self):
+        if self.txt and StateMachineParser.fun(self.txt[0]):# find b
+            self.find_b()
+        elif self.txt:# not find b
+            self.seq=self.seq+self.txt.pop(0)
+            self.not_b()
+    def check_b(self):
+        tmp = ""
+        if self.txt and StateMachineParser.fun(self.txt[0]):
+            tmp.join(self.txt.pop(0))
+            self.check_b()
+        else:
+            self.write_b(tmp)
+    def fun_write(self, tmp):
+        if StateMachineParser.fun2(len(tmp)):
+            for item in tmp: self.seq.join(item)
+        self.not_b()
+
+    # static methods
+    @staticmethod
+    def fun(item):
+        if item == 'B':
+            return True
+        return False
+    @staticmethod
+    def fun2(item):
+        if item >= 3:
+            return True
+        return False
+
 
 
 
@@ -197,10 +255,10 @@ class Trajectory():
         self.algorithm1(threshold_a)
         self.algorithm2(threshold_b)
         self.algorithm3()
+
         self.findSubPrimitives(beta=4)
         self.__removeNoise()
         self.__removeShortPrimitives()
-        #self.__removeNoise3()
 
         return self.__groupPrimitives()
 
@@ -309,73 +367,15 @@ class Trajectory():
 
     # private methods #
     def __removeShortPrimitives(self):
-        # len_list = len(self.__labels)
-        # t = 0
-        # indices = []
-        # while t < len_list:
-        #     if indices and (self.__labels[t] != self.__labels[indices[-1]]):
-        #         if len(indices) < 5:
-        #             for index in range(len(indices)):
-        #                 del self.__labels[indices[0]]
-        #                 del self.__sequence[indices[0]]
-        #                 t -= 1
-        #                 len_list -= 1
-        #         indices.clear()
-        #     if self.__labels[t] in [self.TypePrimitive.ARC.value, self.TypePrimitive.LINE.value]:
-        #         indices.append(t)
-        #     t += 1
-        # return None
-        print(self.__labels)
-        print(self.__labels)
+        # define a state machine for deleting short primitive sequences
+        st_m = StateMachineParser(txt=''.join(self.__labels))
+        st_m.run()
+        self.__labels = st_m.seq
 
     def __removeNoise(self):
         for t in range(len(self.__labels)-1):
             if self.__labels[t] == self.TypePrimitive.BOUNDARY.value and self.__labels[t-1] == self.__labels[t+1] and self.__labels[t-1] in ['A0','A1','A2','A3','A4','A5','A6','A7', 'BCW', 'BCCW']:
                 self.__labels[t] = self.__labels[t-1]
-
-    def __removeNoise2(self):
-
-        delta = 4
-        len_list = len(self.__labels)-delta
-        t = 0
-
-        print(self.__labels)
-
-        while t < len_list:
-            indices = [index for index in range(t, delta+t)]
-            checking_items = [self.__labels[index] for index in indices]
-            if len(list(filter(lambda x: x is self.TypePrimitive.BOUNDARY.value, checking_items))) > 1:
-                for index in indices:
-                    del self.__labels[index]
-                    del self.__sequence[index]
-                self.__labels[t] = self.TypePrimitive.BOUNDARY.value
-                len_list -= len(indices)
-                self.__indices.clear()
-            else:
-                t += 1
-
-        print(self.__labels)
-        print("\n")
-
-    def __removeNoise3(self):
-        delta = 5
-        t = 0
-        rec = True
-        while rec:
-            first_ = self.__nthItem(t, self.__labels)
-            second_ = self.__nthItem(t+1, self.__labels)
-            if second_ != None and (second_-first_< delta):
-                for index in range(first_, second_):
-                    del self.__labels[first_+1]
-                    del self.__sequence[first_+1]
-            else:
-                t+=1
-            if second_ == None:
-                rec = False
-        return self.__labels
-    def __nthItem(self, n, list, item = TypePrimitive.BOUNDARY.value):
-        indicies = compress(count(), map(partial(eq, item), list))
-        return next(islice(indicies, n, None), None)
 
     def __descriptorTrajectory(self):
         """
