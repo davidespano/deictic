@@ -116,7 +116,7 @@ base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset
 #parse_datasets(directories=['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x'])
 #plot_debug(directories=['v'], files=['1_medium_v_02.csv'])
 #  mode
-debug = 3
+debug = 7
 
 if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
@@ -248,7 +248,7 @@ if debug == 3:
         'arrow': [['O', 'A1', 'O', 'A5', 'O', 'A0', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A6', 'O'],
                   ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O']],
         'caret': [['O', 'A2', 'O', 'A7', 'O'], ['O', 'A1', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A7', 'O'],
-                  ['O', 'A2', 'O', 'A6', 'O']],
+                   ['O', 'A2', 'O', 'A6', 'O']],
         'delete_mark': [['O', 'A7', 'O', 'A4', 'O', 'A1', 'O']],
         'left_sq_bracket': [['O', 'A4', 'O', 'A6', 'O', 'A0', 'O']],
         'rectangle': [['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O']],
@@ -658,8 +658,9 @@ if debug == 7:
         'v': ['O', 'A7', 'O', 'A2', 'O'],
         'x': ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
     }
+    ideal_sequences_arc = {}
 
-    directories = ['x']
+    directories = ['circle','left_curly_brace','pigtail','question_mark','right_curly_brace']
 
     for directory in directories:
         # original kalman + resampled + parsing

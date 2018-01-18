@@ -168,13 +168,11 @@ class StateMachineParser(Machine):
             State(name='write',     on_enter="fun_write"),
         ]
         transitions = [
-            {'trigger': 'run',      'source':'start',   'dest': 'pair'},
-            {'trigger': 'not_b',    'source':'pair',    'dest': 'pair'},
-            {'trigger': 'find_b',   'source':'pair',    'dest': 'buffer'},
-            {'trigger': 'not_b',    'source':'buffer',  'dest': 'pair'},
-            {'trigger': 'find_b',   'source':'buffer',  'dest': 'buffer'},
-            {'trigger': 'write_b',    'source':'buffer',  'dest': 'write'},
-            {'trigger': 'not_b',    'source':'write',   'dest': 'pair'}
+            {'trigger': 'run',      'source':'start',       'dest': 'pair'},
+            {'trigger': 'not_b',    'source':'pair',        'dest': 'pair'},
+            {'trigger': 'find_b',   'source':'pair',        'dest': 'buffer'},
+            {'trigger': 'write_b',  'source':'buffer',      'dest': 'write'},
+            {'trigger': 'not_b',    'source':'write',       'dest': 'pair'}
         ]
         self.machine = Machine.__init__(self, states=states, transitions=transitions, initial='start')
         # parameters
@@ -182,27 +180,26 @@ class StateMachineParser(Machine):
         self.seq = []
 
     def flow_sequence(self):
-        if self.txt and StateMachineParser.fun(self.txt[0]):# find b
-            self.find_b()
-        elif self.txt:# not find b
+        while self.txt and not StateMachineParser.fun(self.txt[0]):# find b
             self.seq.append(self.txt.pop(0))
-            self.not_b()
+        if self.txt:
+            self.find_b()
+        return self.seq
     def check_b(self):
         tmp = []
-        if self.txt and StateMachineParser.fun(self.txt[0]):
+        while self.txt and StateMachineParser.fun(self.txt[0]):
             tmp.append(self.txt.pop(0))
-            self.check_b()
         else:
             self.write_b(tmp)
     def fun_write(self, tmp):
         if StateMachineParser.fun2(len(tmp)):
-            for item in tmp: self.seq.join(item)
+            for item in tmp: self.seq.append(item)
         self.not_b()
 
     # static methods
     @staticmethod
     def fun(item):
-        if item == 'B':
+        if 'B' in item:
             return True
         return False
     @staticmethod
@@ -256,7 +253,7 @@ class Trajectory():
         self.algorithm2(threshold_b)
         self.algorithm3()
 
-        self.findSubPrimitives(beta=4)
+        self.findSubPrimitives()
         self.__removeNoise()
         self.__removeShortPrimitives()
 
@@ -345,7 +342,7 @@ class Trajectory():
         self.__labels[-1] = self.TypePrimitive.BOUNDARY.value
         return self.__labels
 
-    def findSubPrimitives(self, beta):
+    def findSubPrimitives(self, beta=4):
         """
             starting from the list of basic primitives, that function scans the all label in order to find the subprimitives
         :param beta:
@@ -368,9 +365,14 @@ class Trajectory():
     # private methods #
     def __removeShortPrimitives(self):
         # define a state machine for deleting short primitive sequences
+        #print(self.__labels)
         st_m = StateMachineParser(sequence=self.__labels)
+        # run it
         st_m.run()
+        # get his sequence
         self.__labels = st_m.seq
+        #print(self.__labels)
+        #print('\n\n\n\n')
 
     def __removeNoise(self):
         for t in range(len(self.__labels)-1):
@@ -623,13 +625,3 @@ class Parsing():
         file = open(path, 'w')
         for item in label_list:
             file.write(item+"\n")
-
-
-
-
-
-
-
-
-
-
