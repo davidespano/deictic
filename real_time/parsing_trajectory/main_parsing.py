@@ -114,7 +114,7 @@ def path_to_alignment(x, y, path):
 # base dir
 base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
 #parse_datasets(directories=['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x'])
-#plot_debug(directories=['v'], files=['1_medium_v_02.csv'])
+#plot_debug(directories=['left_curly_brace'], files=[])
 #  mode
 debug = 7
 
@@ -257,8 +257,16 @@ if debug == 3:
         'triangle': [['O', 'A5', 'O', 'A0', 'O', 'A3', 'O']],
         'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],
               ['O', 'A6', 'O', 'A2', 'O']],
-        'x': [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']]
+        'x': [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']],
     }
+    ideal_sequences={
+        'circle'            : [['O','A5','O','A7','O','A1','O','A2','O'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O']],
+        'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
+        'pigtail'           : [['O','A1','O','BCCW','O','A6','O']],
+        'question_mark'     : [['O','BCW','O','BCCW','O']],
+        'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
+    }
+
     models = {key:[ModelFactory.sequenceAlignment(name=key, ideal_sequence=item) for item in values] for key,values in ideal_sequences.items()}
 
     # test

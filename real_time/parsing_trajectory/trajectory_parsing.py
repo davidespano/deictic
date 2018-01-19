@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 # geometry
 from dataset.geometry import Geometry2D, Point2D
 # state machine
-from transitions import Machine, State
+from real_time.parsing_trajectory.state_machine import StateMachine
 
 # find n-th occurrence
 from itertools import compress, count, islice
@@ -154,56 +154,57 @@ class MathUtils():
         return point
 
 
-class StateMachineParser(Machine):
+class RemoveSequenceStateMachine(StateMachine):
 
-    def __init__(self, sequence=[]):
-        # check parameters
+    # public methods
+    def __init__(self, sequence):
+        # Check parameters
         if not isinstance(sequence, list):
             sequence = list(sequence)
-        # states machine
-        states = [
-            State(name='start'),
-            State(name='pair',      on_enter="flow_sequence"),
-            State(name='buffer',    on_enter="check_b"),
-            State(name='write',     on_enter="fun_write"),
-        ]
-        transitions = [
-            {'trigger': 'run',      'source':'start',       'dest': 'pair'},
-            {'trigger': 'not_b',    'source':'pair',        'dest': 'pair'},
-            {'trigger': 'find_b',   'source':'pair',        'dest': 'buffer'},
-            {'trigger': 'write_b',  'source':'buffer',      'dest': 'write'},
-            {'trigger': 'not_b',    'source':'write',       'dest': 'pair'}
-        ]
-        self.machine = Machine.__init__(self, states=states, transitions=transitions, initial='start')
-        # parameters
-        self.txt = sequence
-        self.seq = []
+        # initialize parameters
+        self.__sequence = sequence
+        self.__new_seq = []
+        # create state machine
+        super().__init__()
+        self.add_state("pair", self.__flowSequence)
+        self.add_state("buffer", self.__buffer)
+        self.add_state("write", self.__write)
+        self.add_state("end", None, end_state=1)
+        self.set_start("pair")
+        # start machine
+        super().run(sequence)
 
-    def flow_sequence(self):
-        while self.txt and not StateMachineParser.fun(self.txt[0]):# find b
-            self.seq.append(self.txt.pop(0))
-        if self.txt:
-            self.find_b()
-        return self.seq
-    def check_b(self):
-        tmp = []
-        while self.txt and StateMachineParser.fun(self.txt[0]):
-            tmp.append(self.txt.pop(0))
-        else:
-            self.write_b(tmp)
-    def fun_write(self, tmp):
-        if StateMachineParser.fun2(len(tmp)):
-            for item in tmp: self.seq.append(item)
-        self.not_b()
+    def get(self):
+        return  self.__new_seq
 
-    # static methods
-    @staticmethod
-    def fun(item):
+    # private methods
+    def __flowSequence(self, cargo):
+        if self.__sequence:
+            if not self.fun1(self.__sequence[0]):
+                # not find item
+                self.__new_seq.append(self.__sequence.pop(0))
+                return ("pair", "")
+            else:
+                return ("buffer", [self.__sequence.pop(0)])
+        return ("end", self.__new_seq)
+
+    def __buffer(self, tmp=[]):
+        if self.__sequence and self.fun1(self.__sequence[0]):
+            tmp.append(self.__sequence.pop(0))
+            return ("buffer", tmp)
+        return ("write", tmp)
+
+    def __write(self, tmp=[]):
+        if self.fun2(len(tmp)):
+            for item in tmp: self.__new_seq.append(item)
+        return("pair", "")
+
+    # user methods
+    def fun1(self, item):
         if 'B' in item:
             return True
         return False
-    @staticmethod
-    def fun2(item):
+    def fun2(self, item):
         if item >= 3:
             return True
         return False
@@ -251,11 +252,11 @@ class Trajectory():
 
         self.algorithm1(threshold_a)
         self.algorithm2(threshold_b)
-        self.algorithm3()
+        #self.algorithm3()
 
         self.findSubPrimitives()
         self.__removeNoise()
-        self.__removeShortPrimitives()
+        #self.__removeShortPrimitives()
 
         return self.__groupPrimitives()
 
@@ -366,11 +367,7 @@ class Trajectory():
     def __removeShortPrimitives(self):
         # define a state machine for deleting short primitive sequences
         #print(self.__labels)
-        st_m = StateMachineParser(sequence=self.__labels)
-        # run it
-        st_m.run()
-        # get his sequence
-        self.__labels = st_m.seq
+        self.__labels = (RemoveSequenceStateMachine(self.__labels)).get()
         #print(self.__labels)
         #print('\n\n\n\n')
 
@@ -450,15 +447,16 @@ class Trajectory():
         # comput interval values
         #interval_value = (max_value-min_value)/beta
         #interval_values = [min_value+(interval_value*x) for x in range(beta)]
-        # find direction clockwise or counter-clockwise
-        interval_direction = MathUtils.findWay(
-            [item for item in operator.itemgetter(indices[0]-1, indices[int(len(indices)/2)], indices[-1]+1)(self.__sequence)])
-        if interval_direction == 0:
-            interval_direction = 'CW'
-        else:
-            interval_direction = 'CCW'
         for index in indices:
             # assign interval
+            # find direction clockwise or counter-clockwise
+            interval_direction = MathUtils.findWay(
+                [item for item in
+                 operator.itemgetter(index-1, index, index+1)(self.__sequence)])
+            if interval_direction == 0:
+                interval_direction = 'CW'
+            else:
+                interval_direction = 'CCW'
             #interval_index = MathUtils.findNearest(interval_values, self.__descriptors[index])
             self.__labels[index] = Trajectory.TypePrimitive.ARC.value+str(interval_direction)
     def __quantizationIntervalsLine(self, indices=[]):
@@ -488,8 +486,8 @@ class Trajectory():
 
     def __groupPrimitives(self):
         #list_ = filter(lambda x,y: y != self.TypePrimitive.NONE.value, self.__labels)
-        l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1]]
-        l.append(self.TypePrimitive.BOUNDARY.value)
+        l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index]!='O' and self.__labels[index]!='0']
+        l = ['O']+[y for x in l for y in [x, 'O']]
         return l
 
 
