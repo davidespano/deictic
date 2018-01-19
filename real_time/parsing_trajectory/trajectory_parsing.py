@@ -486,7 +486,7 @@ class Trajectory():
 
     def __groupPrimitives(self):
         #list_ = filter(lambda x,y: y != self.TypePrimitive.NONE.value, self.__labels)
-        l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index]!='O' and self.__labels[index]!='0']
+        l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index]!='0']
         l = ['O']+[y for x in l for y in [x, 'O']]
         return l
 

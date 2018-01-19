@@ -116,7 +116,7 @@ base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset
 #parse_datasets(directories=['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x'])
 #plot_debug(directories=['left_curly_brace'], files=[])
 #  mode
-debug = 7
+debug = 3
 
 if debug == 0:
     # get the gesture expressions which describe 1$ multistroke dataset
@@ -261,10 +261,10 @@ if debug == 3:
     }
     ideal_sequences={
         'circle'            : [['O','A5','O','A7','O','A1','O','A2','O'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O']],
-        'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
-        'pigtail'           : [['O','A1','O','BCCW','O','A6','O']],
-        'question_mark'     : [['O','BCW','O','BCCW','O']],
-        'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
+        'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O'], ['O','BCCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
+        'pigtail'           : [['O','A1','O','BCCW','O','A6','O'],['O','A1','O','BCCW','O']],
+        'question_mark'     : [['O','BCW','O','BCCW','O'],['O','BCW','O','BCW','O','BCCW','O']],
+        'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O'], ['O','BCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
     }
 
     models = {key:[ModelFactory.sequenceAlignment(name=key, ideal_sequence=item) for item in values] for key,values in ideal_sequences.items()}
