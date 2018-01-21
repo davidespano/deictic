@@ -1,4 +1,4 @@
-(function (Deictic, undefined) {
+(function (Utils, undefined) {
     var Event = function () {
 
         /**
@@ -38,7 +38,7 @@
             });
         };
     };
-    Deictic.Event = Event;
+    Utils.Event = Event;
 
     var StrokeInput = function (layer) {
         this.onStrokeBegin = new Event();
@@ -49,6 +49,8 @@
         this._buffer = [];
         this._recording = false;
         this._box = null;
+        this._debounce = 3;
+        this._count = 0;
 
         var _self = this;
         // attach the input source
@@ -58,45 +60,34 @@
             _self._buffer.splice(0, _self._buffer.length);
             var point = boxCoordinates(event);
             _self._buffer.push(boxCoordinates(event));
-            event.d = {
-                x: point.x,
-                y: point.y,
-                bX: event.target.attrs.x,
-                bY: event.target.attrs.y,
-                buffer: _self._buffer
-            }
+            event.d = createEvent(point);
             _self.onStrokeBegin.trigger(event);
         });
 
 
         this._layer.on('mousemove touchmove', function (event) {
             if (_self._recording === true) {
-                var point = boxCoordinates(event);
-                _self._buffer.push(boxCoordinates(event));
-                event.d = {
-                    x: point.x,
-                    y: point.y,
-                    bX: event.target.attrs.x,
-                    bY: event.target.attrs.y,
-                    buffer: _self._buffer
+                if (_self._count === _self._debounce) {
+                    _self._count = 0;
+                    var point = boxCoordinates(event);
+                    _self._buffer.push(boxCoordinates(event));
+                    event.d = createEvent(point);
+                    _self.onStrokeChange.trigger(event);
+                } else {
+                    _self._count++;
+                    return;
                 }
-                _self.onStrokeChange.trigger(event);
             }
         });
 
         this._layer.on('mouseup touchend', function (event) {
             _self._recording = false;
-            _self._box = null;
             var point = boxCoordinates(event);
             _self._buffer.push(boxCoordinates(event));
-            event.d = {
-                x: point.x,
-                y: point.y,
-                bX: event.target.attrs.x,
-                bY: event.target.attrs.y,
-                buffer: _self._buffer
-            }
+            event.d = createEvent(point);
             _self.onStrokeEnd.trigger(event);
+            _self._box = null;
+
         });
 
         var boxCoordinates = function (kevent) {
@@ -114,39 +105,129 @@
                     break;
 
             }
-            console.log('punto: ' + point.x + ', ' + point.y +
-                ' l: ' + _self._buffer.length +
-                ' k: ' + kevent.target.attrs.x + ', ' + kevent.target.attrs.y);
+            //console.log('punto: ' + point.x + ', ' + point.y +
+            //    ' l: ' + _self._buffer.length +
+            //    ' k: ' + kevent.target.attrs.x + ', ' + kevent.target.attrs.y);
             return new Point2D(point.x - _self._box.x, point.y - _self._box.y);
         };
 
+        var createEvent = function (point) {
+            return {
+                x: point.x,
+                y: point.y,
+                bX: _self._box.x,
+                bY: _self._box.y,
+                buffer: _self._buffer
+            };
+        }
+
 
     };
-    Deictic.StrokeInput = StrokeInput;
+    Utils.StrokeInput = StrokeInput;
 
     var Point2D = function (x, y) {
         this.x = x;
         this.y = y;
     };
-    Deictic.Point2D = Point2D;
+    Utils.Point2D = Point2D;
 
-    var LineFeedback = function (layer, line) {
-        this._line = line;
-        this._layer = layer;
-
+    var AngleFSM = function () {
         var _self = this;
 
-        this.clearLine = function () {
-            _self._line.points().splice(0, _self._line.points().length);
-            _self._layer.draw();
+
+        this.init = function (stateDesc, tollerance) {
+            _self.state = -1;
+            _self.error = 0;
+            _self.next = 0;
+            _self.states = stateDesc;
+            _self.tollerance = tollerance != null ? tollerance : 3;
         };
 
-        this.addPoint = function (x, y) {
-            _self._line.points().push(x, y);
-            _self._line.draw();
+        this.restart = function () {
+            _self.state = -1;
+            _self.error = 0;
+            _self.next = 0;
+        };
+
+        this.push = function (current, previous) {
+            var a = angle(current.x - previous.x, current.y - previous.y);
+            if (isNaN(a)) {
+                return;
+            }
+            switch (_self.state) {
+                case -1: // start
+                    _self.state++;
+                    _self.next = 0;
+                    _self.err = 0;
+                    break;
+                case -2: // not recognized
+                    break;
+                default:
+                    if (_self.checkAngle(a, _self.states[_self.state])) {
+                        _self.sampleOk();
+                    } else {
+                        if (_self.state + 1 < _self.states.length && _self.checkAngle(a, _self.states[_self.state + 1])
+                        ) {
+                            _self.sampleNext();
+                        } else {
+                            _self.sampleError();
+                        }
+                    }
+                    break;
+            }
+
+            if (_self.error > _self.tollerance) {
+                _self.state = -2;
+            }
+
+            if (_self.next > _self.tollerance) {
+                _self.state++;
+                _self.next = 0;
+                _self.error = 0;
+            }
+
+            //console.log('angle: ' + a + ' state: ' + _self.state);
+        };
+
+        this.sampleError = function () {
+            _self.error++;
+            _self.next = 0;
+        };
+
+        this.sampleOk = function () {
+            if (_self.error > 0) {
+                _self.error--;
+            }
+            _self.next = 0;
+        };
+
+        this.sampleNext = function () {
+            _self.next++;
+        };
+
+        this.checkAngle = function (angle, desc) {
+            if (desc.min < 0 && desc.max < 0) {
+                desc.min = desc.min + 360;
+                desc.max = desc.max + 360;
+            }
+
+            if (desc.min > 0 && desc.max > 0) {
+                return angle >= desc.min && angle <= desc.max;
+            }
+
+            return angle >= 0 && angle <= desc.max || angle >= desc.min && angle >= 360;
         };
     };
+    Utils.AngleFSM = AngleFSM;
 
-    Deictic.LineFeedback = LineFeedback;
+    var angle = function (ax, ay) {
+        var angle = Math.acos(ax / Math.sqrt(ax * ax + ay * ay));
+        if (ay > 0) {
+            angle = 2 * Math.PI - angle;
+        }
+        return angle * 180 / Math.PI;
+    };
+    Utils.angle = angle;
 
-}(window.Deictic = window.Deictic || {}, undefined));
+
+}(window.Utils = window.Utils || {}, undefined));
