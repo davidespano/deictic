@@ -1,6 +1,6 @@
 var scene = new Grid.Scene();
 scene.init();
-var input = new Deictic.StrokeInput(scene.layer);
+var input = new Utils.StrokeInput(scene.layer);
 var feedback = new Grid.Octopocus();
 feedback.init(scene.layer);
 

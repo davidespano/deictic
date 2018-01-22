@@ -78,8 +78,11 @@
         this.setImage = function (point, source, w, h) {
             var r = _self.getRow(point);
             var c = _self.getColumn(point);
-            _self.state[r][c] = new Image();
-            _self.state[r][c].onload = function () {
+            if(_self.state[r][c] != null){
+                return;
+            }
+            var img = new Image();
+            img.onload = function () {
 
 
                 var x = (c + 0.5) * _self.BOX_SIZE - 0.5 * w;
@@ -88,16 +91,17 @@
                 var m = new Konva.Image({
                     x: x,
                     y: y,
-                    image: _self.state[r][c],
+                    image: img,
                     width: w,
                     height: h
                 });
 
                 // add the shape to the layer
+                _self.state[r][c] = m;
                 _self.imgLayer.add(m);
                 _self.imgLayer.draw();
             };
-            _self.state[r][c].src = source;
+            img.src = source;
         };
 
         this.clearCell = function (x, y){
@@ -108,6 +112,7 @@
             if(_self.state[r][c] != null){
                 _self.imgLayer.remove(_self.state[r][c]);
                 _self.imgLayer.draw();
+                _self.state[r][c] = null;
             }
         };
 
