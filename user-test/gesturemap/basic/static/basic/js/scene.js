@@ -41,6 +41,13 @@
                 }
             }
 
+            _self._monsterImg = new Image();
+            _self._monsterImg.src = '/static/basic/img/monster.png';
+
+            _self._treasureImg = new Image();
+            _self._treasureImg.src = '/static/basic/img/treasure.png';
+
+
             //this.fitStageIntoParentContainer();
         };
 
@@ -59,35 +66,43 @@
             _self.stage.draw();
         }
 
+
         this.setMonster = function (x, y) {
             return this.setImage(
                 new Utils.Point2D(x, y),
-                '/static/basic/img/monster.png',
+                _self._monsterImg,
                 106,
                 118);
         };
 
-        this.setTreasure = function (x, y){
+        this.setTreasure = function (x, y) {
             return this.setImage(
-             new Utils.Point2D(x, y),
-                '/static/basic/img/treasure.png',
+                new Utils.Point2D(x, y),
+                _self._treasureImg,
                 128,
                 128);
         };
 
-        this.setImage = function (point, source, w, h) {
+        this.setImage = function (point, img, w, h) {
             var r = _self.getRow(point);
             var c = _self.getColumn(point);
-            if(_self.state[r][c] != null){
-                return;
-            }
-            var img = new Image();
-            img.onload = function () {
+            var x = (c + 0.5) * _self.BOX_SIZE - 0.5 * w;
+            var y = (r + 0.5) * _self.BOX_SIZE - 0.5 * h;
 
+            if (_self.state[r][c] != null) {
+                _self.state[r][c].setAttrs(
+                    {
+                        x: x,
+                        y: y,
+                        image: img,
+                        width: w,
+                        height: h
+                    }
+                );
+                _self.state[r][c].show();
 
-                var x = (c + 0.5) * _self.BOX_SIZE - 0.5 * w;
-                var y = (r + 0.5) * _self.BOX_SIZE - 0.5 * h;
-
+            } else {
+                // init
                 var m = new Konva.Image({
                     x: x,
                     y: y,
@@ -99,20 +114,21 @@
                 // add the shape to the layer
                 _self.state[r][c] = m;
                 _self.imgLayer.add(m);
-                _self.imgLayer.draw();
-            };
-            img.src = source;
+            }
+
+            _self.imgLayer.draw();
+
+
         };
 
-        this.clearCell = function (x, y){
+        this.clearCell = function (x, y) {
             var point = new Utils.Point2D(x, y);
             var r = _self.getRow(point);
             var c = _self.getColumn(point);
 
-            if(_self.state[r][c] != null){
-                _self.imgLayer.remove(_self.state[r][c]);
+            if (_self.state[r][c] != null) {
+                _self.state[r][c].hide();
                 _self.imgLayer.draw();
-                _self.state[r][c] = null;
             }
         };
 
@@ -198,7 +214,7 @@
                     {x: _self.r, y: _self.r},
                     {x: _self.r, y: 0},
                     {x: 0, y: 0}
-                    ],
+                ],
                 parts: 4,
                 name: 'square'
             };
@@ -215,7 +231,7 @@
                     {x: _self.d, y: _self.d},
                     {x: 0, y: _self.d},
                     {x: _self.d, y: 0}
-                    ],
+                ],
                 parts: 3,
                 name: 'delete'
             };
@@ -246,7 +262,7 @@
 
         this.start = function (event) {
             // punto da cui far partire il feedforward
-             _self.p0 = {
+            _self.p0 = {
                 x: event.d.bX + event.d.x,
                 y: event.d.bY + event.d.y
             }
@@ -258,8 +274,6 @@
                     {name: 'square', part: 0, probability: 0.333},
                     {name: 'delete', part: 0, probability: 0.333}
                 ]);
-
-
 
 
         };
@@ -277,7 +291,7 @@
                     if (state.name === feedforward.name) {
                         feedforward.line.points().splice(0, feedforward.line.points().length);
                         feedforward.line.points().push(p.x, p.y)
-                        for(var i = 0; i < feedforward.parts - state.part; i++){
+                        for (var i = 0; i < feedforward.parts - state.part; i++) {
                             feedforward.line.points().push(
                                 _self.p0.x + feedforward.points[i].x,
                                 _self.p0.y + feedforward.points[i].y)
@@ -289,7 +303,7 @@
             }
 
             _self.feedback.points().push(p.x, p.y);
-             _self.layer.draw();
+            _self.layer.draw();
         };
 
 
