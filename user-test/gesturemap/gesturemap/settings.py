@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.1.115', 'localhost']
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 # Application definition
 

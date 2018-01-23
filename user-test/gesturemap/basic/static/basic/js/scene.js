@@ -291,7 +291,7 @@
                     if (state.name === feedforward.name) {
                         feedforward.line.points().splice(0, feedforward.line.points().length);
                         feedforward.line.points().push(p.x, p.y)
-                        for (var i = 0; i < feedforward.parts - state.part; i++) {
+                        for (var i = state.part; i < feedforward.parts; i++) {
                             feedforward.line.points().push(
                                 _self.p0.x + feedforward.points[i].x,
                                 _self.p0.y + feedforward.points[i].y)

@@ -229,5 +229,25 @@
     };
     Utils.angle = angle;
 
+    var Deictic = function(){
+        var _self = this;
+
+        this.init = function(gestures){
+            $.ajax({
+                type: 'POST',
+                url: "/basic/deictic_models",
+                asynch: false,
+                headers: {'X-CSRFToken': CSRF_TOKEN},
+                data: JSON.stringify(gestures),
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+            }).done(function(){
+                console.log('ok');
+            });
+        };
+    };
+
+    Utils.Deictic = Deictic;
+
 
 }(window.Utils = window.Utils || {}, undefined));
