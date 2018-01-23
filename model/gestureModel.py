@@ -12,6 +12,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.text import TextPath
 from matplotlib.transforms import Affine2D
+from shlex import shlex
 
 class TypeRecognizer(Enum):
     online = 0
@@ -118,8 +119,10 @@ class CompositeExp(GestureExp):
         self.parent = None
         self.left = left
         self.right = right
-        self.right.parent = self
-        self.left.parent = self
+        if self.right is not None:
+            self.right.parent = self
+        if self.left is not None:
+            self.left.parent = self
         self.op = op
 
     def __str__(self):
@@ -224,7 +227,7 @@ class Arc(GestureExp):
         self.cw = cw
 
     def __str__(self):
-        return "a({0},{1})".format(self.dx, self.dy)
+        return "a({0},{1},{2})".format(self.dx, self.dy, self.cw)
 
     def get_path(self, path, current):
         if self.cw:
@@ -252,6 +255,135 @@ class Arc(GestureExp):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
+
+
+class ParseEnum(Enum):
+    Error = -1
+    Exp = 0
+    Point = 1
+    Line = 2
+    Arc = 3
+    Arg1 = 4
+    Arg2 = 5
+    Arg3 = 6
+    EndExp = 7
+
+
+class StringParser:
+    def __init__(self):
+        self.state = ParseEnum.Exp
+
+    def fromString(self, string):
+        # TODO handle parenthesis in expressions
+        stack = []
+        parent = None
+        current = None
+        factor = 1
+        tokens = list(shlex(string))
+        for t in tokens:
+            # START EXP
+            if self.state == ParseEnum.Exp:
+                if t == 'P':
+                    current = Point(0, 0)
+                    self.state = ParseEnum.Point
+                elif t == 'L':
+                    current = Line(0, 0)
+                    self.state = ParseEnum.Line
+                elif t == 'A':
+                    current = Arc(0, 0, False)
+                    self.state = ParseEnum.Arc
+                elif (t == '+' or t == '*' or t == '|') and current is not None:
+                    composite = CompositeExp(current, None, self.__getOp(t))
+                    parent = composite
+                    current = None
+                    self.state = ParseEnum.Exp
+                else:
+                    self.state = ParseEnum.Error
+            elif self.state == ParseEnum.Point or self.state == ParseEnum.Line or self.state == ParseEnum.Arc:
+                if t == '(':
+                    self.state = ParseEnum.Arg1
+                else:
+                    self.state = ParseEnum.Error
+            # ARG 1
+            elif self.state == ParseEnum.Arg1:
+                if t == '-':
+                    factor = -1
+                elif t == ',':
+                    self.state = ParseEnum.Arg2
+                else:
+                    try:
+                        val = float(t)
+                        if isinstance(current, Point):
+                            current.x = val * factor
+                        else:
+                            current.dx = val * factor
+                        factor = 1;
+
+                    except ValueError:
+                        self.state = ParseEnum.Error
+            # ARG 2
+            elif self.state == ParseEnum.Arg2:
+                if t == '-':
+                    factor = -1
+                elif t == ',':
+                    self.state = ParseEnum.Arg3
+                else:
+                    try:
+                        val = float(t)
+                        if isinstance(current, Point):
+                            current.y = val * factor
+                        else:
+                            current.dy = val * factor
+                        factor = 1
+                        if not isinstance(current, Arc):
+                            self.state = ParseEnum.EndExp
+
+                    except ValueError:
+                        self.state = ParseEnum.Error
+            # ARG 3
+            elif self.state == ParseEnum.Arg3:
+                if t == 'false':
+                    current.cw = False
+                    self.state = ParseEnum.EndExp
+                elif t == 'true':
+                    current.cw = True
+                    self.state = ParseEnum.EndExp
+                else:
+                    self.state = ParseEnum.Error
+            # END EXP
+            elif self.state == ParseEnum.EndExp:
+                if t == ')':
+                    if parent is not None:
+                        parent.right = current
+                        current = parent
+                        parent = None
+                    self.state = ParseEnum.Exp
+                else:
+                    self.state = ParseEnum.Error
+
+            if self.state == ParseEnum.Error:
+                return None
+        return current
+
+    def __getOp(self, t):
+        if t == '+':
+            return OpEnum.Sequence
+        if t == '*':
+            return OpEnum.Parallel
+        if t == '|':
+            return OpEnum.Choice
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ################################### 3D ###################################
