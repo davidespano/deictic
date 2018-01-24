@@ -1,8 +1,8 @@
 var scene = new Grid.Scene();
 scene.init();
 var input = new Utils.StrokeInput(scene.layer);
-var feedback = new Grid.Octopocus();
-feedback.init(scene.layer);
+var lineFeedback = new Grid.LineFeedback();
+lineFeedback.init(scene.layer);
 
 //Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
 var deictic = new Utils.Deictic();
@@ -16,14 +16,19 @@ deictic.init([
 // ------------------ //
 input.onStrokeBegin.add(function (event) {
 
-
 });
 
 input.onStrokeChange.add(function (event) {
-
+    lineFeedback.addPoint(
+        event.d.x +
+        event.d.bX,
+        event.d.y +
+        event.d.bY);
 });
 
 input.onStrokeEnd.add(function (event) {
-
+    var result = deictic.eval(event.d.buffer);
+    console.log(result);
+    lineFeedback.clearLine();
 });
 

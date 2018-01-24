@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 import numpy as numpy
 import sys
@@ -29,31 +29,55 @@ def deictic_models(request):
 
         data = request.body
 
-        print('')
-        print(data)
-        print('')
-        models = json.loads(data)
-        print(models['triangle'])
-        print('')
+        modelDefinitions = json.loads(data)
 
         factory = ClassifierFactory(type=TypeRecognizer.offline)
         factory.setLineSamplesPath(trainingDir)
         factory.setClockwiseArcSamplesPath(arcClockWiseDir)
         factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-        factory.states = 16
+        factory.states = 6
         factory.spu = 20
 
-        #triangle = factory.createClassifier(triangleExpr);
-        #rectangle = factory.createClassifier(rectangleExpr);
+        models = {}
+        for model in modelDefinitions:
+            expr = parser.fromString(model['model'])
+            trained = factory.createClassifier(expr)
+            models[model['name']] = trained[0]
+        request.session['models'] = models
 
-        #request.session['models'] = {
-        #    'triangle' : 'triangle',
-        #    'rectangle': 'rectangle'
-        #}
-
-    #sample = request.session['models']['triangle'][0].sample();
+    #sample = request.session['models']['triangle'].sample()
 
     #print(sample)
-    #print(numpy.exp(request.session['models']['triangle'][0].log_probability(sample) / len(sample)))
-    #print(numpy.exp(request.session['models']['triangle'][0].log_probability(sample) / len(sample)))
-    return JsonResponse({'test': 'ok'})
+    #print(numpy.exp(request.session['models']['triangle'].log_probability(sample) / len(sample)))
+    #print(numpy.exp(request.session['models']['rectangle'].log_probability(sample) / len(sample)))
+    return JsonResponse({'result': 'ok'})
+
+
+def deictic_eval(request):
+
+    if 'models' in request.session:
+        models = request.session['models']
+        res = []
+        data = json.loads(request.body)
+        seq = []
+        for point in data:
+            seq.append([
+                point['x'] * 0.5 - 50,
+                point['y'] * 0.5 - 50
+            ])
+
+        #seq = models['triangle'].sample()
+        print(seq)
+        for key in models:
+            prob = models[key].log_probability(seq) / len(seq)
+            el = {}
+            res.append({
+                'name': key,
+                'prob': prob
+            })
+        return JsonResponse({'result': res})
+
+    else:
+        return HttpResponseBadRequest
+
+

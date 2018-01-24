@@ -233,17 +233,46 @@
         var _self = this;
 
         this.init = function(gestures){
+            var result = true;
+            console.log('Deictic: models init at server-side')
             $.ajax({
                 type: 'POST',
                 url: "/basic/deictic_models",
-                asynch: false,
+                async: false,
                 headers: {'X-CSRFToken': CSRF_TOKEN},
                 data: JSON.stringify(gestures),
                 dataType: 'json',
                 contentType: "application/json; charset=utf-8",
-            }).done(function(){
-                console.log('ok');
+                success: function(response){
+                    result = true;
+                    console.log('Deictic: models init ok!');
+                },
+                error: function(){
+                    result = false
+                }
+
             });
+        };
+
+        this.eval = function(sequence){
+            var result = false;
+            $.ajax({
+                type: 'POST',
+                url: '/basic/deictic_eval',
+                async: false,
+                headers: {'X-CSRFToken': CSRF_TOKEN},
+                data: JSON.stringify(sequence),
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function(response){
+                    result = response;
+                    console.log(result);
+                },
+                error: function(){
+                    result = false
+                }
+            });
+            return result;
         };
     };
 
