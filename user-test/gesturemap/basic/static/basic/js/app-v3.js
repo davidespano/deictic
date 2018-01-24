@@ -8,7 +8,8 @@ lineFeedback.init(scene.layer);
 var deictic = new Utils.Deictic();
 deictic.init([
     {name: 'triangle',  model: 'P(0,0) + L(-3,-4) + L(6,0)+ L(-3,4)'},
-    {name: 'rectangle', model: 'P(0,0) + L(0,-3) + L(4,0) + L(0, 3) + L(-4,0)'}
+    {name: 'rectangle', model: 'P(0,0) + L(0,-3) + L(3,0) + L(0, 3) + L(-3,0)'},
+    {name: 'delete', model: 'P(0, 0) + L(3, -3) + L(-3, 0) + L(3, 3)'}
 ]);
 
 

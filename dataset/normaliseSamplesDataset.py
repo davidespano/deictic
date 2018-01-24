@@ -81,6 +81,7 @@ class TranslateTransform(DatasetTransform):
             sequence[:, self.cols[i]] = sequence[:, self.cols[i]] + self.t[i]
         return sequence
 
+
 class NormaliseLengthTransform(DatasetTransform):
     def __init__(self, axisMode=True, cols=[0,1]):
         super(NormaliseLengthTransform, self).__init__()

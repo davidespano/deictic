@@ -113,6 +113,9 @@ class GestureExp:
         self.get_points(pointList)
         return numpy.array(pointList)
 
+    def clone(self):
+        return GestureExp()
+
 
 class CompositeExp(GestureExp):
     def __init__(self, left, right, op):
@@ -139,6 +142,17 @@ class CompositeExp(GestureExp):
             return "{0} {1} {2}".format(str(self.left), op, str(self.right))
         else:
             return "({0} {1} {2})".format(str(self.left), op, str(self.right))
+
+    def clone(self):
+        leftClone = None
+        rightClone = None
+
+        if self.left is not None:
+            leftClone = self.left.clone()
+        if self.right is not None:
+            rightClone = self.right.clone()
+
+        return CompositeExp(leftClone, rightClone, self.op)
 
     def is_composite(self):
         return True
@@ -174,6 +188,12 @@ class IterativeExp(GestureExp):
             return self.exp.get_points(points)
         return None
 
+    def clone(self):
+        cloneExp = None
+        if self.exp is not None:
+            cloneExp = self.exp.clone()
+        return IterativeExp(cloneExp)
+
 ################################### 2D ###################################
 class Point(GestureExp):
     def __init__(self, x, y):
@@ -195,6 +215,9 @@ class Point(GestureExp):
     def get_points(self, points):
         points.append([self.x, self.y, self])
 
+    def clone(self):
+        return Point(self.x, self.y)
+
 
 class Line(GestureExp):
     def __init__(self, dx, dy):
@@ -202,7 +225,7 @@ class Line(GestureExp):
         self.dy = dy
 
     def __str__(self):
-        return "l({0},{1})".format(str(self.dx), str(self.dy))
+        return "L({0},{1})".format(str(self.dx), str(self.dy))
 
     def get_path(self, path, current):
         path.append(patches.FancyArrowPatch(
@@ -220,6 +243,9 @@ class Line(GestureExp):
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
 
+    def clone(self):
+        return Line(self.dx, self.dy)
+
 class Arc(GestureExp):
     def __init__(self, dx, dy, cw=True):
         self.dx = dx
@@ -227,7 +253,7 @@ class Arc(GestureExp):
         self.cw = cw
 
     def __str__(self):
-        return "a({0},{1},{2})".format(self.dx, self.dy, self.cw)
+        return "A({0},{1},{2})".format(self.dx, self.dy, self.cw)
 
     def get_path(self, path, current):
         if self.cw:
@@ -255,6 +281,9 @@ class Arc(GestureExp):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
+
+    def clone(self):
+        return Arc(self.dx, self.dy, self.cw)
 
 
 class ParseEnum(Enum):

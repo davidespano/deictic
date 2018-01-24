@@ -23,6 +23,8 @@ def index(request):
 @never_cache
 def deictic_models(request):
     parser = StringParser()
+    samples = 20
+    states = 6
 
     if not 'models' in request.session:
         baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
@@ -34,37 +36,41 @@ def deictic_models(request):
 
         modelDefinitions = json.loads(data)
 
+        for definition in modelDefinitions:
+            complete = parser.fromString(definition['model'])
+            parts = [{'name': str(complete), 'exp': complete, 'hmm': None}]
+            current = complete
+            while current.is_composite():
+                current = current.left
+                parts.append(
+                    {'name': str(current), 'exp': current.clone(), 'hmm': None}
+                )
+            definition['parts'] = list(reversed(parts))
+
         factory = ClassifierFactory(type=TypeRecognizer.offline)
         factory.setLineSamplesPath(trainingDir)
         factory.setClockwiseArcSamplesPath(arcClockWiseDir)
         factory.setCounterClockwiseArcSamplesPath(arcCounterClockWiseDir)
-        factory.states = 6
-        factory.spu = 20
+        factory.states = states
 
-        models = {}
-        for model in modelDefinitions:
-            expr = parser.fromString(model['model'])
-            if model['name'] == 'rectangle':
-                factory.spu = 20
-            else:
-                factory.spu = 15
-            trained = factory.createClassifier(expr)
-            models[model['name']] = trained[0]
-        request.session['models'] = models
+        for definition in modelDefinitions:
+            for i in range(1, len(definition['parts'])):
+                factory.spu = samples
 
-    #sample = request.session['models']['triangle'].sample()
+                exp = definition['parts'][i]['exp']
+                hmm = factory.createClassifier(exp)
+                definition['parts'][i]['hmm'] = hmm[0]
 
-    #print(sample)
-    #print(numpy.exp(request.session['models']['triangle'].log_probability(sample) / len(sample)))
-    #print(numpy.exp(request.session['models']['rectangle'].log_probability(sample) / len(sample)))
+        request.session['models'] = modelDefinitions
+
     return JsonResponse({'result': 'ok'})
 
 @never_cache
 def deictic_eval(request):
 
     if 'models' in request.session:
-        samples = 40
-        models = request.session['models']
+        samples = 60
+        modelDefinitions = request.session['models']
         res = []
         data = json.loads(request.body)
         sequence = []
@@ -75,40 +81,33 @@ def deictic_eval(request):
             ])
 
         sequence = numpy.array(sequence).astype(float)
-        composite3 = CompositeTransform()
-        composite3.addTranform(NormaliseLengthTransform(axisMode=True))
-        composite3.addTranform(ScaleDatasetTransform(scale=100))
-        composite3.addTranform(CenteringTransform())
-        composite3.addTranform(ResampleInSpaceTransform(samples= 3 * samples))
+        transform = CompositeTransform()
+        transform.addTranform(NormaliseLengthTransform(axisMode=True))
+        transform.addTranform(ScaleDatasetTransform(scale=100))
+        transform.addTranform(CenteringTransform())
+        transform.addTranform(ResampleInSpaceTransform(samples=samples))
 
+        transformed = transform.transform(numpy.array(sequence).astype(float))
 
-        composite4 = CompositeTransform()
-        composite4.addTranform(NormaliseLengthTransform(axisMode=True))
-        composite4.addTranform(ScaleDatasetTransform(scale=100))
-        composite4.addTranform(CenteringTransform())
-        composite4.addTranform(ResampleInSpaceTransform(samples=4 * samples))
+        res = []
+        for definition in modelDefinitions:
+            print(definition['name'])
+            parts = []
+            for i in range(1, len(definition['parts'])):
+                prob = definition['parts'][i]['hmm'].log_probability(transformed) / len(transformed)
+                parts.append(
+                    {'name': definition['parts'][i]['name'], 'prob': prob}
+                )
+                print("{0}: {1} {2} {3}".format(
+                    definition['parts'][i]['name'],
+                    numpy.exp(prob),
+                    prob,
+                    0.9468093 + 0.01373144 * prob + 0.00005137985*prob* prob)
+                )
+            res.append({
+                'name': definition['name'], 'parts': parts
+            })
 
-        transformed3 = composite3.transform(sequence)
-        transformed4 = composite4.transform(sequence)
-
-        res.append({
-                'name': 'triangle',
-                'prob': models['triangle'].log_probability(transformed3) / len(transformed3)
-        })
-
-        res.append({
-            'name': 'rectangle',
-            'prob': models['rectangle'].log_probability(transformed3) / len(transformed3)
-        })
-        #for key in models:
-        #    prob = models[key].log_probability(transformed) / len(transformed)
-        #    el = {}
-        #    res.append({
-        #        'name': key,
-        #        'prob': prob
-        #    })
-
-        print(res)
         return JsonResponse({'result': res})
 
     else:
