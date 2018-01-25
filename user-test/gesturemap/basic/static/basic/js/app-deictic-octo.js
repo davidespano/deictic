@@ -43,7 +43,7 @@ input.onStrokeChange.add(function (event) {
 
 input.onStrokeEnd.add(function (event) {
     var result = deictic.eval(event.d.buffer);
-    var gesture = deictic.recognizedGesture(result, 0.70);
+    var gesture = deictic.recognizedGesture(result, 0.65);
     switch(gesture){
         case "triangle":
             scene.setMonster(
