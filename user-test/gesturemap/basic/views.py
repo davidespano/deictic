@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
+from django.http import HttpResponseNotFound
 import numpy as numpy
 from django.views.decorators.cache import never_cache
 import sys
@@ -14,10 +15,21 @@ from gesture import *
 import json
 
 
+def index(request, condition, feedback):
+    script = None
+    if (condition == 'heuristic' or condition == 'ml' or condition == 'deictic') and\
+            (feedback == 'line' or feedback == 'octo'):
+        script = "app-{0}-{1}.js".format(condition, feedback)
+        context = {'condition': condition, 'feedback': feedback}
+        return render(request, 'basic/index.html', context)
+    else:
+        return HttpResponseNotFound('<h1> File not found </h1>')
 
-def index(request):
+
+
+def training(request):
     context = {}
-    return render(request, 'basic/index.html', context)
+    return render(request, 'basic/training.html', context)
 
 
 @never_cache

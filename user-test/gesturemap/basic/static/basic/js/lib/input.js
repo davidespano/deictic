@@ -128,6 +128,8 @@
     var Point2D = function (x, y) {
         this.x = x;
         this.y = y;
+        this.X = x;
+        this.Y = y;
     };
     Utils.Point2D = Point2D;
 
@@ -276,7 +278,7 @@
 
         this.recognizedGesture = function (result, threshold) {
             var recognized = null;
-            var max  = 0.0;
+            var max = 0.0;
             for (var i in result) {
                 var gesture = result[i];
                 if (gesture.parts[gesture.parts.length - 1].prob > max) {
@@ -285,13 +287,53 @@
                 }
             }
 
-            if(max >= threshold){
+            if (max >= threshold) {
                 return recognized;
+            } else {
+                return null;
             }
         };
     };
 
     Utils.Deictic = Deictic;
+
+    var MachineLearning = function () {
+        var _self = this;
+
+        this.init = function () {
+            _self.r = new DollarRecognizer();
+            _self.r.Unistrokes = samples;
+        };
+
+        this.eval = function (sequence) {
+            var dollar = _self.r.Recognize(sequence, false);
+            var result = [];
+            for (var i in dollar.Rank) {
+                result.push({'name': dollar.Rank[i].Name, 'prob': dollar.Rank[i].Prob});
+            }
+            ;
+
+            return result;
+        };
+
+        this.recognizedGesture = function (result, threshold) {
+            var recognized = null;
+            var max = 0.0;
+            for (var i in result) {
+                if (result[i].prob >= max) {
+                    recognized = result[i].name;
+                    max = result[i].prob;
+                }
+            }
+            if (max >= threshold) {
+                return recognized;
+            } else {
+                return null;
+            }
+        };
+    };
+
+    Utils.MachineLearning = MachineLearning;
 
 
 }(window.Utils = window.Utils || {}, undefined));

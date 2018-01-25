@@ -296,7 +296,7 @@
                                 _self.p0.x + feedforward.points[i].x,
                                 _self.p0.y + feedforward.points[i].y)
                         }
-                        feedforward.line.opacity(state.probability);
+                        feedforward.line.opacity(Math.exp(2 * state.probability -2));
                         break;
                     }
                 }

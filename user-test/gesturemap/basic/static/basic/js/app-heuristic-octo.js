@@ -22,7 +22,7 @@ squareFSM.init([
 
 var deleteFSM = new Utils.AngleFSM();
 deleteFSM.init([
-    {min: 315 -20, max: 315 + 20},
+    {min: 315 - 20, max: 315 + 20},
     {min: 180 - 20, max: 180 + 20},
     {min: 45 - 20, max: 45 + 20}
 ]);
@@ -50,10 +50,10 @@ input.onStrokeChange.add(function (event) {
     var deleteState = deleteFSM.state >= 0 ? deleteFSM.state : 0;
     var deleteProb = (deleteFSM.state + 1) / 3;
     var descr = [
-            {name: 'triangle', part: triangleState, probability: Math.max(0, triangleProb)},
-            {name: 'square', part: squareState, probability: Math.max(0, squareProb)},
-            {name: 'delete', part: deleteState, probability: Math.max(0, deleteProb)}
-        ];
+        {name: 'triangle', part: triangleState, probability: Math.max(0, triangleProb)},
+        {name: 'square', part: squareState, probability: Math.max(0, squareProb)},
+        {name: 'delete', part: deleteState, probability: Math.max(0, deleteProb)}
+    ];
     feedback.update(
         event,
         descr);
