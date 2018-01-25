@@ -25,8 +25,8 @@ input.onStrokeChange.add(function (event) {
          var max = 0.0;
          var maxIndex = 0;
          for (var j in gesture.parts){
-             if (max <= gesture.parts[j].prob){
-                 max = gesture.parts[j].prob;
+             if (max <= gesture.parts[j].probability){
+                 max = gesture.parts[j].probability;
                  maxIndex = j;
              }
          }

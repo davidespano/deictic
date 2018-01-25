@@ -281,8 +281,8 @@
             var max = 0.0;
             for (var i in result) {
                 var gesture = result[i];
-                if (gesture.parts[gesture.parts.length - 1].prob > max) {
-                    max = gesture.parts[gesture.parts.length - 1].prob;
+                if (gesture.parts[gesture.parts.length - 1].probability > max) {
+                    max = gesture.parts[gesture.parts.length - 1].probability;
                     recognized = gesture.name;
                 }
             }
@@ -309,9 +309,8 @@
             var dollar = _self.r.Recognize(sequence, false);
             var result = [];
             for (var i in dollar.Rank) {
-                result.push({'name': dollar.Rank[i].Name, 'prob': dollar.Rank[i].Prob});
+                result.push({'name': dollar.Rank[i].Name, 'probability': dollar.Rank[i].Prob});
             }
-            ;
 
             return result;
         };
@@ -320,9 +319,9 @@
             var recognized = null;
             var max = 0.0;
             for (var i in result) {
-                if (result[i].prob >= max) {
+                if (result[i].probability >= max) {
                     recognized = result[i].name;
-                    max = result[i].prob;
+                    max = result[i].probability;
                 }
             }
             if (max >= threshold) {

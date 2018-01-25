@@ -113,7 +113,7 @@ def deictic_eval(request):
                 if prob > 7:
                     prob = 1.0;
                 parts.append(
-                    {'name': definition['parts'][i]['name'], 'prob': round(pretty, 4), 'logprob': round(prob, 2)}
+                    {'name': definition['parts'][i]['name'], 'probability': round(pretty, 4), 'logprob': round(prob, 2)}
                 )
                 #print("{0}: {1} {2} {3}".format(
                 #    definition['parts'][i]['name'],
