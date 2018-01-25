@@ -178,9 +178,9 @@
         var _self = this;
 
         this.init = function (layer) {
-            _self.t = BOX_SIZE - 0.35 * BOX_SIZE;
-            _self.r = BOX_SIZE - 0.30 * BOX_SIZE;
-            _self.d = BOX_SIZE - 0.25 * BOX_SIZE;
+            _self.t = BOX_SIZE - 0.26 * BOX_SIZE;
+            _self.r = BOX_SIZE - 0.35 * BOX_SIZE;
+            _self.d = BOX_SIZE - 0.35 * BOX_SIZE;
             _self.feedforward = [];
             _self.layer = layer;
             _self.feedforward[0] = {
