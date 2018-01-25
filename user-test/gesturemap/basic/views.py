@@ -82,7 +82,7 @@ def deictic_eval(request):
 
         sequence = numpy.array(sequence).astype(float)
         transform = CompositeTransform()
-        transform.addTranform(NormaliseLengthTransform(axisMode=True))
+        transform.addTranform(NormaliseLengthTransform(axisMode=False))
         transform.addTranform(ScaleDatasetTransform(scale=100))
         transform.addTranform(CenteringTransform())
         transform.addTranform(ResampleInSpaceTransform(samples=samples))
@@ -91,19 +91,24 @@ def deictic_eval(request):
 
         res = []
         for definition in modelDefinitions:
-            print(definition['name'])
+            #print(definition['name'])
             parts = []
             for i in range(1, len(definition['parts'])):
                 prob = definition['parts'][i]['hmm'].log_probability(transformed) / len(transformed)
+                pretty = 0.9468093 + 0.01373144 * prob + 0.00005137985*prob* prob;
+                if prob < -130:
+                    pretty = 0;
+                if prob > 7:
+                    prob = 1.0;
                 parts.append(
-                    {'name': definition['parts'][i]['name'], 'prob': prob}
+                    {'name': definition['parts'][i]['name'], 'prob': round(pretty, 4), 'logprob': round(prob, 2)}
                 )
-                print("{0}: {1} {2} {3}".format(
-                    definition['parts'][i]['name'],
-                    numpy.exp(prob),
-                    prob,
-                    0.9468093 + 0.01373144 * prob + 0.00005137985*prob* prob)
-                )
+                #print("{0}: {1} {2} {3}".format(
+                #    definition['parts'][i]['name'],
+                #    numpy.exp(prob),
+                #    prob,
+                #    pretty)
+                #)
             res.append({
                 'name': definition['name'], 'parts': parts
             })

@@ -229,10 +229,10 @@
     };
     Utils.angle = angle;
 
-    var Deictic = function(){
+    var Deictic = function () {
         var _self = this;
 
-        this.init = function(gestures){
+        this.init = function (gestures) {
             var result = true;
             console.log('Deictic: models init at server-side')
             $.ajax({
@@ -243,18 +243,18 @@
                 data: JSON.stringify(gestures),
                 dataType: 'json',
                 contentType: "application/json; charset=utf-8",
-                success: function(response){
+                success: function (response) {
                     result = true;
                     console.log('Deictic: models init ok!');
                 },
-                error: function(){
+                error: function () {
                     result = false
                 }
 
             });
         };
 
-        this.eval = function(sequence){
+        this.eval = function (sequence) {
             var result = false;
             $.ajax({
                 type: 'POST',
@@ -264,15 +264,30 @@
                 data: JSON.stringify(sequence),
                 dataType: 'json',
                 contentType: "application/json; charset=utf-8",
-                success: function(response){
-                    result = response;
-                    console.log(result);
+                success: function (response) {
+                    result = response.result;
                 },
-                error: function(){
+                error: function () {
                     result = false
                 }
             });
             return result;
+        };
+
+        this.recognizedGesture = function (result, threshold) {
+            var recognized = null;
+            var max  = 0.0;
+            for (var i in result) {
+                var gesture = result[i];
+                if (gesture.parts[gesture.parts.length - 1].prob > max) {
+                    max = gesture.parts[gesture.parts.length - 1].prob;
+                    recognized = gesture.name;
+                }
+            }
+
+            if(max >= threshold){
+                return recognized;
+            }
         };
     };
 
