@@ -1,3 +1,6 @@
+/**
+ * @description contains the classes for managing the grid map and the action feedback.
+ */
 (function (Utils, undefined) {
     var Event = function () {
 
@@ -112,6 +115,9 @@
         };
 
         var createEvent = function (point) {
+            /**
+             * @typedef  {Object} Utils~StrokeEvent
+             */
             return {
                 x: point.x,
                 y: point.y,
