@@ -1,27 +1,43 @@
 /**
- * @description contains the classes for managing the grid map and the action feedback.
+ * @namespace Input
+ * @description Contains the classes for managing the user's input. It covers both touch and mouse input with a
+ * simplified and unified API. In addition, it contains the classes for recognizing gestures with the tree approaches
+ * covered in the user test: heuristics, machine learning and deictic.
  */
-(function (Utils, undefined) {
+(function (Input, undefined) {
+
+
+    /**
+     * @class Event
+     * @memberOf Input
+     * @description Creates a generic event
+     * @classdesc Represent a generic user's input event. It manages subscription and unsubscription by event
+     * handlers and the notification of the event.
+     */
     var Event = function () {
 
-        /**
-         * The event callback list
-         */
+
         this.callback = [];
 
         /**
-         * Adds an handler for this event
-         * @param {function} handler the handler to be added
-         * @returns {undefined}
+         * @public
+         * @instance
+         * @memberOf Input.Event
+         * @method add
+         * @description Adds an handler for the input event
+         * @param {function} handler - the handler to be added
          */
         this.add = function (handler) {
             this.callback.push(handler);
         };
 
         /**
-         * Removes an handler for this event
-         * @param {function} handler the handler to be removed
-         * @returns {undefined}
+         * @public
+         * @instance
+         * @memberOf Input.Event
+         * @method remove
+         * @description Removes an handler for the input event
+         * @param {function} handler - the handler to be removed
          */
         this.remove = function (handler) {
             var index = this.callback.indexOf(handler);
@@ -31,9 +47,12 @@
         };
 
         /**
-         * Triggers the current event
-         * @param {object} evt the event arguments
-         * @returns {undefined}
+         * @public
+         * @instance
+         * @memberOf Input.Event
+         * @method trigger
+         * @description Triggers the notification of the input event
+         * @param {object} evt  - the event arguments
          */
         this.trigger = function (evt) {
             this.callback.forEach(function (l) {
@@ -41,11 +60,79 @@
             });
         };
     };
-    Utils.Event = Event;
+    Input.Event = Event;
 
+    /**
+     * @class StrokeInput
+     * @memberOf Input
+     * @description Creates a stroke input manager
+     * @classdesc Simplified manager for the user's stroke input, which may be received from both touch and mouse
+     * events. It provides a unified API for writing device agnostic recognition algorithms.
+     */
     var StrokeInput = function (layer) {
+        /**
+         * @public
+         * @member onStrokeBegin
+         * @memberOf Input.StrokeInput
+         * @instance
+         * @description Notifies the beginning of a new stroke. The event object contains a
+         * {@link Input~StrokeChangeDescriptor} in the d property.
+         * @type {Input.Event}
+         * @see {Input~StrokeChangeDescriptor}
+         * @example
+         * // input is a Input.StrokeInput
+         * // register an anonymous handler to the stroke begin event
+         * input.onStrokeBegin.add(function(event){
+         *      // sample handler body, it reads the coordinates of the last stroke point
+         *      // the event object contains a StrokeChangeDescriptor in the d property
+         *      var currentX = event.d.x;
+         *      var currentY = event.d.y;
+         * });
+         */
         this.onStrokeBegin = new Event();
+        /**
+         * @public
+         * @member onStrokeChange
+         * @memberOf Input.StrokeInput
+         * @instance
+         * @description Notifies that the current stroke has changed, adding a new point to the stroke.
+         * The event object contains a {@link Input~StrokeChangeDescriptor} in the d property.
+         * @type {Input.Event}
+         * @see {Input~StrokeChangeDescriptor}
+         * @example
+         * // input is a Input.StrokeInput
+         * // register an anonymous handler to the stroke change event
+         * input.onStrokeChange.add(function(event){
+         *      // sample handler body, it computes the difference in the X and Y coordinates between the current
+         *      // and the previous recorded stroke point, in grid cell coordinates.
+         *      // Note that the event object contains a StrokeChangeDescriptor in the d property.
+         *      var previous = event.d.buffer[event.d.buffer.length - 2];
+         *      var diffX = event.d.x - previous.x;
+         *      var diffY = event.d.y - previous.y;
+         * });
+         */
         this.onStrokeChange = new Event();
+        /**
+         * @public
+         * @member onStrokeEnd
+         * @memberOf Input.StrokeInput
+         * @instance
+         * @description Notifies that the current stroke has completed.
+         * The event object contains a {@link Input~StrokeChangeDescriptor} in the d property.
+         * @type {Input.Event}
+         * @see {Input~StrokeChangeDescriptor}
+         * @example
+         * // input is a Input.StrokeInput
+         * // register an anonymous handler to the stroke end event
+         * input.onStrokeEnd.add(function(event){
+         *      // sample handler body, it computes the difference in the X and Y coordinates between the current
+         *      // and the previous recorded stroke point, in grid cell coordinates.
+         *      // Note that the event object contains a StrokeChangeDescriptor in the d property.
+         *      var previous = event.d.buffer[event.d.buffer.length - 2];
+         *      var diffX = event.d.x - previous.x;
+         *      var diffY = event.d.y - previous.y;
+         * });
+         */
         this.onStrokeEnd = new Event();
 
         this._layer = layer;
@@ -101,7 +188,7 @@
                     point = new Point(
                         kevent.evt.changedTouches[0].clientX,
                         kevent.evt.changedTouches[0].clientY
-                    )
+                    );
                     break;
                 default:
                     point = new Point2D(kevent.evt.x, kevent.evt.y);
@@ -116,7 +203,32 @@
 
         var createEvent = function (point) {
             /**
-             * @typedef  {Object} Utils~StrokeEvent
+             * @description Represent the stroke change description
+             * @typedef  {Object} Input~StrokeChangeDescriptor
+             * @property {number} x - the X coordinate of the current point, expressed in cell coordinates (distance
+             * from the top-left corner of the cell that contains the point)
+             * @property {number} y - the Y coordinate of the current point, expressed in cell coordinates (the distance
+             * from the top-left corner of the cell that contains the point)
+             * @property {number} bX - the X coordinate of the cell containing the stroke, in the scene coordinates
+             * (the distance from the top-left corner of the grid map)
+             * @property {number} bY - the Y coordinate of the cell containing the stroke, in the scene coordinates
+             * (the distance from the top-left corner of the grid map)
+             * @property {Array<Input.Point2D>} buffer - a polyline representing the entire stroke, expressed as an
+             * array of {@link Input.Point2D}.
+             * @example
+             * // d is a StrokeChangeDescriptor
+             * // get the current stroke point in scene (grid map) coordinates
+             * var sX = d.x + d.bX;
+             * var sY = d.y + d.bY;
+             *
+             * // get the coordinates of the first stroke point in cell coordinates
+             * var firstX = d.buffer[0].x;
+             * var firstY = d.buffer[0].y;
+             *
+             * // get the coordinates of the previous stroke point in scene (grid map) coordinates
+             * // note that d.buffer[d.buffer.length -1].x === d.x
+             * var prevX = d.buffer[d.buffer.length - 2].x + d.bX;
+             * var prevY = d.buffer[d.buffer.length - 2].y + d.bY;
              */
             return {
                 x: point.x,
@@ -129,34 +241,148 @@
 
 
     };
-    Utils.StrokeInput = StrokeInput;
+    Input.StrokeInput = StrokeInput;
 
+
+    /**
+     * @class Point2D
+     * @memberOf Input
+     * @description Create a point with 2D coordinates
+     * @classdesc Represents a point in a 2D coordinate system.
+     */
     var Point2D = function (x, y) {
+        /**
+         * @instance
+         * @member {number} x - the X coordinate of the point
+         * @memberOf Input.Point2D
+         */
         this.x = x;
+        /**
+         * @instance
+         * @member {number} y - the Y coordinate of the point
+         * @memberOf Input.Point2D
+         */
         this.y = y;
         this.X = x;
         this.Y = y;
     };
-    Utils.Point2D = Point2D;
+    Input.Point2D = Point2D;
 
+    /**
+     * @class AngleFSM
+     * @memberOf Input
+     * @classdesc Creates a Finite State Machine FSM) that recognizes gestures according to the direction of
+     * the stroke movements, applying an heuristic on the stroke change angle.
+     * We define  the <em>movement vector</em> as the displacement
+     * between the current and the previous stroke position. We translate it into the origin and we calculate the angle
+     * it defines by the vector and the X axis for obtaining the <em>movement vector angle</em>.
+     * <br/>
+     * The FSM is defined through a list of angle ranges (minimum and maximum). Each range is associated to a
+     * FSM state.
+     * <br/>
+     * The FSM stays in the current state as long it receives movement vector angles contained into
+     * the specified range. It goes in the next state (if any) when it receives a certain number of movement vector
+     * angles contained into the range associated to the next state.
+     * It is possible to control such number through the tolerance member (default: 3).
+     * <br/>
+     * If it receives a number of movement vector angles higher than the tolerance threshold that were not contained
+     * in the current state or the next state range, the FSM goes in an error state.
+     * @description Creates a Finite State Machine for recognizing gestures with an heuristic approach.
+     */
     var AngleFSM = function () {
         var _self = this;
 
 
-        this.init = function (stateDesc, tollerance) {
+        /**
+         * @public
+         * @instance
+         * @method init
+         * @description Inits the {@link Input.AngleFSM} instance with the specified configuration.
+         * @memberOf Input.AngleFSM
+         * @param {Array<Input~AngleFSMState>} stateDesc - a configuration containing the array of ranges defining
+         * the FSM states
+         * @param {number} [tolerance = 3] - the number of movement vector angles to be counted before firing the
+         * transition to the next state or to the error state, according to the range check.
+         * @example
+         * var angleFSM = Input.AngleFSM();
+         * // configures angleFSM for recognizing a V gesture.
+         * // We specify the ideal slope plus or minus 20 degrees.
+         * angleFSM.init([
+         *    {min: 315 -20, max: 315 + 20},
+         *    {min: 45 - 20, max: 45 + 20}
+         *  ], 5);
+         */
+        this.init = function (stateDesc, tolerance) {
+
+            /**
+             * @instance
+             * @member {number} state - the current FSM state. Values greater than or equal to
+             * zero represent the state index in the {@link Input.AngleFSM#states|states} array. Values less than
+             * zero represent the error state.
+             * @memberOf Input.AngleFSM
+             */
             _self.state = -1;
             _self.error = 0;
             _self.next = 0;
+            /**
+             * @description Represents an {@link Input.AngleFSM} state
+             * @typedef  {Object} Input~AngleFSMState
+             * @property {number} min - the minimum acceptable angle of the direction vector in degrees
+             * @property {number} max - the maximum acceptable angle of the direction vector in degrees
+             * @example
+             * // recognizes the movement vector angles between 0 and 45 degrees
+             * var range = {min: 0, max: 45};
+             *
+             * // recognizes the movement vector between -20 and 20 degrees
+             * var range = {min: -20, max: 20};
+             */
+            /**
+             * @instance
+             * @member {Array<Input~AngleFSMState>} states - the range list defining the FSM states
+             * @memberOf Input.AngleFSM
+             */
             _self.states = stateDesc;
-            _self.tollerance = tollerance != null ? tollerance : 3;
+            /**
+             * @instance
+             * @member {number} tolerance - the number of movement vector angles to be counted before firing the
+             * transition to the next state or to the error state, according to the range check.
+             * @memberOf Input.AngleFSM
+             */
+            _self.tolerance = tolerance != null ? tolerance : 3;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method restart
+         * @description Resets the FSM to its initial state.
+         * @memberOf Input.AngleFSM
+         */
         this.restart = function () {
             _self.state = -1;
             _self.error = 0;
             _self.next = 0;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method push
+         * @description Feeds the FSM with a new movement vector. The next state will be updated according to the
+         * received vector and the {@link Input.AngleFSM#tolerance|tolerance}.
+         * @memberOf Input.AngleFSM
+         * @param {Input.Point2D} current - the current stroke position
+         * @param {Input.Point2D} previous - the previous stroke position
+         * @example
+         * // When receiveing an update from the StrokeInput input, we feed it
+         * // to the AngleFSM fsm
+         * input.onStrokeChange.add(function (event) {
+         *     var current = event.d;
+         *     var previous = event.d.buffer[event.d.buffer.length - 2];
+         *     fsm.push(current, previous);
+         * });
+         *
+         */
         this.push = function (current, previous) {
             var a = angle(current.x - previous.x, current.y - previous.y);
             if (isNaN(a)) {
@@ -184,11 +410,11 @@
                     break;
             }
 
-            if (_self.error > _self.tollerance) {
+            if (_self.error > _self.tolerance) {
                 _self.state = -2;
             }
 
-            if (_self.next > _self.tollerance) {
+            if (_self.next > _self.tolerance) {
                 _self.state++;
                 _self.next = 0;
                 _self.error = 0;
@@ -226,7 +452,7 @@
             return angle >= 0 && angle <= desc.max || angle >= desc.min && angle >= 360;
         };
     };
-    Utils.AngleFSM = AngleFSM;
+    Input.AngleFSM = AngleFSM;
 
     var angle = function (ax, ay) {
         var angle = Math.acos(ax / Math.sqrt(ax * ax + ay * ay));
@@ -235,7 +461,9 @@
         }
         return angle * 180 / Math.PI;
     };
-    Utils.angle = angle;
+    Input.angle = angle;
+
+
 
     var Deictic = function () {
         var _self = this;
@@ -301,7 +529,7 @@
         };
     };
 
-    Utils.Deictic = Deictic;
+    Input.Deictic = Deictic;
 
     var MachineLearning = function () {
         var _self = this;
@@ -338,7 +566,7 @@
         };
     };
 
-    Utils.MachineLearning = MachineLearning;
+    Input.MachineLearning = MachineLearning;
 
 
-}(window.Utils = window.Utils || {}, undefined));
+}(window.Input = window.Input || {}, undefined));

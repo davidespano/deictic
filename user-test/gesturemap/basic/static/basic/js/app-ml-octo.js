@@ -1,10 +1,10 @@
 var scene = new Grid.Scene();
 scene.init();
-var input = new Utils.StrokeInput(scene.layer);
+var input = new Input.StrokeInput(scene.layer);
 var feedback = new Grid.Octopocus();
 feedback.init(scene.layer);
 
-var ml = new Utils.MachineLearning();
+var ml = new Input.MachineLearning();
 ml.init();
 
 

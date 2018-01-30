@@ -1,11 +1,11 @@
 var scene = new Grid.Scene();
 scene.init();
-var input = new Utils.StrokeInput(scene.layer);
+var input = new Input.StrokeInput(scene.layer);
 var lineFeedback = new Grid.LineFeedback();
 lineFeedback.init(scene.layer);
 
 //Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
-var deictic = new Utils.Deictic();
+var deictic = new Input.Deictic();
 deictic.init([
     {name: 'triangle',  model: 'P(0,0) + L(-3,-4) + L(6,0)+ L(-3,4)'},
     {name: 'square', model: 'P(0,0) + L(0,-3) + L(3,0) + L(0, 3) + L(-3,0)'},

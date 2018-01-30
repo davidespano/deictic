@@ -1,17 +1,17 @@
 var scene = new Grid.Scene();
 scene.init();
-var input = new Utils.StrokeInput(scene.layer);
+var input = new Input.StrokeInput(scene.layer);
 var feedback = new Grid.Octopocus();
 feedback.init(scene.layer);
 
-var triangleFSM = new Utils.AngleFSM();
+var triangleFSM = new Input.AngleFSM();
 triangleFSM.init([
     {min: 210, max: 270},
     {min: -20, max: 20},
     {min: 100, max: 140}
 ]);
 
-var squareFSM = new Utils.AngleFSM();
+var squareFSM = new Input.AngleFSM();
 squareFSM.init([
     {min: 270 - 20, max: 270 + 20},
     {min: -20, max: 20},
@@ -20,7 +20,7 @@ squareFSM.init([
 ]);
 
 
-var deleteFSM = new Utils.AngleFSM();
+var deleteFSM = new Input.AngleFSM();
 deleteFSM.init([
     {min: 315 - 20, max: 315 + 20},
     {min: 180 - 20, max: 180 + 20},

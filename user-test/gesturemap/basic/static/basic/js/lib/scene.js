@@ -118,7 +118,7 @@
          */
         this.setMonster = function (x, y) {
             return this.setImage(
-                new Utils.Point2D(x, y),
+                new Input.Point2D(x, y),
                 _self._monsterImg,
                 106,
                 118);
@@ -136,7 +136,7 @@
          */
         this.setTreasure = function (x, y) {
             return this.setImage(
-                new Utils.Point2D(x, y),
+                new Input.Point2D(x, y),
                 _self._treasureImg,
                 128,
                 128);
@@ -148,11 +148,11 @@
          * @method setImage
          * @memberOf Grid.Scene
          * @description Shows the specified image in a grid cell
-         * @param {Utils.Point2D} point a point contained in the cell
+         * @param {Input.Point2D} point a point contained in the cell
          * @param {Image} img the image object to show
          * @param {number} w the image width
          * @param {number} h the image height
-         * @see {Utils.Point2D}
+         * @see {Input.Point2D}
          */
         this.setImage = function (point, img, w, h) {
             var r = _self.getRow(point);
@@ -202,7 +202,7 @@
          * @param {number} y the Y coordinate of P
          */
         this.clearCell = function (x, y) {
-            var point = new Utils.Point2D(x, y);
+            var point = new Input.Point2D(x, y);
             var r = _self.getRow(point);
             var c = _self.getColumn(point);
 
@@ -228,8 +228,8 @@
      * @class LineFeedback
      * @classdesc A polyline that shows the trajectory of a user's stroke.
      * @memberOf Grid
-     * @description Creates a line feedback for a {@link Utils.StrokeInput}
-     * @see Utils.StrokeInput
+     * @description Creates a line feedback for a {@link Input.StrokeInput}
+     * @see Input.StrokeInput
      */
     var LineFeedback = function () {
 
@@ -306,7 +306,7 @@
 
     /**
      * @class Octopocus
-     * @classdesc A combined feedback and feedforward component for the user's strokes, as sensed by {@link Utils.StrokeInput}.
+     * @classdesc A combined feedback and feedforward component for the user's strokes, as sensed by {@link Input.StrokeInput}.
      * During the stroke execution, it shows a black line
      * representing the part of the trajectory that has been completed (feedback) and the possible completions for the
      * stroke (feedforward). Each possible completion is represented with a different colour, and its opacity represents
@@ -315,8 +315,8 @@
      * guide for learning gesture-based command sets. In Proceedings of UIST '08, ACM,  37-46.</em>
      * {@link https://doi.org/10.1145/1449715.1449724 | DOI}</em>
      * @memberOf Grid
-     * @description Creates a OctoPocus feedback for a {@link Utils.StrokeInput}
-     * @see Utils.StrokeInput
+     * @description Creates a OctoPocus feedback for a {@link Input.StrokeInput}
+     * @see Input.StrokeInput
      */
     var Octopocus = function () {
         var _self = this;
@@ -338,11 +338,11 @@
             _self.d = BOX_SIZE - 0.35 * BOX_SIZE;
 
             /**
-             * Represents the feedforward for the ideal execution of a gesture.
+             * @description Represents the feedforward for the ideal execution of a gesture.
              * @typedef {Object} Grid~Feedforward
              * @property {Konva.Line} line - the line ({@link https://konvajs.github.io/docs/ | Konva.Line}) representing
              * the feedback.
-             * @property {Array<Utils.Point2D>} points - the points of the polyline representing the ideal gesture
+             * @property {Array<Input.Point2D>} points - the points of the polyline representing the ideal gesture
              * execution.
              * @property {number} parts - the number of sub-parts in the ideal execution of the gesture.
              * @property {string} name - the name identifying the specific gesture. For the user test, they are
@@ -484,11 +484,11 @@
          * @memberOf Grid.Octopocus
          * @description Starts the visualization of both feedback and feedforward.
          * @param {object} event - the original {@link https://konvajs.github.io/docs/ |Konva.Event} enhanced with a
-         * {Utils~StrokeEvent} in the d field
+         * {Input~StrokeEvent} in the d field
          * @example
-         * // It receives the start stroke event from a {@link Utils.StrokeInput} instance named
+         * // It receives the start stroke event from a {@link Input.StrokeInput} instance named
          * // input and  it passes it to a {@link Scene.Octopocus} instance named feedback.
-         * // The {@link Utils.StrokeInput} instance enhances the {@link https://konvajs.github.io/docs/ |Konva.Event}
+         * // The {@link Input.StrokeInput} instance enhances the {@link https://konvajs.github.io/docs/ |Konva.Event}
          * // descriptor with the d field automatically.
          * input.onStrokeBegin.add(function (event) {
          *     feedback.start(event);
@@ -530,13 +530,13 @@
          * @memberOf Grid.Octopocus
          * @description Updates the representation of the feedforward.
          * @param {object} event - the original {@link https://konvajs.github.io/docs/ | Konva.Event} enhanced with a
-         * {Utils~StrokeEvent} in the d field.
+         * {Input~StrokeEvent} in the d field.
          * @param {Array<Grid~FeedforwardState>} descr - the feedforward state description
          * @example
          * // It receives the updates on a user's stroke from
-         * // a {@link Utils.StrokeInput} instance named input and  it passes it to
+         * // a {@link Input.StrokeInput} instance named input and  it passes it to
          * // a {@link Scene.Octopocus} instance named feedback.
-         * // The {@link Utils.StrokeInput} instance enhances the {@link https://konvajs.github.io/docs/ |Konva.Event}
+         * // The {@link Input.StrokeInput} instance enhances the {@link https://konvajs.github.io/docs/ |Konva.Event}
          * // descriptor with the d field automatically.
          * input.onStrokeChange.add(function (event) {
          *
