@@ -485,6 +485,7 @@
          * @description Inits the {@link Input.Deictic} instance with the specified configuration.
          * @memberOf Input.Deictic
          * @param {Array<Input~DeicticGesture>} gestures - the definition of the gesture set.
+         * @returns true if Deictic has been correctly initialized, false otherwise.
          * @example
          * var deictic = Input.Deictic();
          * // configures deictic for recognizing a V and a circle gesture (counter-clockwise)
@@ -548,16 +549,34 @@
              * @property {string} model - the gesture modelled with the Deictic primitives and operators.
              * @example
              * // single stroke horizontal line
-             * var horizontal = {name: 'horizontal', model: 'P(0,0) + L(1, 0)'}
+             * var horizontal = {name: 'horizontal', model: 'P(0,0) + L(1, 0)'};
              *
              * // single stroke vertical line
-             * var vertical = {name: 'vertical', model: 'P(0,0) + L(0, 5)'}
+             * var vertical = {name: 'vertical', model: 'P(0,0) + L(0, 5)'};
              *
              * // a V gesture
-             * var v = {name: 'V', model: 'P(0,0) + L(2,-3) + L(2,3)'}
+             * var v = {name: 'V', model: 'P(0,0) + L(2,-3) + L(2,3)'};
              *
              * // clockwise circle
-             * var circleCw = {'circleCw', model: 'P(0, 0) + A(-3, -3, true) + A(3, -3, true) + A(3, 3, true) + A(-3, 3, true)'}
+             * var circleCw = {
+             *     name: 'circleCw',
+             *     model: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true)'
+             * };
+             *
+             * // counterclockwise circle
+             * var circleCcw = {
+             *     name: 'circleCcw',
+             *     model: 'P(0, 0) + A(-3, -3, false) + A(3, -3, false) + A(3, 3, false) + A(-3, 3, false)'
+             * };
+             *
+             * // a question mark
+             * var question = {
+             *     name: 'question',
+             *     model: 'P(0,0) + A(-3,3, true) + A(3,-3, true) + A(-3,-3,true) + L(-3,0)'
+             * };
+             *
+             * // a five-points star
+             * var star = {name: 'star', model: 'P(0,0) + L(2,5) + L(2, -5) + L(-5, 3) + L(6,0) + L(-5, -3)'}
              */
             $.ajax({
                 type: 'POST',
@@ -576,8 +595,51 @@
                 }
 
             });
+            return result;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method eval
+         * @description Evaluates the current stroke and returns the probability associated to each gesture and
+         * its sub-parts.
+         * @memberOf Input.Deictic
+         * @param {Array<Input.Point2D>} sequence - the current stroke represented as an array of {@link Input.Point2D}
+         * @returns {Input~DeicticEvaluation} the evaluation result, null in case of errors.
+         * @example
+         * // Example 1: sample result dump
+         * var result = {
+         *      name: 'V', parts: [
+         *          {name: 'P(0,0) + L(2,-3)', probability: 0.33},
+         *          {name: 'P(0,0) + L(2,-3) + L(2,3)', probability: 0.75}
+         *      ],
+         *
+         *      name: 'circleCw', parts: [
+         *          {name: 'P(0, 0) + A(3, 3, true)', probability: 0},
+         *          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true)', probability: 0},
+         *          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true)', probability: 0},
+         *          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true)', probability: 0},
+         *      ]
+         * };
+         *
+         * // Example 2: stroke update
+         * // When receiveing an update from the StrokeInput input,
+         * // we evaluate it with Deictic
+         * input.onStrokeChange.add(function (event) {
+         *     var result = deictic.eval(event.d.buffer);
+         *
+         *     // check the probability of the second part of the V gesture
+         *     var prob = 0;
+         *     for(var i in result){
+         *          var gesture = result[i];
+         *          if(gesture.name === 'V'){
+         *              prob = gesture.parts[1].probability;
+         *          }
+         *     }
+         * });
+         *
+         */
         this.eval = function (sequence) {
             var result = false;
             $.ajax({
@@ -589,10 +651,27 @@
                 dataType: 'json',
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
+                    /**
+                     * @description Represents the Deictic evaluation of a stroke.
+                     * @typedef  {Object} Input~DeicticEvaluation
+                     * @property {string} name - the name associated to the gesture
+                     * @property {Array<Input~DeicticEvaluationPart>} parts - the Deictic evaluation associated to the
+                     * different gesture parts.
+                     *
+                     */
+                    /**
+                     * @description Represents the Deictic probability evaluation of a gesture part
+                     * @typedef {Object} Input~DeicticEvaluationPart
+                     * @property {string} name - the name associated to the gesture part (e.g. the subpart expression)
+                     * @property {number} probability - the probability associated to the gesture part
+                     * @example
+                     * // describes the probability of the first part of a V gesture
+                     * var v1 = {name: 'P(0,0) + L(2,-3)', probability: 0.67};
+                     */
                     result = response.result;
                 },
                 error: function () {
-                    result = false
+                    result = null
                 }
             });
             return result;
