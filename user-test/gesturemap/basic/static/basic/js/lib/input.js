@@ -464,13 +464,101 @@
     Input.angle = angle;
 
 
-
+    /**
+     * @class Deictic
+     * @memberOf Input
+     * @classdesc A support for real-time gesture recognition with identification of the subparts. It allows
+     * defining a gesture set composing points, lines and arc primitives. The recognition is robust with respect to
+     * user's performance variability and, for each update received on the stroke path, it provides information on
+     * the recognition probability of the whole gesture and the composed primitives. <br/>
+     * The recognition is performed at server-side, but this hides completely the communication.
+     * @description Creates a Finite State Machine for recognizing gestures with an heuristic approach.
+     * @see Input~DeicticGesture
+     */
     var Deictic = function () {
         var _self = this;
 
+        /**
+         * @public
+         * @instance
+         * @method init
+         * @description Inits the {@link Input.Deictic} instance with the specified configuration.
+         * @memberOf Input.Deictic
+         * @param {Array<Input~DeicticGesture>} gestures - the definition of the gesture set.
+         * @example
+         * var deictic = Input.Deictic();
+         * // configures deictic for recognizing a V and a circle gesture (counter-clockwise)
+         * deictic.init([
+         *      {name: 'V', model: 'P(0,0) + L(2,-3) + L(2,3)'},
+         *      {name: 'circle', model: 'P(0, 0) + A(-3, -3, false) + A(3, -3, false) + A(3, 3, false) + A(-3, 3, false)'}
+         * ]);
+         */
         this.init = function (gestures) {
             var result = true;
-            console.log('Deictic: models init at server-side')
+            console.log('Deictic: models init at server-side');
+            /**
+             * @description Represents a gesture in the  {@link Input.Deictic} format. <br/>
+             * It is possible to combine the following 2D primitives:
+             * <ul>
+             *  <li> A <strong>2D point</strong>, denoted as <code>P(x,y)</code> where <code>x</code> and <code>y</code> are its
+             *      coordinates. It represents the starting point of a stroke.
+             *  </li>
+             *  <li> A <strong>2D line</strong>, starting at the end of the previous primitive and moving <code>dx</code> along the X
+             *      axis and <code>dy</code> along the Y axis, denoted as <code>L(dx, dy)</code>. It represents
+             *      a movement along a linear path.
+             *  </li>
+             *  <li> A <strong>2D arc</strong>, starting at the end of the previous primitive, moving <code>dx</code> along the X
+             *      axis and <code>dy</code> along the Y axis, clockwise if <code>cw === true</code> or
+             *      counter-clockwise if <code>cw === false</code>. An arc is denoted as <code>A(dx, dy, cw)</code>.
+             *      It represents a movement along a curved path, clockwise or counterclockwise.
+             *  </li>
+             *  </ul>
+             *
+             *  Applying the following composition operator it is possible to obtain complex gestures starting from
+             *  primitives, declaring a modelling expression:
+             *  <ul>
+             *      <li>A <strong>sequence</strong>, represented by the symbol <code>+</code> indicating that the
+             *          the user has to complete first the left operand and then the right one. <code>A + B</code>
+             *          denotes that, for completing the gesture, the user has first to perform <code>A</code>
+             *          and then <code>B</code>
+             *      </li>
+             *      <li>
+             *          A <strong>choice</strong>, represented by the symbol <code>|</code>, indicating that the
+             *          the user has to complete either one operand or the other. <code>A | B</code>
+             *          denotes that, for completing the gesture, the user may perform either <code>A</code>
+             *          or <code>B</code>
+             *      </li>
+             *      <li>
+             *          A <strong>parallel</strong> execution, represented by the symbol <code>*</code>,
+             *          indicating that the user has to complete either both operands at (nearly) the same time.
+             *          <code>A * B</code> denotes that, for completing the gesture, the user has to perform both
+             *          <code>A</code> and <code>B</code>
+             *      </li>
+             *  </ul>
+             *  A stroke always stars with a point. Then, it continues along a linear (line), curved (arc) or mixed
+             *  (both of them) path. A multi-stroke gesture (e.g. perfomed with more than a finger) contains
+             *  two or more point primitives. <br/>
+             *  Please note that only the relative sizes among the primitives influence the recognition, since the
+             *  dimensions are normalised by the underlying engine. Therefore the gesture
+             *  <code>P(0,0) + L(0,1) + L(1,0)</code> is equivalent to <code>P(0,0) + L(0,5) + L(5,0)</code>, but it is
+             *  different from <code>P(0,0) + L(0,1) + L(5,0)</code>, since the movement on the X  is 5 times
+             *  the one on the Y.
+             * @typedef  {Object} Input~DeicticGesture
+             * @property {string} name - the name associated to the gesture
+             * @property {string} model - the gesture modelled with the Deictic primitives and operators.
+             * @example
+             * // single stroke horizontal line
+             * var horizontal = {name: 'horizontal', model: 'P(0,0) + L(1, 0)'}
+             *
+             * // single stroke vertical line
+             * var vertical = {name: 'vertical', model: 'P(0,0) + L(0, 5)'}
+             *
+             * // a V gesture
+             * var v = {name: 'V', model: 'P(0,0) + L(2,-3) + L(2,3)'}
+             *
+             * // clockwise circle
+             * var circleCw = {'circleCw', model: 'P(0, 0) + A(-3, -3, true) + A(3, -3, true) + A(3, 3, true) + A(-3, 3, true)'}
+             */
             $.ajax({
                 type: 'POST',
                 url: "/basic/deictic_models",
