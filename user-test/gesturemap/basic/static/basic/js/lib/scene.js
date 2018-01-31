@@ -313,7 +313,7 @@
      * the estimated completion likelihood.
      * </br> The complete idea has been described in <em>Olivier Bau and Wendy E. Mackay. 2008. OctoPocus: a dynamic
      * guide for learning gesture-based command sets. In Proceedings of UIST '08, ACM,  37-46.</em>
-     * {@link https://doi.org/10.1145/1449715.1449724 | DOI}</em>
+     * {@link https://doi.org/10.1145/1449715.1449724|DOI}</em>
      * @memberOf Grid
      * @description Creates a OctoPocus feedback for a {@link Input.StrokeInput}
      * @see Input.StrokeInput

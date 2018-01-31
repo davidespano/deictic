@@ -1,0 +1,28 @@
+{
+  "opts": {
+    "template": "/Users/davide/node_modules/tui-jsdoc-template/",
+    // same as -t templates/default
+    "encoding": "utf8",
+    // same as -e utf8
+    "destination": "./out/",
+    // same as -d ./out/
+    "recurse": true,
+    // same as -r
+    "tutorials": "./tutorials"
+    // same as -u path/to/tutorials
+  },
+  "templates": {
+    "logo": {
+      "url": "https://www.unica.it/static/resources/static/img/logo_unica.svg",
+      "width": "0px",
+      "height": "0px",
+      "link": "http://dipartimenti.unica.it/matematicaeinformatica/"
+    },
+    "footerText": "Gesture UI Development Test",
+    "tabNames": {
+      "api": "API",
+      "tutorials": "Tutorials"
+    },
+    "name": "Docs"
+  }
+}

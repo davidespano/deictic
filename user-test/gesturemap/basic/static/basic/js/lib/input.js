@@ -472,7 +472,7 @@
      * user's performance variability and, for each update received on the stroke path, it provides information on
      * the recognition probability of the whole gesture and the composed primitives. <br/>
      * The recognition is performed at server-side, but this hides completely the communication.
-     * @description Creates a Finite State Machine for recognizing gestures with an heuristic approach.
+     * @description Creates an object for recognizing gestures with the Deictic approach.
      * @see Input~DeicticGesture
      */
     var Deictic = function () {
@@ -487,7 +487,7 @@
          * @param {Array<Input~DeicticGesture>} gestures - the definition of the gesture set.
          * @returns true if Deictic has been correctly initialized, false otherwise.
          * @example
-         * var deictic = Input.Deictic();
+         * var deictic = new Input.Deictic();
          * // configures deictic for recognizing a V and a circle gesture (counter-clockwise)
          * deictic.init([
          *      {name: 'V', model: 'P(0,0) + L(2,-3) + L(2,3)'},
@@ -624,8 +624,9 @@
          * };
          *
          * // Example 2: stroke update
-         * // When receiveing an update from the StrokeInput input,
-         * // we evaluate it with Deictic
+         * // When receiving an update from the StrokeInput input,
+         * // we evaluate it with Deictic. The object input is an
+         * // Input.StrokeInput instance.
          * input.onStrokeChange.add(function (event) {
          *     var result = deictic.eval(event.d.buffer);
          *
@@ -677,7 +678,29 @@
             return result;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method recognisedGesture
+         * @description A short-hand for getting the name of the gesture with the higher recognition probability.
+         * @memberOf Input.Deictic
+         * @param {Input~DeicticEvaluation} result - the Deictic evaluation of a stroke, as returned by the
+         * {@link Input.Deictic#eval/eval} method.
+         * @param {number} threshold - the minimum probability for considering the gesture as recognized.
+         * @returns {string} the name of the gesture with the higher evaluation probability, null if all
+         * gestures are below the threshold.
+         * @example
+         * // get the most likely gesture at the end of the stroke performance.
+         * // input is an Input.StrokeInput instance
+         * input.onStrokeEnd.add(function (event) {
+         *     var gesture = deictic.recognisedGesture(deictic.eval(event.d.buffer), 0.70);
+         *
+         * });
+         */
         this.recognizedGesture = function (result, threshold) {
+            if (result == null) {
+                return null;
+            }
             var recognized = null;
             var max = 0.0;
             for (var i in result) {
@@ -698,17 +721,103 @@
 
     Input.Deictic = Deictic;
 
+
+    /**
+     * @class MachineLearning
+     * @memberOf Input
+     * @classdesc A support for gesture recognition using Machine Learning (ML) techniques. It allows
+     * providing labelled examples of the different gestures in the vocabulary and automatically learns
+     * to recognize them.
+     * <br/>
+     * This object provides a simplified API for the 1$ gesture recogniser described in
+     * Jacob O. Wobbrock, Andrew D. Wilson, and Yang Li. 2007. Gestures without libraries, toolkits or training:
+     * a $1 recognizer for user interface prototypes. In Proceedings of UIST 2007, ACM, 159-168.
+     * {@link https://doi.org/10.1145/1294211.1294238 | DOI}. The javascript library is available at
+     * {@link http://depts.washington.edu/madlab/proj/dollar/}
+     * <br/>
+     * It requires a set of labelled examples represented as an {@link Input~DollarSamples} object, contained in the
+     * global variable samples. <br/>
+     * For the user-test, a simple interface for providing the labelled examples is available, please read the
+     * tutorial.
+     * @description Creates an object for recognizing gestures with the Machine Learning approach.
+     * @see Input~DollarTraining
+     */
     var MachineLearning = function () {
         var _self = this;
 
+        /**
+         * @public
+         * @instance
+         * @method init
+         * @description Inits the {@link Input.MachineLearning} instance with the training samples.
+         * <br/> Please note that, for library code compatibility issues, the training samples <strong>must
+         * be specified through a global variable called samples</strong>.
+         * @memberOf Input.MachineLearning
+         * @example
+         * samples =  ...; // get the labeled samples from any source you like (global)
+         * // after this statement, the training samples are not loaded
+         * var machineLearning = new Input.MachineLearning();
+         * // after this statement the MachineLearning object is ready to use.
+         * // The called function  reads internally the samples variable.
+         * machineLearning.init()
+         */
         this.init = function () {
             _self.r = new DollarRecognizer();
+            /**
+             * @description Labelled samples for the 1$ gesture recognizer training.
+             * @typedef  {Object} Input~DollarTraining
+             * @property {string} Name - the name of the gesture (the label)
+             * @property {Array<Input~DollarSample>} Points - the points defining the labelled sample
+             */
+            /**
+             * @description Labelled samples for the 1$ gesture recognizer training.
+             * @typedef  {Input~DollarSample} Input~DollarSamples
+             * @property {number} X - the X coordinate of the sample point
+             * @property {number} Y - the Y coordinate of the sample point
+             */
             _self.r.Unistrokes = samples;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method eval
+         * @description Evaluates the current stroke and returns the probability associated to each gesture label
+         * @memberOf Input.MachineLearning
+         * @param {Array<Input.Point2D>} sequence - the current stroke represented as an array of {@link Input.Point2D}
+         * @returns {Array<Input~MLEvaluation>} the evaluation result.
+         * @example
+         *
+         * // Example 2: stroke update
+         * // When receiving an update from the StrokeInput input,
+         * // we evaluate it with Machine Learning. The object input is an
+         * // Input.StrokeInput instance.
+         * var machineLearning = new MachineLearning();
+         * machineLearning.init();
+         *
+         * input.onStrokeChange.add(function (event) {
+         *     var result = machineLearning.eval(event.d.buffer);
+         *
+         *     // check the probability of the V gesture
+         *     var prob = 0;
+         *     for(var i in result){
+         *          var gesture = result[i];
+         *          if(gesture.name === 'V'){
+         *              prob = gesture.probability;
+         *          }
+         *     }
+         * });
+         *
+         */
         this.eval = function (sequence) {
             var dollar = _self.r.Recognize(sequence, false);
             var result = [];
+            /**
+             * @description Probability that the current stroke belongs to the specified named class (label)
+             * @typedef  {Object} Input~MLEvaluation
+             * @property {string} name - the label (name of the class) for a gesture
+             * @property {number} probability - the associated probability
+             */
             for (var i in dollar.Rank) {
                 result.push({'name': dollar.Rank[i].Name, 'probability': dollar.Rank[i].Prob});
             }
@@ -716,6 +825,25 @@
             return result;
         };
 
+        /**
+         * @public
+         * @instance
+         * @method recognisedGesture
+         * @description A short-hand for getting the name of the gesture with the higher recognition probability.
+         * @memberOf Input.MachineLearning
+         * @param {Array<Input~MLEvaluation>} result - the Machine Learning evaluation of a stroke, as returned by the
+         * {@link Input.MachineLearning#eval/eval} method.
+         * @param {number} threshold - the minimum probability for considering the gesture as recognized.
+         * @returns {string} the name of the gesture with the higher evaluation probability, null if all
+         * gestures are below the threshold.
+         * @example
+         * // get the most likely gesture at the end of the stroke performance.
+         * // input is an Input.StrokeInput instance
+         * input.onStrokeEnd.add(function (event) {
+         *     var gesture = machineLearning.recognisedGesture(machineLearning.eval(event.d.buffer), 0.70);
+         *
+         * });
+         */
         this.recognizedGesture = function (result, threshold) {
             var recognized = null;
             var max = 0.0;
