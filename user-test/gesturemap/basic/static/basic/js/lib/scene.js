@@ -484,7 +484,7 @@
          * @memberOf Grid.Octopocus
          * @description Starts the visualization of both feedback and feedforward.
          * @param {object} event - the original {@link https://konvajs.github.io/docs/ |Konva.Event} enhanced with a
-         * {Input~StrokeEvent} in the d field
+         * {@link Input~StrokeEvent} in the d field
          * @example
          * // It receives the start stroke event from a {@link Input.StrokeInput} instance named
          * // input and  it passes it to a {@link Scene.Octopocus} instance named feedback.
@@ -530,7 +530,7 @@
          * @memberOf Grid.Octopocus
          * @description Updates the representation of the feedforward.
          * @param {object} event - the original {@link https://konvajs.github.io/docs/ | Konva.Event} enhanced with a
-         * {Input~StrokeEvent} in the d field.
+         * {@link Input~StrokeEvent} in the d field.
          * @param {Array<Grid~FeedforwardState>} descr - the feedforward state description
          * @example
          * // It receives the updates on a user's stroke from

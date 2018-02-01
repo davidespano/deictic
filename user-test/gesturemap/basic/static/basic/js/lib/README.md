@@ -19,6 +19,10 @@ the available documentation at any moment during the development.
 The tutorials are the following:
 1. {@tutorial Managing the grid map}
 2. {@tutorial Registering strokes}
+3. {@tutorial Using the line feedback}
+4. {@tutorial Using the Octopocus feedback}
+5. {@tutorial Recognizing gestures with Finite State Machines}
+
 
 
 1. Graphics library
