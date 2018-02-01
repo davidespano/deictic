@@ -17,8 +17,12 @@ look at them in order to understand the role of each component in the target app
 the available documentation at any moment during the development. 
 
 The tutorials are the following:
+1. {@tutorial Managing the grid map}
+2. {@tutorial Registering strokes}
+
+
 1. Graphics library
-    1. Managing the grid map
+    1. 
     2. Using the line feedback
     3. Using the Octopocus feedback
 2. Input library

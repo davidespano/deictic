@@ -117,7 +117,7 @@
          * @member onStrokeEnd
          * @memberOf Input.StrokeInput
          * @instance
-         * @description Notifies that the current stroke has completed.
+         * @description Notifies that the current stroke is completed.
          * The event object contains a {@link Input~StrokeChangeDescriptor} in the d property.
          * @type {Input.Event}
          * @see {Input~StrokeChangeDescriptor}
