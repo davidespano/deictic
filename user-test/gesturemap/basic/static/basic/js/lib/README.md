@@ -83,7 +83,7 @@ Before starting, please fill the <a href="" >demographic questionnaire</a>.
 
 Task 1
 ---
-
+Please take note of the time you start. 
 Please implement the grid map application using the {@link Input.LineFeedback} object. According to the recognition
 algorithm you are using, you will put the code in the following file and you will access the application through a
 different url:
@@ -95,11 +95,12 @@ different url:
 * **Deictic** source file: `app-deictic-line.js` app link: 
 <a href="http://localhost:8000/basic/map/deictic/line" >http://localhost:8000/basic/map/deictic/line</a>.
 
-When the application works correctly, please fill the  <a href="" >post task questionnaire</a>.
+When the application works correctly, take note of the time you finished. 
+After that, please fill the  <a href="" >post task questionnaire</a>.
 
 Task 2
 ---
-
+Please take note of the time you start. 
 Please implement the grid map application using the {@link Input.Octopocus} object. According to the recognition
 algorithm you are using, you will put the code in the following file and you will access the application through a
 different url:
@@ -111,7 +112,8 @@ different url:
 * **Deictic** source file: `app-deictic-line.js` app link: 
 <a href="http://localhost:8000/basic/map/deictic/octo" >http://localhost:8000/basic/map/deictic/octo</a>.
 
-When the application works correctly, please fill the  <a href="" >post task questionnaire</a>.
+When the application works correctly, take note of the time you finished. 
+After that, please fill the  <a href="" >post task questionnaire</a>.
 
 Post test
 ---
