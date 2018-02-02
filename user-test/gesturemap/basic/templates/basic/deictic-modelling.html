@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% load static %}
+{% static "" as baseUrl %}
+<html>
+<head>
+    <title>Deictic Modelling Environment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link href="{% static 'basic/style.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body>
+<!--
+    Questo svg traccia la griglia utilizzando i pattern
+-->
+<svg id="main" width="501" height="501">
+    <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="2" refY="1"
+                orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,2 L3,1 z" fill="#f88"/>
+        </marker>
+        <marker id="dot" markerWidth="10" markerHeight="10" refX="5" refY="5">
+            <circle r="0.7" cx="5" cy="5" fill="#f44"/>
+        </marker>
+        <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5"/>
+        </pattern>
+        <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#smallGrid)"/>
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" stroke-width="1"/>
+        </pattern>
+    </defs>
+
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+</svg>
+
+<!--
+    Questo svg traccia i cerchi che utilizziamo come palette per la
+    selezione della shape da tracciare o dell'azione da effettuare
+-->
+
+<svg id="palette" width="400" height="500">
+    <g transform="translate(100, 50)" stroke="#833">
+        <circle class="button" r="26" fill="#def"/>
+        <text class="button" x="0" y="12" text-anchor="middle" fill="#833" font-size="30px">&#8623;</text>
+        <text class="label" x="40" y="6" fill="#833">Unistroke mode</text>
+
+        <circle class="button" r="26" cy="60"/>
+        <text class="button" x="0" y="76" text-anchor="middle" fill="#833" font-size="48px">&#x2022;</text>
+        <text class="label" x="40" y="68" fill="#833">Point</text>
+
+        <circle class="button" r="26" cy="120"/>
+        <text class="button" x="0" y="132" text-anchor="middle" fill="#833" font-size="30px">&#x279a;</text>
+        <text class="label" x="40" y="126" fill="#833">Line</text>
+
+        <circle class="button" r="26" cy="180"/>
+        <text class="button" x="1" y="192" text-anchor="middle" fill="#833" font-size="30px">&#x21b7;</text>
+        <text class="label" x="40" y="186" fill="#833">Arc (cw)</text>
+
+        <circle class="button" r="26" cy="240"/>
+        <text class="button" x="0" y="252" text-anchor="middle" fill="#833" font-size="30px">&#x21b6;</text>
+        <text class="label" x="40" y="246" fill="#833">Arc (counter cw)</text>
+
+        <circle class="button" r="26" cy="300"/>
+        <text class="button" x="0" y="308" text-anchor="middle" fill="#833">&#xe140;</text>
+        <text class="label" x="40" y="302" fill="#833">Move</text>
+
+        <circle class="button" r="26" cy="360"/>
+        <text class="button" x="0" y="368" text-anchor="middle" fill="#833">&#xe065;</text>
+        <text class="label" x="40" y="362" fill="#833">Change</text>
+
+        <circle class="button" r="26" cy="420"/>
+        <text class="button" x="0" y="428" text-anchor="middle" fill="#833">&#xe014;</text>
+        <text class="label" x="40" y="426" fill="#833">Delete</text>
+
+    </g>
+</svg>
+
+<div> &nbsp;</div>
+
+<!--
+    Questi div rappresentano, rispettivamente, una scritta a schermo
+            temporanea per mostrare all'utente quale azione sta compiendo
+            e l'espressione che identifica la gesture
+-->
+<div id="statusline"></div>
+
+<div id="printer"> &nbsp;</div>
+
+<script src="{% static 'basic/js/deictic-modelling/shapes.js' %}"></script>
+</body>
+
+</html>
+
+<!--
+-->

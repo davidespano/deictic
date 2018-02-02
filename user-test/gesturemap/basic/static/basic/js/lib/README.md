@@ -22,17 +22,8 @@ The tutorials are the following:
 3. {@tutorial Using the line feedback}
 4. {@tutorial Using the Octopocus feedback}
 5. {@tutorial Recognizing gestures with Finite State Machines}
-6. {@tutorial Recognizing gestures with Machine Learning} 
+6. {@tutorial Recognizing gestures with Machine Learning}
+7. {@tutorial Recognizing gestures with Deictic} 
 
 
-
-1. Graphics library
-    1. 
-    2. Using the line feedback
-    3. Using the Octopocus feedback
-2. Input library
-    1. Registering strokes
-    2. Recognizing gestures with Finite State Machines
-    3. Recognizing gestures with Machine Learning
-    4. Recognizing gestures with Deictic
 

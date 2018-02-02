@@ -16,7 +16,9 @@ Defining the gesture models
 
 Defining gestures stroke with Deictic requires using a simple expression language. The basic ingredients are a set
 of simple geometric primitives, depicted in the following figure (please note that the Y positive direction is up,
-as in Cartesian coordinates and opposite to the screen coordinates).
+as in Cartesian coordinates and opposite to the screen coordinates). A 
+<a href="http://localhost:8000/basic/deictic_editor" target="_blank">
+graphical modelling editor</a> for the expressions is available. 
 
 <img src="./tutorials/img/6-1-primitives.png" alt="A sample grid map" style="width: 600px;"/> 
 
@@ -81,6 +83,9 @@ providing a name for each of them. The following code initializes a  {@link Inpu
 counter-clockwise circle from the examples above.  Internally, the function communicates with the server-side part and
 automatically trains the recognizer according to the gesture set. This step may take some time to complete (5-6 seconds). 
 
+A <a href="http://localhost:8000/basic/deictic_editor" target="_blank">
+graphical modelling editor</a> for the gesture expressions is available. 
+
 ````
 var deictic = new Input.Deictic();
 // configures deictic for recognizing a V and a circle gesture (counter-clockwise)
@@ -89,6 +94,8 @@ deictic.init([
      {name: 'circle', model: 'P(0, 0) + A(-3, -3, false) + A(3, -3, false) + A(3, 3, false) + A(-3, 3, false)'}
 ]);
 ````
+
+
 
 Gesture recognition
 ---

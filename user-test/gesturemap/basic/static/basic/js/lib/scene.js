@@ -12,6 +12,7 @@
      * @memberOf Grid
      * @description Creates a grid map object
      * @classdesc Represents the grid map to be filled with monsters and treasures.
+     * @tutorial Managing the grid map
      */
     var Scene = function () {
 
@@ -230,6 +231,7 @@
      * @memberOf Grid
      * @description Creates a line feedback for a {@link Input.StrokeInput}
      * @see Input.StrokeInput
+     * @tutorial Using the line feedback
      */
     var LineFeedback = function () {
 
@@ -317,6 +319,7 @@
      * @memberOf Grid
      * @description Creates a OctoPocus feedback for a {@link Input.StrokeInput}
      * @see Input.StrokeInput
+     * @tutorial Using the Octopocus feedback
      */
     var Octopocus = function () {
         var _self = this;

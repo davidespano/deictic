@@ -68,6 +68,7 @@
      * @description Creates a stroke input manager
      * @classdesc Simplified manager for the user's stroke input, which may be received from both touch and mouse
      * events. It provides a unified API for writing device agnostic recognition algorithms.
+     * @tutorial Registering strokes
      */
     var StrokeInput = function (layer) {
         /**
@@ -288,6 +289,7 @@
      * If it receives a number of movement vector angles higher than the tolerance threshold that were not contained
      * in the current state or the next state range, the FSM goes in an error state.
      * @description Creates a Finite State Machine for recognizing gestures with an heuristic approach.
+     * @tutorial Recognizing gestures with Finite State Machines
      */
     var AngleFSM = function () {
         var _self = this;
@@ -471,9 +473,12 @@
      * defining a gesture set composing points, lines and arc primitives. The recognition is robust with respect to
      * user's performance variability and, for each update received on the stroke path, it provides information on
      * the recognition probability of the whole gesture and the composed primitives. <br/>
+     * A <a href="http://localhost:8000/basic/deictic_editor" target="_blank"> graphical modelling editor</a> for the gesture
+     *  expressions is available. <br/>
      * The recognition is performed at server-side, but this hides completely the communication.
      * @description Creates an object for recognizing gestures with the Deictic approach.
      * @see Input~DeicticGesture
+     * @tutorial Recognizing gestures with Deictic
      */
     var Deictic = function () {
         var _self = this;
@@ -499,6 +504,8 @@
             console.log('Deictic: models init at server-side');
             /**
              * @description Represents a gesture in the  {@link Input.Deictic} format. <br/>
+             * A <a href="http://localhost:8000/basic/deictic_editor" target="_blank"> graphical modelling editor</a> for the gesture
+             *  expressions is available. <br/>
              * It is possible to combine the following 2D primitives:
              * <ul>
              *  <li> A <strong>2D point</strong>, denoted as <code>P(x,y)</code> where <code>x</code> and <code>y</code> are its
@@ -544,6 +551,7 @@
              *  <code>P(0,0) + L(0,1) + L(1,0)</code> is equivalent to <code>P(0,0) + L(0,5) + L(5,0)</code>, but it is
              *  different from <code>P(0,0) + L(0,1) + L(5,0)</code>, since the movement on the X  is 5 times
              *  the one on the Y.
+             *
              * @typedef  {Object} Input~DeicticGesture
              * @property {string} name - the name associated to the gesture
              * @property {string} model - the gesture modelled with the Deictic primitives and operators.
@@ -737,10 +745,12 @@
      * <br/>
      * It requires a set of labelled examples represented as an {@link Input~DollarSamples} object, contained in the
      * global variable samples. <br/>
-     * For the user-test, a simple interface for providing the labelled examples is available, please read the
-     * tutorial.
+     * For the user-test, a <a href="http://localhost:8000/basic/training" target="_blank">
+     *     simple interface for providing the labelled examples</a> is available, please read the
+     * tutorial linked below.
      * @description Creates an object for recognizing gestures with the Machine Learning approach.
      * @see Input~DollarTraining
+     * @tutorial Recognizing gestures with Machine Learning
      */
     var MachineLearning = function () {
         var _self = this;

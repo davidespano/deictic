@@ -31,6 +31,9 @@ def training(request):
     context = {}
     return render(request, 'basic/training.html', context)
 
+def deictic_editor(request):
+    context = {}
+    return render(request, 'basic/deictic-modelling.html', context)
 
 @never_cache
 def deictic_models(request):
