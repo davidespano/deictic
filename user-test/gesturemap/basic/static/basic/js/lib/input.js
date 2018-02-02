@@ -518,7 +518,7 @@
              *  Applying the following composition operator it is possible to obtain complex gestures starting from
              *  primitives, declaring a modelling expression:
              *  <ul>
-             *      <li>A <strong>sequence</strong>, represented by the symbol <code>+</code> indicating that the
+             *      <li>A <strong>sequence</strong>, represented by the symbol <code>+</code> indicating that
              *          the user has to complete first the left operand and then the right one. <code>A + B</code>
              *          denotes that, for completing the gesture, the user has first to perform <code>A</code>
              *          and then <code>B</code>
@@ -537,7 +537,7 @@
              *      </li>
              *  </ul>
              *  A stroke always stars with a point. Then, it continues along a linear (line), curved (arc) or mixed
-             *  (both of them) path. A multi-stroke gesture (e.g. perfomed with more than a finger) contains
+             *  (both of them) path. A multi-stroke gesture (e.g. performed with more than a finger) contains
              *  two or more point primitives. <br/>
              *  Please note that only the relative sizes among the primitives influence the recognition, since the
              *  dimensions are normalised by the underlying engine. Therefore the gesture
@@ -549,7 +549,7 @@
              * @property {string} model - the gesture modelled with the Deictic primitives and operators.
              * @example
              * // single stroke horizontal line
-             * var horizontal = {name: 'horizontal', model: 'P(0,0) + L(1, 0)'};
+             * var horizontal = {name: 'horizontal', model: 'P(0,0) + L(5, 0)'};
              *
              * // single stroke vertical line
              * var vertical = {name: 'vertical', model: 'P(0,0) + L(0, 5)'};
@@ -560,7 +560,7 @@
              * // clockwise circle
              * var circleCw = {
              *     name: 'circleCw',
-             *     model: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true)'
+             *     model: 'P(0, 0) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true) + A(3, 3, true)'
              * };
              *
              * // counterclockwise circle
@@ -572,7 +572,7 @@
              * // a question mark
              * var question = {
              *     name: 'question',
-             *     model: 'P(0,0) + A(-3,3, true) + A(3,-3, true) + A(-3,-3,true) + L(-3,0)'
+             *     model: 'P(0,0) + A(3,3, true) + A(3,-3, true) + A(-3,-3,true) + L(0,-4)'
              * };
              *
              * // a five-points star

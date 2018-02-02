@@ -66,9 +66,9 @@ input.onStrokeEnd.add(function (event) {
 ````
 
 In many cases, we consider as the recognized gesture the one having the higher probability. In addition, we threshold
-the probability value in order to avoid low values. For instance, if the maximum probability is 0.25 we consider the
+its probability value in order to avoid low values. For instance, if the maximum probability is 0.25 we consider the
 not recognized. The {@link Input.MachineLearning} object provides the `recognizedGesture` utility method for searching 
-the maximum probability and threshold it. 
+the maximum probability and threshold it. The method takes as input the object returned by `eval`.
 
 ````
 // get the most likely gesture at the end of the stroke performance.
