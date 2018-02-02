@@ -121,7 +121,3 @@ Post test
 algorithms (3 times).**
 
 Please fill the <a href="" >post test questionnaire</a>.
-
- 
-
-
