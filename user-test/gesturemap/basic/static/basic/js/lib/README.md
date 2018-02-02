@@ -22,6 +22,7 @@ The tutorials are the following:
 3. {@tutorial Using the line feedback}
 4. {@tutorial Using the Octopocus feedback}
 5. {@tutorial Recognizing gestures with Finite State Machines}
+6. {@tutorial Recognizing gestures with Machine Learning} 
 
 
 
