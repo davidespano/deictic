@@ -30,9 +30,11 @@ available in the library:
 We are interested in evaluating the impact of the gesture recognition library on building the user interface. We
 consider three approaches:
 * **Heuristic recognition** in which the developer writes code procedures for recognizing the gesture according to 
-simple geometric features
-* **Machine Learning** in which the developer trains a classifier with a set of examples
+simple geometric features ({@tutorial Recognizing gestures with Finite State Machines})
+* **Machine Learning** in which the developer trains a classifier with a set of examples 
+({@tutorial Recognizing gestures with Machine Learning})
 * **Deictic** an hybrid approach that builds a classifier from the geometric gesture modelling. 
+({@tutorial Recognizing gestures with Deictic})
 
 In the test, we will ask you to exploit all the recognition approaches for building the grid application, once 
 configured with the line and once configured with the Octopocus feedback. Your are going to create 3x2=6 versions 
@@ -79,7 +81,14 @@ Please **use the names we provided for the gestures**, this will help us in anal
 * <img src="./tutorials/img/0-3-delete.png" alt="" style="width: 150px;"/> 
   **delete** (deletes the cell content)
 
-Before starting, please fill the <a href="" >demographic questionnaire</a>.
+Before starting, please fill the <a href="http://104.196.211.17/limesurvey/index.php/952736?newtest=Y&lang=it" >
+demographic questionnaire</a>.
+
+Pre-Task
+--
+Ask the moderator to check if the local development server is up. If not the following are the commands needed:
+1. From the deictic project root directory execute `cd user-test/gesturemap/`
+2. Execute  `python3 manage.py runserver` 
 
 Task 1
 ---
@@ -96,7 +105,8 @@ different url:
 <a href="http://localhost:8000/basic/map/deictic/line" >http://localhost:8000/basic/map/deictic/line</a>.
 
 When the application works correctly, take note of the time you finished. 
-After that, please fill the  <a href="" >post task questionnaire</a>.
+After that, please fill the  <a href="http://104.196.211.17/limesurvey/index.php/952736?lang=it" >
+post task questionnaire</a>.
 
 Task 2
 ---
@@ -113,11 +123,12 @@ different url:
 <a href="http://localhost:8000/basic/map/deictic/octo" >http://localhost:8000/basic/map/deictic/octo</a>.
 
 When the application works correctly, take note of the time you finished. 
-After that, please fill the  <a href="" >post task questionnaire</a>.
+After that, please fill the  <a href="http://104.196.211.17/limesurvey/index.php/873383?lang=it" >
+post task questionnaire</a>.
 
 Post test
 ---
 **You should fill the following questionnaire only when you have completed the two tasks with all recognition 
 algorithms (3 times).**
 
-Please fill the <a href="" >post test questionnaire</a>.
+Please fill the <a href="http://104.196.211.17/limesurvey/index.php/873383?lang=it" >post test questionnaire</a>.
