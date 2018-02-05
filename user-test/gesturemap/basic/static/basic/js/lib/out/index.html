@@ -93,9 +93,11 @@ available in the library:</p>
 consider three approaches:</p>
 <ul>
 <li><strong>Heuristic recognition</strong> in which the developer writes code procedures for recognizing the gesture according to 
-simple geometric features</li>
-<li><strong>Machine Learning</strong> in which the developer trains a classifier with a set of examples</li>
-<li><strong>Deictic</strong> an hybrid approach that builds a classifier from the geometric gesture modelling. </li>
+simple geometric features (<a href="tutorial-Recognizing gestures with Finite State Machines.html">Recognizing gestures with Finite State Machines</a>)</li>
+<li><strong>Machine Learning</strong> in which the developer trains a classifier with a set of examples 
+(<a href="tutorial-Recognizing gestures with Machine Learning.html">Recognizing gestures with Machine Learning</a>)</li>
+<li><strong>Deictic</strong> an hybrid approach that builds a classifier from the geometric gesture modelling. 
+(<a href="tutorial-Recognizing gestures with Deictic.html">Recognizing gestures with Deictic</a>)</li>
 </ul>
 <p>In the test, we will ask you to exploit all the recognition approaches for building the grid application, once 
 configured with the line and once configured with the Octopocus feedback. Your are going to create 3x2=6 versions 
@@ -133,8 +135,15 @@ Please <strong>use the names we provided for the gestures</strong>, this will he
 <li><img src="./tutorials/img/0-3-delete.png" alt="" style="width: 150px;"/> 
 <strong>delete</strong> (deletes the cell content)</li>
 </ul>
-<p>Before starting, please fill the <a href="" >demographic questionnaire</a>.</p>
-<h2>Task 1</h2><p>Please implement the grid map application using the Input.LineFeedback object. According to the recognition
+<p>Before starting, please fill the <a href="http://104.196.211.17/limesurvey/index.php/952736?newtest=Y&lang=it" >
+demographic questionnaire</a>.</p>
+<h2>Pre-Task</h2><p>Ask the moderator to check if the local development server is up. If not the following are the commands needed:</p>
+<ol>
+<li>From the deictic project root directory execute <code>cd user-test/gesturemap/</code></li>
+<li>Execute  <code>python3 manage.py runserver</code> </li>
+</ol>
+<h2>Task 1</h2><p>Please take note of the time you start. 
+Please implement the grid map application using the Input.LineFeedback object. According to the recognition
 algorithm you are using, you will put the code in the following file and you will access the application through a
 different url:</p>
 <ul>
@@ -145,8 +154,11 @@ different url:</p>
 <li><strong>Deictic</strong> source file: <code>app-deictic-line.js</code> app link: 
 <a href="http://localhost:8000/basic/map/deictic/line" >http://localhost:8000/basic/map/deictic/line</a>.</li>
 </ul>
-<p>When the application works correctly, please fill the  <a href="" >post task questionnaire</a>.</p>
-<h2>Task 2</h2><p>Please implement the grid map application using the Input.Octopocus object. According to the recognition
+<p>When the application works correctly, take note of the time you finished. 
+After that, please fill the  <a href="http://104.196.211.17/limesurvey/index.php/952736?lang=it" >
+post task questionnaire</a>.</p>
+<h2>Task 2</h2><p>Please take note of the time you start. 
+Please implement the grid map application using the Input.Octopocus object. According to the recognition
 algorithm you are using, you will put the code in the following file and you will access the application through a
 different url:</p>
 <ul>
@@ -157,10 +169,12 @@ different url:</p>
 <li><strong>Deictic</strong> source file: <code>app-deictic-line.js</code> app link: 
 <a href="http://localhost:8000/basic/map/deictic/octo" >http://localhost:8000/basic/map/deictic/octo</a>.</li>
 </ul>
-<p>When the application works correctly, please fill the  <a href="" >post task questionnaire</a>.</p>
+<p>When the application works correctly, take note of the time you finished. 
+After that, please fill the  <a href="http://104.196.211.17/limesurvey/index.php/873383?lang=it" >
+post task questionnaire</a>.</p>
 <h2>Post test</h2><p><strong>You should fill the following questionnaire only when you have completed the two tasks with all recognition 
 algorithms (3 times).</strong></p>
-<p>Please fill the <a href="" >post test questionnaire</a>.</p></article>
+<p>Please fill the <a href="http://104.196.211.17/limesurvey/index.php/873383?lang=it" >post test questionnaire</a>.</p></article>
     </section>
 
 
