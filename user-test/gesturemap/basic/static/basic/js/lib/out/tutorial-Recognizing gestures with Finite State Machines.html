@@ -90,7 +90,7 @@ the transition towards the error state. Symmetrically, it defines also how many 
 the next state are needed for firing the transition. 
 It allows having a recognizer that is more robust to the input noise, but it  delays the transitions. 
 For creating a good interface, we need to find a good balance between the two aspects. </p>
-<pre class="prettyprint source"><code>var angleFSM = Input.AngleFSM();
+<pre class="prettyprint source"><code>var angleFSM = new Input.AngleFSM();
 var midRange = 15;
 var tolerance = 5;
 
