@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 from dataset.geometry import Geometry2D, Point2D
 # state machine
 from real_time.parsing_trajectory.state_machine import StateMachine
+# splitting
+import itertools
 
-# find n-th occurrence
-from itertools import compress, count, islice
-from functools import partial
-from operator import eq
+import copy
+
 # levenshtein
 from real_time.parsing_trajectory.levenshtein_distance import LevenshteinDistance
 
@@ -230,6 +230,7 @@ class Trajectory():
             raise Exception("sequence must be a numpy array.")
         # Inizialization
         #
+        self.seq = sequence
         self.__sequence = sequence.tolist()
         #
         self.__labels = [Trajectory.TypePrimitive.NONE.value for x in range(len(sequence))]
@@ -249,15 +250,13 @@ class Trajectory():
         return self.__sequence
 
     def parse(self, threshold_a = None, threshold_b = None):
-
         self.algorithm1(threshold_a)
         self.algorithm2(threshold_b)
         #self.algorithm3()
 
         self.findSubPrimitives()
-        self.__removeNoise()
-        #self.__removeShortPrimitives()
-
+        #self.__removeNoise()
+        self.__removeShortPrimitives()
         return self.__groupPrimitives()
 
 
@@ -349,27 +348,72 @@ class Trajectory():
         :param beta:
         :return:
         """
+        class SplitSequence(StateMachine):
+            # public methods
+            def __init__(self, sequence, splitter):
+                # Check parameters
+                if not isinstance(sequence, list):
+                    sequence = list(sequence)
+                # initialize parameters
+                self.__sequence = [(sequence[index],index)for index in range(len(sequence))]
+                self.__splitter = splitter
+                self.__lists = []
+                # create state machine
+                super().__init__()
+                self.add_state("pair", self.__flowSequence)
+                self.add_state("write", self.__write)
+                self.add_state("end", None, end_state=1)
+                self.set_start("pair")
+                # start machine
+                super().run(sequence)
+
+            def get(self):
+                for index in range(len(self.__lists)):
+                    self.__lists[index] = [x[1] for x in self.__lists[index]]
+                return self.__lists
+
+            # private methods
+            def __flowSequence(self, cargo):
+                if self.__sequence:
+                    if not self.fun1(self.__sequence[0]):
+                        # not find item
+                        self.__sequence.pop(0)
+                        return ("pair", "")
+                    else:
+                        return ("write", [self.__sequence.pop(0)])
+                return ("end", "")
+
+            def __write(self, tmp=[]):
+                if self.__sequence:
+                    if tmp[0][0] == self.__sequence[0][0]:
+                        tmp.append(self.__sequence.pop(0))
+                        return ("write", tmp)
+                self.__lists.append(tmp)
+                return ("pair", "")
+
+            # user methods
+            def fun1(self, item):
+                if item[0] in self.__splitter:
+                    return True
+                return False
+
+
+
+        # compute trajectory descriptors
         self.__descriptorTrajectory()
-        indices=[]
-        for index in range(len(self.__sequence)-1):
-            if self.__labels[index] == Trajectory.TypePrimitive.LINE.value:
-                indices.append(index)
-                self.__quantizationIntervalsLine(indices=indices)
-            elif self.__labels[index] == Trajectory.TypePrimitive.ARC.value:
-                indices.append(index)
-                self.__quantizationIntervalsArc(indices=indices, beta=beta)
+        # find 'A' and 'B' subprimitives by splitting list in more nested list
+        for nested_list in SplitSequence(copy.deepcopy(self.__labels), ['A','B']).get():
+            if 'A' in self.__labels[nested_list[0]]:
+                self.__quantizationIntervalsLine(nested_list)
             else:
-                indices.clear()
+                self.__quantizationIntervalsArc(indices=nested_list, beta=beta)
         return self.__labels
 
 
     # private methods #
     def __removeShortPrimitives(self):
         # define a state machine for deleting short primitive sequences
-        #print(self.__labels)
         self.__labels = (RemoveSequenceStateMachine(self.__labels)).get()
-        #print(self.__labels)
-        #print('\n\n\n\n')
 
     def __removeNoise(self):
         for t in range(len(self.__labels)-1):
@@ -487,7 +531,12 @@ class Trajectory():
     def __groupPrimitives(self):
         #list_ = filter(lambda x,y: y != self.TypePrimitive.NONE.value, self.__labels)
         l = [self.__labels[index] for index in range(len(self.__labels)-1) if self.__labels[index]!=self.__labels[index+1] and self.__labels[index]!='0']
+
+        # line + border #
+        #l.append('O')
+        # line + arc + border #
         l = ['O']+[y for x in l for y in [x, 'O']]
+
         return l
 
 

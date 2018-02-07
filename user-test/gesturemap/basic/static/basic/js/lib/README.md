@@ -115,11 +115,11 @@ Please implement the grid map application using the {@link Input.Octopocus} obje
 algorithm you are using, you will put the code in the following file and you will access the application through a
 different url:
 
-* **Heuristic** source file: `app-heuristic-line.js` app link: 
+* **Heuristic** source file: `app-heuristic-octo.js` app link: 
 <a href="http://localhost:8000/basic/map/heuristic/octo" >http://localhost:8000/basic/map/heuristic/octo</a>.
-* **Machine Learning** source file: `app-ml-line.js` app link: 
+* **Machine Learning** source file: `app-ml-octo.js` app link: 
 <a href="http://localhost:8000/basic/map/ml/octo" >http://localhost:8000/basic/map/ml/octo</a>.
-* **Deictic** source file: `app-deictic-line.js` app link: 
+* **Deictic** source file: `app-deictic-octo.js` app link: 
 <a href="http://localhost:8000/basic/map/deictic/octo" >http://localhost:8000/basic/map/deictic/octo</a>.
 
 When the application works correctly, take note of the time you finished. 

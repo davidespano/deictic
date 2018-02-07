@@ -1,0 +1,42 @@
+ply
+format ascii 1.0
+comment made by Greg Turk
+comment this file is a cube
+element vertex 12
+property float x
+property float y
+property float z
+property uchar red
+property uchar green
+property uchar blue
+element face 10
+property list uchar int vertex_index
+end_header
+0 0 0 97 185 127
+-1 0 -1 97 185 127
+-2 0 0 97 185 127
+0 0 1.5 97 185 127
+3.5 0 -1.5 97 185 127
+2.5 0 -2.5 97 185 127
+0 1 0 97 185 127
+-1 1 -1 97 185 127
+-2 1 0 97 185 127
+0 1 1.5 97 185 127
+3.5 1 -1.5 97 185 127
+2.5 1 -2.5 97 185 127
+4 0 5 4 3
+4 3 2 1 0
+4 6 7 8 9
+4 9 10 11 6
+4 2 8 7 1
+4 7 6 0 1
+4 0 6 11 5
+4 5 11 10 4
+4 9 3 4 10
+4 8 2 3 9
+
+
+
+
+
+
