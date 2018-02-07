@@ -73,7 +73,7 @@ the maximum probability and threshold it. The method takes as input the object r
 ````
 // get the most likely gesture at the end of the stroke performance.
 input.onStrokeEnd.add(function (event) {
-    var gesture = machineLearning.recognisedGesture(machineLearning.eval(event.d.buffer), 0.70);
+    var gesture = machineLearning.recognizedGesture(machineLearning.eval(event.d.buffer), 0.70);
 });
 ````
 

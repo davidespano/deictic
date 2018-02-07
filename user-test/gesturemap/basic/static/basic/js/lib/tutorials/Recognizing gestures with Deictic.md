@@ -162,7 +162,7 @@ the maximum probability and threshold it.  The method takes as input the object 
 // get the most likely gesture at the end of the stroke performance.
 // input is an Input.StrokeInput instance
 input.onStrokeEnd.add(function (event) {
-    var gesture = deictic.recognisedGesture(deictic.eval(event.d.buffer), 0.70);
+    var gesture = deictic.recognizedGesture(deictic.eval(event.d.buffer), 0.70);
 
 });
 ````
