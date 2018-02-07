@@ -172,7 +172,7 @@ has two properties:</p>
 the entire gesture recognition probability. This means that the underlying recognition algorithm believes that the 
 user is performing an <strong>intermediate part of the gesture</strong>. </li>
 </ol>
-<pre class="prettyprint source"><code>{
+<pre class="prettyprint source"><code>[
      name: 'V', parts: [
          {name: 'P(0,0) + L(2,-3)', probability: 0.33},
          {name: 'P(0,0) + L(2,-3) + L(2,3)', probability: 0.75}
@@ -184,7 +184,7 @@ user is performing an <strong>intermediate part of the gesture</strong>. </li>
          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true)', probability: 0},
          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true)', probability: 0},
      ]
-}</code></pre><p>In many cases, we consider as the recognized gesture the one having the higher probability. In addition, we threshold
+]</code></pre><p>In many cases, we consider as the recognized gesture the one having the higher probability. In addition, we threshold
 its probability value in order to avoid low values. For instance, if the maximum probability is 0.25 we consider the
 not recognized. The <a href="Input.Deictic.html">Input.Deictic</a> object provides the <code>recognizedGesture</code> utility method for searching 
 the maximum probability and threshold it.  The method takes as input the object returned by <code>eval</code>.</p>

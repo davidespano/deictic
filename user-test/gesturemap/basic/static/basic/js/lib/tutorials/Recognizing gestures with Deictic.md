@@ -138,7 +138,7 @@ the entire gesture recognition probability. This means that the underlying recog
 user is performing an **intermediate part of the gesture**. 
 
 ````
-{
+[
      name: 'V', parts: [
          {name: 'P(0,0) + L(2,-3)', probability: 0.33},
          {name: 'P(0,0) + L(2,-3) + L(2,3)', probability: 0.75}
@@ -150,7 +150,7 @@ user is performing an **intermediate part of the gesture**.
          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true)', probability: 0},
          {name: 'P(0, 0) + A(3, 3, true) + A(3, -3, true) + A(-3, -3, true) + A(-3, 3, true)', probability: 0},
      ]
-}
+]
 ````
 
 In many cases, we consider as the recognized gesture the one having the higher probability. In addition, we threshold
