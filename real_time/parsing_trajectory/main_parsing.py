@@ -114,7 +114,7 @@ def path_to_alignment(x, y, path):
 # base dir
 base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/"
 #parse_datasets(directories=['arrow', 'caret', 'delete_mark', 'left_sq_bracket', 'rectangle', 'right_sq_bracket', 'star', 'triangle', 'v', 'x'])
-#plot_debug(directories=['left_curly_brace'], files=[])
+#plot_debug(directories=['arrow'], files=["2_medium_arrow_09.csv"])
 #  mode
 debug = 3
 
@@ -245,8 +245,9 @@ if debug == 3:
     #                                    ['O', 'A0', 'O', 'A2', 'O', 'A6', 'O']]
     # }
     ideal_sequences = {
-        'arrow': [['O', 'A1', 'O', 'A5', 'O', 'A0', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A6', 'O'],
-                  ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O']],
+        'arrow': [['O', 'A1', 'O', 'A5', 'O', 'A0', 'O', 'A6', 'O'],['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A6', 'O'],
+                  ['O', 'A1', 'O', 'A4', 'O', 'A0', 'O', 'A5', 'O'],['O', 'A1', 'O', 'A5', 'O', 'A1', 'O'],
+                  ['O', 'A1', 'O', 'A0', 'O', 'A6', 'O']],
         'caret': [['O', 'A2', 'O', 'A7', 'O'], ['O', 'A1', 'O', 'A6', 'O'], ['O', 'A1', 'O', 'A7', 'O'],
                    ['O', 'A2', 'O', 'A6', 'O']],
         'delete_mark': [['O', 'A7', 'O', 'A4', 'O', 'A1', 'O']],
@@ -255,15 +256,14 @@ if debug == 3:
         'right_sq_bracket': [['O', 'A0', 'O', 'A6', 'O', 'A4', 'O']],
         'star': [['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O']],
         'triangle': [['O', 'A5', 'O', 'A0', 'O', 'A3', 'O']],
-        'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],
-              ['O', 'A6', 'O', 'A2', 'O']],
+        'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],['O', 'A6', 'O', 'A2', 'O']],
         'x': [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']],
-    }
-    ideal_sequences={
-        'circle'            : [['O','A5','O','A7','O','A1','O','A2','O'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O']],
+    #}
+    #ideal_sequences={
+        'circle'            : [['O','A5','O','A7','O','A1','O','A3'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O'],['O', 'A5', 'O', 'A6', 'O', 'A7', 'O', 'A1', 'O'],['O', 'A5', 'O', 'BCCW', 'O', 'A1', 'O', 'A3', 'O']],
         'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O'], ['O','BCCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
-        'pigtail'           : [['O','A1','O','BCCW','O','A6','O'],['O','A1','O','BCCW','O']],
-        'question_mark'     : [['O','BCW','O','BCCW','O'],['O','BCW','O','BCW','O','BCCW','O']],
+        'pigtail'           : [['O','A1','O','BCCW','O','A6','O'],['O','A1','O','BCCW','O'],['O', 'A0', 'O', 'A1', 'O', 'BCCW', 'O', 'BCCW', 'O']],
+        'question_mark'     : [['O','BCW','O','BCCW','O'],['O','BCW','O','BCW','O','BCCW','O'],['O', 'A2', 'O', 'BCW', 'O', 'A5', 'O', 'A6', 'O'],['O', 'A1', 'O', 'A0', 'O', 'A6', 'O', 'A5', 'O']],
         'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O'], ['O','BCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
     }
 
@@ -287,17 +287,19 @@ if debug == 3:
 
             # if column_label != directory:
             #     print("\n\nGesture recognized:{} ---- file:{}".format(column_label, sequence[1]))
-                # if column_label != directory:
-                #     for m in models:
-                #             logp, path = m.viterbi(sequence[0])
-                #             logp = (m.log_probability(sequence[0])/len(sequence[0]))
-                #             x, y = path_to_alignment(''.join(ideal_sequences[m.name]), ''.join(sequence[0]), path)
-                #
-                #             print("Gesture:'{}' -- Described Sequence: {} -- Log_Probability: {}".format(''.join(m.name), ideal_sequences[m.name], logp))
-                #             print("--------Sequence            {}".format(sequence[0]))
-                #             print("--------Path:               {}".format([state.name for idx, state in path[1:-1]]))
-                #             print(x)
-                #             print(y)
+            #     if column_label != directory:
+            #         for name,hmms in models.items():
+            #             for index in range(len(hmms)):
+            #                 m=hmms[index]
+            #                 logp, path = m.viterbi(sequence[0])
+            #                 logp = (m.log_probability(sequence[0])/len(sequence[0]))
+            #                 x, y = path_to_alignment(''.join(ideal_sequences[name][index]), ''.join(sequence[0]), path)
+            #
+            #                 print("Gesture:'{}' -- Described Sequence: {} -- Log_Probability: {}".format(''.join(m.name), ideal_sequences[m.name], logp))
+            #                 print("--------Sequence            {}".format(sequence[0]))
+            #                 print("--------Path:               {}".format([state.name for idx, state in path[1:-1]]))
+            #                 print(x)
+            #                 print(y)
     result.plot()
 
 
@@ -654,21 +656,9 @@ if debug == 6:
 
 ######################## Debug
 if debug == 7:
-    ideal_sequences = {
-        'arrow':['O', 'A1', 'O', 'A5', 'O', 'A1', 'O', 'A6', 'O'],
-        'caret': ['O', 'A2', 'O', 'A7', 'O'],
-        'delete_mark': ['O', 'A7', 'O', 'A4', 'O', 'A1', 'O'],
-        'left_sq_bracket': ['O', 'A4', 'O', 'A6', 'O', 'A0', 'O'],
-        'rectangle': ['O', 'A6', 'O', 'A0', 'O', 'A2', 'O', 'A4', 'O'],
-        'right_sq_bracket': ['O', 'A0', 'O', 'A6', 'O', 'A4', 'O'],
-        'star': ['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O'],
-        'triangle': ['O', 'A5', 'O', 'A0', 'O', 'A3', 'O'],
-        'v': ['O', 'A7', 'O', 'A2', 'O'],
-        'x': ['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']
-    }
     ideal_sequences_arc = {}
 
-    directories = ['circle','left_curly_brace','pigtail','question_mark','right_curly_brace']
+    directories = ['arrow']
 
     for directory in directories:
         # original kalman + resampled + parsing

@@ -10,16 +10,16 @@ class ModelFactory():
     __chars = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7','O']# 'B0True','B1True','B2True','B3True', 'B0False','B1False','B2False','B3False', 'O']
 
     @staticmethod
-    def ergodic(nome=None, n_states=0):
+    def ergodic(name=None, n_states=0):
         model = HiddenMarkovModel(name)
         # Ergodic
-        states = self.__fix_parameters(self.name, n_states, [], [], self.model);
+        states = ModelFactory.__fix_parameters(name, n_states, [], [], model);
         p_tr = 1 / (n_states + 2)
         for i in range(0, n_states):
-            self.model.add_transition(self.model.start, states[i], p_tr)
-            self.model.add_transition(states[i], self.model.end, p_tr)
+            model.add_transition(model.start, states[i], p_tr)
+            model.add_transition(states[i], model.end, p_tr)
             for j in range(0, n_states):
-                self.model.add_transition(states[i], states[j], p_tr)
+                model.add_transition(states[i], states[j], p_tr)
         # bake
         model.bake()
         return model

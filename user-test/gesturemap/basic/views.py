@@ -8,7 +8,7 @@ import numpy as numpy
 from django.views.decorators.cache import never_cache
 import sys
 
-sys.path.append('/Users/davide/PycharmProjects/deictic')
+sys.path.append('/home/ale/PycharmProjects/deictic')
 
 from gesture import *
 
@@ -42,7 +42,7 @@ def deictic_models(request):
     states = 6
 
     if not 'models' in request.session:
-        baseDir = '/Users/davide/PycharmProjects/deictic/repository/'
+        baseDir = '/home/ale/PycharmProjects/deictic/repository/'
         trainingDir = baseDir + 'deictic/unica-dataset/raw/right/'
         arcClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1ClockWise/'
         arcCounterClockWiseDir = baseDir + 'deictic/unica-dataset/raw/arc1CounterClockWise/'
@@ -110,7 +110,8 @@ def deictic_eval(request):
             parts = []
             for i in range(1, len(definition['parts'])):
                 prob = definition['parts'][i]['hmm'].log_probability(transformed) / len(transformed)
-                pretty = 0.9468093 + 0.01373144 * prob + 0.00005137985*prob* prob;
+                #pretty = 0.9468093 + 0.01373144 * prob + 0.00005137985*prob* prob;
+                pretty = 1.23 + 0.0148 * prob + 0.0000411 * prob * prob;
                 if prob < -130:
                     pretty = 0;
                 if prob > 7:
