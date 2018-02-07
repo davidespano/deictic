@@ -44,7 +44,7 @@ It allows having a recognizer that is more robust to the input noise, but it  de
 For creating a good interface, we need to find a good balance between the two aspects. 
 
 ````
-var angleFSM = Input.AngleFSM();
+var angleFSM = new Input.AngleFSM();
 var midRange = 15;
 var tolerance = 5;
 

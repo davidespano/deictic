@@ -35,7 +35,7 @@ var input = new Input.StrokeInput(scene.layer);
 
 // clears the line when a new stroke starts
 input.onStrokeBegin.add(function (event) {
-    lineFeedback.clear();
+    lineFeedback.clearLine();
 });
 
 // at each stroke update, push the point in the list
@@ -67,7 +67,7 @@ input.onStrokeChange.add(function (event) {
 
 // clears the line when a new stroke ends
 input.onStrokeEnd.add(function (event) {
-    lineFeedback.clear();
+    lineFeedback.clearLine();
 });
 
 ````
