@@ -127,25 +127,25 @@ the user  must start from the left side, otherwise the system should not recogni
 3) <img src="./tutorials/img/4-1-feedback-5.png" alt="A sample grid map" style="width: 200px;"/></p>
 <pre class="prettyprint source"><code>// figure 1)
 var upd1 = [
-     {name: &quot;triangle&quot;, part: &quot;0&quot;, probability: 0.8334},
-     {name: &quot;square&quot;, part: &quot;0&quot;, probability: 0.651},
-     {name: &quot;delete&quot;, part: &quot;1&quot;, probability: 0.5203}
+     {name: &quot;triangle&quot;, part: 0, probability: 0.8334},
+     {name: &quot;square&quot;, part: 0, probability: 0.651},
+     {name: &quot;delete&quot;, part: 1, probability: 0.5203}
 ];
 feedback.update(event, upd1);
 
 // figure 2)
 var upd2 = [
-     {name: &quot;triangle&quot;, part: &quot;1&quot;, probability: 0.8229},
-     {name: &quot;square&quot;, part: &quot;2&quot;, probability: 0.4448},
-     {name: &quot;delete&quot;, part: &quot;1&quot;, probability: 0.4497}
+     {name: &quot;triangle&quot;, part: 1, probability: 0.8229},
+     {name: &quot;square&quot;, part: 2, probability: 0.4448},
+     {name: &quot;delete&quot;, part: 1, probability: 0.4497}
 ];
 feedback.update(event, upd2);
 
 // figure 3)
 var upd3 = [
-     {name: &quot;triangle&quot;, part: &quot;2&quot;, probability: 0.8229},
-     {name: &quot;square&quot;, part: &quot;2&quot;, probability: 0.022},
-     {name: &quot;delete&quot;, part: &quot;1&quot;, probability: 0.33}
+     {name: &quot;triangle&quot;, part: 2, probability: 0.8229},
+     {name: &quot;square&quot;, part: 2, probability: 0.022},
+     {name: &quot;delete&quot;, part: 1, probability: 0.33}
 ];
 feedback.update(event, upd3);</code></pre><h2>Clear method</h2><p>The clear method simply hides the visual feedback and resets it to its initial state. </p>
 <pre class="prettyprint source"><code>feedback.clear();</code></pre><h2>Combining StrokeInput and Octopocus</h2><p>The schema for composing a <a href="Input.StrokeInput.html">Input.StrokeInput</a> and a <a href="Grid.Octopocus.html">Grid.Octopocus</a> instance is simple:</p>

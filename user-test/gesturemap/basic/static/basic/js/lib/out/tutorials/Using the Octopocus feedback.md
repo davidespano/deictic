@@ -92,25 +92,25 @@ The figures below show some sample updates.
 ````
 // figure 1)
 var upd1 = [
-     {name: "triangle", part: "0", probability: 0.8334},
-     {name: "square", part: "0", probability: 0.651},
-     {name: "delete", part: "1", probability: 0.5203}
+     {name: "triangle", part: 0, probability: 0.8334},
+     {name: "square", part: 0, probability: 0.651},
+     {name: "delete", part: 1, probability: 0.5203}
 ];
 feedback.update(event, upd1);
 
 // figure 2)
 var upd2 = [
-     {name: "triangle", part: "1", probability: 0.8229},
-     {name: "square", part: "2", probability: 0.4448},
-     {name: "delete", part: "1", probability: 0.4497}
+     {name: "triangle", part: 1, probability: 0.8229},
+     {name: "square", part: 2, probability: 0.4448},
+     {name: "delete", part: 1, probability: 0.4497}
 ];
 feedback.update(event, upd2);
 
 // figure 3)
 var upd3 = [
-     {name: "triangle", part: "2", probability: 0.8229},
-     {name: "square", part: "2", probability: 0.022},
-     {name: "delete", part: "1", probability: 0.33}
+     {name: "triangle", part: 2, probability: 0.8229},
+     {name: "square", part: 2, probability: 0.022},
+     {name: "delete", part: 1, probability: 0.33}
 ];
 feedback.update(event, upd3);
 ````

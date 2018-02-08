@@ -637,9 +637,11 @@
                         feedforward.line.points().splice(0, feedforward.line.points().length);
                         feedforward.line.points().push(p.x, p.y)
                         for (var i = state.part; i &lt; feedforward.parts; i++) {
-                            feedforward.line.points().push(
-                                _self.p0.x + feedforward.points[i].x,
-                                _self.p0.y + feedforward.points[i].y)
+                            if(feedforward.points[i] != null) {
+                                feedforward.line.points().push(
+                                    _self.p0.x + feedforward.points[i].x,
+                                    _self.p0.y + feedforward.points[i].y)
+                            }
                         }
                         feedforward.line.opacity(Math.exp(2 * state.probability - 2));
                         break;
