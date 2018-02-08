@@ -183,7 +183,7 @@
 
         var boxCoordinates = function (kevent) {
             var point;
-            switch (event.type) {
+            switch (kevent.type) {
                 case 'touchmove':
                 case 'touchend':
                     point = new Point(
