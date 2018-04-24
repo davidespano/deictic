@@ -3,7 +3,7 @@ from model.gestureModel import Point, Line, Arc
 from dataset import CsvDataset
 from test import Test
 from config import Config
-
+#pip3 install more_itertools is required!
 def firstExample():
     '''
         shows how to describe a gesture with Deictic and create its model.
@@ -98,4 +98,4 @@ def fourthExample():
     print(log_probabilities)
 
 # Start example
-fourthExample()
+thirdExample()
