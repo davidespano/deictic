@@ -1,14 +1,17 @@
 import re
 import more_itertools as mit
-
+from gesture import *
+from test.test import Test
+import matplotlib.pyplot as mp
+import numpy
 
 class Tree(object):
 
-    def __init__(self, name, children=[]):
-        if(isinstance(name, str) or isinstance(name, tuple)):
+    def __init__(self, name, gestures=None, children=[]):
+        if(isinstance(name, str)):
             self.name = name.__str__()
+            self.gestures=gestures
             self.children = []
-
 
     def add_child(self, node):
         if (isinstance(node, Tree)):
@@ -73,6 +76,7 @@ class Tree(object):
 
         return primitives_dictionary, list_of_operators
 
+    #Wip, non ancora completata/usata
     def splitCompositeGesture(self, list_of_operators, temp, half):
 
         temp = re.split(r'[\|\*]', temp)
@@ -130,27 +134,101 @@ class Tree(object):
 
 
                 #if (operators[indice] == '+'):
-                chiave = chiavi_ramo[indice].__str__()
-                valore = dict_ramo[chiavi_ramo[indice]].__str__()
-                coppia = (chiave, valore)
+                chiave = ramo.__str__() + "_pt_" + (indice+1).__str__()
 
-                temp.add_child(Tree(coppia))
+                #Unisco tutte le stringhe nella lista in una sola, separandole da " + "
+                valore = " + ".join(dict_ramo[chiavi_ramo[indice]])
+
+                #Sostituisco alcune stringhe (mi servirà per l'eval)
+                valore=valore.replace("P", "Point")
+                valore=valore.replace("L", "Line")
+
+
+                temp.add_child(Tree(name=chiave, gestures=valore.__str__()))
                 indice+=1
 
         return radice
-
 
     def visit(self, tree):
 
         #Se il nodo ha figli, li ''visito'', altrimenti stampo che non ne ha
         if(tree.children!=[]):
             for figlio in tree.children:
-                print(tree.name + " ha come figlio " + figlio.name)
+                if(figlio.gestures!=None):
+                    print(tree.name + " ha come figlio " + figlio.name + " e ha come gestures: " + figlio.gestures.__str__())
+                else:
+                    print(tree.name + " ha come figlio " + figlio.name + " e non ha gestures")
             for figlio in tree.children:
                 figlio.visit(figlio)
         else:
             print(tree.name + " non ha figli")
 
+    def createTreeDict(self, tree, gestures_hmms):
 
 
+        #Creo l'hmm delle foglie dell'albero
+        if (tree.children != []):
+            for figlio in tree.children:
+                figlio.createTreeDict(figlio, gestures_hmms)
+        else:
+
+            #ricostruisco la gesture_expression dal nome del nodo e dalle sue gestures (tramite eval)
+            #gesture_exp={tree.name: [eval(tree.gestures)]}
+            # gestures_hmms.append(ModelExpression.generatedModels(gesture_exp, num_states=6, spu=20))
+            gestures_hmms.setdefault(tree.name, [eval(tree.gestures)])
+
+    def calculateProbability(self, n_sample, gesture_hmms):
+
+        results=[]
+
+        unistroke_mode=True
+
+        gesture = ("triangle", 3 * n_sample)
+
+        path = 'C:/Users/fedus/Documents/GitHub/deictic_backup/repository/'+'deictic/unica-dataset/raw/'+gesture[0]+'/'
+
+        dataset = CsvDataset(path, type=float)
+
+        # Transform
+        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform2 = ScaleDatasetTransform(scale=100)
+        transform3 = CenteringTransform()
+        if unistroke_mode:
+            transform5 = ResampleInSpaceTransform(samples=gesture[1])
+        else:
+            transform5 = ResampleInSpaceTransformMultiStroke(samples=gesture[1], strokes=gesture[2])
+        # Apply transforms
+        dataset.addTransform(transform1)
+        dataset.addTransform(transform2)
+        dataset.addTransform(transform3)
+        dataset.addTransform(transform5)
+
+        list_of_points = dataset.applyTransforms()
+
+        #Confronto una coppia di punti del dataset con gli hmm dell'albero con la compare, che mi restituisce
+        #il nome dell'hmm con la probabilità massima tra i vari hmms
+
+        mp.figure(1)
+        mp.title('')
+
+        change=False
+        sequence_test=[]
+
+        i=0
+        for ndarray, name in list_of_points:
+            for ndarray1 in ndarray:
+                sequence_test.append(ndarray1)
+        if(i==0):
+            mp.title('Triangolo d\'esempio')
+            for ndarray1 in ndarray:
+                i+=1;
+                mp.plot(ndarray1[0], ndarray1[1], 'bo')
+
+        index_label, log_probabilities = Test.compare(sequence=sequence_test, gesture_hmms=gesture_hmms,
+                                                      return_log_probabilities=True)
+
+        print("The gesture with the highest log probabilities value is " + index_label)
+        print(log_probabilities)
+
+        mp.show()
 
