@@ -3,7 +3,8 @@ import more_itertools as mit
 from gesture import *
 from test.test import Test
 import matplotlib.pyplot as mp
-import numpy
+from sys import stdout
+import time
 
 class Tree(object):
 
@@ -177,17 +178,18 @@ class Tree(object):
             # gestures_hmms.append(ModelExpression.generatedModels(gesture_exp, num_states=6, spu=20))
             gestures_hmms.setdefault(tree.name, [eval(tree.gestures)])
 
-    def calculateProbability(self, n_sample, gesture_hmms):
+    def recognizeByProbability(self, gesture, gesture_hmms, sample_frames):
+        #gesture= gesture da riconoscere
+        #gesture_hmms= il dizionario contenente gli hmms
+        #sample_frame= numero di frames ogni quanto effettuare il riconoscimento
 
         results=[]
 
         unistroke_mode=True
 
-        gesture = ("triangle", 3 * n_sample)
+        path0 = '/home/federico/PycharmProjects/deictic/repository/'+'deictic/1dollar-dataset/raw/'+gesture[0]+'/'
 
-        path = 'C:/Users/fedus/Documents/GitHub/deictic_backup/repository/'+'deictic/unica-dataset/raw/'+gesture[0]+'/'
-
-        dataset = CsvDataset(path, type=float)
+        dataset = CsvDataset(path0, type=float)
 
         # Transform
         transform1 = NormaliseLengthTransform(axisMode=True)
@@ -207,28 +209,105 @@ class Tree(object):
 
         #Confronto una coppia di punti del dataset con gli hmm dell'albero con la compare, che mi restituisce
         #il nome dell'hmm con la probabilità massima tra i vari hmms
-
-        mp.figure(1)
-        mp.title('')
-
-        change=False
-        sequence_test=[]
+        list_of_prob_fullGesture=[]
+        someFrames=[]
+        list_of_prob_someFrames=[]
 
         i=0
+        y=0
+        plot_frames=[]
+        label=""
+        prev_label=""
+
         for ndarray, name in list_of_points:
+
+            #Riconoscimento singolo file (ndarray)
+            list_of_prob_fullGesture.append(Test.compare(sequence=ndarray, gesture_hmms=gesture_hmms,
+                                                          return_log_probabilities=False))
+
+            #Stampo il grafico finale
+            if(someFrames!=[] and plot_frames!=[]):
+                for x, y in plot_frames:
+                    mp.plot(x, y, 'bo')
+                #mp.title("FILE:" + name + ", GESTURE FINALE: " + label)
+                mp.title(label)
+                mp.suptitle(name)
+                mp.show()
+
+
+            i=0 #Inizializzo il counter dei frame
+            someFrames=[] #Inizializzo la lista contenente i frame quando cambio file
+
+            label_changes = 0
+            plot_frames=[]
             for ndarray1 in ndarray:
-                sequence_test.append(ndarray1)
-        if(i==0):
-            mp.title('Triangolo d\'esempio')
-            for ndarray1 in ndarray:
-                i+=1;
-                mp.plot(ndarray1[0], ndarray1[1], 'bo')
+                i+=1
 
-        index_label, log_probabilities = Test.compare(sequence=sequence_test, gesture_hmms=gesture_hmms,
-                                                      return_log_probabilities=True)
 
-        print("The gesture with the highest log probabilities value is " + index_label)
-        print(log_probabilities)
+                #Riconoscimento attraverso un array di frames (viene incrementato di un frame per ogni ciclo)
+                someFrames.append(ndarray1)
+                plot_frames.append((ndarray1[0],ndarray1[1]))
 
-        mp.show()
 
+
+                #prev_label = label
+                label=Test.compare(sequence=someFrames, gesture_hmms=gesture_hmms, return_log_probabilities=False)
+
+                #Stampo grafico parziale
+                '''a= (prev_label == label)
+                if ((a==False) and label!=None):
+                    mp.subplot(2, 2, label_changes+1)
+                    for x,y in plot_frames:
+                        mp.plot(x, y, 'bo')
+                    #mp.title("FILE:" + name + ", GESTURE: " + label)
+                    mp.title(label)
+
+                    #mp.show()
+                    label_changes += 1'''
+
+                #Stampa di aggiornamento (stampo in questo modo per sostituire sempre la riga attuale)
+                stdout.write("\rCalcolo probabilità FILE: " + name + "  Frame " + i.__str__() +
+                             "  Gesture riconosciuta: " + label.__str__())
+                stdout.flush()
+
+                #time.sleep(0.025)
+
+
+                y+=1
+                list_of_prob_someFrames.append(label)
+
+
+
+        i=0
+
+        #Result full è un dizionario gesture -> numero di riconoscimenti....full perchè appartiene al fullgesture
+        result_full = {i: list_of_prob_fullGesture.count(i) for i in list_of_prob_fullGesture}
+        print("\nLa gesture con il maggior numero di match nella modalità fullgesture è: ")
+        max=-1
+
+        #Cerco il massimo valore nel dizionario
+        for label in list(result_full.keys()):
+            if(max==-1):
+                max=(label,(result_full[label]))
+            if(result_full[label]>max[1]):
+                max=(label,(result_full[label]))
+
+        #Lo stampo
+        print(max)
+        print("Risultati complessivi: " + result_full.__str__())
+
+
+
+    #Funzione extra (Riconoscimento di una gesture tramite confronto)
+    def recognizeByCompare(self, tree, gesture):
+        # Se il nodo ha figli, li ''visito'', altrimenti stampo che non ne ha
+        if (tree.children != []):
+            for figlio in tree.children:
+                temp=(list(gesture.keys()))[0]
+                temp=gesture[temp][0]
+                if (figlio.gestures !=None):
+                    gesture_figlio=[eval(figlio.gestures)][0]
+                    if(temp.__str__() == gesture_figlio.__str__()):
+                        print("Gesture riconosciuta come " + figlio.name)
+            for figlio in tree.children:
+                figlio.recognizeByCompare(figlio, gesture)
