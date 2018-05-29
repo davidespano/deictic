@@ -218,6 +218,7 @@ class Tree(object):
         plot_frames=[]
         label=""
         prev_label=""
+        onetime=True
 
         for ndarray, name in list_of_points:
 
@@ -227,12 +228,26 @@ class Tree(object):
 
             #Stampo il grafico finale
             if(someFrames!=[] and plot_frames!=[]):
-                for x, y in plot_frames:
-                    mp.plot(x, y, 'bo')
-                #mp.title("FILE:" + name + ", GESTURE FINALE: " + label)
                 mp.title(label)
                 mp.suptitle(name)
+                label_changes-=1 #altrimenti cambia colore del punto
+
+                #Stampo i punti residui
+                for x, y in plot_frames:
+                    if (label_changes == 0):
+                        mp.plot(x, y, 'bo')
+                    if (label_changes == 1):
+                        mp.plot(x, y, 'ro')
+                    if (label_changes == 2):
+                        mp.plot(x, y, 'go')
+                    if (label_changes == 3):
+                        mp.plot(x, y, 'yo')
+                    if (label_changes == 4):
+                        mp.plot(x, y, 'ro')
+
                 mp.show()
+
+
 
 
             i=0 #Inizializzo il counter dei frame
@@ -250,20 +265,28 @@ class Tree(object):
 
 
 
-                #prev_label = label
+                prev_label = label
                 label=Test.compare(sequence=someFrames, gesture_hmms=gesture_hmms, return_log_probabilities=False)
 
                 #Stampo grafico parziale
-                '''a= (prev_label == label)
+                a= (prev_label == label)
                 if ((a==False) and label!=None):
-                    mp.subplot(2, 2, label_changes+1)
                     for x,y in plot_frames:
-                        mp.plot(x, y, 'bo')
-                    #mp.title("FILE:" + name + ", GESTURE: " + label)
-                    mp.title(label)
+                        if(label_changes==0):
+                            mp.plot(x, y, 'bo')
+                        if (label_changes == 1):
+                            mp.plot(x, y, 'ro')
+                        if (label_changes == 2):
+                            mp.plot(x, y, 'go')
+                        if (label_changes == 3):
+                            mp.plot(x, y, 'yo')
+                        if (label_changes == 4):
+                            mp.plot(x, y, 'ro')
+                    label_changes += 1
 
-                    #mp.show()
-                    label_changes += 1'''
+                    x,y=plot_frames[int(len(plot_frames)/2)]
+                    mp.text(x,y, label)
+                    plot_frames=[]
 
                 #Stampa di aggiornamento (stampo in questo modo per sostituire sempre la riga attuale)
                 stdout.write("\rCalcolo probabilità FILE: " + name + "  Frame " + i.__str__() +

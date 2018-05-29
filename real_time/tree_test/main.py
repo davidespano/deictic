@@ -36,8 +36,16 @@ def main():
     print("Albero:")
     tree.visit(tree)
     n_sample = 20
-    gesture=("triangle", 3 * n_sample)
+    list_gesture = [("triangle", 3 * n_sample),("rectangle", 4 * n_sample),("arrow", 4 * n_sample), ("caret", 2 * n_sample), ("circle", 4 * n_sample), ("check", 2 * n_sample),
+                    ("delete_mark", 3 * n_sample),
+                    ("left_curly_brace", 6 * n_sample), ("left_sq_bracket", 3 * n_sample), ("pigtail", 4 * n_sample),
+                    ("question_mark", 4 * n_sample),
+                     ("right_curly_brace", 6 * n_sample),
+                    ("right_sq_bracket", 3 * n_sample), ("star", 5 * n_sample),
+                     ("v", 2 * n_sample), ("x", 3 * n_sample)]
     print("")
+
+    gesture=("triangle", 3 * n_sample)
     tree.recognizeByProbability(gesture=gesture, gesture_hmms=gestures_hmms, sample_frames=100)
 
     gesture={"triangle_pt2":[Point(0,0) + Line(-3,-4) + Line(6,0)]}
