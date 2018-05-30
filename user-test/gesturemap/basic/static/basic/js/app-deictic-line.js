@@ -9,7 +9,6 @@ var input = new Input.StrokeInput(scene.layer);
 var lineFeedback = new Grid.LineFeedback();
 lineFeedback.init(scene.layer);
 
-
 input.onStrokeBegin.add(function (event) {
 
 });

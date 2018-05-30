@@ -16,6 +16,22 @@ from real_time.parsing_trajectory.trajectory_parsing import Parsing
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
 ###
+class RemovingFrames(DatasetTransform):
+    def __init__(self, stage=100):
+        # check
+        if not isinstance(stage, int):
+            raise TypeError
+        # call super
+        super(RemovingFrames, self).__init__()
+        self.stage = stage if stage < 100 else 100
+
+    def transform(self, sequence):
+        # check
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+
+        return sequence[:int((len(sequence)*self.stage)/100)]
+
 
 class ScaleDatasetTransform(DatasetTransform):
     def __init__(self, scale=100, cols=[0,1]):
@@ -339,7 +355,8 @@ class ResampleInSpaceTransform(DatasetTransform):
         size = len(srcPts)
         step = length/ max(self.samples -1, 1)
 
-        resampled = []
+        # append first and last points
+        resampled=[]
 
         if self.stroke is None:
             resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]]])
@@ -488,7 +505,6 @@ class ParseSamples(DatasetTransform):
         self.dir=None
     #
     def transform(self, sequence):
-        #return Parsing.parsingLine(sequence=sequence[:,[0,1]]).getLabelsSequence()
         return Parsing.parsingLine(sequence=sequence[:, [0, 1]]).getLabels()
 
 class NormaliseSamples:

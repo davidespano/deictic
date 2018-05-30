@@ -1,21 +1,21 @@
 from enum import Enum
 # Kalman filter
 from pykalman import KalmanFilter
-# Math
-import math
-# Numpy
-import numpy as np
-import numpy.linalg as la
-# Operator
-import operator
-# Plot
-import matplotlib.pyplot as plt
 # geometry
 from dataset.geometry import Geometry2D, Point2D
 # state machine
 from real_time.parsing_trajectory.state_machine import StateMachine
-# splitting
-import itertools
+# math
+import math
+# numpy
+import numpy as np
+# operator
+import operator
+# plot
+import matplotlib.pyplot as plt
+# copy
+import copy
+
 
 import copy
 
@@ -141,17 +141,25 @@ class MathUtils():
         return point_a[0]*point_b[0] + point_a[1]*point_b[1]
     @staticmethod
     def sub(point_a, point_b):
-        vector = [point_a[0]-point_b[0], point_a[1]-point_b[1]]
+        vector = [point_b[0]-point_a[0], point_b[1]-point_a[1]]
         return vector
     @staticmethod
     def distance(point_a, point_b):
         return math.hypot(point_b[0]-point_a[0], point_b[1]-point_a[1])
     @staticmethod
-    def normalize(point):
-        length = MathUtils.magn(point)
-        for index in range(0, len(point)):
-            point[index] = point[index]/length
-        return point
+    def normalize(vector):
+        # check
+        if not isinstance(vector,list):
+            raise TypeError
+        # normalize vector and return it
+        new_vector = []
+        length = MathUtils.magn(vector)
+        for index in range(0, len(vector)):
+            if length == 0:
+                new_vector.append(0)
+            else:
+                new_vector.append(vector[index]/length)
+        return new_vector
 
 
 class RemoveSequenceStateMachine(StateMachine):

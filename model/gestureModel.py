@@ -167,6 +167,14 @@ class CompositeExp(GestureExp):
         if not self.right is None:
             self.right.get_points(points)
 
+    def get_operands(self):
+        #todo: manage disabling and parallal case
+        operands = []
+        exp = self
+        while isinstance(exp, CompositeExp):
+            operands = [exp.right] + operands
+            exp = exp.left
+        return [exp]+operands
 
 class IterativeExp(GestureExp):
     def __init__(self, exp):

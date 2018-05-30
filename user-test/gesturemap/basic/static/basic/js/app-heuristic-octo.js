@@ -9,7 +9,6 @@ var input = new Input.StrokeInput(scene.layer);
 var feedback = new Grid.Octopocus();
 feedback.init(scene.layer);
 
-
 input.onStrokeBegin.add(function (event) {
 
 });

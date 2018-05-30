@@ -256,15 +256,23 @@ if debug == 3:
         'right_sq_bracket': [['O', 'A0', 'O', 'A6', 'O', 'A4', 'O']],
         'star': [['O', 'A1', 'O', 'A7', 'O', 'A3', 'O', 'A0', 'O', 'A5', 'O']],
         'triangle': [['O', 'A5', 'O', 'A0', 'O', 'A3', 'O']],
-        'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],['O', 'A6', 'O', 'A2', 'O']],
+        'v': [['O', 'A7', 'O', 'A2', 'O'], ['O', 'A7', 'O', 'A1', 'O'], ['O', 'A6', 'O', 'A1', 'O'],
+              ['O', 'A6', 'O', 'A2', 'O']],
         'x': [['O', 'A7', 'O', 'A2', 'O', 'A5', 'O']],
     #}
     #ideal_sequences={
-        'circle'            : [['O','A5','O','A7','O','A1','O','A3'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O'],['O', 'A5', 'O', 'A6', 'O', 'A7', 'O', 'A1', 'O'],['O', 'A5', 'O', 'BCCW', 'O', 'A1', 'O', 'A3', 'O']],
-        'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O'], ['O','BCCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
-        'pigtail'           : [['O','A1','O','BCCW','O','A6','O'],['O','A1','O','BCCW','O'],['O', 'A0', 'O', 'A1', 'O', 'BCCW', 'O', 'BCCW', 'O']],
-        'question_mark'     : [['O','BCW','O','BCCW','O'],['O','BCW','O','BCW','O','BCCW','O'],['O', 'A2', 'O', 'BCW', 'O', 'A5', 'O', 'A6', 'O'],['O', 'A1', 'O', 'A0', 'O', 'A6', 'O', 'A5', 'O']],
-        'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O'], ['O','BCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
+        'circle'            : [['O','A5','O','A7','O','A1','O','A3'],['O','BCCW','O','BCCW','O','BCCW','O','BCCW','O'],
+                               ['O', 'A5', 'O', 'A6', 'O', 'A7', 'O', 'A1', 'O'],
+                               ['O', 'A5', 'O', 'BCCW', 'O', 'A1', 'O', 'A3', 'O']],
+        'left_curly_brace'  : [['O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O'],
+                               ['O','BCCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O']],
+        'pigtail'           : [['O','A1','O','BCCW','O','A6','O'],['O','A1','O','BCCW','O'],
+                               ['O', 'A0', 'O', 'A1', 'O', 'BCCW', 'O', 'BCCW', 'O']],
+        'question_mark'     : [['O','BCW','O','BCCW','O'],['O','BCW','O','BCW','O','BCCW','O'],
+                               ['O', 'A2', 'O', 'BCW', 'O', 'A5', 'O', 'A6', 'O'],
+                               ['O', 'A1', 'O', 'A0', 'O', 'A6', 'O', 'A5', 'O']],
+        'right_curly_brace' : [['O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O'],
+                               ['O','BCW','O','BCW','O','BCCW','O','BCW','O','BCCW','O','BCW','O']]
     }
 
     models = {key:[ModelFactory.sequenceAlignment(name=key, ideal_sequence=item) for item in values] for key,values in ideal_sequences.items()}

@@ -9,10 +9,44 @@ import collections
 from axel import Event
 # Transforms
 from dataset.normaliseSamplesDataset import *
-import matplotlib.pyplot as plt
+from gesture import ModelExpression
+from model import *
+from config import *
+from test.test import Test
+
+################### Base Version ###################
+expressions = {
+    'r_1': [Point(0,0)+Line(0,-3)],
+    'r_2': [Point(0,0)+Line(0,-3)+Line(6,0)],
+    'r_3': [Point(0,0)+Line(0,-3)+Line(6,0)+Line(0,3)],
+    'r_4': [Point(0,0)+Line(0,-3)+Line(6,0)+Line(0,3)+Line(-6,0)],
+}
+models = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
+dataset = CsvDataset(Config.baseDir+'deictic/1dollar-dataset/raw/rectangle/', type=float)
+
+# Transform
+transform1 = NormaliseLengthTransform(axisMode=True)
+transform2 = ScaleDatasetTransform(scale=100)
+transform3 = CenteringTransform()
+transform5 = ResampleInSpaceTransform(samples=80)
+# Apply transforms
+dataset.addTransform(transform1)
+dataset.addTransform(transform2)
+dataset.addTransform(transform3)
+dataset.addTransform(transform5)
+
+for file in dataset.applyTransforms():
+    sequences = file[0]
+
+    buffer = []
+    res = []
+    for item in sequences:
+        buffer.append(item)
+        res.append(Test.compare(buffer, models))
+    print(res)
 
 
-
+################### Advanced Version ###################
 class CsvDatasetRealTime(CsvDataset):
     """
         Class for firing frame like real time:
@@ -31,7 +65,7 @@ class CsvDatasetRealTime(CsvDataset):
         self.end = Event()  # End of sequence
         # Variables
         self.__buffer = collections.deque(maxlen=maxlen)  # Circular buffer
-        self.buffer = []  # collections.deque(maxlen=maxlen) # Circular buffer
+        self.buffer = [] # Circular buffer
         # Call super method
         super(CsvDatasetRealTime, self).__init__(dir)
 
@@ -40,7 +74,6 @@ class CsvDatasetRealTime(CsvDataset):
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        # if self.type_gestures == "unistroke":
         transform5 = ResampleInSpaceTransform(samples=num_samples)
         # Apply transforms
         self.addTransform(transform1)
@@ -83,8 +116,6 @@ class CsvDatasetRealTime(CsvDataset):
             self.buffer = self.applyTransforms()
             # # Sends a single frame
             self.__fire(frame)
-            # plt.plot(self.buffer[:, 0], self.buffer[:, 1], color='r')
-            # plt.show()
 
     # Firing events methods
     def __start(self, filename):
@@ -122,11 +153,11 @@ class DeicticRealTime():
                 # Gestures
                 self.gestures = \
                     [
-                        # "unistroke-arrow_1", "unistroke-arrow_2", "unistroke-arrow_3", "unistroke-arrow_4",
+                        #"unistroke-arrow_1", "unistroke-arrow_2", "unistroke-arrow_3", "unistroke-arrow_4",
 
                         #"unistroke-circle_1","unistroke-circle_2","unistroke-circle_3","unistroke-circle_4",
 
-                        # "unistroke-check_1","unistroke-check_2",
+                        "unistroke-check_1","unistroke-check_2",
 
                         # "unistroke-caret_1","unistroke-caret_2",
 
@@ -150,7 +181,7 @@ class DeicticRealTime():
 
                         # "unistroke-triangle_1","unistroke-triangle","unistroke-triangle_3",
 
-                        "unistroke-v_1", "unistroke-v_2",
+                        #"unistroke-v_1", "unistroke-v_2",
 
                         # "unistroke-x_1","unistroke-x_2","unistroke-x_3",
 
@@ -165,9 +196,9 @@ class DeicticRealTime():
                     ]
                 self.gesturesDataset = \
                     [
-                        # ["arrow", self.n_samples*4],
+                        #["arrow", self.n_samples*4],
                         #["circle", self.n_samples*4],
-                        # ["check", self.n_samples*2],
+                        ["check", self.n_samples*2],
                         # ["caret", self.n_samples * 2],
                         # ["delete_mark", self.n_samples * 3],
                         # ["left_curly_brace", self.n_samples * 4],
@@ -179,7 +210,7 @@ class DeicticRealTime():
                         # ["right_sq_bracket", self.n_samples * 3],
                         # ["star", self.n_samples*5],
                         # ["triangle", self.n_samples * 3],
-                        ["v", self.n_samples * 2],
+                        #["v", self.n_samples * 2],
                         # ["x", self.n_samples*3]
 
                     ]
@@ -335,7 +366,6 @@ class DeicticRealTime():
                 plt.show()
         """
         for item in self.testResult:
-            #self.testResult[item].plot(csvDataset=dataset)
             success,fail = self.testResult[item].showResult()
             print(str(success)+" / "+str(fail))
 

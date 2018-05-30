@@ -42,17 +42,12 @@ class ModelFactory():
         model = HiddenMarkovModel(name)
         ### create distribution
         # Define the distribution for insertions
-        # i_d = DiscreteDistribution(
-        #     {'A0': 0.1111, 'A1': 0.1111, 'A2': 0.1111, 'A3': 0.1111, 'A4': 0.1111,
-        #      'A5': 0.1111, 'A6': 0.1111, 'A7': 0.1111, 'O': 0.1112}
-        # )
         i_d = DiscreteDistribution(
             {'A0': 0.09, 'A1': 0.09, 'A2': 0.09, 'A3': 0.09, 'A4': 0.09,
              'A5': 0.09, 'A6': 0.09, 'A7': 0.09, 'O': 0.1,
              'BCW': 0.09,'BCCW': 0.09}
         )
-        # s_d = {'A0': 0.00, 'A1': 0.00, 'A2': 0.00, 'A3': 0.00, 'A4': 0.00,
-        #      'A5': 0.00, 'A6': 0.00, 'A7': 0.00, 'O': 0.00}
+        # Define the distribution for matche states
         s_d = {'A0': 0.00, 'A1': 0.00, 'A2': 0.00, 'A3': 0.00, 'A4': 0.00,
                'A5': 0.00, 'A6': 0.00, 'A7': 0.00, 'O': 0.00,
                'BCW':0.00, 'BCCW':0.00}
@@ -68,7 +63,7 @@ class ModelFactory():
             n_d = deepcopy(s_d)
             n_d[ideal_sequence[index]] = 1.0
             match_states.append(State((DiscreteDistribution(n_d)), name="M" + str(index + 1)))
-        # Create the match and the delete states
+        # Create the distrdelete states
         delete_states = []
         for index in range(len(ideal_sequence)):
             delete_states.append(State(None, name="D"+str(index+1)))

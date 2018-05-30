@@ -1,7 +1,7 @@
 {
   "opts": {
     "template": "/Users/davide/node_modules/tui-jsdoc-template",
-    // same as -t templates/default
+    // same as -t template/default
     "encoding": "utf8",
     // same as -e utf8
     "destination": "./out/",

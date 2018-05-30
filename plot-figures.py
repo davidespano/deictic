@@ -22,7 +22,7 @@ def plot_confusion_matrix(cm, classes,
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
-    plt.rcParams.update({'font.size': 15})
+    plt.rcParams.update({'font.size': 10})
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
@@ -139,7 +139,6 @@ ad_hoc_unistroke = np.matrix(
  [   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0,    0,    0,  330 ]]
 )
 
-
 deictic_shrec_palm = np.matrix(
 #  2    7   8   9   10  11  12   13
 [[62,   0,  6,  1,  14, 10, 2,  5],  # 2
@@ -174,6 +173,23 @@ shrec_class_names = [
     'Swipe V '  # 13
 ];
 
+deictic_unistroke_online = np.matrix(
+    [[263,  15,  0,   0,   2,   0,  14,  13,   0,   0,  15,   5,   1,   1,   1],# arrow
+     [ 17, 309,  0,   0,   2,   0,   0,   2,   0,   0,   0,   0,   0,   0,   0],    # caret
+     [ 1,   0, 262,   0,  18,  12,  16,   0,   9,   3,   0,   1,   4,   4,   0],   # circle
+     [ 0,   0,   0, 328,   1,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0],   # delete_mark
+     [ 2,   5,   7,   0, 278,   1,   7,   7,   0,  13,   0,   0,   0,  10,   0],   # left curly brace
+     [ 0,   3,   0,   0,   4, 283,  18,   8,   0,  12,   0,   0,   0,   2,   0],   # left square bracket
+     [ 44,  9,   9,   0,   2,   4, 254,   6,   0,   1,   0,   0,   0,   1,   0],   # pigtail
+     [ 31,  5,   1,   0,   6,   0,  21, 232,   0,  25,   5,   2,   0,   0,   2],   # question mark
+     [ 0,   0,   0,   0,   1,   0,   0,   0, 328,   0,   0,   0,  18,   1,   0],   # rectangle
+     [ 3,   1,   0,   0,  29,   0,  13,   8,   0, 259,   1,   0,   0,  16,   0],   # right curly brace
+     [ 0,   0,   0,   0,   5,   0,   1,   9,   0,   1, 312,   0,   0,   2,   0],   # right square bracket
+     [ 7,   7,   0,   0,   1,   0,   0,   0,   0,   0,   0, 315,   0,   0,   0],   # star
+     [ 1,   0,   4,   0,   0,   0,   0,   0,  11,   0,   0,   0, 314,   0,   0],   # triangle
+     [ 0,   0,   0,  23,   2,   0,   0,   1,   0,   0,   3,   0,   0, 300,   1],   # v
+     [ 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1, 329]]   # x
+)
 
 # ------------------------------------------
 # synthetic unistroke
@@ -376,6 +392,23 @@ uni_class_names = [
     '' + chr(0x2113) + ' ' # pigtail
 ];
 
+online_uni_class_names = [
+    '' + chr(0x279C)+ ' ', # arrow
+    '' + chr(0x22C0) + '', # caret
+    '' + chr(0x25CB) + ' ', # circle
+    '' + chr(0x232B) + ' ', # delete
+    '{ ', # left curly brace
+    '[ ', # left square bracket
+    '' + chr(0x2113) + ' ', # pigtail
+    '? ', # question mark
+    '' + chr(0x2395) + ' ', # rectangle
+    '} ', #right curly brace
+    '] ', # right square bracket
+    '' + chr(0x2605) +  ' ', # star
+    '' + chr(0x25B3) + ' ', # triangle
+    'V ', # V
+    'X ', # X
+];
 
 iciap = np.matrix([
     [60, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -447,6 +480,6 @@ def opPlot(matrix, names, title):
 #accuracy(deictic_multistroke, 600);
 
 
-plot_confusion_matrix(deictic_shrec_palm, classes=shrec_class_names, normalize=False,
+plot_confusion_matrix(deictic_unistroke_online, classes=online_uni_class_names, normalize=False,
                        title='Confusion matrix', cmap=plt.cm.Blues)
 plt.show()
