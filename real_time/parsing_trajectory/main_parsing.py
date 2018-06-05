@@ -19,7 +19,7 @@ from gesture.modellingExpression import ModelExpression
 from real_time.parsing_trajectory.model_factory import ModelFactory
 from real_time.parsing_trajectory.trajectory_parsing import Parsing
 # Test
-from test.test import Test, Result
+from test.test import Test, ConfusionMatrix
 # Levenshtein
 from real_time.parsing_trajectory.levenshtein_distance import LevenshteinDistance
 import sys
@@ -283,7 +283,7 @@ if debug == 3:
     #directories = ['arrow']
     # debug #
 
-    result = Result(ideal_sequences)
+    result = ConfusionMatrix(ideal_sequences)
     for directory in directories:
         # original kalman + resampled + parsing
         dataset = transforms_set(directory, parsing=True)
@@ -339,7 +339,7 @@ if debug == 4:
     directories = [key for key in ideal_sequences]
 
     # matrix
-    result = Result(gesture_labels=directories)
+    result = ConfusionMatrix(gesture_labels=directories)
     for directory in directories:
         # original kalman + resampled
         dataset = transforms_set(directory, parsing=True)
@@ -646,7 +646,7 @@ if debug == 6:
 
     # test 2
     directories = [m.name for m in models]
-    result = Result(directories)
+    result = ConfusionMatrix(directories)
     for directory in directories:
         # original kalman + resampled + parsing
         dataset = transforms_set(directory, parsing=True)

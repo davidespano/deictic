@@ -1,5 +1,5 @@
 from dataset import CsvDataset, RemovingFrames, ResampleInSpaceTransform
-from real_time.scale_detection import Sequence, ArtificialSequence
+from real_time.scale_detection import ArtificialSequence
 from config import Config
 from real_time.parsing_trajectory.trajectory_parsing import MathUtils
 from gesture.datasetExpressions import DatasetExpressions

@@ -6,6 +6,8 @@ from axel import Event
 # Copy
 import copy
 
+
+# todo: delete #
 ## Compare deictic model
 def compares_deictic_models(groups, baseDir, ten_fold = False, fold =0):
     # Filename results

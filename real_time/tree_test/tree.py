@@ -334,3 +334,27 @@ class Tree(object):
                         print("Gesture riconosciuta come " + figlio.name)
             for figlio in tree.children:
                 figlio.recognizeByCompare(figlio, gesture)
+
+
+    def returnModels(self):
+        pass
+
+
+
+
+#### HINT ####
+# hai presente il this di java? ecco, self è la stessa identica cosa. Per esempio, nella funzione recognizedByCompare
+# non c'è bisogno di passare anche tree tra i parametri, perché tanto puoi accedere agli oggetti di quello stesso
+# oggetto tramite la self: esempio, riga 328, anziché avere tree.children, avrai self.children. Non è sbagliato quello
+# che fai, però è inutile. In pratica per ogni chiamata ti crei in memoria due volte lo stesso oggetto.
+
+#### COSE DA FARE ####
+# - 1) stavo controllando come creavi la lista di hmm. Ora cerchiamo di fare un passo in avanti, fai in modo che i nodi
+#      foglia contengano anche i rispettivi hmm, oppure mettili nel nodo genitore. Poi valutiamo quale è la scelta migliore;
+# - 2) la comparazione avviene attraverso un'altra funzione non contenuta in Tree.
+# - 3) modifica la funzione "returnModels" in modo che restituisca tutte le hmm contenuti nell'albero (vedere poi
+#      se dal nodo genitore o dai nodi figli);
+# - 4) togli le parti che non servono e aggiusta i commenti.
+
+#### MODIFICHE INSERITE ####
+# - 1) ho creato il file __init__.py per poter richiamare Tree anche in altre parti della libreria.

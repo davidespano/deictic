@@ -12,6 +12,9 @@ from shutil import copyfile
 from enum import Enum
 import numpy as np
 
+
+
+# todo: delete #
 x = np.ones((1000, 1000)) * np.nan
 
 

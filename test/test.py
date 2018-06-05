@@ -1,6 +1,8 @@
 import numpy
 import sys
 import collections
+# Tranforms
+from dataset import RemovingFrames
 # Plotting
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -10,8 +12,10 @@ import csv
 # Deictic
 from gesture import ModelExpression
 from dataset import CsvDataset
+from model import CompositeExp
+#from real_time.tree_test import Tree
 
-class Result():
+class ConfusionMatrix():
     """
         Results provides the methods for managing, plotting and saving confusion matrix.
     """
@@ -143,7 +147,7 @@ class Result():
         :return:
         """
         # Check parameters
-        if not isinstance(other, Result):
+        if not isinstance(other, ConfusionMatrix):
             raise TypeError
         compare = lambda x, y: collections.Counter(x) == collections.Counter(y) # this function is used for comparing two list of objects
         if not compare(other.__labels, self.__labels):
@@ -224,19 +228,18 @@ class Test():
         :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
         :return: comparision results
         """
-        # Check parameters
-
+        # Check parameters # todo: see again check parameters
         if not isinstance(gesture_hmms, dict):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         if not isinstance(gesture_datasets, dict):
             raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
-
         self.gesture_hmms = gesture_hmms
         self.gesture_datasets = gesture_datasets
-        # comparison results
-        self.result = Result(list(self.gesture_hmms.keys()))
 
-        # comparasing gesture_hmms
+        # confusion matrix in order to compare results
+        self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
+
+        # comparing gesture_hmms
         for gesture_label, datasets in self.gesture_datasets.items():
             # for each dataset
             for dataset in datasets:
@@ -264,30 +267,51 @@ class Test():
         # start comparison
         return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, gesture_hmms, gesture_datasets, type=float): pass
+    def onlineTest(self, gesture_hmms, gesture_datasets, gesture_reference_primitives, perc_completed=100):
+        # check
+        # todo: static method for checking dictionary values
+        if not isinstance(gesture_hmms, dict) \
+                or not all(isinstance(item, CompositeExp)
+                            for key,value in gesture_hmms.items() for item in value): # check federico thesis (is type tree?)
+            raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
+        if not isinstance(gesture_datasets, dict) \
+                or not all(isinstance(item, (CsvDataset, list))
+                           for key,value in gesture_datasets.items() for item in value):
+            raise Exception("gesture_datasets must be a dictionary of CsvDataset objects or a numpy ndarray.")
+        #if not isinstance(gesture_reference_primitives, dict) \
+        #        or not all(isinstance(item, int)
+        #                   for key,value in gesture_reference_primitives.items() for item in value):
+        #    raise Exception("gesture_reference_primitives must be a dictionary of integers.")
+        if not isinstance(perc_completed, (int,float)):
+            raise TypeError
+        # assigned parameters
+        self.gesture_hmms = gesture_hmms
+        self.gesture_datasets = gesture_datasets
 
-    ### Private methods ###
-    def __createModel(self, gesture_expressions):
-        """
-            this method creates a hmm for each expression in gesture_expressions.
-        :param gesture_expressions: a dictionary of deictic expression.
-        :return: a dictionary of deictic hmms.
-        """
-        return ModelExpression.generatedModels(expressions=gesture_expressions)
+        # confusion matrix for showing the results
+        self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
+        # comparison gesture_hmms
+        for gesture_label,datasets in self.gesture_datasets.items():
+            # for each dataset
+            for dataset in datasets:
+                # csvDataset or list of sequences?
+                if isinstance(dataset, CsvDataset):
+                    # first case: csvDataset - get the specified number of frames (apply a transform)
+                    transform_perc_completed = RemovingFrames(stage=perc_completed)
+                    dataset.addTransform(transform_perc_completed)
+                    sequences = dataset.applyTransforms()
+                else:
+                    # second case: a list of sequences - get the specified number of frames
+                    sequences = [dataset[:,int((len(sequence)*self.stage)/100)] for sequence in dataset]
+                # proceed to compare models based on gesture_reference_primitives contents
+                for sequence in sequences:
+                    # get row label
+                    row_label = ""
+                    # compare models
+                    self.__comparison(sequences=sequence, dataset_label=row_label)
+        # return comparison results
+        return self.result
 
-    def __comparison(self, sequences, dataset_label):
-        """
-            given a list of sequence, this method updates the result array based on the comparison of each model.
-        :param sequences: a list of sequence frames.
-        :param dataset_label: the list of gesture labels.
-        :return:
-        """
-        # Get each sequence
-        for sequence in sequences:
-            index_label = Test.compare(sequence[0], self.gesture_hmms)
-            # Update results
-            if index_label != None:
-                self.result.update(row_label=dataset_label, column_label=index_label, id_sequence=sequence[1])
 
     ### Static methods ###
     @staticmethod
@@ -333,7 +357,6 @@ class Test():
             return index_label
         else:
             return index_label, log_probabilities
-
     @staticmethod
     def findLogProbability(sequence, model):
         """
@@ -349,3 +372,32 @@ class Test():
         log_probability = model.log_probability(sequence)
         norm_log_probability = log_probability/len(sequence)
         return norm_log_probability
+    @staticmethod
+    def check(items_to_check, types):
+        # parameters have to be lists
+        if not isinstance((items_to_check, types), list):
+            raise TypeError
+        pass
+
+
+    ### Private methods ###
+    def __createModel(self, gesture_expressions):
+        """
+            this method creates a hmm for each expression in gesture_expressions.
+        :param gesture_expressions: a dictionary of deictic expression.
+        :return: a dictionary of deictic hmms.
+        """
+        return ModelExpression.generatedModels(expressions=gesture_expressions)
+    def __comparison(self, sequences, row_label):
+        """
+            given a list of sequence, this method updates the result array based on the comparison of each model.
+        :param sequences: a list of sequence frames.
+        :param dataset_label: the list of gesture labels.
+        :return:
+        """
+        # Get each sequence
+        for sequence in sequences:
+            index_label = Test.compare(sequence[0], self.gesture_hmms)
+            # Update results
+            if index_label != None:
+                self.result.update(row_label=row_label, column_label=index_label, id_sequence=sequence[1])

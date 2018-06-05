@@ -64,14 +64,14 @@ def thirdExample():
         'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
         'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
         'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        # 'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
-        # 'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
-        # 'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
-        # 'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
-        # 'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
-        # 'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
-        # 'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
-        # 'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
+        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
+        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
+        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
+        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
+        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
+        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
+        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
+        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
     }
 
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
@@ -97,5 +97,39 @@ def fourthExample():
     print("The gesture with the highest log probabilities value is " +index_label)
     print(log_probabilities)
 
+def fifthExample():
+    """
+        online
+    :return:
+    """
+    # get the gesture expressions which describe 1$ multistroke dataset
+    gesture_hmms = DatasetExpressions.returnExpressions(selected_dataset= DatasetExpressions.TypeDataset.multistroke_1dollar)
+    # get gesture datasets
+    gesture_dataset = {
+        'arrowhead' :  [CsvDataset(Config.baseDir+"deictic/mdollar-dataset/resampled/arrowhead/")],
+        'asterisk': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/asterisk/")],
+        'D': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/D/")],
+        'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
+        'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
+        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
+        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
+        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
+        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
+        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
+        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
+        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
+        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
+    }
+
+    # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    results = Test.getInstance().onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset,
+                                            gesture_reference_primitives=None, perc_completed=25)
+    # show result through confusion matrix
+    results.plot()
+    # save result on csv file
+    results.save(path=None)
+
+
 # Start example
-firstExample()
+fifthExample()

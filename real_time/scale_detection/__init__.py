@@ -1,1 +1,1 @@
-from real_time.scale_detection.csvDataset import CsvDataset, Sequence, ArtificialSequence
+from real_time.scale_detection.csvDataset import ArtificialSequence
