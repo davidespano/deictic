@@ -1,23 +1,101 @@
 from enum import Enum
 from model.gestureModel import Point, Line, Arc
+# config
+from config import Config
+# CsvDataset
+from dataset import CsvDataset, CsvDatasetExtended
+
+class TypeDataset(Enum):
+    unistroke_1dollar = 0
+    multistroke_1dollar = 1
+    unica = 2
+    shrec = 3
+
+class DatasetFolders:
+
+    @classmethod
+    def returnFolders(cls, selected_dataset):
+        if selected_dataset == TypeDataset.unistroke_1dollar:
+            return cls.__returnDollar1Unistroke()
+        if selected_dataset == TypeDataset.multistroke_1dollar:
+            return cls.__returnDollar1Multistroke()
+        if selected_dataset == TypeDataset.unica:
+            return cls.__returnUnica()
+        if selected_dataset == TypeDataset.shrec:
+            return cls.__returnShrec()
+
+    @staticmethod
+    def __returnDollar1Unistroke():
+        dataset_folder = "deictic/1dollar-dataset/resampled/"
+        return {
+            'arrow':            [CsvDataset(Config.baseDir +dataset_folder+ "arrow/")],
+            'caret':            [CsvDataset(Config.baseDir +dataset_folder+ "caret/")],
+            'check':            [CsvDataset(Config.baseDir +dataset_folder+ "check/")],
+            'circle':           [CsvDataset(Config.baseDir +dataset_folder+ "circle/")],
+            'delete_mark':      [CsvDataset(Config.baseDir +dataset_folder+ "delete_mark/")],
+            'left_curly_brace': [CsvDataset(Config.baseDir +dataset_folder+ "left_curly_brace/")],
+            'left_sq_bracket':  [CsvDataset(Config.baseDir +dataset_folder+ "left_sq_bracket/")],
+            'pigtail':          [CsvDataset(Config.baseDir +dataset_folder+ "pigtail/")],
+            'question_mark':    [CsvDataset(Config.baseDir +dataset_folder+ "question_mark/")],
+            'rectangle':        [CsvDataset(Config.baseDir +dataset_folder+ "rectangle/")],
+            'right_curly_brace':[CsvDataset(Config.baseDir +dataset_folder+ "right_curly_brace/")],
+            'right_sq_bracket': [CsvDataset(Config.baseDir +dataset_folder+ "right_sq_bracket/")],
+            'star':             [CsvDataset(Config.baseDir +dataset_folder+ "star/")],
+            'triangle':         [CsvDataset(Config.baseDir +dataset_folder+ "triangle/")],
+            'v':                [CsvDataset(Config.baseDir +dataset_folder+ "v/")],
+            'x':                [CsvDataset(Config.baseDir +dataset_folder+ "x/")],
+        }
+
+    @staticmethod
+    def __returnDollar1Multistroke():
+        dataset_folder = "deictic/mdollar-dataset/resampled/"
+        return {
+            'arrowhead' :           [CsvDataset(Config.baseDir +dataset_folder+ "arrowhead/")],
+            'asterisk':             [CsvDataset(Config.baseDir +dataset_folder+ "asterisk/")],
+            'D':                    [CsvDataset(Config.baseDir +dataset_folder+ "D/")],
+            'exclamation_point':    [CsvDataset(Config.baseDir +dataset_folder+ "exclamation_point/")],
+            'H':                    [CsvDataset(Config.baseDir +dataset_folder+ "H/")],
+            'half_note':            [CsvDataset(Config.baseDir +dataset_folder+ "half_note/")],
+            'I':                    [CsvDataset(Config.baseDir +dataset_folder+ "I/")],
+            'N':                    [CsvDataset(Config.baseDir +dataset_folder+ "N/")],
+            'null':                 [CsvDataset(Config.baseDir +dataset_folder+ "null/")],
+            'P':                    [CsvDataset(Config.baseDir +dataset_folder+ "P/")],
+            'pitchfork':            [CsvDataset(Config.baseDir +dataset_folder+ "pitchfork/")],
+            'six_point_star':       [CsvDataset(Config.baseDir +dataset_folder+ "six_point_star/")],
+            'T':                    [CsvDataset(Config.baseDir +dataset_folder+ "T/")],
+            'X':                    [CsvDataset(Config.baseDir +dataset_folder+ "X/")],
+        }
+
+    @staticmethod
+    def __returnUnica():
+        pass
+
+    @staticmethod
+    def __returnShrec():
+        dataset_folder = "deictic/shrec-dataset/resampled/index_tip/"
+        return {
+            'gesture_2':    [CsvDataset(Config.baseDir +dataset_folder+ "gesture_2/")],
+            'gesture_7':    [CsvDataset(Config.baseDir +dataset_folder+ "gesture_7/")],
+            'gesture_8':    [CsvDataset(Config.baseDir +dataset_folder+ "gesture_8/")],
+            'gesture_9':    [CsvDataset(Config.baseDir +dataset_folder+ "gesture_9/")],
+            'gesture_10':   [CsvDataset(Config.baseDir +dataset_folder+ "gesture_10/")],
+            'gesture_11':   [CsvDataset(Config.baseDir +dataset_folder+ "gesture_11/")],
+            'gesture_12':   [CsvDataset(Config.baseDir +dataset_folder+ "gesture_12/")],
+            'gesture_13':   [CsvDataset(Config.baseDir +dataset_folder+ "gesture_13/")],
+            'gesture_14':   [CsvDataset(Config.baseDir +dataset_folder+ "gesture_14/")],
+        }
 
 class DatasetExpressions:
 
-    class TypeDataset(Enum):
-        unistroke_1dollar = 0
-        multistroke_1dollar = 1
-        unica = 2
-        shrec = 3
-
     @staticmethod
     def returnExpressions(selected_dataset):
-        if selected_dataset == DatasetExpressions.TypeDataset.unistroke_1dollar:
+        if selected_dataset == TypeDataset.unistroke_1dollar:
             return DatasetExpressions.__returnDollar1Unistroke()
-        if selected_dataset == DatasetExpressions.TypeDataset.multistroke_1dollar:
+        if selected_dataset == TypeDataset.multistroke_1dollar:
             return DatasetExpressions.__returnDollar1Multistroke()
-        if selected_dataset == DatasetExpressions.TypeDataset.unica:
+        if selected_dataset == TypeDataset.unica:
             return DatasetExpressions.__returnUnica()
-        if selected_dataset == DatasetExpressions.TypeDataset.shrec:
+        if selected_dataset == TypeDataset.shrec:
             return DatasetExpressions.__returnShrec()
 
     @staticmethod

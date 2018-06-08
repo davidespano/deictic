@@ -432,6 +432,8 @@ class Sequence(object):
         func = switcher.get(self.points.shape[-1])
         # Execute the function
         return func(self)
+
+    # private methods #
     def __plot2D(self):
         """
             plotting in 2 dimensions

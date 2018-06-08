@@ -1,4 +1,4 @@
-from gesture import ModelExpression, DatasetExpressions
+from gesture import ModelExpression, DatasetExpressions, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
 from dataset import CsvDataset
 from test import Test
@@ -102,29 +102,31 @@ def fifthExample():
         online
     :return:
     """
-    # get the gesture expressions which describe 1$ multistroke dataset
-    gesture_hmms = DatasetExpressions.returnExpressions(selected_dataset= DatasetExpressions.TypeDataset.multistroke_1dollar)
-    # get gesture datasets
-    gesture_dataset = {
-        'arrowhead' :  [CsvDataset(Config.baseDir+"deictic/mdollar-dataset/resampled/arrowhead/")],
-        'asterisk': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/asterisk/")],
-        'D': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/D/")],
-        'exclamation_point': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/exclamation_point/")],
-        'H': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'half_note': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/half_note/")],
-        'I': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/I/")],
-        'N': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/N/")],
-        'null': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/null/")],
-        'P': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/P/")],
-        'pitchfork': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/pitchfork/")],
-        'six_point_star': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/six_point_star/")],
-        'T': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/T/")],
-        'X': [CsvDataset(Config.baseDir + "deictic/mdollar-dataset/resampled/X/")],
+    # get the gesture expressions which describe 1$ unistroke dataset
+    #gesture_hmms = DatasetExpressions.returnExpressions(selected_dataset= TypeDataset.unistroke_1dollar)
+    expressions = {
+        'Triangle_1': [Point(0,0)+Line(-3,-3)],
+        'Triangle_2': [Point(0,0)+Line(-3,-3)+Line(6,0)],
+        'Triangle_3': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
+        'Rectangle_1': [Point(0,0)+Line(0,-2)],
+        'Rectangle_2': [Point(0,0)+Line(0,-2)+Line(4,0)],
+        'Rectangle_3': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)],
+        'Rectangle_4': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
     }
+    gesture_hmms = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
 
+    # get gesture datasets
+    #gesture_dataset = DatasetFolders.returnFolders(selected_dataset=TypeDataset.unistroke_1dollar)
+    gesture_dataset = {
+        'Triangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
+        'Rectangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
+    }
+    # get primitive references
+    gesture_primitive_references = {'1_fast_triangle_01.csv':[25,60,100], '1_fast_rectangle_01.csv':[30,40,80]}
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset,
-                                            gesture_reference_primitives=None, perc_completed=25)
+                                            gesture_primitive_references=gesture_primitive_references,
+                                            perc_completed=25)
     # show result through confusion matrix
     results.plot()
     # save result on csv file

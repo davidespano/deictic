@@ -12,7 +12,8 @@ import csv
 # Deictic
 from gesture import ModelExpression
 from dataset import CsvDataset
-from model import CompositeExp
+# hidden markov model
+from pomegranate import HiddenMarkovModel
 #from real_time.tree_test import Tree
 
 class ConfusionMatrix():
@@ -267,11 +268,11 @@ class Test():
         # start comparison
         return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, gesture_hmms, gesture_datasets, gesture_reference_primitives, perc_completed=100):
+    def onlineTest(self, gesture_hmms, gesture_datasets, gesture_primitive_references, perc_completed=100):
         # check
         # todo: static method for checking dictionary values
         if not isinstance(gesture_hmms, dict) \
-                or not all(isinstance(item, CompositeExp)
+                or not all(isinstance(item, HiddenMarkovModel)
                             for key,value in gesture_hmms.items() for item in value): # check federico thesis (is type tree?)
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         if not isinstance(gesture_datasets, dict) \
@@ -285,12 +286,12 @@ class Test():
         if not isinstance(perc_completed, (int,float)):
             raise TypeError
         # assigned parameters
-        self.gesture_hmms = gesture_hmms
+        self.gesture_hmms = gesture_hmms # tree.getGesture()
         self.gesture_datasets = gesture_datasets
 
         # confusion matrix for showing the results
         self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
-        # comparison gesture_hmms
+        # compare gesture through hmms
         for gesture_label,datasets in self.gesture_datasets.items():
             # for each dataset
             for dataset in datasets:
@@ -302,13 +303,18 @@ class Test():
                     sequences = dataset.applyTransforms()
                 else:
                     # second case: a list of sequences - get the specified number of frames
-                    sequences = [dataset[:,int((len(sequence)*self.stage)/100)] for sequence in dataset]
+                    sequences = [dataset[:,int((len(sequence)*perc_completed)/100)] for sequence in dataset]
+                # filter sequences basing on gesture_primitive_reference's contents
+                sequences = []
                 # proceed to compare models based on gesture_reference_primitives contents
-                for sequence in sequences:
-                    # get row label
-                    row_label = ""
-                    # compare models
-                    self.__comparison(sequences=sequence, dataset_label=row_label)
+                for sequence in sequences: # filter with gesture_primitive_references
+                    # get row label and proceed to comparison whether it is contained on gesture_reference_primitives
+                    if sequence[1] in gesture_primitive_references:
+                        primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence[0]),
+                                                                             gesture_primitive_references[sequence[1]])
+                        row_label = gesture_label+'_'+str(primitive_to_recognize)
+                        # compare models
+                        self.__comparison(sequences=[sequence], row_label=row_label)
         # return comparison results
         return self.result
 
@@ -374,11 +380,22 @@ class Test():
         return norm_log_probability
     @staticmethod
     def check(items_to_check, types):
+        """
+
+        :param items_to_check:
+        :param types:
+        :return:
+        """
         # parameters have to be lists
         if not isinstance((items_to_check, types), list):
             raise TypeError
         pass
-
+    @staticmethod
+    def findPrimitiveGivenFile(len_sequence, reference_primitives):
+        candidates = [n_frame for n_frame in reference_primitives if n_frame < len_sequence]
+        if len(candidates) > 0:
+            return len(candidates)-1
+        return 1
 
     ### Private methods ###
     def __createModel(self, gesture_expressions):
