@@ -8,11 +8,14 @@ import time
 
 class Tree(object):
 
-    def __init__(self, name, gestures=None, children=[]):
+    def __init__(self, name, gestures=None, children=[], hmm=None, children_hmm=None):
         if(isinstance(name, str)):
             self.name = name.__str__()
             self.gestures=gestures
             self.children = []
+            self.hmm= hmm
+            self.children_hmm=children_hmm
+
 
     def add_child(self, node):
         if (isinstance(node, Tree)):
@@ -143,10 +146,22 @@ class Tree(object):
                 #Sostituisco alcune stringhe (mi servirà per l'eval)
                 valore=valore.replace("P", "Point")
                 valore=valore.replace("L", "Line")
+                valore=valore.replace("A", "Arc")
+                gesture_list={chiave:[eval(valore)]}
 
+                stdout.write("\rCalcolo hmm nodo:" + chiave.__str__() )
+                stdout.flush()
 
-                temp.add_child(Tree(name=chiave, gestures=valore.__str__()))
+                temp.add_child(Tree(name=chiave, gestures=valore.__str__(), children=[], hmm=ModelExpression.generatedModels(gesture_list)))
                 indice+=1
+
+            if (temp.children == []):
+                temp.children_hmm = None
+            else:
+                children_hmm = {}
+                for figlio in temp.children:
+                    children_hmm.update(figlio.hmm)
+                temp.children_hmm = children_hmm
 
         return radice
 
@@ -156,7 +171,7 @@ class Tree(object):
         if(tree.children!=[]):
             for figlio in tree.children:
                 if(figlio.gestures!=None):
-                    print(tree.name + " ha come figlio " + figlio.name + " e ha come gestures: " + figlio.gestures.__str__())
+                    print(tree.name + " ha come figlio " + figlio.name + " e come gestures: " + figlio.gestures.__str__())
                 else:
                     print(tree.name + " ha come figlio " + figlio.name + " e non ha gestures")
             for figlio in tree.children:
@@ -178,10 +193,10 @@ class Tree(object):
             # gestures_hmms.append(ModelExpression.generatedModels(gesture_exp, num_states=6, spu=20))
             gestures_hmms.setdefault(tree.name, [eval(tree.gestures)])
 
-    def recognizeByProbability(self, gesture, gesture_hmms, sample_frames):
+    def recognizeByProbability(self, gesture, gesture_hmms, enable_show):
         #gesture= gesture da riconoscere
         #gesture_hmms= il dizionario contenente gli hmms
-        #sample_frame= numero di frames ogni quanto effettuare il riconoscimento
+        #enable_show=bool per attivare o meno la visualizzazione grafica del riconoscimento
 
         results=[]
 
@@ -213,12 +228,24 @@ class Tree(object):
         someFrames=[]
         list_of_prob_someFrames=[]
 
-        i=0
+        i=0 #Counter dei frames
+
+        #Coordinate
+        x=0
         y=0
-        plot_frames=[]
-        label=""
-        prev_label=""
-        onetime=True
+        stop_counter=0 #counter del numero di file letti (dello stesso tipo)
+        stop=0 #counter del numero totale dei file letti
+        plot_frames=[] #lista dei frames
+        label="" #gesture riconosciuta
+        prev_type="" #precedente tipo di file letto
+        prev_filename="" #file letto nel precedente ciclo for (per stampare correttamente il titolo del grafico)
+
+        prev_frame=[]
+        frame=[]
+        frames_changes=[]
+
+        results_list=[] #risultati del riconoscimento realtime
+
 
         for ndarray, name in list_of_points:
 
@@ -229,10 +256,9 @@ class Tree(object):
             #Stampo il grafico finale
             if(someFrames!=[] and plot_frames!=[]):
                 mp.title(label)
-                mp.suptitle(name)
-                label_changes-=1 #altrimenti cambia colore del punto
+                mp.suptitle(prev_filename)
+                label_changes-=1
 
-                #Stampo i punti residui
                 for x, y in plot_frames:
                     if (label_changes == 0):
                         mp.plot(x, y, 'bo')
@@ -244,8 +270,24 @@ class Tree(object):
                         mp.plot(x, y, 'yo')
                     if (label_changes == 4):
                         mp.plot(x, y, 'ro')
+                    if (label_changes == 5):
+                        mp.plot(x, y, 'go')
+                    if (label_changes == 6):
+                        mp.plot(x, y, 'bo')
+                    if (label_changes == 7):
+                        mp.plot(x, y, 'ro')
+                    if (label_changes == 8):
+                        mp.plot(x, y, 'yo')
 
-                mp.show()
+                if(enable_show):
+                    #print(" Frames_changes: " + frames_changes.__str__())
+                    mp.show()
+                    frames_changes=[]
+                    frame=[]
+                    prev_frame=[]
+
+
+                results_list.append(prob)
 
 
 
@@ -255,49 +297,100 @@ class Tree(object):
 
             label_changes = 0
             plot_frames=[]
-            for ndarray1 in ndarray:
-                i+=1
+
+            #Dopo 12 file, interrompo il ciclo for
+            if (stop == 12):
+                break
+
+            #Per far si che legga solo 4 file fast/medium/slow, devo usare un counter, che si incrementa di 1 ogni volta
+            #che incontra un file dello stesso tipo, ma che si resetta se quello precedente era di un altro tipo
+            #Se prev_type è una stringa vuota, setto stop_counter a -1 perchè si tratta della prima iterazione
+            #(Altrimenti la prima tipologia di file verrebbe letta solo 3 volte, in base al mio algoritmo)
+
+            if (prev_type == ""):
+                stop_counter = -1
+
+            if ("fast" in name):
+                if (prev_type == "medium"):
+                    stop_counter = 0
+                    prev_type="fast"
+                elif(prev_type == "slow"):
+                    stop_counter=0
+                    prev_type="fast"
+                else:
+                    prev_type = "fast"
+                    stop_counter += 1
+            if ("medium" in name):
+                if (prev_type == "fast"):
+                    stop_counter = 0
+                    prev_type="medium"
+                elif(prev_type == "slow"):
+                    stop_counter=0
+                    prev_type="medium"
+                else:
+                    prev_type = "medium"
+                    stop_counter += 1
+            if ("slow" in name):
+                if (prev_type == "medium"):
+                    stop_counter = 0
+                    prev_type="slow"
+                elif(prev_type == "fast"):
+                    stop_counter=0
+                    prev_type="slow"
+                else:
+                    prev_type = "slow"
+                    stop_counter += 1
+            if(stop_counter<4):
+                stop += 1
+                for ndarray1 in ndarray:
+                    i+=1
 
 
-                #Riconoscimento attraverso un array di frames (viene incrementato di un frame per ogni ciclo)
-                someFrames.append(ndarray1)
-                plot_frames.append((ndarray1[0],ndarray1[1]))
+                    #Riconoscimento attraverso un array di frames (viene incrementato di un frame per ogni ciclo)
+                    someFrames.append(ndarray1)
+                    plot_frames.append((ndarray1[0],ndarray1[1]))
+
+                    frame = ndarray1
+
+                    prev_label = label
+                    label, prob=Test.compare(sequence=someFrames, gesture_hmms=gesture_hmms, return_log_probabilities=True)
+
+                    mp.text(ndarray1[0], ndarray1[1], i)
+
+                    #Stampo grafico parziale
+                    a= (prev_label == label)
+                    if ((a==False) and label!=None):
+                        for x,y in plot_frames:
+                            if(label_changes==0):
+                                mp.plot(x, y, 'bo')
+                            if (label_changes == 1):
+                                mp.plot(x, y, 'ro')
+                            if (label_changes == 2):
+                                mp.plot(x, y, 'go')
+                            if (label_changes == 3):
+                                mp.plot(x, y, 'yo')
+                            if (label_changes == 4):
+                                mp.plot(x, y, 'ro')
+                            if (label_changes == 5):
+                                mp.plot(x, y, 'go')
+                            if (label_changes == 6):
+                                mp.plot(x, y, 'bo')
+                        label_changes += 1
+
+                        x,y=plot_frames[int(len(plot_frames)/2)]
+                        mp.text(x,y, label)
+                        plot_frames=[]
+
+                    #Stampa di aggiornamento (stampo in questo modo per sostituire sempre la riga attuale)
+                    stdout.write("\rCalcolo probabilità FILE: " + name + "  Frame " + i.__str__() +
+                                 "  Gesture riconosciuta: " + label.__str__())
+                    stdout.flush()
+                    prev_filename=name
+                    #time.sleep(0.025)
 
 
-
-                prev_label = label
-                label=Test.compare(sequence=someFrames, gesture_hmms=gesture_hmms, return_log_probabilities=False)
-
-                #Stampo grafico parziale
-                a= (prev_label == label)
-                if ((a==False) and label!=None):
-                    for x,y in plot_frames:
-                        if(label_changes==0):
-                            mp.plot(x, y, 'bo')
-                        if (label_changes == 1):
-                            mp.plot(x, y, 'ro')
-                        if (label_changes == 2):
-                            mp.plot(x, y, 'go')
-                        if (label_changes == 3):
-                            mp.plot(x, y, 'yo')
-                        if (label_changes == 4):
-                            mp.plot(x, y, 'ro')
-                    label_changes += 1
-
-                    x,y=plot_frames[int(len(plot_frames)/2)]
-                    mp.text(x,y, label)
-                    plot_frames=[]
-
-                #Stampa di aggiornamento (stampo in questo modo per sostituire sempre la riga attuale)
-                stdout.write("\rCalcolo probabilità FILE: " + name + "  Frame " + i.__str__() +
-                             "  Gesture riconosciuta: " + label.__str__())
-                stdout.flush()
-
-                #time.sleep(0.025)
-
-
-                y+=1
-                list_of_prob_someFrames.append(label)
+                    y+=1
+                    list_of_prob_someFrames.append(label)
 
 
 
@@ -319,7 +412,8 @@ class Tree(object):
         print(max)
         print("Risultati complessivi: " + result_full.__str__())
 
-
+        print("\nRisultati modalità someframes: ")
+        print(results_list)
 
     #Funzione extra (Riconoscimento di una gesture tramite confronto)
     def recognizeByCompare(self, tree, gesture):
@@ -336,8 +430,14 @@ class Tree(object):
                 figlio.recognizeByCompare(figlio, gesture)
 
 
-    def returnModels(self):
-        pass
+    def returnModels(self, tree, hmm={}):
+        if (tree.children != []):
+            for figlio in tree.children:
+                if (figlio.hmm != None):
+                    hmm.update(figlio.hmm)
+
+                figlio.returnModels(figlio, hmm)
+            return hmm
 
 
 
@@ -349,12 +449,8 @@ class Tree(object):
 # che fai, però è inutile. In pratica per ogni chiamata ti crei in memoria due volte lo stesso oggetto.
 
 #### COSE DA FARE ####
-# - 1) stavo controllando come creavi la lista di hmm. Ora cerchiamo di fare un passo in avanti, fai in modo che i nodi
-#      foglia contengano anche i rispettivi hmm, oppure mettili nel nodo genitore. Poi valutiamo quale è la scelta migliore;
-# - 2) la comparazione avviene attraverso un'altra funzione non contenuta in Tree.
-# - 3) modifica la funzione "returnModels" in modo che restituisca tutte le hmm contenuti nell'albero (vedere poi
-#      se dal nodo genitore o dai nodi figli);
-# - 4) togli le parti che non servono e aggiusta i commenti.
+# - 1) la comparazione avviene attraverso un'altra funzione non contenuta in Tree.
+# - 2) togli le parti che non servono e aggiusta i commenti.
 
 #### MODIFICHE INSERITE ####
 # - 1) ho creato il file __init__.py per poter richiamare Tree anche in altre parti della libreria.
