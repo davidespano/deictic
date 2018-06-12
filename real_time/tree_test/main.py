@@ -1,11 +1,57 @@
 from gesture import *
 from model.gestureModel import Point, Line, Arc
-from test.test import Test
-
-
+from real_time.tree_test import recognition as re
 from real_time.tree_test.tree import Tree
 
 def main():
+
+    ####################################################################################################################
+    ####                                               TUTORIAL                                                     ####
+    ####################################################################################################################
+    #                                                                                                                  #
+    #Il metodo  ##gestureFactory## splitta la gesture nei vari nodi dell'albero (per adesso gestisce solo la sequence) #
+    #                                                                                                                  #
+    #Prende in input un DIZIONARIO che ha come chiavi il nome della gesture, e come valore una compositeExpression     #
+    #                                                                                                                  #
+    #La funzione restituisce un dizionario contenente la scomposizione della gesture (nome gesture: scomposizione)     #
+    #nella diverse primitive e una lista degli operatori presenti nella compositeExpression                            #
+    #(Quest'ultima serviva per la scomposizione di espressione contenenti anche altri operatori al di fuori della      #
+    #sequence (+), ma non ho mai finito di implementarla                                                               #
+    #                                                                                                                  #
+    #                                      #######################                                                     #
+    #                                                                                                                  #
+    #Il metodo ##createTree## crea un oggetto di tipo Tree e lo popola con i diversi nodi corrispondenti alle gesture e#
+    #alle loro scomposizioni. Ogni nodo può contenere una lista dei nodi figli, il proprio hmm, l'hmm dei figli e la   #
+    #propria gesture. Va richiamata a partire da un oggetto di tipo Tree inizializzato come segue: tree=Tree("").      #
+    #Ciò permette di creare la radice dell'albero e di richiamare tutti i metodi per modellarlo                        #
+    #                                                                                                                  #
+    #Prende in input un dizionario contenente la scomposizione della gesture nelle diverse primitive, una lista delle  #
+    #chiavi di questo dizionario e la lista degli operatori (stesso discorso della precedente funzione).               #
+    #                                                                                                                  #
+    #Ovviamente, restituisce un oggetto di tipo Tree                                                                   #
+    #                                                                                                                  #
+    ##                                     #######################                                                     #
+    #                                                                                                                  #
+    #Il metodo ##createTreeDict## crea il dizionario dell'albero passato in input, inserendo come chiave il nome della #
+    #sottogesture e come valore la sua compositeExp. Restituisce il dizionario creato                                  #
+    #                                                                                                                  #
+    #                                      #######################                                                     #
+    #                                                                                                                  #
+    #Il metodo ##visit## effettua la visita in ampiezza dell'albero inserito in input                                  #
+    #                                                                                                                  #
+    #                                      #######################                                                     #
+    #                                                                                                                  #
+    #Il metodo ##returnModels## restituisce un dizionario corrispondente all'hmm di tutti i nodi dell'albero           #
+    #                                                                                                                  #
+    #                                      #######################                                                     #
+    #                                                                                                                  #
+    #Il metodo ##recognizeByProbability## stampa a video il grafico della gesture riconosciuta framebyframe e indica,  #
+    #inoltre, quale è stata riconosciuta mediante il riconoscimento filebyfile                                         #
+    #                                                                                                                  #
+    #Prende in input una gesture (es: ("triangle", 3 * n_sample) ), l'hmm dell'albero, e un bool che permette di       #
+    #scegliere se visualizzare il grafico o meno (in ogni caso, stampa su console il riconoscimento in tempo reale     #
+    #                                                                                                                  #
+    ###################################################################################################################
 
     gestures_dictionary1 = {'triangle': [Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)]}
 
@@ -30,25 +76,19 @@ def main():
                             'x': [Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3)]}
 
     items = []
-    tree=Tree("")
-    list_of_operators=[]
+    tree=Tree("") #Creazione di un oggetto Tree, inserendo la sua radice
 
     primitives_dictionary, list_of_operators = tree.gestureFactory(gestures_dictionary3)
+
     list_of_key=(list(primitives_dictionary.keys()))
 
-    #print(primitives_dictionary)
-    tree=tree.createTree(primitives_dictionary, 0, list_of_key, list_of_operators)
+    tree=tree.createTree(primitives_dictionary, list_of_key, list_of_operators)
 
-    gestures_list={}
-    gestures_hmms={}
+    gestures_list=tree.createTreeDict(tree)
 
-    tree.createTreeDict(tree, gestures_list)
-
-    #(DEPRECATO)Creo gli hmms dei nodi dell'albero attraverso quanto ottenuto con le precedenti funzioni
-    #gestures_hmms1=ModelExpression.generatedModels(gestures_list)
-
-    print("Albero:")
+    print("\nAlbero:")
     tree.visit(tree)
+
     n_sample = 20
     list_gesture = [("triangle", 3 * n_sample),("rectangle", 4 * n_sample),("arrow", 4 * n_sample), ("caret", 2 * n_sample), ("circle", 4 * n_sample), ("check", 2 * n_sample),
                     ("delete_mark", 3 * n_sample),
@@ -64,11 +104,9 @@ def main():
 
 
     for gesture in list_gesture:
-        tree.recognizeByProbability(gesture=gesture, gesture_hmms=gestures_hmms, enable_show=True)
+        re.recognizeByProbability(gesture=gesture, gesture_hmms=gestures_hmms, enable_show=True)
+        #re.plotCsvFile(gesture)
 
-    gesture={"triangle_pt2":[Point(0,0) + Line(-3,-4) + Line(6,0)]}
-    gesture_trovata=False
-    #tree.recognizeByCompare(tree=tree, gesture=gesture)
     print("end")
 
 
