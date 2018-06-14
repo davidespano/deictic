@@ -211,7 +211,3 @@ class Tree(object):
 # non c'è bisogno di passare anche tree tra i parametri, perché tanto puoi accedere agli oggetti di quello stesso
 # oggetto tramite la self: esempio, riga 328, anziché avere tree.children, avrai self.children. Non è sbagliato quello
 # che fai, però è inutile. In pratica per ogni chiamata ti crei in memoria due volte lo stesso oggetto.
-
-#### COSE DA FARE ####
-# - 1) creare funzione che, leggendo il file csv contenente il nome del file e il numero dei frame della scomposizione
-#      crei un dizionario con nomefile:lista frames (solo i frame come numero)

@@ -53,27 +53,62 @@ def main():
     #                                                                                                                  #
     ###################################################################################################################
 
+
     gestures_dictionary1 = {'triangle': [Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)]}
 
     gestures_dictionary2 = {'triangle': [Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)],
                            'rectangle': [Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0)]}
 
-    gestures_dictionary3 = {'arrow': [Point(0,0) + Line(6,4) + Line(-4,0) + Line(5,1) + Line(-1, -4)],
-                            'caret': [Point(0,0) + Line(2,3) + Line(2,-3)],
-                            'check': [Point(0,0) + Line(2, -2) + Line(4,6)],
-                            'circle': [Point(0,0) + Arc(-3,-3, cw=False) + Arc(3,-3, cw=False) + Arc(3,3, cw=False) + Arc(-3,3, cw=False)], #mancano gli archi nel mio albero
-                            'delete_mark': [Point(0,0) + Line(2, -3) + Line(-2,0) + Line(2,3)],
-                            'left_curly_brace': [Point(0,0) + Arc(-5,-5, cw=False) + Arc(-3,-3)  + Arc(3,-3) +  Arc(5,-5,cw=False)],
-                            'left_sq_bracket': [Point(0,0) + Line(-4,0) + Line(0,-5) + Line(4,0)],
-                            'pigtail': [Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False)],
-                            'question_mark': [Point(0,0) + Arc(4,4) + Arc(4,-4) + Arc(-4,-4) + Arc(-2,-2, cw=False) + Arc(2, -2, cw=False)],
-                            'rectangle': [Point(0, 0) + Line(0, -3) + Line(4, 0) + Line(0, 3) + Line(-4, 0)],
-                            'right_curly_brace':[Point(0,0) + Arc(5,-5) +  Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Arc(-5,-5)],
-                            'right_sq_bracket':[Point(0,0) + Line(4,0) + Line(0, -5)  + Line(-4, 0)],
-                            'star':[Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)],
-                            'triangle': [Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)],
-                            'v':[Point(0,0) + Line(2,-3) + Line(2,3)],
-                            'x': [Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3)]}
+    gestures_dictionary3 = {
+                                'arrow': [
+                                    Point(0, 0) + Line(6, 4) + Line(-4, 0) + Line(5, 1) + Line(-1, -4)
+                                ],
+                                'caret': [
+                                    Point(0, 0) + Line(2, 3) + Line(2, -3)
+                                ],
+                                'check': [
+                                    Point(0, 0) + Line(2, -2) + Line(4, 6)
+                                ],
+                                'circle': [
+                                    Point(0, 0) + Arc(-3, -3, cw=False) + Arc(3, -3, cw=False) + Arc(3, 3, cw=False) + Arc(-3, 3, cw=False)
+                                ],
+                                'delete_mark': [
+                                    Point(0, 0) + Line(2, -3) + Line(-2, 0) + Line(2, 3)
+                                ],
+                                'left_curly_brace': [
+                                    Point(0, 0) + Arc(-5, -5, cw=False) + Arc(-3, -3) + Arc(3, -3) + Arc(5, -5, cw=False)
+                                ],
+                                'left_sq_bracket': [
+                                    Point(0, 0) + Line(-4, 0) + Line(0, -5) + Line(4, 0)
+                                ],
+                                'pigtail':[
+                                    Point(0,0) + Arc(3,3, cw=False) + Arc(-1,1, cw=False) + Arc(-1,-1, cw=False) + Arc(3, -3, cw=False)
+                                ],
+                                'question_mark':[
+                                    Point(0,0) + Arc(4,4) + Arc(4,-4) + Arc(-4,-4) + Arc(-2,-2, cw=False) + Arc(2, -2, cw=False)
+                                ],
+                                'rectangle':[
+                                    Point(0,0) + Line(0,-3) + Line(4,0) + Line(0, 3) + Line(-4,0)
+                                ],
+                                'right_curly_brace':[
+                                    Point(0,0) + Arc(5,-5) +  Arc(3,-3, cw=False) + Arc(-3,-3, cw=False) + Arc(-5,-5)
+                                ],
+                                'right_sq_bracket':[
+                                    Point(0,0) + Line(4,0) + Line(0, -5) + Line(-4, 0)
+                                ],
+                                'star':[
+                                    Point(0,0) + Line(2,5) + Line(2, -5) + Line(-5, 3) + Line(6,0) + Line(-5, -3)
+                                ],
+                                'triangle':[
+                                    Point(0,0) + Line(-3,-4) + Line(6,0)+ Line(-3,4)
+                                ],
+                                'v':[
+                                    Point(0,0) + Line(2,-3) + Line(2,3)
+                                ],
+                                'x':[
+                                    Point(0,0) + Line(3,-3) + Line(0,3) + Line(-3,-3)
+                                ],
+                            }
 
     items = []
     tree=Tree("") #Creazione di un oggetto Tree, inserendo la sua radice
@@ -103,9 +138,29 @@ def main():
     gestures_hmms=tree.returnModels(tree)
 
 
+    ##########################
+    ##       LEGGIMI        ##
+    ##########################
+    #           |            #
+    #           |            #
+    #           V            #
+    #Se vuoi eseguire il riconoscimento framebyframe, decommenta recognizeByPRobability
+    #Se vuoi plottare i frames dei file originali delle gesture, decommenta plotCsvFile
+    #Solo una delle due deve essere decommentata, altrimenti mischi le stampe
+
+
     for gesture in list_gesture:
-        re.recognizeByProbability(gesture=gesture, gesture_hmms=gestures_hmms, enable_show=True)
+        #re.recognizeByProbability(gesture=gesture, gesture_hmms=gestures_hmms, enable_show=True)
+        pass
         #re.plotCsvFile(gesture)
+
+
+    print("\n################\n")
+
+
+    #Ottengo il dizionario nomefile: frame della scomposizione
+    changePrimitivesDict = (re.readChangePrimitivesFile().__str__())
+
 
     print("end")
 

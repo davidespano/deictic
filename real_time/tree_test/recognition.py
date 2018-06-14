@@ -2,6 +2,7 @@ from gesture import *
 from test.test import Test
 import matplotlib.pyplot as mp
 from sys import stdout
+import csv
 
 
 def recognizeByProbability(gesture, gesture_hmms, enable_show):
@@ -235,8 +236,9 @@ def recognizeByCompare(tree, gesture):
         for figlio in tree.children:
             figlio.recognizeByCompare(figlio, gesture)
 
+#Funzione di debug per aiutare la scrittura a mano dei frames nel file csv
 def plotCsvFile(gesture):
-    path0 = 'C:/Users/fedus/Documents/GitHub/deictic/repository/' + 'Tree_test/' + gesture[0] + '/'
+    path0 = '/home/federico/PycharmProjects/deictic/repository/' + 'Tree_test/' + gesture[0] + '/'
 
     dataset = CsvDataset(path0, type=float)
 
@@ -245,10 +247,46 @@ def plotCsvFile(gesture):
     list=[]
     for file in dataset_iter:
         i=0
-        mp.show()
-        mp.title(file.__str__())
+
         for ndarray in dataset.readFile(file):
             i+=1
             mp.plot(ndarray[0], ndarray[1], 'bo')
             mp.text(ndarray[0], ndarray[1], i)
 
+        mp.title(file.__str__())
+        mp.show()
+
+def readChangePrimitivesFile():
+    path0 = '/home/federico/PycharmProjects/deictic/repository/'+ 'Tree_test/manualRecognition/changePrimitives.csv'
+
+    f = open(path0, 'rt')
+    try:
+        changePrimitivesDict={}
+        reader = csv.reader(f)
+        i=1
+        for row in reader:
+            if(i%13!=1):
+                row=re.split(r"[;]", row[0])
+                file_name=row[0]
+                part_list=[]
+                for part in row:
+                    if(part is not file_name and part is not ""):
+                        try:
+                            temp=((re.split(r"[:]", part))[1])
+
+                            temp=((re.findall(r'\d+', temp))[0])
+
+                        except IndexError:
+                            print("ERRORE nella suddivisione di pr_x dal numero (es pr_3 da 11): " + (re.split(r"[:]", part)).__str__())
+                            print("Non è stato inserito un numero (ma un altro carattere) in una delle pr_x della riga: " + row.__str__())
+                            print("Oppure è stato inserito un carattere (diverso dallo spazio) dopo l'ultima pr_x: X (ad esempio pr_5: 45;)\n")
+
+                        temp=float(temp)
+                        temp=int(temp)
+                        part_list.append(temp)
+
+                changePrimitivesDict.setdefault(file_name, part_list)
+            i+=1
+        return changePrimitivesDict
+    finally:
+        f.close()
