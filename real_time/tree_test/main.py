@@ -159,7 +159,7 @@ def main():
 
 
     #Ottengo il dizionario nomefile: frame della scomposizione
-    changePrimitivesDict = (re.readChangePrimitivesFile().__str__())
+    changePrimitivesDict = re.readChangePrimitivesFile()
 
 
     print("end")

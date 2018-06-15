@@ -14,7 +14,7 @@ from gesture import ModelExpression
 from dataset import CsvDataset, Sequence, CsvDatasetExtended
 # hidden markov model
 from pomegranate import HiddenMarkovModel
-from real_time.tree_test import Tree
+from real_time.tree_test import tree
 
 class ConfusionMatrix():
     """
