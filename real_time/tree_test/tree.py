@@ -1,20 +1,32 @@
-import re
 import more_itertools as mit
 from gesture import *
-from test.test import Test
-import matplotlib.pyplot as mp
 from sys import stdout
-import time
 
 class Tree(object):
 
-    def __init__(self, name, gestures=None, children=[], hmm=None, children_hmm=None):
+    '''def __init__(self, name, gestures=None, children=[], hmm=None, children_hmm=None):
         if(isinstance(name, str)):
             self.name = name.__str__()
             self.gestures=gestures
             self.children = []
             self.hmm= hmm
-            self.children_hmm=children_hmm
+            self.children_hmm=children_hmm'''
+
+    def __init__(self, name=None, gestures=None, children=[], hmm=None, children_hmm=None, gesture_exp=None):
+        if(isinstance(gesture_exp, dict)):
+
+            primitives_dictionary, list_of_operators = self.gestureFactory(gesture_exp)
+            list_of_key = (list(primitives_dictionary.keys()))
+            self.__dict__=self.createTree(primitives_dictionary, list_of_key, list_of_operators)
+            print("")
+
+        if (isinstance(name, str) and gesture_exp==None):
+            self.name = name.__str__()
+            self.gestures = gestures
+            self.children = []
+            self.hmm = hmm
+            self.children_hmm = children_hmm
+
 
 
     def add_child(self, node):
@@ -163,51 +175,46 @@ class Tree(object):
                     children_hmm.update(figlio.hmm)
                 temp.children_hmm = children_hmm
 
-        return radice
+        return radice.__dict__
 
-    def visit(self, tree):
+    def visit(self):
 
         #Se il nodo ha figli, li ''visito'', altrimenti stampo che non ne ha
-        if(tree.children!=[]):
-            for figlio in tree.children:
+        if(self.children!=[]):
+            for figlio in self.children:
                 if(figlio.gestures!=None):
-                    print(tree.name + " ha come figlio " + figlio.name + " e come gestures: " + figlio.gestures.__str__())
+                    print(self.name + " ha come figlio " + figlio.name + " e come gestures: " + figlio.gestures.__str__())
                 else:
-                    print(tree.name + " ha come figlio " + figlio.name + " e non ha gestures")
-            for figlio in tree.children:
-                figlio.visit(figlio)
+                    print(self.name + " ha come figlio " + figlio.name + " e non ha gestures")
+            for figlio in self.children:
+                figlio.visit()
         else:
-            print(tree.name + " non ha figli")
+            print(self.name + " non ha figli")
 
-    def createTreeDict(self, tree, gestures_hmms={}):
+    def createTreeDict(self, gestures_hmms={}):
 
 
         #Creo l'hmm delle foglie dell'albero
-        if (tree.children != []):
-            for figlio in tree.children:
-                figlio.createTreeDict(figlio, gestures_hmms)
+        if (self.children != []):
+            for figlio in self.children:
+                figlio.createTreeDict(gestures_hmms)
             return gestures_hmms
         else:
 
             #ricostruisco la gesture_expression dal nome del nodo e dalle sue gestures (tramite eval)
             #gesture_exp={tree.name: [eval(tree.gestures)]}
             # gestures_hmms.append(ModelExpression.generatedModels(gesture_exp, num_states=6, spu=20))
-            gestures_hmms.setdefault(tree.name, [eval(tree.gestures)])
+            gestures_hmms.setdefault(self.name, [eval(self.gestures)])
 
-    def returnModels(self, tree, hmm={}):
-        if (tree.children != []):
-            for figlio in tree.children:
+    def returnModels(self, hmm={}):
+        if (self.children != []):
+            for figlio in self.children:
                 if (figlio.hmm != None):
                     hmm.update(figlio.hmm)
 
-                figlio.returnModels(figlio, hmm)
+                figlio.returnModels(hmm)
             return hmm
 
 
 
 
-#### HINT ####
-# hai presente il this di java? ecco, self è la stessa identica cosa. Per esempio, nella funzione recognizedByCompare
-# non c'è bisogno di passare anche tree tra i parametri, perché tanto puoi accedere agli oggetti di quello stesso
-# oggetto tramite la self: esempio, riga 328, anziché avere tree.children, avrai self.children. Non è sbagliato quello
-# che fai, però è inutile. In pratica per ogni chiamata ti crei in memoria due volte lo stesso oggetto.

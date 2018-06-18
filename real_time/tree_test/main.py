@@ -111,18 +111,15 @@ def main():
                             }
 
     items = []
-    tree=Tree("") #Creazione di un oggetto Tree, inserendo la sua radice
 
-    primitives_dictionary, list_of_operators = tree.gestureFactory(gestures_dictionary3)
+    tree=Tree(gesture_exp=gestures_dictionary3) #Creazione di un oggetto Tree, inserendo il dizionario sopra definito
 
-    list_of_key=(list(primitives_dictionary.keys()))
-
-    tree=tree.createTree(primitives_dictionary, list_of_key, list_of_operators)
-
-    gestures_list=tree.createTreeDict(tree)
+    gestures_list=tree.createTreeDict()
 
     print("\nAlbero:")
-    tree.visit(tree)
+
+
+    tree.visit()
 
     n_sample = 20
     list_gesture = [("triangle", 3 * n_sample),("rectangle", 4 * n_sample),("arrow", 4 * n_sample), ("caret", 2 * n_sample), ("circle", 4 * n_sample), ("check", 2 * n_sample),
@@ -135,7 +132,7 @@ def main():
     print("")
 
     #gesture_hmms contiene tutti gli hmm dell'albero
-    gestures_hmms=tree.returnModels(tree)
+    gestures_hmms=tree.returnModels()
 
 
     ##########################

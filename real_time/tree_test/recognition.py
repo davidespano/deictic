@@ -3,7 +3,7 @@ from test.test import Test
 import matplotlib.pyplot as mp
 from sys import stdout
 import csv
-
+from config import Config
 
 def recognizeByProbability(gesture, gesture_hmms, enable_show):
     # gesture= gesture da riconoscere
@@ -14,7 +14,7 @@ def recognizeByProbability(gesture, gesture_hmms, enable_show):
 
     unistroke_mode = True
 
-    path0 = '/home/federico/PycharmProjects/deictic/repository/' + 'Tree_test/' + gesture[0] + '/'
+    path0 = Config.baseDir + 'Tree_test/' + gesture[0] + '/'
 
     dataset = CsvDataset(path0, type=float)
 
@@ -238,7 +238,7 @@ def recognizeByCompare(tree, gesture):
 
 #Funzione di debug per aiutare la scrittura a mano dei frames nel file csv
 def plotCsvFile(gesture):
-    path0 = '/home/federico/PycharmProjects/deictic/repository/' + 'Tree_test/' + gesture[0] + '/'
+    path0 = Config.baseDir + 'Tree_test/' + gesture[0] + '/'
 
     dataset = CsvDataset(path0, type=float)
 
@@ -257,7 +257,7 @@ def plotCsvFile(gesture):
         mp.show()
 
 def readChangePrimitivesFile():
-    path0 = '/home/federico/PycharmProjects/deictic/repository/'+ 'Tree_test/manualRecognition/changePrimitives.csv'
+    path0 = Config.baseDir+ 'Tree_test/manualRecognition/changePrimitives.csv'
 
     f = open(path0, 'rt')
     try:
