@@ -278,7 +278,7 @@ class CsvDatasetExtended(CsvDataset):
         if not os.path.isdir(dir):
             raise NotADirectoryError
         # Initialize parameters
-        super(dir, type)
+        super(CsvDatasetExtended,self).__init__(dir, type)
 
 
     def readFile(self, filename):
@@ -290,7 +290,7 @@ class CsvDatasetExtended(CsvDataset):
         # check
         if not isinstance(filename, str):
             raise TypeError
-        if os.path.isfile(self.dir+filename):
+        if not os.path.isfile(self.dir+filename):
             raise FileNotFoundError
         return Sequence.fromFile(filepath=self.dir+filename, type=self.type)
 
@@ -392,7 +392,7 @@ class Sequence(object):
         :return:
         '''
         self.compositeTransform.addTranform(transform)
-    def applyTransform(self):
+    def applyTransforms(self):
         '''
             apply sequentially the specified transforms
         :return:

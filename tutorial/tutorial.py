@@ -1,8 +1,9 @@
 from gesture import ModelExpression, DatasetExpressions, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
-from dataset import CsvDataset
+from dataset import CsvDataset, CsvDatasetExtended
 from test import Test
 from config import Config
+from real_time.tree_test import *
 
 def firstExample():
     '''
@@ -104,34 +105,58 @@ def fifthExample():
     """
     # get the gesture expressions which describe 1$ unistroke dataset
     #gesture_hmms = DatasetExpressions.returnExpressions(selected_dataset= TypeDataset.unistroke_1dollar)
-    expressions = {
-        'Triangle_1': [Point(0,0)+Line(-3,-3)],
-        'Triangle_2': [Point(0,0)+Line(-3,-3)+Line(6,0)],
-        'Triangle_3': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
-        'Rectangle_1': [Point(0,0)+Line(0,-2)],
-        'Rectangle_2': [Point(0,0)+Line(0,-2)+Line(4,0)],
-        'Rectangle_3': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)],
-        'Rectangle_4': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
-    }
-    gesture_hmms = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
+    # expressions = {
+    #     'Triangle_1': [Point(0,0)+Line(-3,-3)],
+    #     'Triangle_2': [Point(0,0)+Line(-3,-3)+Line(6,0)],
+    #     'Triangle_3': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
+    #     'Rectangle_1': [Point(0,0)+Line(0,-2)],
+    #     'Rectangle_2': [Point(0,0)+Line(0,-2)+Line(4,0)],
+    #     'Rectangle_3': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)],
+    #     'Rectangle_4': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
+    # }
+    # gesture_hmms = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
+    #
+    # # get gesture datasets
+    # #gesture_dataset = DatasetFolders.returnFolders(selected_dataset=TypeDataset.unistroke_1dollar)
+    # gesture_dataset = {
+    #     'Triangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
+    #     'Rectangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
+    # }
+    # # get primitive references
+    # gesture_primitive_references = {'1_fast_triangle_01.csv':[25,60,100], '1_fast_rectangle_01.csv':[30,40,80]}
+    # # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    # results = Test.getInstance().onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset,
+    #                                         gesture_primitive_references=gesture_primitive_references,
+    #                                         perc_completed=25)
+    # show result through confusion matrix
+    #results.plot()
+    # save result on csv file
+    #results.save(path=None)
 
-    # get gesture datasets
-    #gesture_dataset = DatasetFolders.returnFolders(selected_dataset=TypeDataset.unistroke_1dollar)
-    gesture_dataset = {
-        'Triangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
-        'Rectangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
+    #
+    expressions = {
+        'triangle': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
+        'rectangle': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
     }
+    #
+    gesture_dataset = {
+        'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
+        'rectangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
+    }
+    #
+    tree=Tree(gesture_exp=expressions)
+    gestures_list=tree.createTreeDict()
     # get primitive references
-    gesture_primitive_references = {'1_fast_triangle_01.csv':[25,60,100], '1_fast_rectangle_01.csv':[30,40,80]}
+    gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
+
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-    results = Test.getInstance().onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset,
+    results = Test.getInstance().onlineTest(tree=tree, gesture_datasets=gesture_dataset,
                                             gesture_primitive_references=gesture_primitive_references,
-                                            perc_completed=25)
+                                            perc_completed=45)
     # show result through confusion matrix
     results.plot()
     # save result on csv file
-    results.save(path=None)
-
+    #results.save(path=None)
 
 # Start example
 fifthExample()

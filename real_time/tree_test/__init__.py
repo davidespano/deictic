@@ -1,1 +1,2 @@
 from real_time.tree_test.tree import Tree
+from real_time.tree_test.recognition import readChangePrimitivesFile

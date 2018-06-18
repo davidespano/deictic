@@ -14,7 +14,7 @@ from gesture import ModelExpression
 from dataset import CsvDataset, Sequence, CsvDatasetExtended
 # hidden markov model
 from pomegranate import HiddenMarkovModel
-from real_time.tree_test import tree
+from real_time.tree_test import Tree
 
 class ConfusionMatrix():
     """
@@ -268,13 +268,13 @@ class Test():
         # start comparison
         return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, gesture_hmms, gesture_datasets, gesture_primitive_references, perc_completed=100):
+    def onlineTest(self, tree, gesture_datasets, gesture_primitive_references, perc_completed=100):
         # check
         # todo: static method for checking dictionary values
         # gesture hmms #
-        if not isinstance(gesture_hmms, Tree) \
-                or not all(isinstance(item, HiddenMarkovModel)
-                            for key,value in gesture_hmms.items() for item in value):
+        if not isinstance(tree, Tree):# \
+                #or not all(isinstance(item, HiddenMarkovModel)
+                #            for key,value in gesture_hmms.items() for item in value):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         # gesture datasets #
         if not isinstance(gesture_datasets, dict) \
@@ -282,16 +282,16 @@ class Test():
                            for key,value in gesture_datasets.items() for item in value):
             raise Exception("gesture_datasets must be a dictionary of CsvDataset objects or a numpy ndarray.")
         # gesture primitive references #
-        if not isinstance(gesture_reference_primitives, dict) \
+        if not isinstance(gesture_primitive_references, dict) \
                or not all(isinstance(item, int)
-                          for key,value in gesture_reference_primitives.items() for item in value):
+                          for key,value in gesture_primitive_references.items() for item in value):
            raise Exception("gesture_reference_primitives must be a dictionary of integers.")
         # perc completed #
         if not isinstance(perc_completed, (int,float)):
             raise TypeError
 
         # assigned parameters
-        self.gesture_hmms = gesture_hmms.returnModels()
+        self.gesture_hmms = tree.returnModels()
         self.gesture_datasets = gesture_datasets
 
         # confusion matrix for showing the results
@@ -303,21 +303,21 @@ class Test():
                 # proceed to compare models using the files contained into gesture_reference_primitives #
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
-                    dataset = item.readDataset()
+                    dataset = dataset.readDataset()
                 # filter sequences basing on gesture_primitive_reference's contents
                 sequences = [sequence for sequence in dataset if sequence.filename in gesture_primitive_references]
                 # proceed to compare models based on gesture_reference_primitives contents
                 for sequence in sequences:
                     # apply transform
                     transform_perc_completed = RemovingFrames(stage=perc_completed)
-                    dataset.addTransform(transform_perc_completed)
-                    sequence = item.applyTransforms()
+                    sequence.addTransform(transform_perc_completed)
+                    sequence.applyTransforms()
                     # get row label and proceed to comparison
-                    primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence[0]),
-                                                                         gesture_primitive_references[sequence[1]])
-                    row_label = gesture_label+'_'+str(primitive_to_recognize)
+                    primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence.points),
+                                                                         gesture_primitive_references[sequence.filename])
+                    row_label = gesture_label+"_pt_"+str(primitive_to_recognize)
                     # compare models
-                    self.__comparison(sequences=[sequence], row_label=row_label)
+                    self.__comparison(sequences=[(sequence.points, sequence.filename)], row_label=row_label)
         # return comparison results
         return self.result
 
@@ -397,7 +397,7 @@ class Test():
     def findPrimitiveGivenFile(len_sequence, reference_primitives):
         candidates = [n_frame for n_frame in reference_primitives if n_frame < len_sequence]
         if len(candidates) > 0:
-            return len(candidates)-1
+            return len(candidates)
         return 1
 
     ### Private methods ###

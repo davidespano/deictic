@@ -1,5 +1,5 @@
 from gesture import *
-from test.test import Test
+#from test.test import Test
 import matplotlib.pyplot as mp
 from sys import stdout
 import csv
@@ -256,8 +256,9 @@ def plotCsvFile(gesture):
         mp.title(file.__str__())
         mp.show()
 
-def readChangePrimitivesFile():
-    path0 = Config.baseDir+ 'Tree_test/manualRecognition/changePrimitives.csv'
+def readChangePrimitivesFile(path):
+    path0=path
+    #path0 = Config.baseDir+ 'Tree_test/manualRecognition/changePrimitives.csv'
 
     f = open(path0, 'rt')
     try:
