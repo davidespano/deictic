@@ -144,8 +144,8 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
 
 
 
-
-baseDir = '/home/ale/PycharmProjects/deictic/repository/'
+baseDir = '/home/federico/PycharmProjects/deictic/repository/'
+#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
 mode = 2

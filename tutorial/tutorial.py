@@ -135,13 +135,41 @@ def fifthExample():
 
     #
     expressions = {
-        'triangle': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
-        'rectangle': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
+        'arrow': [Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)],
+        'caret': [Point(0,0)  +  Line(2,3)  +  Line(2,-3)],
+        'check': [Point(0,0)  +  Line(2,-2)  +  Line(4,6)],
+        'circle': [Point(0,0)  +  Arc(-3,-3,False)  +  Arc(3,-3,False)  +  Arc(3,3,False)  +  Arc(-3,3,False)],
+        'delete_mark': [Point(0,0)  +  Line(2,-3)  +  Line(-2,0)  +  Line(2,3)],
+        'left_curly_brace': [Point(0,0)  +  Arc(-5,-5,False)  +  Arc(-3,-3,True)  +  Arc(3,-3,True)  +  Arc(5,-5,False)],
+        'left_sq_bracket': [Point(0,0)  +  Line(-4,0)  +  Line(0,-5)  +  Line(4,0)],
+        'pigtail': [Point(0,0)  +  Arc(3,3,False)  +  Arc(-1,1,False)  +  Arc(-1,-1,False)  +  Arc(3,-3,False)],
+        'question_mark': [Point(0,0)  +  Arc(4,4,True)  +  Arc(4,-4,True)  +  Arc(-4,-4,True)  +  Arc(-2,-2,False)  +  Arc(2,-2,False)],
+        'rectangle': [Point(0,0)  +  Line(0,-3)  +  Line(4,0)  +  Line(0,3)  +  Line(-4,0)],
+        'right_curly_brace': [Point(0,0)  +  Arc(5,-5,True)  +  Arc(3,-3,False)  +  Arc(-3,-3,False)  +  Arc(-5,-5,True)],
+        'right_sq_bracket': [Point(0,0)  +  Line(4,0)  +  Line(0,-5)  +  Line(-4,0)],
+        'star': [Point(0,0)  +  Line(2,5)  +  Line(2,-5)  +  Line(-5,3)  +  Line(6,0)  +  Line(-5,-3)],
+        'triangle': [Point(0,0)  +  Line(-3,-4)  +  Line(6,0)  +  Line(-3,4)],
+        'v': [Point(0,0)  +  Line(2,-3)  +  Line(2,3)],
+        'x': [Point(0,0)  +  Line(3,-3)  +  Line(0,3)  +  Line(-3,-3)]
     }
     #
     gesture_dataset = {
+        'arrow': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/arrow/")],
+        'caret': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/caret/")],
+        'check': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/check/")],
+        'circle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/circle/")],
+        'delete_mark': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/delete_mark/")],
+        'left_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/left_curly_brace/")],
+        'left_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/left_sq_bracket/")],
+        'pigtail': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/pigtail/")],
+        'question_mark': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/question_mark/")],
+        'rectangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")],
+        'right_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_curly_brace/")],
+        'right_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_sq_bracket/")],
+        'star': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/star/")],
         'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
-        'rectangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
+        'v': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/v/")],
+        'x': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/x/")]
     }
     #
     tree=Tree(gesture_exp=expressions)
@@ -152,7 +180,7 @@ def fifthExample():
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().onlineTest(tree=tree, gesture_datasets=gesture_dataset,
                                             gesture_primitive_references=gesture_primitive_references,
-                                            perc_completed=45)
+                                            perc_completed=75)
     # show result through confusion matrix
     results.plot()
     # save result on csv file
