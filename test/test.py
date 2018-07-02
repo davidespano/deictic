@@ -2,7 +2,7 @@ import numpy
 import sys
 import collections
 # Tranforms
-from dataset import RemovingFrames
+from dataset import *
 # Plotting
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -15,7 +15,11 @@ from dataset import CsvDataset, Sequence, CsvDatasetExtended
 # hidden markov model
 from pomegranate import HiddenMarkovModel
 from real_time.tree_test import Tree
+# namedtuple
+from collections import namedtuple
 
+
+Accuracy = namedtuple('Accuracy', 'true total accuracy')
 class ConfusionMatrix():
     """
         Results provides the methods for managing, plotting and saving confusion matrix.
@@ -61,12 +65,15 @@ class ConfusionMatrix():
             this methods computes and returns the mean accuracy obtained from the test.
         :return:
         """
-        mean_accuracy = 0
-        # The mean accurancy is computed by using the data returned from self.detailedResults
+        # the mean accurancy is computed by using the data returned from self.detailedResults
         means = self.__getAccuracyModels()
-        for model_name in self.__labels:
-            mean_accuracy+=means[model_name][-1]
-        return mean_accuracy/len(self.__labels)
+        true_files = sum([value.true for key,value in means.items()])
+        tested_files = sum([value.total for key,value in means.items()])
+        try:
+            mean_accuracy = true_files/tested_files
+        except:
+            mean_accuracy = 0
+        return mean_accuracy
 
 
     def save(self, path):
@@ -86,8 +93,6 @@ class ConfusionMatrix():
         for row in range(0,len(self.__labels)):
             for column in range(0,len(self.__labels)):
                 array_to_save[row+1][column+1] = self.__array[row,column]
-        # Save confusion matrix
-        #array_to_save.tofile(path)
         # Save confusion matrix
         with open(path, 'w', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=',',
@@ -173,8 +178,8 @@ class ConfusionMatrix():
         raise Exception(wanted_label+" is not present.")
     def __getAccuracyModels(self):
         """
-            this methods computes and returns a more detailed analysis about the results obtained for each model.
-        :return: a triple of [the number of elements recognized correctly, the number of elements used for the test and mean and the accuracy]
+            this methods computes and returns a more detailed analysis about the obtained results for each model.
+        :return: a triple of [the number of elements recognized correctly, the number of elements used for the test and the accuracy]
         """
         means = {}
         # for each models
@@ -189,7 +194,7 @@ class ConfusionMatrix():
                 mean = true/total
             else:
                 mean = 0
-            means[model_name] = [true, total, mean]
+            means[model_name] = Accuracy(true=true, total=total, accuracy=mean)
         return means
 
 class Test():
@@ -308,12 +313,12 @@ class Test():
                 sequences = [sequence for sequence in dataset if sequence.filename in gesture_primitive_references]
                 # proceed to compare models based on gesture_reference_primitives contents
                 for sequence in sequences:
-                    # apply transform
+                    # apply transforms
                     transform_perc_completed = RemovingFrames(stage=perc_completed)
                     sequence.addTransform(transform_perc_completed)
                     sequence.applyTransforms()
                     # get row label and proceed to comparison
-                    primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence.points),
+                    primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence.getPoints()),
                                                                          gesture_primitive_references[sequence.filename])
                     row_label = gesture_label+"_pt_"+str(primitive_to_recognize)
                     # compare models

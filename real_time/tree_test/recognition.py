@@ -256,6 +256,7 @@ def plotCsvFile(gesture):
         mp.title(file.__str__())
         mp.show()
 
+# todo: add to tree?
 def readChangePrimitivesFile(path):
     path0=path
     #path0 = Config.baseDir+ 'Tree_test/manualRecognition/changePrimitives.csv'

@@ -1,8 +1,11 @@
-from dataset import *
-from gesture import *
+from dataset import CsvDatasetExtended, CsvDataset, NormaliseLengthTransform, ScaleDatasetTransform, CenteringTransform, \
+    ResampleInSpaceTransformOnline, ResampleInSpaceTransform, ResampleInSpaceTransformMultiStroke
+from config import Config
+import numpy
 import random
-
 random.seed()
+
+# todo: tutorial #
 
 # Creates two file, train and test, for each k iteration. The [] file is used for training phase and the latter for testing.
 # name          -> the list of gesture.
@@ -148,7 +151,7 @@ baseDir = '/home/federico/PycharmProjects/deictic/repository/'
 #baseDir = '/home/ale/PycharmProjects/deictic/repository/'
 #baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
 
-mode = 2
+mode = 8
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
@@ -198,6 +201,7 @@ if mode == 5:
     synthetic_dataset_factory(list_gesture, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
                               iter=25, type='multistroke', operator=[2])#int(random.uniform(1, len(list)-1)))
 ########################################## Ten-Cross-Validation Dataset ##########################################################
+# todo: is it still useful?
 # Ten-Cross-Validation 1Dollar
 if mode == 6:
     list_gesture = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
@@ -248,4 +252,61 @@ if mode == 7:
         for i in range(0, 10):
             dataset.ten_cross_validation(outputDir+gesture+'/', i, rates, file_array)
             #ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
+########################################## 1-dollar online primitives ##########################################################
+from real_time.tree_test import *
+if mode == 8:
+    gesture_dataset = {
+        # 'arrow': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")]),
+        # 'caret': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/caret/")]),
+        # 'check': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/check/")]),
+        # 'circle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/circle/")]),
+        # 'delete_mark': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/delete_mark/")]),
+        # 'left_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_curly_brace/")]),
+        # 'left_sq_bracket': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_sq_bracket/")]),
+        # 'pigtail': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/pigtail/")]),
+        # 'question_mark': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/question_mark/")]),
+        # 'rectangle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/rectangle/")]),
+        # 'right_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/right_curly_brace/")]),
+        # 'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/right_sq_bracket/")]),
+        # 'star': (5,[CsvDatasetExtended(Config.baseDir+"Tree_test/star/")]),
+        'triangle': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/triangle/")]),
+        # 'v': (2,[CsvDatasetExtended(Config.baseDir+"Tree_test/v/")]),
+        # 'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
+    }
+    primitives = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
+    # transforms
+    transform1 = NormaliseLengthTransform(axisMode=True)
+    transform2 = ScaleDatasetTransform(scale=100)
+    transform3 = CenteringTransform()
+    for key,tuple in gesture_dataset.items():
+        n_sample = tuple[0]
+        datasets = tuple[1]
+        # resampled #
+        transform4 = ResampleInSpaceTransformOnline(samples=n_sample*20, col_primitives=-1)
+        # adding column primitives transform #
+        for dataset in datasets:
+            dataset.addTransform(transform1)
+            dataset.addTransform(transform2)
+            dataset.addTransform(transform3)
+            # add new column #
+            for file in dataset.applyTransforms():
+                # adapt last marker
+                value = primitives[file.filename]
+                temp = [(value[0],0)]
+                for index_item in range(1,len(value)-1):
+                    amount = value[index_item]-value[index_item-1]
+                    temp.append((amount,index_item))
+                temp.append((len(file.points)-value[index_item],index_item+1))
+                primitives[file.filename]=temp
+                # concatenate
+                new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1])
+                                                for dim in primitives[file.filename]])
+                file.points = numpy.column_stack([file.points, new_column])
+                # resample and save files #
+                file.addTransform(transform4)
+                print(file.filename)
+                file.applyTransforms(output_dir=Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')
+                file.plot()
+
+
 

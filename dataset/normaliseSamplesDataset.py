@@ -1,9 +1,3 @@
-import csv
-import numpy as np
-import scipy
-import scipy.signal
-import re
-import math
 from copy import copy, deepcopy
 from math import sin, cos, radians
 from .csvDataset import *
@@ -12,6 +6,13 @@ from .geometry import *
 from pykalman import KalmanFilter
 # Parsing
 from real_time.parsing_trajectory.trajectory_parsing import Parsing
+# math/numpy
+import csv
+import numpy as np
+import scipy
+import scipy.signal
+import re
+import math
 
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
@@ -399,6 +400,111 @@ class ResampleInSpaceTransform(DatasetTransform):
                 resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
 
         return numpy.array(resampled)
+
+class ResampleInSpaceTransformOnline(DatasetTransform):
+    def __init__(self, samples=20, cols=[0,1], col_primitives=0):
+        # check
+        if not isinstance(samples, int):
+            return TypeError
+        if not isinstance(cols, list):
+            return TypeError
+        if not isinstance(col_primitives, int):
+            return TypeError
+        # init
+        self.samples = samples
+        self.cols = cols
+        self.col_primitives = col_primitives
+        self.stroke = None
+
+    def transform(self, sequence):
+        # adapted from WobbrockLib #
+        # check
+        if not isinstance(sequence, numpy.ndarray):
+            raise TypeError
+        # init resampling
+        srcPts = numpy.copy(sequence).tolist()
+        length = Geometry2D.pathLength(sequence)
+        size = len(srcPts)
+        step = length/ max(self.samples -1, 1)
+        D = 0.0
+        i = 1
+
+        # primitive indexes
+        index_primitives = sequence[:,self.col_primitives]
+        primitives = [sequence[x[0]+1] for x,y in zip(enumerate(index_primitives),enumerate(index_primitives[1:])) \
+                      if x[1]!=y[1] or x[0] == (size-2)]
+        index=0
+
+        # append first and last points
+        resampled=[]
+        if self.stroke is None:
+            resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]],index])
+        else:
+            resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]], self.stroke])
+
+
+
+        # Resampling #
+        while i < len(srcPts):
+            pt1x = srcPts[i - 1][self.cols[0]]
+            pt1y = srcPts[i - 1][self.cols[1]]
+            pt2x = srcPts[i][self.cols[0]]
+            pt2y = srcPts[i][self.cols[1]]
+            # distance in space
+            d = Geometry2D.distance(pt1x, pt1y, pt2x, pt2y)
+
+            # first solution #
+            # problem: how to return indixes?
+            # check if is a changing primitive point
+            #if not index_1 >= len(primitives) \
+            #        and pt2x == primitives[index_1][self.cols[0]] and pt2y == primitives[index_1][self.cols[1]]:
+                # update its index
+            #    index_primitives_1.append(len(resampled)+1)
+            #    index_1+=1
+
+            if (D + d) >= step and d > 0: # has enough space been traversed in the last step?
+                qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
+                qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
+                # add resampled point
+                if self.stroke is None:
+                    resampled.append([qx,qy,index])
+                else:
+                    resampled.append([qx, qy, self.stroke])
+                # insert 'q' at position i in points s.t. 'q' will be the next i
+                srcPts.insert(i, [qx, qy])
+                # re-init D
+                D = 0.0
+                # solution 2 #
+                if len(resampled)>1 and index < len(primitives)+1:
+                    # check if q is a changing primitive point
+                    distance_from_last = Geometry2D.distance(qx,qy,
+                                                             primitives[index][self.cols[0]],
+                                                             primitives[index][self.cols[1]])
+                    if distance_from_last<=step:
+                        r_2x = resampled[-2][self.cols[0]]
+                        r_2y = resampled[-2][self.cols[1]]
+                        distance_from_secondotolast = Geometry2D.distance(r_2x,r_2y,
+                                                                          primitives[index][self.cols[0]],
+                                                                          primitives[index][self.cols[1]])
+                        #pos = len(resampled) if distance_from_last >= distance_from_secondotolast \
+                        #                     else len(resampled)-1
+                        #primitives[index] = pos
+                        if index<(len(primitives)-1):
+                            index+=1
+            else:
+                D+= d
+            i +=1
+        #
+        if D > 0.0:
+            size = len(srcPts)
+            if self.stroke is None:
+                resampled.append([srcPts[size -1][0], srcPts[size -1][1], index])
+            else:
+                resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
+        #print(primitives)
+        # return resampled sequence
+        return numpy.array(resampled)
+
 
 # Resampling other version
 class ResampleTransform(DatasetTransform):
