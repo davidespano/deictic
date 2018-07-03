@@ -273,7 +273,7 @@ class Test():
         # start comparison
         return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, tree, gesture_datasets, gesture_primitive_references, perc_completed=100):
+    def onlineTest(self, tree, gesture_datasets, perc_completed=100):
         # check
         # todo: static method for checking dictionary values
         # gesture hmms #
@@ -287,10 +287,10 @@ class Test():
                            for key,value in gesture_datasets.items() for item in value):
             raise Exception("gesture_datasets must be a dictionary of CsvDataset objects or a numpy ndarray.")
         # gesture primitive references #
-        if not isinstance(gesture_primitive_references, dict) \
-               or not all(isinstance(item, int)
-                          for key,value in gesture_primitive_references.items() for item in value):
-           raise Exception("gesture_reference_primitives must be a dictionary of integers.")
+        #if not isinstance(gesture_primitive_references, dict) \ #
+        #       or not all(isinstance(item, int) #
+        #                  for key,value in gesture_primitive_references.items() for item in value): #
+        #   raise Exception("gesture_reference_primitives must be a dictionary of integers.") #
         # perc completed #
         if not isinstance(perc_completed, (int,float)):
             raise TypeError
@@ -308,10 +308,10 @@ class Test():
                 # proceed to compare models using the files contained into gesture_reference_primitives #
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
-                    dataset = dataset.readDataset()
-                # filter sequences basing on gesture_primitive_reference's contents
-                sequences = [sequence for sequence in dataset if sequence.filename in gesture_primitive_references]
-                # proceed to compare models based on gesture_reference_primitives contents
+                    sequences = dataset.readDataset()
+                # filter sequences basing on gesture_primitive_reference's contents#
+                #sequences = [sequence for sequence in dataset if sequence.filename in gesture_primitive_references]#
+                # compare models
                 for sequence in sequences:
                     # apply transforms
                     transform_perc_completed = RemovingFrames(stage=perc_completed)
@@ -319,7 +319,7 @@ class Test():
                     sequence.applyTransforms()
                     # get row label and proceed to comparison
                     primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence.getPoints()),
-                                                                         gesture_primitive_references[sequence.filename])
+                                                                         sequence.getIndexPrimitives())
                     row_label = gesture_label+"_pt_"+str(primitive_to_recognize)
                     # compare models
                     self.__comparison(sequences=[(sequence.points, sequence.filename)], row_label=row_label)
@@ -350,11 +350,18 @@ class Test():
         # Log probability values
         log_probabilities = {}
 
+        plt.plot(sequence[:, 0], sequence[:, 1])
+        plt.show()
         # Compute log probability for each model
         for gesture_label, models in gesture_hmms.items():
             # Max probability "local"
             local_norm_log_probabilty = -sys.maxsize
             for model in models:
+                # print model
+                #points = numpy.array(model.sample())
+                #plt.plot(points[:, 0], points[:, 1])
+                #plt.show()
+                #
                 norm_log_probability = Test.findLogProbability(sequence, model)
                 # Check which is the best 'local' model
                 if norm_log_probability > local_norm_log_probabilty:
@@ -402,7 +409,7 @@ class Test():
     def findPrimitiveGivenFile(len_sequence, reference_primitives):
         candidates = [n_frame for n_frame in reference_primitives if n_frame < len_sequence]
         if len(candidates) > 0:
-            return len(candidates)
+            return len(candidates)+1
         return 1
 
     ### Private methods ###

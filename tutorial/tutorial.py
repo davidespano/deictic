@@ -169,32 +169,21 @@ def fifthExample():
         #'right_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_curly_brace/")],
         #'right_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_sq_bracket/")],
         #'star': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/star/")],
-        'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
+        'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")],
         #'v': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/v/")],
         #'x': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/x/")]
     }
 
-    file = Sequence.fromFile(filepath=Config.baseDir+"deictic/1dollar-dataset/raw/triangle/"+"10_fast_triangle_01.csv")
-    new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1]) for dim in [(20,0),(13,1),(9,2)]])
-    file.points = numpy.column_stack([file.points, new_column])
-    #file.plot()
-    transform = ResampleInSpaceTransformOnline(samples=60, col_primitives=4)
-    file.addTransform(transform)
-    file.applyTransforms()
-    file.plot()
-
-    # #
-    # tree=Tree(gesture_exp=expressions)
-    # gestures_list=tree.createTreeDict()
-    # # get primitive references
-    # gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     #
-    # # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-    # results = Test.getInstance().onlineTest(tree=tree, gesture_datasets=gesture_dataset,
-    #                                         gesture_primitive_references=gesture_primitive_references,
-    #                                         perc_completed=25)
-    # # show result through confusion matrix
-    # results.plot()
+    tree=Tree(gesture_exp=expressions)
+    # get primitive references
+    #gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
+    # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    results = Test.getInstance().onlineTest(tree=tree,
+                                            gesture_datasets=gesture_dataset,
+                                            perc_completed=100)
+    # show result through confusion matrix
+    results.plot()
     # # save result on csv file
     # #results.save(path=None)
 

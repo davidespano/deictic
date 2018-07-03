@@ -465,6 +465,24 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
             if (D + d) >= step and d > 0: # has enough space been traversed in the last step?
                 qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
                 qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
+
+                # solution 2 #
+                # todo: mostrare a davide la soluzione
+                flag_post_increment = False
+                if len(resampled)>1 and index < len(primitives):
+                    px = primitives[index][self.cols[0]]
+                    py = primitives[index][self.cols[1]]
+                    # check if q is a changing primitive point
+                    distance_from_last = Geometry2D.distance(qx,qy,px,py)
+                    if distance_from_last<=step:
+                        r_2x = resampled[-1][self.cols[0]]
+                        r_2y = resampled[-1][self.cols[1]]
+                        distance_from_secondotolast = Geometry2D.distance(r_2x,r_2y,px,py)
+                        if distance_from_secondotolast < distance_from_last:
+                            index+=1
+                        elif index < len(primitives)-1:
+                            flag_post_increment = True
+
                 # add resampled point
                 if self.stroke is None:
                     resampled.append([qx,qy,index])
@@ -474,23 +492,10 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                 srcPts.insert(i, [qx, qy])
                 # re-init D
                 D = 0.0
-                # solution 2 #
-                if len(resampled)>1 and index < len(primitives)+1:
-                    # check if q is a changing primitive point
-                    distance_from_last = Geometry2D.distance(qx,qy,
-                                                             primitives[index][self.cols[0]],
-                                                             primitives[index][self.cols[1]])
-                    if distance_from_last<=step:
-                        r_2x = resampled[-2][self.cols[0]]
-                        r_2y = resampled[-2][self.cols[1]]
-                        distance_from_secondotolast = Geometry2D.distance(r_2x,r_2y,
-                                                                          primitives[index][self.cols[0]],
-                                                                          primitives[index][self.cols[1]])
-                        #pos = len(resampled) if distance_from_last >= distance_from_secondotolast \
-                        #                     else len(resampled)-1
-                        #primitives[index] = pos
-                        if index<(len(primitives)-1):
-                            index+=1
+
+                if flag_post_increment:
+                    index+=1
+
             else:
                 D+= d
             i +=1

@@ -271,7 +271,7 @@ if mode == 8:
         # 'star': (5,[CsvDatasetExtended(Config.baseDir+"Tree_test/star/")]),
         'triangle': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/triangle/")]),
         # 'v': (2,[CsvDatasetExtended(Config.baseDir+"Tree_test/v/")]),
-        # 'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
+        #'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
     }
     primitives = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     # transforms
@@ -304,9 +304,10 @@ if mode == 8:
                 file.points = numpy.column_stack([file.points, new_column])
                 # resample and save files #
                 file.addTransform(transform4)
-                print(file.filename)
+                #print(file.filename)
+                #file.plot()
                 file.applyTransforms(output_dir=Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')
-                file.plot()
+                #file.plot()
 
 
 

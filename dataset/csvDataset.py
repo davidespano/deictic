@@ -443,12 +443,12 @@ class Sequence(object):
         :return: a set of points which describe a trajectory
         """
         # check
-        if not isinstance(dimensions, int):
+        if not isinstance(columns,list):
             raise TypeError("dimensions must be int!")
         # return the sliced array
         return self.points[:, columns]
 
-    def getIndexPrimitives(self, col=None):
+    def getIndexPrimitives(self, col=-1):
         """
             return the list of indexies which define the end of a primitive
         :param col: column where to find on which primitive a point belongs
@@ -456,11 +456,12 @@ class Sequence(object):
         """
         # check
         if not isinstance(col, int):
+            print(col)
             raise TypeError
         # get indexes
-        index_primitives = enumerate(self.points[:, col])
-        indexes = [x for x,y in zip(index_primitives,index_primitives[1:]) if x[0]!=y[0]]
-        indexes.append(index_primitives[-1])
+        index_primitives = self.points[:, col]
+        indexes = [x[0] for x,y in zip(enumerate(index_primitives),enumerate(index_primitives[1:])) if x[1]!=y[1]]
+        indexes.append(len(self.points))
         # return indexes
         return indexes
 
