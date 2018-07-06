@@ -19,6 +19,7 @@ from real_time.tree_test import Tree
 from collections import namedtuple
 
 
+
 Accuracy = namedtuple('Accuracy', 'true total accuracy')
 class ConfusionMatrix():
     """

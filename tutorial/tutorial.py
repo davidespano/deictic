@@ -7,6 +7,7 @@ from real_time.tree_test import *
 
 import numpy
 
+
 def firstExample():
     '''
         shows how to describe a gesture with Deictic and create its model.

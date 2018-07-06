@@ -7,6 +7,7 @@ random.seed()
 
 # todo: tutorial #
 
+
 # Creates two file, train and test, for each k iteration. The [] file is used for training phase and the latter for testing.
 # name          -> the list of gesture.
 # inputBase     -> contains the file of each gesture.

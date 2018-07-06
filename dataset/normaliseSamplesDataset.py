@@ -14,6 +14,7 @@ import scipy.signal
 import re
 import math
 
+
 ###
 # This class defines the tools for making csv dataset (pre-processing, normalise and samples).
 ###

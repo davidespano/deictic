@@ -18,6 +18,7 @@ from pomegranate import HiddenMarkovModel
 # groupby
 from itertools import groupby
 
+
 class DatasetIterator:
 
     def __init__(self, dir, filter = '.csv'):
