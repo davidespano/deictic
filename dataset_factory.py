@@ -275,40 +275,20 @@ if mode == 8:
         #'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
     }
     primitives = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
-    # transforms
-    transform1 = NormaliseLengthTransform(axisMode=True)
-    transform2 = ScaleDatasetTransform(scale=100)
-    transform3 = CenteringTransform()
     for key,tuple in gesture_dataset.items():
-        n_sample = tuple[0]
-        datasets = tuple[1]
-        # resampled #
-        transform4 = ResampleInSpaceTransformOnline(samples=n_sample*20, col_primitives=-1)
-        # adding column primitives transform #
-        for dataset in datasets:
-            dataset.addTransform(transform1)
-            dataset.addTransform(transform2)
-            dataset.addTransform(transform3)
-            # add new column #
-            for file in dataset.applyTransforms():
-                # adapt last marker
-                value = primitives[file.filename]
-                temp = [(value[0],0)]
-                for index_item in range(1,len(value)-1):
-                    amount = value[index_item]-value[index_item-1]
-                    temp.append((amount,index_item))
-                temp.append((len(file.points)-value[index_item],index_item+1))
-                primitives[file.filename]=temp
-                # concatenate
-                new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1])
-                                                for dim in primitives[file.filename]])
-                file.points = numpy.column_stack([file.points, new_column])
-                # resample and save files #
-                file.addTransform(transform4)
-                #print(file.filename)
-                #file.plot()
-                file.applyTransforms(output_dir=Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')
-                #file.plot()
-
-
-
+        dataset = tuple[1][0]
+        # add new column #
+        for file in dataset.readDataset():
+            # adapt last marker
+            value = primitives[file.filename]
+            temp = [(value[0],0)]
+            for index_item in range(1,len(value)-1):
+                amount = value[index_item]-value[index_item-1]
+                temp.append((amount,index_item))
+            temp.append((len(file.points)-value[index_item],index_item+1))
+            primitives[file.filename]=temp
+            # concatenate
+            new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1])
+                                            for dim in primitives[file.filename]])
+            file.points = numpy.column_stack([file.points, new_column])
+            file.save(Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')

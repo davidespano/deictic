@@ -182,7 +182,7 @@ def fifthExample():
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().onlineTest(tree=tree,
                                             gesture_datasets=gesture_dataset,
-                                            perc_completed=100)
+                                            perc_completed=75)
     # show result through confusion matrix
     results.plot()
     # # save result on csv file

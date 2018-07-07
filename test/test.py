@@ -303,6 +303,12 @@ class Test():
         # confusion matrix for showing the results
         self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
         # compare gesture through hmms
+        # transforms
+        transform_perc_completed = RemovingFrames(stage=perc_completed)
+        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform2 = ScaleDatasetTransform(scale=100)
+        transform3 = CenteringTransform()
+        transform4 = ResampleInSpaceTransformOnline(samples=60, col_primitives=-1)
         for gesture_label,datasets in self.gesture_datasets.items():
             # for each
             for dataset in datasets:
@@ -315,13 +321,15 @@ class Test():
                 # compare models
                 for sequence in sequences:
                     # apply transforms
-                    transform_perc_completed = RemovingFrames(stage=perc_completed)
                     sequence.addTransform(transform_perc_completed)
+                    sequence.addTransform(transform1)
+                    sequence.addTransform(transform2)
+                    sequence.addTransform(transform3)
+                    sequence.addTransform(transform4)
                     sequence.applyTransforms()
                     # get row label and proceed to comparison
-                    primitive_to_recognize = Test.findPrimitiveGivenFile(len(sequence.getPoints()),
-                                                                         sequence.getIndexPrimitives())
-                    row_label = gesture_label+"_pt_"+str(primitive_to_recognize)
+                    primitive_to_recognize = (sequence.getPoints([-1])[-1])+1
+                    row_label = gesture_label+"_pt_"+str(int(primitive_to_recognize[0]))
                     # compare models
                     self.__comparison(sequences=[(sequence.points, sequence.filename)], row_label=row_label)
         # return comparison results
@@ -351,17 +359,11 @@ class Test():
         # Log probability values
         log_probabilities = {}
 
-        plt.plot(sequence[:, 0], sequence[:, 1])
-        plt.show()
         # Compute log probability for each model
         for gesture_label, models in gesture_hmms.items():
             # Max probability "local"
             local_norm_log_probabilty = -sys.maxsize
             for model in models:
-                # print model
-                #points = numpy.array(model.sample())
-                #plt.plot(points[:, 0], points[:, 1])
-                #plt.show()
                 #
                 norm_log_probability = Test.findLogProbability(sequence, model)
                 # Check which is the best 'local' model
