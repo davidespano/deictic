@@ -327,11 +327,13 @@ class Test():
                     sequence.addTransform(transform3)
                     sequence.addTransform(transform4)
                     sequence.applyTransforms()
+
                     # get row label and proceed to comparison
                     primitive_to_recognize = (sequence.getPoints([-1])[-1])+1
                     row_label = gesture_label+"_pt_"+str(int(primitive_to_recognize[0]))
+                    #sequence.plot()
                     # compare models
-                    self.__comparison(sequences=[(sequence.points, sequence.filename)], row_label=row_label)
+                    self.__comparison(sequences=[(sequence.getPoints(columns=[0,1]), sequence.filename)], row_label=row_label)
         # return comparison results
         return self.result
 

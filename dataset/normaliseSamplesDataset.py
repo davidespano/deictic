@@ -422,28 +422,25 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
         # check
         if not isinstance(sequence, numpy.ndarray):
             raise TypeError
+        # primitive indexes
+        index_primitives = sequence[:,self.col_primitives]
+        primitives = [sequence[x[0]+1] for x,y in zip(enumerate(index_primitives),enumerate(index_primitives[1:])) \
+                      if x[1]!=y[1] or x[0] == (len(sequence)-2)]
+        index=0
         # init resampling
         srcPts = numpy.copy(sequence).tolist()
         length = Geometry2D.pathLength(sequence)
         size = len(srcPts)
         step = length/ max(self.samples -1, 1)
-        D = 0.0
-        i = 1
-
-        # primitive indexes
-        index_primitives = sequence[:,self.col_primitives]
-        primitives = [sequence[x[0]+1] for x,y in zip(enumerate(index_primitives),enumerate(index_primitives[1:])) \
-                      if x[1]!=y[1] or x[0] == (size-2)]
-        index=0
-
-        # append first and last points
+        # append first point
         resampled=[]
         if self.stroke is None:
             resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]],index])
         else:
             resampled.append([srcPts[0][self.cols[0]], srcPts[0][self.cols[1]], self.stroke])
-
-
+        D = 0.0
+        j = 1
+        i = 1
 
         # Resampling #
         while i < len(srcPts):
@@ -453,7 +450,6 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
             pt2y = srcPts[i][self.cols[1]]
             # distance in space
             d = Geometry2D.distance(pt1x, pt1y, pt2x, pt2y)
-
             # first solution #
             # problem: how to return indixes?
             # check if is a changing primitive point
@@ -462,11 +458,9 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                 # update its index
             #    index_primitives_1.append(len(resampled)+1)
             #    index_1+=1
-
             if (D + d) >= step and d > 0: # has enough space been traversed in the last step?
                 qx = pt1x + ((step - D) / d) * (pt2x - pt1x) # interpolate position
                 qy = pt1y + ((step - D) / d) * (pt2y - pt1y) # interpolate position
-
                 # solution 2 #
                 # todo: mostrare a davide la soluzione
                 flag_post_increment = False
@@ -483,7 +477,6 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                             index+=1
                         elif index < len(primitives)-1:
                             flag_post_increment = True
-
                 # add resampled point
                 if self.stroke is None:
                     resampled.append([qx,qy,index])
@@ -493,13 +486,11 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                 srcPts.insert(i, [qx, qy])
                 # re-init D
                 D = 0.0
-
                 if flag_post_increment:
                     index+=1
-
             else:
-                D+= d
-            i +=1
+                D+=d
+            i+=1
         #
         if D > 0.0:
             size = len(srcPts)
@@ -507,6 +498,7 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                 resampled.append([srcPts[size -1][0], srcPts[size -1][1], index])
             else:
                 resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
+        return numpy.array(resampled)
         #print(primitives)
         # return resampled sequence
         return numpy.array(resampled)

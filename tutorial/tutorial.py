@@ -1,6 +1,6 @@
 from gesture import ModelExpression, DatasetExpressions, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
-from dataset import CsvDataset, CsvDatasetExtended, Sequence, ResampleInSpaceTransformOnline
+from dataset import *#CsvDataset, CsvDatasetExtended, Sequence, ResampleInSpaceTransformOnline
 from test import Test
 from config import Config
 from real_time.tree_test import *
@@ -171,22 +171,56 @@ def fifthExample():
         #'right_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_sq_bracket/")],
         #'star': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/star/")],
         'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")],
+        #'triangle_2': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")],
         #'v': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/v/")],
         #'x': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/x/")]
     }
 
+
+    # c = gesture_dataset['triangle_1'][0]
+    # d = gesture_dataset['triangle_2'][0]
+    # #
+    # transform1 = NormaliseLengthTransform(axisMode=True)
+    # transform2 = ScaleDatasetTransform(scale=100)
+    # transform3 = CenteringTransform()
+    # transform4 = ResampleInSpaceTransform(samples=60)
+    # c.addTransform(transform1)
+    # c.addTransform(transform2)
+    # c.addTransform(transform3)
+    # c.addTransform(transform4)
+    # files_1 = c.applyTransforms()
+    # #
+    # transform1 = NormaliseLengthTransform(axisMode=True)
+    # transform2 = ScaleDatasetTransform(scale=100)
+    # transform3 = CenteringTransform()
+    # transform4 = ResampleInSpaceTransformOnline(samples=60, col_primitives=-1)
+    # d.addTransform(transform1)
+    # d.addTransform(transform2)
+    # d.addTransform(transform3)
+    # d.addTransform(transform4)
+    # files_2 = d.applyTransforms()
+    # ######
+    # for f_1,f_2 in zip(files_1,files_2):
+    #     f_1.plot()
+    #     f_2.plot()
+
+
+
+
+
+
     #
     tree=Tree(gesture_exp=expressions)
     # get primitive references
-    #gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
+    gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().onlineTest(tree=tree,
-                                            gesture_datasets=gesture_dataset,
-                                            perc_completed=75)
+                                           gesture_datasets=gesture_dataset,
+                                           perc_completed=100)
     # show result through confusion matrix
     results.plot()
-    # # save result on csv file
-    # #results.save(path=None)
+    # save result on csv file
+    #results.save(path=None)
 
 # Start example
 fifthExample()
