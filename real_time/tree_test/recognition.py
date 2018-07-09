@@ -237,8 +237,8 @@ def recognizeByCompare(tree, gesture):
             figlio.recognizeByCompare(figlio, gesture)
 
 #Funzione di debug per aiutare la scrittura a mano dei frames nel file csv
-def plotCsvFile(gesture):
-    path0 = Config.baseDir + 'Tree_test/' + gesture[0] + '/'
+def plotCsvFile(gesture, path0=-1):
+    if (path0 == -1): path0 = Config.baseDir + 'Tree_test/' + gesture[0] + '/'
 
     dataset = CsvDataset(path0, type=float)
 
