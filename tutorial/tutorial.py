@@ -1,6 +1,7 @@
 from gesture import ModelExpression, DatasetExpressions, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
 from dataset import *#CsvDataset, CsvDatasetExtended, Sequence, ResampleInSpaceTransformOnline
+from real_time.tree_test.recognition import plotCsvFile
 from test import Test
 from config import Config
 from real_time.tree_test import *
@@ -155,6 +156,50 @@ def fifthExample():
     results.plot()
     # save result on csv file
     #results.save(path=None)
+
+def fifthExamplePt2():
+    n_sample = 20
+    list_gesture = [("triangle", 3 * n_sample), ("rectangle", 4 * n_sample), ("arrow", 4 * n_sample),
+                    ("caret", 2 * n_sample), ("circle", 4 * n_sample), ("check", 2 * n_sample),
+                    ("delete_mark", 3 * n_sample),
+                    ("left_curly_brace", 6 * n_sample), ("left_sq_bracket", 3 * n_sample), ("pigtail", 4 * n_sample),
+                    ("question_mark", 4 * n_sample),
+                    ("right_curly_brace", 6 * n_sample),
+                    ("right_sq_bracket", 3 * n_sample), ("star", 5 * n_sample),
+                    ("v", 2 * n_sample), ("x", 3 * n_sample)]
+
+    #Saving new dataset
+    for gesture in list_gesture:
+        path0 = Config.baseDir + 'Tree_test/' + gesture[0] + '/'
+
+        dataset = CsvDataset(path0, type=float)
+
+        transform0= RemovingFrames(stage=100)
+        transform1 = NormaliseLengthTransform(axisMode=True)
+        transform2 = ScaleDatasetTransform(scale=100)
+        transform3 = CenteringTransform()
+        transform4= ResampleInSpaceTransform(samples=gesture[1])
+
+        #unistroke_mode
+        transform5 = ResampleInSpaceTransform(samples=gesture[1])
+
+        # Apply transforms
+        dataset.addTransform(transform0)
+        dataset.addTransform(transform1)
+        dataset.addTransform(transform2)
+        dataset.addTransform(transform3)
+        dataset.addTransform(transform5)
+
+        dataset.applyTransforms(output_dir=Config.baseDir + 'Tree_test/Spano_Test/' + gesture[0] + '/')
+
+    #Plot new csv files
+    for gesture in list_gesture:
+        path0=Config.baseDir + 'Tree_test/Spano_Test/' + gesture[0] + '/'
+        plotCsvFile(gesture, path0)
+
+# Start example
+#fifthExample()
+fifthExamplePt2()
 
 # Start example
 fifthExample()
