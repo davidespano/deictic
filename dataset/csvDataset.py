@@ -9,6 +9,7 @@ import csv
 import numpy
 import matplotlib.pyplot as plt
 import os
+import copy
 from shutil import copyfile
 # random
 import datetime
@@ -447,7 +448,11 @@ class Sequence(object):
         if not isinstance(columns,list):
             raise TypeError("dimensions must be int!")
         # return the sliced array
-        return self.points[:, columns]
+        # todo: error in self.points[:,columns]
+        points = []
+        for point in self.points:
+            points.append(point[columns])
+        return points #self.points[:, columns]
 
     def getIndexPrimitives(self, col=-1):
         """

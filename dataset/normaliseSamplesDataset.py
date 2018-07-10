@@ -474,7 +474,7 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                         r_2y = resampled[-1][self.cols[1]]
                         distance_from_secondotolast = Geometry2D.distance(r_2x,r_2y,px,py)
                         if distance_from_secondotolast < distance_from_last:
-                            index+=1
+                            index = index+1 if index < len(primitives)-1 else index
                         elif index < len(primitives)-1:
                             flag_post_increment = True
                 # add resampled point
@@ -498,8 +498,7 @@ class ResampleInSpaceTransformOnline(DatasetTransform):
                 resampled.append([srcPts[size -1][0], srcPts[size -1][1], index])
             else:
                 resampled.append([srcPts[size - 1][0], srcPts[size - 1][1], self.stroke])
-        return numpy.array(resampled)
-        #print(primitives)
+
         # return resampled sequence
         return numpy.array(resampled)
 

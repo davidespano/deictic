@@ -106,113 +106,47 @@ def fifthExample():
         online
     :return:
     """
-    # get the gesture expressions which describe 1$ unistroke dataset
-    #gesture_hmms = DatasetExpressions.returnExpressions(selected_dataset= TypeDataset.unistroke_1dollar)
-    # expressions = {
-    #     'Triangle_1': [Point(0,0)+Line(-3,-3)],
-    #     'Triangle_2': [Point(0,0)+Line(-3,-3)+Line(6,0)],
-    #     'Triangle_3': [Point(0,0)+Line(-3,-3)+Line(6,0)+Line(-3,3)],
-    #     'Rectangle_1': [Point(0,0)+Line(0,-2)],
-    #     'Rectangle_2': [Point(0,0)+Line(0,-2)+Line(4,0)],
-    #     'Rectangle_3': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)],
-    #     'Rectangle_4': [Point(0,0)+Line(0,-2)+Line(4,0)+Line(0,2)+Line(-4,0)],
-    # }
-    # gesture_hmms = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
-    #
-    # # get gesture datasets
-    # #gesture_dataset = DatasetFolders.returnFolders(selected_dataset=TypeDataset.unistroke_1dollar)
-    # gesture_dataset = {
-    #     'Triangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/triangle/")],
-    #     'Rectangle': [CsvDataset(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")]
-    # }
-    # # get primitive references
-    # gesture_primitive_references = {'1_fast_triangle_01.csv':[25,60,100], '1_fast_rectangle_01.csv':[30,40,80]}
-    # # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-    # results = Test.getInstance().onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset,
-    #                                         gesture_primitive_references=gesture_primitive_references,
-    #                                         perc_completed=25)
-    # show result through confusion matrix
-    #results.plot()
-    # save result on csv file
-    #results.save(path=None)
-
-    #
+    # gesture expressions
     expressions = {
-        #'arrow': [Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)],
-        #'caret': [Point(0,0)  +  Line(2,3)  +  Line(2,-3)],
-        #'check': [Point(0,0)  +  Line(2,-2)  +  Line(4,6)],
-        #'circle': [Point(0,0)  +  Arc(-3,-3,False)  +  Arc(3,-3,False)  +  Arc(3,3,False)  +  Arc(-3,3,False)],
-        #'delete_mark': [Point(0,0)  +  Line(2,-3)  +  Line(-2,0)  +  Line(2,3)],
+        'arrow': [Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)],
+        'caret': [Point(0,0)  +  Line(2,3)  +  Line(2,-3)],
+        'check': [Point(0,0)  +  Line(2,-2)  +  Line(4,6)],
+        'circle': [Point(0,0)  +  Arc(-3,-3,False)  +  Arc(3,-3,False)  +  Arc(3,3,False)  +  Arc(-3,3,False)],
+        'delete_mark': [Point(0,0)  +  Line(2,-3)  +  Line(-2,0)  +  Line(2,3)],
         #'left_curly_brace': [Point(0,0)  +  Arc(-5,-5,False)  +  Arc(-3,-3,True)  +  Arc(3,-3,True)  +  Arc(5,-5,False)],
-        #'left_sq_bracket': [Point(0,0)  +  Line(-4,0)  +  Line(0,-5)  +  Line(4,0)],
+        'left_sq_bracket': [Point(0,0)  +  Line(-4,0)  +  Line(0,-5)  +  Line(4,0)],
         #'pigtail': [Point(0,0)  +  Arc(3,3,False)  +  Arc(-1,1,False)  +  Arc(-1,-1,False)  +  Arc(3,-3,False)],
         #'question_mark': [Point(0,0)  +  Arc(4,4,True)  +  Arc(4,-4,True)  +  Arc(-4,-4,True)  +  Arc(-2,-2,False)  +  Arc(2,-2,False)],
-        #'rectangle': [Point(0,0)  +  Line(0,-3)  +  Line(4,0)  +  Line(0,3)  +  Line(-4,0)],
+        'rectangle': [Point(0,0)  +  Line(0,-3)  +  Line(4,0)  +  Line(0,3)  +  Line(-4,0)],
         #'right_curly_brace': [Point(0,0)  +  Arc(5,-5,True)  +  Arc(3,-3,False)  +  Arc(-3,-3,False)  +  Arc(-5,-5,True)],
-        #'right_sq_bracket': [Point(0,0)  +  Line(4,0)  +  Line(0,-5)  +  Line(-4,0)],
-        #'star': [Point(0,0)  +  Line(2,5)  +  Line(2,-5)  +  Line(-5,3)  +  Line(6,0)  +  Line(-5,-3)],
+        'right_sq_bracket': [Point(0,0)  +  Line(4,0)  +  Line(0,-5)  +  Line(-4,0)],
+        'star': [Point(0,0)  +  Line(2,5)  +  Line(2,-5)  +  Line(-5,3)  +  Line(6,0)  +  Line(-5,-3)],
         'triangle': [Point(0,0)  +  Line(-3,-4)  +  Line(6,0)  +  Line(-3,4)],
-        #'v': [Point(0,0)  +  Line(2,-3)  +  Line(2,3)],
-        #'x': [Point(0,0)  +  Line(3,-3)  +  Line(0,3)  +  Line(-3,-3)]
+        'v': [Point(0,0)  +  Line(2,-3)  +  Line(2,3)],
+        'x': [Point(0,0)  +  Line(3,-3)  +  Line(0,3)  +  Line(-3,-3)]
     }
-    #
+    # datasets
     gesture_dataset = {
-        #'arrow': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/arrow/")],
-        #'caret': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/caret/")],
-        #'check': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/check/")],
-        #'circle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/circle/")],
-        #'delete_mark': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/delete_mark/")],
-        #'left_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/left_curly_brace/")],
-        #'left_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/left_sq_bracket/")],
-        #'pigtail': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/pigtail/")],
-        #'question_mark': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/question_mark/")],
-        #'rectangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/rectangle/")],
-        #'right_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_curly_brace/")],
-        #'right_sq_bracket': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_sq_bracket/")],
-        #'star': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/star/")],
-        'triangle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")],
-        #'triangle_2': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")],
-        #'v': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/v/")],
-        #'x': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/x/")]
+        'arrow': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/arrow/")]),
+        'caret': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/caret/")]),
+        'check': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/check/")]),
+        'circle':(4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/circle/")]),
+        'delete_mark': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/delete_mark/")]),
+        #'left_curly_brace': (6,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/left_curly_brace/")]),
+        'left_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/left_sq_bracket/")]),
+        #'pigtail': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/pigtail/")]),
+        #'question_mark': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/question_mark/")]),
+        'rectangle': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/rectangle/")]),
+        #'right_curly_brace': (6,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/right_curly_brace/")]),
+        'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/right_sq_bracket/")]),
+        'star': (5,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/star/")]),
+        'triangle': (3, [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/triangle/")]),
+        'v': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/v/")]),
+        'x': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/x/")])
     }
 
-
-    # c = gesture_dataset['triangle_1'][0]
-    # d = gesture_dataset['triangle_2'][0]
-    # #
-    # transform1 = NormaliseLengthTransform(axisMode=True)
-    # transform2 = ScaleDatasetTransform(scale=100)
-    # transform3 = CenteringTransform()
-    # transform4 = ResampleInSpaceTransform(samples=60)
-    # c.addTransform(transform1)
-    # c.addTransform(transform2)
-    # c.addTransform(transform3)
-    # c.addTransform(transform4)
-    # files_1 = c.applyTransforms()
-    # #
-    # transform1 = NormaliseLengthTransform(axisMode=True)
-    # transform2 = ScaleDatasetTransform(scale=100)
-    # transform3 = CenteringTransform()
-    # transform4 = ResampleInSpaceTransformOnline(samples=60, col_primitives=-1)
-    # d.addTransform(transform1)
-    # d.addTransform(transform2)
-    # d.addTransform(transform3)
-    # d.addTransform(transform4)
-    # files_2 = d.applyTransforms()
-    # ######
-    # for f_1,f_2 in zip(files_1,files_2):
-    #     f_1.plot()
-    #     f_2.plot()
-
-
-
-
-
-
-    #
+    # Tree
     tree=Tree(gesture_exp=expressions)
-    # get primitive references
-    gesture_primitive_references = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
     results = Test.getInstance().onlineTest(tree=tree,
                                            gesture_datasets=gesture_dataset,

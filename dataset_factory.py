@@ -257,22 +257,22 @@ if mode == 7:
 from real_time.tree_test import *
 if mode == 8:
     gesture_dataset = {
-        # 'arrow': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")]),
-        # 'caret': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/caret/")]),
-        # 'check': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/check/")]),
-        # 'circle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/circle/")]),
-        # 'delete_mark': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/delete_mark/")]),
+        'arrow': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")]),
+        'caret': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/caret/")]),
+        'check': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/check/")]),
+        'circle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/circle/")]),
+        'delete_mark': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/delete_mark/")]),
         # 'left_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_curly_brace/")]),
-        # 'left_sq_bracket': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_sq_bracket/")]),
+        'left_sq_bracket': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_sq_bracket/")]),
         # 'pigtail': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/pigtail/")]),
         # 'question_mark': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/question_mark/")]),
-        # 'rectangle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/rectangle/")]),
+        'rectangle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/rectangle/")]),
         # 'right_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/right_curly_brace/")]),
-        # 'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/right_sq_bracket/")]),
-        # 'star': (5,[CsvDatasetExtended(Config.baseDir+"Tree_test/star/")]),
+        'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/right_sq_bracket/")]),
+        'star': (5,[CsvDatasetExtended(Config.baseDir+"Tree_test/star/")]),
         'triangle': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/triangle/")]),
-        # 'v': (2,[CsvDatasetExtended(Config.baseDir+"Tree_test/v/")]),
-        #'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
+        'v': (2,[CsvDatasetExtended(Config.baseDir+"Tree_test/v/")]),
+        'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
     }
     primitives = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     for key,tuple in gesture_dataset.items():
@@ -282,10 +282,10 @@ if mode == 8:
             # adapt last marker
             value = primitives[file.filename]
             temp = [(value[0],0)]
-            for index_item in range(1,len(value)-1):
+            for index_item in range(1,len(value)):
                 amount = value[index_item]-value[index_item-1]
                 temp.append((amount,index_item))
-            temp.append((len(file.points)-value[index_item],index_item+1))
+            temp.append((len(file.points)-value[index_item],index_item))
             primitives[file.filename]=temp
             # concatenate
             new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1])

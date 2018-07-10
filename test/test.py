@@ -17,8 +17,7 @@ from pomegranate import HiddenMarkovModel
 from real_time.tree_test import Tree
 # namedtuple
 from collections import namedtuple
-
-
+import copy
 
 Accuracy = namedtuple('Accuracy', 'true total accuracy')
 class ConfusionMatrix():
@@ -274,26 +273,20 @@ class Test():
         # start comparison
         return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
 
-    def onlineTest(self, tree, gesture_datasets, perc_completed=100):
+    def onlineTest(self, tree, gesture_datasets, perc_completed=100, samples=20):
         # check
         # todo: static method for checking dictionary values
         # gesture hmms #
-        if not isinstance(tree, Tree):# \
-                #or not all(isinstance(item, HiddenMarkovModel)
-                #            for key,value in gesture_hmms.items() for item in value):
+        if not isinstance(tree, Tree):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         # gesture datasets #
-        if not isinstance(gesture_datasets, dict) \
-                or not all(isinstance(item, (CsvDataset, Sequence))
-                           for key,value in gesture_datasets.items() for item in value):
-            raise Exception("gesture_datasets must be a dictionary of CsvDataset objects or a numpy ndarray.")
-        # gesture primitive references #
-        #if not isinstance(gesture_primitive_references, dict) \ #
-        #       or not all(isinstance(item, int) #
-        #                  for key,value in gesture_primitive_references.items() for item in value): #
-        #   raise Exception("gesture_reference_primitives must be a dictionary of integers.") #
+        if not isinstance(gesture_datasets, dict):
+            raise Exception("gesture_datasets must be a dictionary of CsvDataset and int.")
         # perc completed #
         if not isinstance(perc_completed, (int,float)):
+            raise TypeError
+        # samples #
+        if not isinstance(samples, int):
             raise TypeError
 
         # assigned parameters
@@ -308,16 +301,17 @@ class Test():
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        transform4 = ResampleInSpaceTransformOnline(samples=60, col_primitives=-1)
-        for gesture_label,datasets in self.gesture_datasets.items():
+        for gesture_label,values in self.gesture_datasets.items():
+            num_samples = samples*values[0]
+            datasets = values[1]
+            transform4 = ResampleInSpaceTransformOnline(samples=num_samples, col_primitives=-1)
+            #transform5 = ResampleInSpaceTransform(samples=num_samples)
             # for each
             for dataset in datasets:
                 # proceed to compare models using the files contained into gesture_reference_primitives #
                 # csvDataset or list of sequences?
                 if isinstance(dataset, CsvDataset):
                     sequences = dataset.readDataset()
-                # filter sequences basing on gesture_primitive_reference's contents#
-                #sequences = [sequence for sequence in dataset if sequence.filename in gesture_primitive_references]#
                 # compare models
                 for sequence in sequences:
                     # apply transforms
@@ -327,13 +321,11 @@ class Test():
                     sequence.addTransform(transform3)
                     sequence.addTransform(transform4)
                     sequence.applyTransforms()
-
                     # get row label and proceed to comparison
                     primitive_to_recognize = (sequence.getPoints([-1])[-1])+1
                     row_label = gesture_label+"_pt_"+str(int(primitive_to_recognize[0]))
-                    #sequence.plot()
                     # compare models
-                    self.__comparison(sequences=[(sequence.getPoints(columns=[0,1]), sequence.filename)], row_label=row_label)
+                    self.__comparison(sequences=[(sequence.getPoints(), sequence.filename)], row_label=row_label)
         # return comparison results
         return self.result
 
