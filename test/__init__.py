@@ -1,2 +1,2 @@
 from .testModels import *
-from .test import Test
+from .test import Test, ConfusionMatrix, CompareResult

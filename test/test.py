@@ -19,6 +19,9 @@ from real_time.tree_test import Tree
 from collections import namedtuple
 import copy
 
+# CompareResult tuple #
+CompareResult = namedtuple('CompareResult', 'confusion_matrix log_probabilities')
+# ConfusionMatrix class #
 Accuracy = namedtuple('Accuracy', 'true total accuracy')
 class ConfusionMatrix():
     """
@@ -29,7 +32,7 @@ class ConfusionMatrix():
     def __init__(self, gesture_labels = []):
         # Check parameters
         if not isinstance(gesture_labels, (list, dict)):
-            raise Exception("name_gestures must be a list of object.")
+            raise Exception("gesture_labels must be a list of object.")
         if isinstance(gesture_labels, dict):
             gesture_labels = [key for key in gesture_labels]
         # gesture_labels
@@ -197,71 +200,56 @@ class ConfusionMatrix():
             means[model_name] = Accuracy(true=true, total=total, accuracy=mean)
         return means
 
+# Test class #
 class Test():
 
-    # singleton
-    __singleton = None
-
-    ### Public methods ###
-    @staticmethod
-    def getInstance():
-        """
-        :return:
-        """
-        if Test.__singleton == None:
-            Test.__singleton = Test()
-        return Test.__singleton
-
-    def offlineTestExpression(self, gesture_expressions, gesture_datasets):
+    # public and class methods #
+    @classmethod
+    def offlineTestExpression(cls, gesture_expressions, gesture_datasets):
         """
             offlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
         :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
         :return: comparison results
         """
-        # Check parameters
-        if not isinstance(gesture_expressions, dict):
-            raise Exception("gesture_expressions must be a dictionary of deictic expressions.")
         # creates models
-        gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
+        gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
         # start comparison
-        return self.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
-
-    def offlineTest(self, gesture_hmms, gesture_datasets):
+        return cls.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+    @classmethod
+    def offlineTest(cls, gesture_hmms, gesture_datasets):
         """
             offlineTest compares gesture hmms each one and return the resulted confusion matrix.
         :param gesture_hmms: a dictionary of hidden markov models (key is the gesture label, values are his expression models).
         :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
         :return: comparision results
         """
-        # Check parameters # todo: see again check parameters
+        # gesture hmms
         if not isinstance(gesture_hmms, dict):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
-        if not isinstance(gesture_datasets, dict):
-            raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
-        self.gesture_hmms = gesture_hmms
-        self.gesture_datasets = gesture_datasets
+        # gesture datasets
+        try:
+            gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
+                                 else dataset.readDataset()]
+                              for label,datasets in gesture_datasets.items()}
+        except: raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
 
-        # confusion matrix in order to compare results
-        self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
+        # assigned parameters
+        cls.gesture_hmms = gesture_hmms
+        gesture_labels = list(gesture_datasets.keys())
+        # confusion matrix for showing the results
+        cls.result = CompareResult(confusion_matrix=ConfusionMatrix(gesture_labels),
+                                    log_probabilities={key:[] for key in gesture_labels})
 
         # comparing gesture_hmms
-        for gesture_label, datasets in self.gesture_datasets.items():
-            # for each dataset
+        for gesture_label, datasets in gesture_datasets.items():
+            # start comparison for each dataset
             for dataset in datasets:
-                # csvDataset or list of sequences?
-                if isinstance(dataset, CsvDataset):
-                    sequences = [sequence for sequence in dataset.readDataset()]
-                elif isinstance(dataset, (numpy.ndarray, list)):
-                    sequences = [dataset]
-                else:
-                    raise Exception("gesture dataset must be a CsvDataset object or a numpy ndarray!")
-                # Comparison
-                self.__comparison(sequences=sequences, dataset_label=gesture_label)
+                cls.__comparison(sequences=dataset, row_label=gesture_label)
         # return comparison results
-        return self.result
-
-    def onlineTestExpression(self, gesture_expressions, gesture_datasets):
+        return cls.result
+    @classmethod
+    def onlineTestExpression(cls, gesture_expressions, gesture_datasets):
         """
             onlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
         :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
@@ -269,19 +257,20 @@ class Test():
         :return: comparison results
         """
         # creates models
-        gesture_hmms = self.__createModel(gesture_expressions=gesture_expressions)
+        gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
         # start comparison
-        return self.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
-
+        return cls.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
+    @classmethod
     def onlineTest(self, tree, gesture_datasets, perc_completed=100, samples=20):
-        # check
-        # todo: static method for checking dictionary values
         # gesture hmms #
         if not isinstance(tree, Tree):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
-        # gesture datasets #
-        if not isinstance(gesture_datasets, dict):
-            raise Exception("gesture_datasets must be a dictionary of CsvDataset and int.")
+        # gesture datasets
+        try:
+            gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
+                                     else dataset.readDataset()]
+                              for label,datasets in gesture_datasets.items()}
+        except: raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
         # perc completed #
         if not isinstance(perc_completed, (int,float)):
             raise TypeError
@@ -291,46 +280,37 @@ class Test():
 
         # assigned parameters
         self.gesture_hmms = tree.returnModels()
-        self.gesture_datasets = gesture_datasets
-
+        gesture_labels = list(self.gesture_hmms.keys())
         # confusion matrix for showing the results
-        self.result = ConfusionMatrix(list(self.gesture_hmms.keys()))
-        # compare gesture through hmms
+        self.result = CompareResult(confusion_matrix=ConfusionMatrix(gesture_labels),
+                                      log_probabilities={key:[] for key in gesture_labels})
+
         # transforms
         transform_perc_completed = RemovingFrames(stage=perc_completed)
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        for gesture_label,values in self.gesture_datasets.items():
+        for gesture_label,values in gesture_datasets.items():
             num_samples = samples*values[0]
             datasets = values[1]
             transform4 = ResampleInSpaceTransformOnline(samples=num_samples, col_primitives=-1)
-            #transform5 = ResampleInSpaceTransform(samples=num_samples)
             # for each
             for dataset in datasets:
                 # proceed to compare models using the files contained into gesture_reference_primitives #
-                # csvDataset or list of sequences?
-                if isinstance(dataset, CsvDataset):
-                    sequences = dataset.readDataset()
-                # compare models
-                for sequence in sequences:
+                for sequence in dataset:
                     # apply transforms
-                    sequence.addTransform(transform_perc_completed)
-                    sequence.addTransform(transform1)
-                    sequence.addTransform(transform2)
-                    sequence.addTransform(transform3)
-                    sequence.addTransform(transform4)
+                    sequence.addTransforms([transform_perc_completed,transform1,transform2,
+                                            transform3,transform4])
                     sequence.applyTransforms()
                     # get row label and proceed to comparison
                     primitive_to_recognize = (sequence.getPoints([-1])[-1])+1
                     row_label = gesture_label+"_pt_"+str(int(primitive_to_recognize[0]))
                     # compare models
-                    self.__comparison(sequences=[(sequence.getPoints(), sequence.filename)], row_label=row_label)
+                    self.__comparison(sequences=[sequence], row_label=row_label)
         # return comparison results
         return self.result
 
-
-    ### Static methods ###
+    # public and static methods #
     @staticmethod
     def compare(sequence, gesture_hmms, return_log_probabilities = False):
         """
@@ -370,7 +350,8 @@ class Test():
             if (local_norm_log_probabilty > max_norm_log_probability):
                 max_norm_log_probability = local_norm_log_probabilty
                 index_label = gesture_label
-        # Comparison completed, index_label contains the best global model while log_probabilities the norm log probabilities of each model for the passed sequence.
+        # Comparison completed, index_label contains the best global model while
+        # log_probabilities the norm log probabilities of each model for the passed sequence.
         if not return_log_probabilities:
             return index_label
         else:
@@ -384,49 +365,38 @@ class Test():
         :return:
         """
         # Check parameters
-        # if not isinstance(model, HiddenMarkovModel):
-        #     raise TypeError
+        if not isinstance(model, HiddenMarkovModel):
+            raise TypeError
         # Compute sequence's log-probability and its normalized
         log_probability = model.log_probability(sequence)
         norm_log_probability = log_probability/len(sequence)
         return norm_log_probability
-    @staticmethod
-    def check(items_to_check, types):
-        """
 
-        :param items_to_check:
-        :param types:
-        :return:
-        """
-        # parameters have to be lists
-        if not isinstance((items_to_check, types), list):
-            raise TypeError
-        pass
+    # private methods #
     @staticmethod
-    def findPrimitiveGivenFile(len_sequence, reference_primitives):
+    def __findPrimitiveGivenFile(len_sequence, reference_primitives):
         candidates = [n_frame for n_frame in reference_primitives if n_frame < len_sequence]
         if len(candidates) > 0:
             return len(candidates)+1
         return 1
 
-    ### Private methods ###
-    def __createModel(self, gesture_expressions):
-        """
-            this method creates a hmm for each expression in gesture_expressions.
-        :param gesture_expressions: a dictionary of deictic expression.
-        :return: a dictionary of deictic hmms.
-        """
-        return ModelExpression.generatedModels(expressions=gesture_expressions)
+    @classmethod
     def __comparison(self, sequences, row_label):
         """
             given a list of sequence, this method updates the result array based on the comparison of each model.
+        :param result: a ConfusionMatrix object
         :param sequences: a list of sequence frames.
         :param dataset_label: the list of gesture labels.
         :return:
         """
+        # check sequences
+
         # Get each sequence
         for sequence in sequences:
-            index_label = Test.compare(sequence[0], self.gesture_hmms)
+            index_label,probabilities = Test.compare(sequence.getPoints(columns=[0,1]),
+                                                     self.gesture_hmms, return_log_probabilities=True)
             # Update results
             if index_label != None:
-                self.result.update(row_label=row_label, column_label=index_label, id_sequence=sequence[1])
+                self.result.confusion_matrix.update(row_label=row_label, column_label=index_label,
+                                                      id_sequence=sequence.filename)
+                self.result.log_probabilities[row_label].append((sequence.filename, probabilities))

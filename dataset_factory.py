@@ -1,6 +1,9 @@
+# trasnform methods #
 from dataset import CsvDatasetExtended, CsvDataset, NormaliseLengthTransform, ScaleDatasetTransform, CenteringTransform, \
     ResampleInSpaceTransformOnline, ResampleInSpaceTransform, ResampleInSpaceTransformMultiStroke
+# config #
 from config import Config
+# imports #
 import numpy
 import random
 random.seed()
@@ -146,13 +149,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         print("Dataset "+gesture[0]+" completed")
     return
 
-
-
-baseDir = '/home/federico/PycharmProjects/deictic/repository/'
-#baseDir = '/home/ale/PycharmProjects/deictic/repository/'
-#baseDir  = '/Users/davide/PycharmProjects/deictic/repository/'
-
-mode = 8
+mode = 9
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
@@ -162,7 +159,7 @@ if mode == 1:
                     ("left_sq_bracket", 3*n_sample), ("right_sq_bracket", 3*n_sample), ("delete_mark", 3*n_sample),
                     ("star", 5*n_sample), ('check', 2*n_sample)
                     }#, ("left", n_sample), ("right", n_sample)
-    dataset_factory(list_gesture, baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
+    dataset_factory(list_gesture, Config.baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
 
 # 1Dollar
 if mode == 2:
@@ -172,7 +169,7 @@ if mode == 2:
                     ("rectangle", 4*n_sample), ("right_curly_brace", 6*n_sample), ("right_sq_bracket", 3*n_sample), ("star", 5*n_sample),
                     ("triangle", 3*n_sample), ("v", 2*n_sample), ("x", 3*n_sample)
                     }#('zig_zag', 5*n_sample)
-    dataset_factory(list_gesture, baseDir+'deictic/1dollar-dataset/raw/', baseDir+'deictic/1dollar-dataset/resampled/')
+    dataset_factory(list_gesture, Config.baseDir+'deictic/1dollar-dataset/raw/', Config.baseDir+'deictic/1dollar-dataset/resampled/')
 
 # MDollar
 if mode == 3:
@@ -183,7 +180,7 @@ if mode == 3:
                     ("P", n_sample, 2), ("pitchfork", n_sample, 2), ("six_point_star", n_sample, 2),
                     ("T", n_sample, 2), ("X", n_sample, 2)
                     }#("line", n_sample, 1), ("five_point_star", n_sample, 1, True),
-    dataset_factory(list_gesture, baseDir+'deictic/mdollar-dataset/raw/', baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
+    dataset_factory(list_gesture, Config.baseDir+'deictic/mdollar-dataset/raw/', Config.baseDir+'deictic/mdollar-dataset/resampled/', unistroke_mode=False)
 
 ########################################## Synthetic Dataset ##########################################################
 # Sinthetic Database 1Dollar
@@ -192,14 +189,16 @@ if mode == 4:
                     'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
                     'v', 'x']
     list_gesture = ['question_mark', 'x']
-    synthetic_dataset_factory(list_gesture, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/synthetic/',
+    synthetic_dataset_factory(list_gesture, Config.baseDir+'deictic/1dollar-dataset/resampled/',
+                              Config.baseDir+'deictic/1dollar-dataset/synthetic/',
                               iter=1, type='unistroke', operator = [0])#int(random.uniform(0, len(list)-1)))
 
 if mode == 5:
     # Sinthetic Database MDollar
     list_gesture = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
                     'N', 'null', 'P', 'pitchfork', 'six_point_star', 'T', 'X']
-    synthetic_dataset_factory(list_gesture, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/synthetic/',
+    synthetic_dataset_factory(list_gesture, Config.baseDir+'deictic/mdollar-dataset/resampled/',
+                              Config.baseDir+'deictic/mdollar-dataset/synthetic/',
                               iter=25, type='multistroke', operator=[2])#int(random.uniform(1, len(list)-1)))
 ########################################## Ten-Cross-Validation Dataset ##########################################################
 # todo: is it still useful?
@@ -208,7 +207,8 @@ if mode == 6:
     list_gesture = ['arrow', 'caret', 'circle', 'check', 'delete_mark', 'left_curly_brace', 'left_sq_bracket', 'pigtail',
                     'question_mark', 'rectangle', 'right_curly_brace', 'right_sq_bracket', 'star', 'triangle',
                     'v', 'x']
-    ten_cross_validation_factory(list_gesture, baseDir+'deictic/1dollar-dataset/resampled/', baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
+    ten_cross_validation_factory(list_gesture, Config.baseDir+'deictic/1dollar-dataset/resampled/',
+                                 Config.baseDir+'deictic/1dollar-dataset/ten-cross-validation/')
     # Ten-Cross-Validation MDollar
 if mode == 7:
     list_gesture = ['arrowhead', 'asterisk', 'D', 'exclamation_point', 'H', 'half_note', 'I',
@@ -257,22 +257,22 @@ if mode == 7:
 from real_time.tree_test import *
 if mode == 8:
     gesture_dataset = {
-        'arrow': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")]),
-        'caret': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/caret/")]),
-        'check': (2, [CsvDatasetExtended(Config.baseDir+"Tree_test/check/")]),
-        'circle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/circle/")]),
-        'delete_mark': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/delete_mark/")]),
-        # 'left_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_curly_brace/")]),
-        'left_sq_bracket': (3, [CsvDatasetExtended(Config.baseDir+"Tree_test/left_sq_bracket/")]),
-        # 'pigtail': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/pigtail/")]),
-        # 'question_mark': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/question_mark/")]),
-        'rectangle': (4, [CsvDatasetExtended(Config.baseDir+"Tree_test/rectangle/")]),
-        # 'right_curly_brace': (6, [CsvDatasetExtended(Config.baseDir+"Tree_test/right_curly_brace/")]),
-        'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/right_sq_bracket/")]),
-        'star': (5,[CsvDatasetExtended(Config.baseDir+"Tree_test/star/")]),
-        'triangle': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/triangle/")]),
-        'v': (2,[CsvDatasetExtended(Config.baseDir+"Tree_test/v/")]),
-        'x': (3,[CsvDatasetExtended(Config.baseDir+"Tree_test/x/")])
+        'arrow': [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")],
+        'caret': [CsvDatasetExtended(Config.baseDir+"Tree_test/caret/")],
+        'check': [CsvDatasetExtended(Config.baseDir+"Tree_test/check/")],
+        'circle': [CsvDatasetExtended(Config.baseDir+"Tree_test/circle/")],
+        'delete_mark': [CsvDatasetExtended(Config.baseDir+"Tree_test/delete_mark/")],
+        # 'left_curly_brace': [CsvDatasetExtended(Config.baseDir+"Tree_test/left_curly_brace/")],
+        'left_sq_bracket': [CsvDatasetExtended(Config.baseDir+"Tree_test/left_sq_bracket/")],
+        # 'pigtail': [CsvDatasetExtended(Config.baseDir+"Tree_test/pigtail/")],
+        # 'question_mark': [CsvDatasetExtended(Config.baseDir+"Tree_test/question_mark/")],
+        'rectangle': [CsvDatasetExtended(Config.baseDir+"Tree_test/rectangle/")],
+        # 'right_curly_brace': [CsvDatasetExtended(Config.baseDir+"Tree_test/right_curly_brace/")],
+        'right_sq_bracket': [CsvDatasetExtended(Config.baseDir+"Tree_test/right_sq_bracket/")],
+        'star': [CsvDatasetExtended(Config.baseDir+"Tree_test/star/")],
+        'triangle': [CsvDatasetExtended(Config.baseDir+"Tree_test/triangle/")],
+        'v': [CsvDatasetExtended(Config.baseDir+"Tree_test/v/")],
+        'x': [CsvDatasetExtended(Config.baseDir+"Tree_test/x/")]
     }
     primitives = readChangePrimitivesFile(Config.baseDir+'Tree_test/manualRecognition/changePrimitives.csv')
     for key,tuple in gesture_dataset.items():
@@ -292,3 +292,5 @@ if mode == 8:
                                             for dim in primitives[file.filename]])
             file.points = numpy.column_stack([file.points, new_column])
             file.save(Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')
+
+

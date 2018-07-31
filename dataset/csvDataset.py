@@ -112,6 +112,13 @@ class CsvDataset:
     def addTransform(self, transform):
         self.compositeTransform.addTranform(transform)
 
+    def addTransforms(self, transforms):
+        # check
+        if not isinstance(transforms, list):
+            raise TypeError
+        for transform in transforms:
+            self.addTransform(transform)
+
     def applyTransforms(self, output_dir=None):
         sequences = []
         if not output_dir is None and not os.path.exists(output_dir):
@@ -121,7 +128,7 @@ class CsvDataset:
             sequence = self.compositeTransform.transform(sequence)
             sequences.append([sequence, file])
             if not output_dir is None:
-                #todo
+                # todo: manage strings or floats
                 numpy.savetxt(output_dir + file, sequence, delimiter=',')
                 #file = open(output_dir+file, 'w')
                 #for item in sequence:
@@ -394,6 +401,12 @@ class Sequence(object):
         :return:
         '''
         self.compositeTransform.addTranform(transform)
+    def addTransforms(self, transforms):
+        # check
+        if not isinstance(transforms, list):
+            raise TypeError
+        for transform in transforms:
+            self.compositeTransform.addTranform(transform)
     def applyTransforms(self, output_dir=None):
         '''
             apply sequentially the specified transforms
@@ -408,9 +421,10 @@ class Sequence(object):
         :param output_dir:
         :return:
         '''
-        # check
-        if not isinstance(output_dir, str):
-            raise TypeError
+        # check if output_dir exists
+        if not os.path.exists(output_dir):
+            # create dir
+            os.makedirs(output_dir)
         numpy.savetxt(output_dir + self.filename, self.points, delimiter=',')
     def plot(self, dimensions=2):
         """
@@ -432,6 +446,7 @@ class Sequence(object):
             2: Sequence.__plot2D, # 2D
             3: Sequence.__plot3D, # 3D
         }
+        fig = plt.figure(figsize)
         # get the function from switcher dictionary
         func = switcher.get(dimensions)
         # Execute the function
@@ -452,7 +467,7 @@ class Sequence(object):
         points = []
         for point in self.points:
             points.append(point[columns])
-        return points #self.points[:, columns]
+        return numpy.array(points) #points #self.points[:, columns]
 
     def getIndexPrimitives(self, col=-1):
         """
