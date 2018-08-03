@@ -4,8 +4,10 @@ from dataset import Sequence
 # tkinter interface
 from tkinter import *
 from tkinter.font import Font, nametofont
-# collections
-from collections import namedtuple
+# recordtype
+from recordclass import recordclass
+# itemgetter
+from operator import itemgetter
 # config
 from config import Config
 # matplotlib
@@ -16,6 +18,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.text import Text
 from matplotlib.image import AxesImage
 import matplotlib.pyplot as plt
+# copy
+from copy import deepcopy
 # numpy
 import numpy as np
 
@@ -33,9 +37,9 @@ class Interface(Frame):
         Frame.__init__(self, self._master)
 
 # Selected_Point
-SelectedPoint = namedtuple('SelectedPoint', 'index point distance_from_click')
+SelectedPoint = recordclass('SelectedPoint', 'index point distance_from_click')
 # Primitive
-Primitive = namedtuple('Primitive', 'num_primitive num_frame')
+Primitive = recordclass('Primitive', 'num_primitive num_frame')
 class Window(Interface):
 
     # window size
@@ -51,7 +55,7 @@ class Window(Interface):
         # init gui
         Interface.__init__(self,title="Deictic", width=self._width, height=self._height)
         # fonts
-        self._medium_font = Font(root=self, family='Helvetica', size=10)
+        self._medium_font = Font(root=self, family='Helvetica', size=10, weight='bold')
         self._large_font = Font(root=self, family='Helvetica', size=14, weight='bold')
 
         # panel image #
@@ -61,38 +65,48 @@ class Window(Interface):
         self._fig = Figure(figsize=(16,18))
         self._ax = self._fig.add_subplot(111)
         self._ax.scatter([], [])
-        self._ax.set_ylabel("Y", fontsize=14)
-        self._ax.set_xlabel("X", fontsize=14)
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._left_frame)
         self._canvas.get_tk_widget().pack()
+
         # panel summary primitives #
         self._right_frame = Frame(self._master, width=self._width/6, height=self._height)
         self._right_frame.pack(side=RIGHT)
-        _top_frame = Frame(self._right_frame)
-        _top_frame.pack(side=TOP,fill=BOTH,expand=1)
-        _bottom_frame = Frame(self._right_frame)
-        _bottom_frame.pack(side=BOTTOM,fill=BOTH,expand=1)
+        _top_frame_right = Frame(self._right_frame)
+        _top_frame_right.pack(side=TOP,fill=BOTH,expand=1)
+        _bottom_frame_right = Frame(self._right_frame)
+        _bottom_frame_right.pack(side=BOTTOM,fill=BOTH,expand=1)
 
         # labels
-        self._info = Label(_top_frame, text="")
-        self._info.grid(row=0, column=0, padx=(10,60))
-        self._filename = Label(_top_frame, text="")
-        self._filename.grid(row=1, column=0, padx=(10,60))
+        self._feedback = Label(_top_frame_right, text="")
+        self._feedback.grid(row=0, column=0, padx=(10,10), pady=(25,25))
+        self._info = Label(_top_frame_right, text="")
+        self._info.grid(row=1, column=0, padx=(10,10), pady=(25,25))
+        self._filename = Label(_top_frame_right, text="")
+        self._filename.grid(row=2, column=0, padx=(10,10), pady=(25,25))
         # listbox primitives
-        self._list_box=Listbox(_top_frame, width=35, height=40, font=self._medium_font)
-        self._list_box.grid(row=2, column=0, pady=(14,14))
+        self._list_box=Listbox(_top_frame_right, width=35, height=15, font=self._medium_font, selectmode="multiple")
+        self._list_box.grid(row=3, column=0, padx=(30,30))
+        # input
+        frame_input = Frame(_top_frame_right)
+        frame_input.grid(row=4, column=0, padx=(30,30))
+        self._input = Entry(frame_input)
+        self._input.grid(row=0, column=0)
+        self._input_button = Button(frame_input, text="Insert", fg="black",
+                              command=self._newItem, height=self._height_button, width=self._width_button)
+        self._input_button.grid(row=0, column=1)
+
         # button next
-        self._next_button=Button(_bottom_frame, text="Next Image", fg="black",
+        self._next_button=Button(_bottom_frame_right, text="Next Image", fg="black",
                                  command=self._next, height=self._height_button, width=self._width_button)
-        self._next_button.grid(row=0,column=0)
+        self._next_button.grid(row=0,column=0, padx=(20,0), pady=(50,50))
         # button save
-        self._save_button = Button(_bottom_frame, text="Save", fg="green", state="disabled",
+        self._save_button = Button(_bottom_frame_right, text="Save", fg="green", state="disabled",
                                      command=self._save, height=self._height_button, width=self._width_button)
-        self._save_button.grid(row=0,column=1)
+        self._save_button.grid(row=0,column=1, pady=(50,50))
         # remove button is used to manage primitives
-        self._remove_button = Button(_bottom_frame, text="Remove", fg="red", state="disabled",
+        self._remove_button = Button(_bottom_frame_right, text="Remove", fg="red", state="disabled",
                                      command=self._remove, height=self._height_button, width=self._width_button)
-        self._remove_button.grid(row=0,column=2)
+        self._remove_button.grid(row=0,column=2, padx=(0,20),pady=(50,50))
         #  start application
         self._datasets = datasets
         self._dataset = None
@@ -106,7 +120,7 @@ class Window(Interface):
         if self._dataset != None and len(self._dataset) > 0:
             # clean list box
             for i in range(self._list_box.size()):
-                self._remove()
+                self._delete(i)
             # get sequence
             self._sequence = self._dataset.pop(0)
             # and plot sequence
@@ -121,28 +135,85 @@ class Window(Interface):
         # all files have been showed
         self._next_button.config(state="disabled")
 
+    def _newItem(self):
+        """
+            this handler manages the input recieved from entry widget. On one hand, it provides to split and verify input,
+            and in the other hand to update the list of primitives.
+        :return:
+        """
+        # check
+        if len(self._input.get()) > 0:
+            try:
+                values = [int(item) for item in self._input.get().split(" ")]
+                new_primitive = Primitive(values[0],values[1])
+            except:
+                print("Error! Insert two integers in the entry widget!")
+                return
+            # clear input
+            self._input.delete(0,'end')
+            # update list and figure
+            self._insert(new_primitive)
+            self._change_point(index=new_primitive.num_primitive, style_to_plot="ro")
     def _remove(self):
-        # remove last inserted element and update plot
-        element=self._list_box.get(END)
-        self._change_point(int(element.split(": ")[-1]), "co")
-        self._list_box.delete(END)
+        # remove the selected elements then update plot and lists #
+        # get selected elements and create a new Primitive array
+        elements = [Primitive(int(item[0]),int(item[1])) for item in
+                    [element.split(": ") for element in
+                    [self._list_box.get(index) for index in self._list_box.curselection()]]]
+        for element in elements:
+            # delete selected element
+            self._delete(element.num_primitive)
+            # delete highlighted point
+            self._change_point(element.num_frame, "co")
+            # and update list
+            for index in range(element.num_primitive,self._list_box.size()):
+                temp_item = self._list_box.get(index).split(': ')
+                update_item = Primitive(int(temp_item[0])-1,int(temp_item[1]))
+                self._delete(index)
+                self._insert(item=update_item)
         if not self._list_box.size() > 0:
             self._config_button(buttons=[self._remove_button,self._save_button],states=["disabled","disabled"])
-
+    def _delete(self, index):
+        """
+            delete an item, with the specify index, from the listbox widget.
+        :param index:
+        :return:
+        """
+        # check
+        if isinstance(index,str):
+            index = int(index)
+        try:
+            self._list_box.delete(index)
+        except:
+            print("Index out of boundary")
+    def _insert(self, item):
+        """
+            provide to insert a new item in the listbox widget
+        :param item:
+        :return:
+        """
+        # check
+        if not isinstance(item, Primitive):
+            raise TypeError("Item must be a Primitive object")
+        self._list_box.insert(item.num_primitive, str(item.num_primitive) + ": " + str(item.num_frame))
+        # check buttons state
+        if self._remove_button['state'] == 'disabled':
+            self._config_button(buttons=[self._remove_button,self._save_button],states=["normal","normal"])
 
     def _save(self):
         """
-            add to sequence the references to primitives and save it
+            get from the widget the list of primitives and add to the file the references about primitives then save it.
         :return:
         """
         if self._list_box.size() > 0:
             try:
                 # get inserted values
-                inserted_values = ([Primitive(int(value[0]),int(value[1])+1) for value
-                                            in [(item.split(": ")) for item in self._list_box.get(0,END)]])
-                # pull out primitives list from inserted_values
-                inserted_values = [inserted_values[0]]+[Primitive(a.num_primitive, a.num_frame-b.num_frame)
-                                    for a,b in zip(inserted_values[1:],inserted_values)]
+                inserted_values = [Primitive(int(item[0]),int(item[1])+1) for item in
+                                   [element.split(": ") for element in self._list_box.get(0,END)]]
+                # determine the lenght of each primitive (t.num_frame - t-1.num_frame)
+                temp = deepcopy(inserted_values)
+                for a,b in zip(inserted_values[1:],temp):
+                    a.num_frame = a.num_frame-b.num_frame
                 # add new column which describes primitives
                 new_column = np.concatenate([np.full(shape=(item.num_frame,1),fill_value=item.num_primitive)
                                                 for item in inserted_values])
@@ -152,15 +223,17 @@ class Window(Interface):
                                                +self._gesture_label+'/')
                 message = " has been saved"
                 color = "green"
-            except:
+            except ValueError as e:
                 message = " has not been saved"
                 color = "red"
+                print(e)
+
             # notify to user save result
-            self._info.config(text=(self._sequence.filename+message),
+            self._feedback.config(text=(self._sequence.filename+message),
                               font=self._medium_font, fg=color)
 
     def _plot(self):
-        print(self._sequence.filename+" is showed")
+        print(self._sequence.filename+" is showed - "+str(len(self._sequence.getPoints())))
         # get points
         points = self._sequence.getPoints(columns=[0,1])
         # plot and show selected file
@@ -169,8 +242,13 @@ class Window(Interface):
         self._ax.plot(points[:,0],points[:,1],'o-',picker=self._line_picker)
         for i in range(0, len(points)):
             self._ax.annotate(str(i), (points[i,0], points[i,1]))
-        self._filename.config(text=("Gesture: " + self._gesture_label + "\nFilename: " + self._sequence.filename),
+        # show name of the plotted file
+        self._filename.config(text=("File: " + self._sequence.filename),
                               font=self._large_font)
+        # show how many files require user intervation
+        self._info.config(text=("Label: "+self._gesture_label + " - size: " + str(len(self._dataset))+
+                                "\nLenght: "+str(len(points)-1)),
+                          font=self._medium_font)
         self._canvas.draw()
 
     def _line_picker(self, line, mouseevent):
@@ -194,17 +272,16 @@ class Window(Interface):
     def _update(self, selected_point):
         # higlight point on figure
         self._change_point(selected_point.index, "ro")
-        # get data and update listbox #
-        num_primitive = self._list_box.size()
-        num_frame = selected_point.index
-        self._list_box.insert(END, str(num_primitive) + ": " + str(num_frame))
+        # insert the selected point in the listbox #
+        self._insert(item=Primitive(self._list_box.size(), selected_point.index))
+        # re-instate remove button
         if self._remove_button['state'] == 'disabled':
             self._config_button(buttons=[self._remove_button,self._save_button],states=["normal","normal"])
-
     def _change_point(self, index, style_to_plot):
         point = self._sequence.getPoints(columns=[0,1])[index]
         self._ax.plot(point[0],point[1],style_to_plot)
         self._canvas.draw()
+
     @staticmethod
     def _config_button(buttons=[], states=[]):
         # check
