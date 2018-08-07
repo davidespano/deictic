@@ -9,7 +9,7 @@ import tkinter as tk
 from numpy.random import rand
 
 
-ex = 5
+ex = 6
 
 if ex == 0:
     mode = 2
@@ -281,3 +281,20 @@ if ex == 5:
 
     app = MyPlot()
     app.makePlot()
+
+if ex == 6:
+    from tkinter import *
+
+    def key(event):
+        print("pressed", repr(event.char))
+
+    def callback(event):
+        frame.focus_set()
+        print("clicked at", event.x, event.y)
+
+    root = Tk()
+    frame = Frame(root, width=100, height=100)
+    frame.bind("<Key>", key)
+    frame.bind("<Button-1>", callback)
+    frame.pack()
+    root.mainloop()

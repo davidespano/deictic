@@ -19,6 +19,8 @@ from real_time.tree_test import Tree
 from collections import namedtuple
 import copy
 
+# Gesture dataset
+GestureDatasetOnline = namedtuple('GestureDatasetOnline', "num_primitives datasets")
 # CompareResult tuple #
 CompareResult = namedtuple('CompareResult', 'confusion_matrix log_probabilities')
 # ConfusionMatrix class #
@@ -267,9 +269,15 @@ class Test():
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         # gesture datasets
         try:
-            gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
-                                     else dataset.readDataset()]
-                              for label,datasets in gesture_datasets.items()}
+            gesture_datasets={label:GestureDatasetOnline(num_primitives=item[0],
+                                                         datasets=[dataset if isinstance(dataset, (numpy.ndarray, list))
+                                                                   else dataset.readDataset()
+                                                                   for dataset in item[1]])
+                              for label,item in gesture_datasets.items()}
+            #gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
+            #                         else dataset.readDataset()]
+            #                  for dataset in datasets
+            #                  for label,datasets in gesture_datasets.items()}
         except: raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
         # perc completed #
         if not isinstance(perc_completed, (int,float)):
@@ -290,12 +298,11 @@ class Test():
         transform1 = NormaliseLengthTransform(axisMode=True)
         transform2 = ScaleDatasetTransform(scale=100)
         transform3 = CenteringTransform()
-        for gesture_label,values in gesture_datasets.items():
-            num_samples = samples*values[0]
-            datasets = values[1]
+        for gesture_label,value in gesture_datasets.items():
+            num_samples = samples*value.num_primitives
             transform4 = ResampleInSpaceTransformOnline(samples=num_samples, col_primitives=-1)
             # for each
-            for dataset in datasets:
+            for dataset in value.datasets:
                 # proceed to compare models using the files contained into gesture_reference_primitives #
                 for sequence in dataset:
                     # apply transforms

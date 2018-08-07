@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 # numpy
 import numpy as np
+# file
+import os
 
 class Interface(Frame):
 
@@ -66,6 +68,7 @@ class Window(Interface):
         self._ax = self._fig.add_subplot(111)
         self._ax.scatter([], [])
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._left_frame)
+        self._fig.canvas.mpl_connect('key_press_event', self._keyPress)
         self._canvas.get_tk_widget().pack()
 
         # panel summary primitives #
@@ -114,26 +117,33 @@ class Window(Interface):
         self.mainloop()
 
     def _next(self):
-        # save list_box contents
+        # save
         self._save()
-        # show new image if available
-        if self._dataset != None and len(self._dataset) > 0:
-            # clean list box
-            for i in range(self._list_box.size()):
-                self._delete(i)
-            # get sequence
-            self._sequence = self._dataset.pop(0)
-            # and plot sequence
+        # delete old listbox
+        for i in range(self._list_box.size()):
+            self._delete(index=0)
+        # plot file, if it is avaiable
+        if self._findNextFile():
             self._plot()
             return
-        # change datatet, if available
+        # otherwise change datatet, if available
         if self._datasets:
             next_dataset = self._datasets.popitem() if len(self._datasets)>0 else None
             self._gesture_label = next_dataset[0]
-            self._dataset = sum([set.readDataset() for set in next_dataset[1]], []) if next_dataset!=None else None
+            self._dataset = sum([set.readDataset() for set in next_dataset[1][1]], []) if next_dataset!=None else None
+            self._num_primtivies = (next_dataset[1][0] if next_dataset!=None else None)
             return
         # all files have been showed
         self._next_button.config(state="disabled")
+    def _findNextFile(self):
+        # find the next image
+        if self._dataset != None and len(self._dataset) > 0:
+            self._sequence = self._dataset.pop(0)
+            # get sequence
+            return True if not os.path.isfile(Config.baseDir+'deictic/1dollar-dataset/primitives/'+
+                                          self._gesture_label+"/"+self._sequence.filename) \
+                else self._findNextFile()
+        return False
 
     def _newItem(self):
         """
@@ -144,8 +154,9 @@ class Window(Interface):
         # check
         if len(self._input.get()) > 0:
             try:
-                values = [int(item) for item in self._input.get().split(" ")]
-                new_primitive = Primitive(values[0],values[1])
+                new_primitive = Primitive(num_primitive=self._list_box.size(), num_frame=int(self._input.get()))
+                #num_frame = int(self._input.get()) #[int(item) for item in self._input.get().split(" ")]
+                #new_primitive = Primitive(values[0],values[1])
             except:
                 print("Error! Insert two integers in the entry widget!")
                 return
@@ -153,13 +164,14 @@ class Window(Interface):
             self._input.delete(0,'end')
             # update list and figure
             self._insert(new_primitive)
-            self._change_point(index=new_primitive.num_primitive, style_to_plot="ro")
+            self._change_point(index=new_primitive.num_frame, style_to_plot="ro")
     def _remove(self):
         # remove the selected elements then update plot and lists #
         # get selected elements and create a new Primitive array
-        elements = [Primitive(int(item[0]),int(item[1])) for item in
+        elements = reversed([Primitive(int(item[0]),int(item[1])) for item in
                     [element.split(": ") for element in
-                    [self._list_box.get(index) for index in self._list_box.curselection()]]]
+                    [self._list_box.get(index) for index in self._list_box.curselection()]]])
+
         for element in elements:
             # delete selected element
             self._delete(element.num_primitive)
@@ -171,6 +183,7 @@ class Window(Interface):
                 update_item = Primitive(int(temp_item[0])-1,int(temp_item[1]))
                 self._delete(index)
                 self._insert(item=update_item)
+
         if not self._list_box.size() > 0:
             self._config_button(buttons=[self._remove_button,self._save_button],states=["disabled","disabled"])
     def _delete(self, index):
@@ -192,9 +205,16 @@ class Window(Interface):
         :param item:
         :return:
         """
-        # check
+        # check input
         if not isinstance(item, Primitive):
             raise TypeError("Item must be a Primitive object")
+        # check whether the new item has been just inserted #
+        # get latest item
+        if self._list_box.size() > 0:
+            old_item = Primitive(num_primitive=-1, num_frame=int(self._list_box.get(END).split(" ")[-1]))
+            if item.num_frame <= old_item.num_frame:
+                return
+        # insert new item
         self._list_box.insert(item.num_primitive, str(item.num_primitive) + ": " + str(item.num_frame))
         # check buttons state
         if self._remove_button['state'] == 'disabled':
@@ -206,6 +226,11 @@ class Window(Interface):
         :return:
         """
         if self._list_box.size() > 0:
+            if self._list_box.size()+1 == self._num_primtivies:
+                self._insert(item=Primitive(self._list_box.size(),len(self._sequence.getPoints())-1))
+            if self._list_box.size() < self._num_primtivies:
+                raise Exception("You must select "+str(self._num_primtivies)+" primitives.")
+
             try:
                 # get inserted values
                 inserted_values = [Primitive(int(item[0]),int(item[1])+1) for item in
@@ -277,6 +302,9 @@ class Window(Interface):
         # re-instate remove button
         if self._remove_button['state'] == 'disabled':
             self._config_button(buttons=[self._remove_button,self._save_button],states=["normal","normal"])
+    def _keyPress(self, event):
+        if event.key == " ":
+            self._next()
     def _change_point(self, index, style_to_plot):
         point = self._sequence.getPoints(columns=[0,1])[index]
         self._ax.plot(point[0],point[1],style_to_plot)
