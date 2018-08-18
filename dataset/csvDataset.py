@@ -446,7 +446,6 @@ class Sequence(object):
             2: Sequence.__plot2D, # 2D
             3: Sequence.__plot3D, # 3D
         }
-        fig = plt.figure(figsize)
         # get the function from switcher dictionary
         func = switcher.get(dimensions)
         # Execute the function

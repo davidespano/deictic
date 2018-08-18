@@ -168,24 +168,29 @@ class Window(Interface):
     def _remove(self):
         # remove the selected elements then update plot and lists #
         # get selected elements and create a new Primitive array
-        elements = reversed([Primitive(int(item[0]),int(item[1])) for item in
-                    [element.split(": ") for element in
-                    [self._list_box.get(index) for index in self._list_box.curselection()]]])
+        #elements = reversed([Primitive(int(item[0]),int(item[1])) for item in
+        #            [element.split(": ") for element in
+        #            [self._list_box.get(index) for index in self._list_box.curselection()]]])
 
-        for element in elements:
+        #for element in elements:
             # delete selected element
-            self._delete(element.num_primitive)
+        #    self._delete(element.num_primitive)
             # delete highlighted point
-            self._change_point(element.num_frame, "co")
+        #    self._change_point(element.num_frame, "co")
             # and update list
-            for index in range(element.num_primitive,self._list_box.size()):
-                temp_item = self._list_box.get(index).split(': ')
-                update_item = Primitive(int(temp_item[0])-1,int(temp_item[1]))
-                self._delete(index)
-                self._insert(item=update_item)
+        #    for index in range(element.num_primitive,self._list_box.size()):
+        #        temp_item = self._list_box.get(index).split(': ')
+        #        update_item = Primitive(int(temp_item[0])-1,int(temp_item[1]))
+        #        self._delete(index)
+        #        self._insert(item=update_item)
+        #if not self._list_box.size() > 0:
+        #    self._config_button(buttons=[self._remove_button,self._save_button],states=["disabled","disabled"])
 
-        if not self._list_box.size() > 0:
-            self._config_button(buttons=[self._remove_button,self._save_button],states=["disabled","disabled"])
+        for i in range(self._list_box.size()):
+            element = self._list_box.get(END).split(": ")
+            self._change_point(int(element[1]), "co")
+            self._list_box.delete(END)
+
     def _delete(self, index):
         """
             delete an item, with the specify index, from the listbox widget.
