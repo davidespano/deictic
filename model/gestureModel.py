@@ -57,8 +57,6 @@ class GestureExp:
         return IterativeExp(self)
 
 
-
-
     def get_path(self, path, current):
         """
 
@@ -116,6 +114,8 @@ class GestureExp:
     def clone(self):
         return GestureExp()
 
+    def get_distance(self):
+        return 0
 
 class CompositeExp(GestureExp):
     def __init__(self, left, right, op):
@@ -143,6 +143,12 @@ class CompositeExp(GestureExp):
         else:
             return "({0} {1} {2})".format(str(self.left), op, str(self.right))
 
+    def __eq__(self, other):
+        # check
+        if isinstance(other, CompositeExp) and (self.left==other.left and self.right==other.right):
+            return True
+        return False
+
     def clone(self):
         leftClone = None
         rightClone = None
@@ -167,6 +173,14 @@ class CompositeExp(GestureExp):
         if not self.right is None:
             self.right.get_points(points)
 
+    def get_numOperands(self):
+        cont = 1
+        exp = self.left
+        while isinstance(exp, CompositeExp):
+            cont+=1
+            exp = exp.left
+        return cont
+
     def get_operands(self):
         #todo: manage disabling and parallal case
         operands = []
@@ -175,6 +189,12 @@ class CompositeExp(GestureExp):
             operands = [exp.right] + operands
             exp = exp.left
         return [exp]+operands
+
+    def get_numPrimitives(self):
+        return 1+self.left.get_numPrimitives
+
+    def get_distance(self):
+        return self.left.get_distance() + self.right.get_distance()
 
 class IterativeExp(GestureExp):
     def __init__(self, exp):
@@ -211,6 +231,12 @@ class Point(GestureExp):
     def __str__(self):
         return "P({0},{1})".format(str(self.x), str(self.y))
 
+    def __eq__(self, other):
+        # check
+        if isinstance(other, Point) and (self.x == other.x and self.y == other.y):
+            return True
+        return False
+
     def get_path(self, path, current):
         path.append(patches.Ellipse(
             xy=(self.x, self.y),
@@ -226,7 +252,6 @@ class Point(GestureExp):
     def clone(self):
         return Point(self.x, self.y)
 
-
 class Line(GestureExp):
     def __init__(self, dx, dy):
         self.dx = dx
@@ -234,6 +259,12 @@ class Line(GestureExp):
 
     def __str__(self):
         return "L({0},{1})".format(str(self.dx), str(self.dy))
+
+    def __eq__(self, other):
+        # check
+        if isinstance(other, Line) and (self.dx == other.dx and self.dy == other.dy):
+            return True
+        return False
 
     def get_path(self, path, current):
         path.append(patches.FancyArrowPatch(
@@ -251,6 +282,9 @@ class Line(GestureExp):
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
 
+    def get_distance(self):
+        return Geometry2D.distance(0, 0, self.dx, self.dy)
+
     def clone(self):
         return Line(self.dx, self.dy)
 
@@ -262,6 +296,12 @@ class Arc(GestureExp):
 
     def __str__(self):
         return "A({0},{1},{2})".format(self.dx, self.dy, self.cw)
+
+    def __eq__(self, other):
+        # check
+        if isinstance(other, Arc) and (self.dx == other.dx and self.dy == other.dy and self.cw == other.cw):
+            return True
+        return False
 
     def get_path(self, path, current):
         if self.cw:
@@ -289,6 +329,9 @@ class Arc(GestureExp):
         last = points[-1]
         if last is not None:
             points.append([last[0] + self.dx, last[1] + self.dy, self])
+
+    def get_distance(self):
+        return abs(0.5 * math.pi * self.dx)
 
     def clone(self):
         return Arc(self.dx, self.dy, self.cw)

@@ -4,8 +4,6 @@ from model import *
 from topology import *
 # config
 from config import *
-# parsing
-from real_time.parsing_trajectory.trajectory_parsing import Parsing
 
 class ClassifierFactory:
     """
@@ -53,7 +51,7 @@ class ClassifierFactory:
         processor = ModelPreprocessor(exp)
         transform1 = CenteringTransform()
         transform2 = NormaliseLengthTransform(axisMode=True)
-        transform3 = RotateCenterTransform(traslationMode=True)####
+        #transform3 = RotateCenterTransform(traslationMode=True)####
         processor.transforms.addTranform(transform1)
         #processor.transforms.addTranform(transform3)####
         processor.transforms.addTranform(transform2)
@@ -83,7 +81,7 @@ class ClassifierFactory:
             if not exp.right is None:
                 self.parseStrokes(exp.right)
 
-    def parseExpression(self, exp, startPoint, d = False):
+    def parseExpression(self, exp, startPoint, d=False):
         """
 
         :param exp:
@@ -102,14 +100,6 @@ class ClassifierFactory:
             startPoint[1] = exp.y
             return OpEnum.Point, None
 
-        # Point 3D
-        if isinstance(exp, Point3D):
-            self.stroke += 1
-            startPoint[0] = exp.x
-            startPoint[1] = exp.y
-            startPoint[2] = exp.z
-            return OpEnum.Point3D, None
-
         # Line 2D
         if isinstance(exp, Line):
             alpha = math.acos(Geometry2D.getCosineFromSides(exp.dx, exp.dy)) # rotation with respect to left-to-right line
@@ -119,57 +109,24 @@ class ClassifierFactory:
             distance = Geometry2D.distance(0,0, exp.dx, exp.dy)
             samples = round(distance * self.spu)
             n_states = round(distance * self.states + 0.5)
+            #### debug
+            print("Expr: "+str(exp))
+            print("Distance: "+str(distance)+" - num_states: "+str(n_states) +" - samples: "+ str(samples))
+            ####
 
             # get samples
-            dataset = CsvDataset(self.line) # reads the raw data
+            dataset = CsvDataset(self.line)# reads the raw data
             self.transformLinePrimitive(dataset, distance, alpha, startPoint, samples) # creates the primitive transforms
             if self.type == TypeRecognizer.online:
                 self.transformOnline(dataset)
             samples = [sequence[0] for sequence in dataset.applyTransforms()]
-
-            # add more samples
-            #for i in range(3):
-            #    samples.extend(samples)
-
-            ### Debug ###
-            if d:
-                # # dataset example
-                base_dir = "/home/ale/PycharmProjects/deictic/repository/deictic/1dollar-dataset/raw/"
-                dataset_original = CsvDataset(base_dir + "caret/")
-                kalmanTransform = KalmanFilterTransform()
-                parse = ParseSamples()
-                dataset_original.addTransform(kalmanTransform)
-                dataset_original.addTransform(parse)
-                sequences = dataset_original.applyTransforms()
-                sequence = sequences[0][0]
-                s = sequence.getPointsSequence()
-                l = sequence.getLabelsSequence()
-                # plot original sequence
-                original = plt.plot(s[:, 0], s[:, 1]+150, color='r')
-                for i in range(len(l) - 1):
-                   plt.annotate(l[i], (s[i, 0], s[i, 1]+150))
-                ########### Plotting ########################
-                sample = samples[5]
-                sequence = sample.getPointsSequence()
-                label_list = sample.getLabelsSequence()
-                # plot original sequence
-                print(len(sequence))
-                syntethic = plt.plot(sequence[:, 0], sequence[:, 1], color='b')
-                # label
-                for i in range(len(label_list) - 1):
-                    plt.annotate(label_list[i], (sequence[i, 0], sequence[i, 1]))
-                plt.axis('equal')
-                plt.show
-            ### Debug ###
 
             # create hmm
             hmm = self.createCleanLine(str(exp), startPoint, exp.dx, exp.dy, self.scale, n_states)  # creates empty HMM
             # training
             hmm.fit(samples)#, use_pseudocount=True) # trains it with the transformed samples
 
-
             self.addStrokeIdDistribution(hmm)
-
 
             startPoint[0] += exp.dx
             startPoint[1] += exp.dy
@@ -233,9 +190,6 @@ class ClassifierFactory:
             if self.type == TypeRecognizer.online:
                 self.transformOnline(dataset)
             samples = [sequence[0] for sequence in dataset.applyTransforms()]
-            # add more samples
-            # for i in range(3):
-            #     samples.extend(samples)
 
             #if d:
             #    self.debugPlot(samples, exp)
@@ -251,47 +205,6 @@ class ClassifierFactory:
             #startPoint[2] += exp.dz
 
             return OpEnum.Arc, [(hmm, None)]
-
-        # todo - incomplete
-        # Line 3D
-        if isinstance(exp, Line3D):
-            # Gets angles
-            angles = Geometry3D.getCosineFromSides(exp.dx, exp.dy, exp.dz)
-
-            #
-            #if exp.dy < 0:
-            #    alpha = -alpha
-
-            # Computes the distance between origin and the passed vector. The distance value is used
-            # to compute the correct number of samples and states.
-            distance = Geometry3D.distance(0,0,0, exp.dx, exp.dy, exp.dz)
-            samples = round(distance * self.spu)
-            n_states = round(distance * self.states + 0.5)
-
-            # Reads the raw data
-            dataset = CsvDataset(self.line)
-
-            # Creates the primitives transforms
-            self.transformLine3DPrimitive(dataset, distance, angles, startPoint, samples)
-
-            # Creates empty HMM
-            hmm = self.createCleanLine3D(str(exp), startPoint, exp.dx, exp.dy, exp.dz, self.scale, n_states)
-            samples = dataset.applyTransforms()
-
-            if d:
-                self.debugPlot(samples, exp)
-
-            # Trains it with the transformed samples
-            hmm.fit(samples, use_pseudocount=True)
-
-            #
-            self.addStrokeIdDistribution(hmm)
-
-            #
-            startPoint[0] += exp.dx
-            startPoint[1] += exp.dy
-
-            return OpEnum.Line, [(hmm, None)]
 
         # -----------------------------------------------
         #       composite terms
@@ -328,8 +241,8 @@ class ClassifierFactory:
             expType, hmm = self.parseExpression(exp.exp, startPoint)
             operand, seq_edge = self.createHMM(str(exp.exp), expType, hmm)
             return OpEnum.Iterative, [(operand, seq_edge)]
-
         return None
+
     def addStrokeIdDistribution(self, hmm):
         if len(self.strokeList) > 1:
             step = 0.5 / len(hmm.states) +1
@@ -346,8 +259,6 @@ class ClassifierFactory:
 
     def transformLinePrimitive(self, dataset, distance, alpha, startPoint, samples):
         # applying transforms for fitting the expression
-        # kalman
-        kalman = KalmanFilterTransform()
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=False)  # normalise the length
         origin = TranslateTransform(t=[0.5, 0])  # put the first sample in the origin, the line goes left-to-right
@@ -357,7 +268,6 @@ class ClassifierFactory:
         #resample = ResampleTransform(delta=5)
         translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])  # position the segment at its starting point
         # adding transforms to dataset
-        #dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
@@ -368,8 +278,6 @@ class ClassifierFactory:
 
     def trasformArcPrimitive(self, dataset, startPoint, radiusX, radiusY, alpha, center, samples):
         # applying transforms for fitting
-        # kalman
-        kalman = KalmanFilterTransform()
         centering = CenteringTransform()  # centering the line
         normalise = NormaliseLengthTransform(axisMode=True)  # normalise the length
         origin = TranslateTransform(t=[0.5, 0.5])
@@ -381,7 +289,6 @@ class ClassifierFactory:
         resample = ResampleInSpaceTransform(samples=samples)  # resampling
         #resample = ResampleTransform(delta=5)
         # adding transforms to dataset
-        #dataset.addTransform(kalman)
         dataset.addTransform(centering)
         dataset.addTransform(normalise)
         dataset.addTransform(origin)
@@ -395,52 +302,6 @@ class ClassifierFactory:
         # applying transforms for fitting
         parse = ParseSamples()
         dataset.addTransform(parse)
-
-
-
-
-    # todo - incomplete
-    def transformLine3DPrimitive(self, dataset, distance, angles, startPoint, samples):
-        """
-            Applying transforms for fitting the expression.
-        :param dataset:
-        :param distance:
-        :param angles:
-        :param startPoint:
-        :param samples:
-        :return:
-        """
-        # Centering the line
-        centering = CenteringTransform()
-        # Normalise the length
-        normalise = NormaliseLengthTransform(axisMode=False)
-        # Put the first sample in the origin, the line goes left-to-right
-        origin = TranslateTransform(t=[0.5, 0])
-        # Rotation, first through alpha_xy then alpha_xz
-        rotate_z = RotateTransform(theta=angles[0],
-                                 unit=RotateTransform.radians)  # rotate the samples for getting the right slope
-        rotate_y = RotateTransform(theta=angles[1],
-                                 unit=RotateTransform.radians)
-        rotate_x = RotateTransform(theta=angles[2],
-                                   unit=RotateTransform.radians)
-        # Adjust the size
-        scale = ScaleDatasetTransform(scale=distance * self.scale)
-        # Resampling
-        resample = ResampleInSpaceTransform(samples=samples)
-        # Position the segment at its starting point
-        translate = TranslateTransform(t=[startPoint[0] * self.scale, startPoint[1] * self.scale])
-
-        # Apply transforms
-        dataset.addTransform(centering)
-        dataset.addTransform(normalise)
-        dataset.addTransform(origin)
-        dataset.addTransform(scale)
-        dataset.addTransform(rotate_z)
-        dataset.addTransform(rotate_y)
-        dataset.addTransform(rotate_x)
-        dataset.addTransform(resample)
-        dataset.addTransform(translate)
-
 
 
     def updateStartPoint(self, startPoint, oldPoint, op):
@@ -473,10 +334,6 @@ class ClassifierFactory:
                 new_samples.append(new_sample)
             return new_samples
         return samples
-
-
-
-
 
     def createStrokeDiscreteDistribution(self):
         """
@@ -582,36 +439,6 @@ class ClassifierFactory:
 
         return topology_factory.forward(name, num_states, distributions)
 
-    # todo - incomplete
-    def createCleanLine3D(self, name, startPoint, dx, dy, dz, scale, samples):
-        topology_factory = HiddenMarkovModelTopology()  # Topology
-        distributions = []
-        #
-        step_x = dx / max(samples - 1, 1)
-        step_y = dy / max(samples - 1, 1)
-        step_z = dz / max(samples - 1, 1)
-        #
-        for i in range(0, samples):
-            a = (startPoint[0] + (i * step_x)) * scale
-            b = (startPoint[1] + (i * step_y)) * scale
-            c = (startPoint[2] + (i * step_z)) * scale
-            gaussianX = NormalDistribution(a, self.scale * 0.01)
-            gaussianY = NormalDistribution(b, self.scale * 0.01)
-            gaussianZ = NormalDistribution(c, self.scale * 0.01)
-            distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY, gaussianZ]))
-        return topology_factory.forward(name, samples, distributions)
-
-    def __DiscreteDistribution(self, num_states=0, emissions=[]):
-        for i in range(0, num_states):
-            random.seed(datetime.datetime.now())
-            distribution_values = numpy.random.dirichlet(numpy.ones(len(self.__chars)), size=1)[0]
-            values = {self.__chars[index]: distribution_values[index] for index in range(0, len(self.__chars))}
-            emissions.append(DiscreteDistribution(values))
-        return emissions
-
-
-
-
 
     def debugPlot(self, samples, exp):
         """
@@ -681,18 +508,8 @@ class ClassifierFactory:
 
         return None
 
-
-
-
-
     def plot(self):
         plt.show()
-
-
-
-
-
-
 
 class ModelPreprocessor:
     """

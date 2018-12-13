@@ -1,4 +1,4 @@
-from gesture import ModelExpression, DatasetExpressions, DatasetFolders, TypeDataset
+from gesture import ModelExpression, DatasetExpressions, ClassifierFactory, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
 from dataset import *#CsvDataset, CsvDatasetExtended, Sequence, ResampleInSpaceTransformOnline
 from real_time.tree_test.recognition import plotCsvFile
@@ -87,6 +87,39 @@ def thirdExample():
     results.save(path=None)
 
 def fourthExample():
+    # get the gesture expressions which describe 1$ multistroke dataset
+    gesture_expressions = DatasetExpressions.returnExpressions(
+        selected_dataset=TypeDataset.unistroke_1dollar)
+    # get gesture datasets
+    gesture_dataset = {
+        'arrow': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/arrow/")],
+        'caret': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/caret/")],
+        'check': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/check/")],
+        'circle': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/circle/")],
+        'delete_mark': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/delete_mark/")],
+        'left_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/left_curly_brace/")],
+        'left_sq_bracket': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/left_sq_bracket/")],
+        'pigtail': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/pigtail/")],
+        'question_mark': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/question_mark/")],
+        'rectangle': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/rectangle/")],
+        'right_curly_brace': [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/resampled/right_curly_brace/")],
+        'right_sq_bracket': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/right_sq_bracket/")],
+        'star': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/star/")],
+        'triangle': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/triangle/")],
+        'v': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/v/")],
+        'x': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/x/")]
+    }
+
+    # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
+    results = Test.offlineTestExpression(gesture_expressions=gesture_expressions,
+                                         gesture_datasets=gesture_dataset)
+    # show result through confusion matrix
+    results.plot()
+    # save result on csv file
+    results.save(path=None)
+
+
+def fifthExample():
     '''
 
     :return:
@@ -102,7 +135,7 @@ def fourthExample():
     print("The gesture with the highest log probabilities value is " +index_label)
     print(log_probabilities)
 
-def fifthExample():
+def sixthExample():
     """
         online
     :return:
@@ -110,77 +143,100 @@ def fifthExample():
     # gesture expressions
     expressions = {
         'arrow': [Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)],
-        'caret': [Point(0,0)  +  Line(2,3)  +  Line(2,-3)],
+        #'caret': [Point(0,0)  +  Line(2,3)  +  Line(2,-3)],
         #'check': [Point(0,0)  +  Line(2,-2)  +  Line(4,6)],
         #'circle': [Point(0,0)  +  Arc(-3,-3,False)  +  Arc(3,-3,False)  +  Arc(3,3,False)  +  Arc(-3,3,False)],
-        'delete_mark': [Point(0,0)  +  Line(2,-3)  +  Line(-2,0)  +  Line(2,3)],
+        #'delete_mark': [Point(0,0)  +  Line(2,-3)  +  Line(-2,0)  +  Line(2,3)],
         #'left_curly_brace': [Point(0,0)  +  Arc(-5,-5,False)  +  Arc(-3,-3,True)  +  Arc(3,-3,True)  +  Arc(5,-5,False)],
-        'left_sq_bracket': [Point(0,0)  +  Line(-4,0)  +  Line(0,-5)  +  Line(4,0)],
+        #'left_sq_bracket': [Point(0,0)  +  Line(-4,0)  +  Line(0,-5)  +  Line(4,0)],
         #'pigtail': [Point(0,0)  +  Arc(3,3,False)  +  Arc(-1,1,False)  +  Arc(-1,-1,False)  +  Arc(3,-3,False)],
         #'question_mark': [Point(0,0)  +  Arc(4,4,True)  +  Arc(4,-4,True)  +  Arc(-4,-4,True)  +  Arc(-2,-2,False)  +  Arc(2,-2,False)],
-        'rectangle': [Point(0,0)  +  Line(0,-3)  +  Line(4,0)  +  Line(0,3)  +  Line(-4,0)],
+        #'rectangle': [Point(0,0)  +  Line(0,-3)  +  Line(4,0)  +  Line(0,3)  +  Line(-4,0)],
         #'right_curly_brace': [Point(0,0)  +  Arc(5,-5,True)  +  Arc(3,-3,False)  +  Arc(-3,-3,False)  +  Arc(-5,-5,True)],
-        'right_sq_bracket': [Point(0,0)  +  Line(4,0)  +  Line(0,-5)  +  Line(-4,0)],
-        'star': [Point(0,0)  +  Line(2,5)  +  Line(2,-5)  +  Line(-5,3)  +  Line(6,0)  +  Line(-5,-3)],
-        'triangle': [Point(0,0)  +  Line(-3,-4)  +  Line(6,0)  +  Line(-3,4)],
+        #'right_sq_bracket': [Point(0,0)  +  Line(4,0)  +  Line(0,-5)  +  Line(-4,0)],
+        #'star': [Point(0,0)  +  Line(2,5)  +  Line(2,-5)  +  Line(-5,3)  +  Line(6,0)  +  Line(-5,-3)],
+        #'triangle': [Point(0,0)  +  Line(-3,-4)  +  Line(6,0)  +  Line(-3,4)],
         'v': [Point(0,0)  +  Line(2,-3)  +  Line(2,3)],
-        'x': [Point(0,0)  +  Line(3,-3)  +  Line(0,3)  +  Line(-3,-3)]
+        #'x': [Point(0,0)  +  Line(3,-3)  +  Line(0,3)  +  Line(-3,-3)]
     }
     # datasets
     gesture_dataset = {
         'arrow': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/arrow/")]),
-        'caret': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/caret/")]),
+        #'caret': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/caret/")]),
         #'check': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/check/")]),
         #'circle':(4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/circle/")]),
-        'delete_mark': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/delete_mark/")]),
+        #'delete_mark': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/delete_mark/")]),
         #'left_curly_brace': (6,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/left_curly_brace/")]),
-        'left_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/left_sq_bracket/")]),
+        #'left_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/left_sq_bracket/")]),
         #'pigtail': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/pigtail/")]),
         #'question_mark': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/question_mark/")]),
-        'rectangle': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/rectangle/")]),
+        #'rectangle': (4,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/rectangle/")]),
         #'right_curly_brace': (6,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/online/right_curly_brace/")]),
-        'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/right_sq_bracket/")]),
-        'star': (5,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/star/")]),
-        'triangle': (3, [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/triangle/")]),
+        #'right_sq_bracket': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/right_sq_bracket/")]),
+        #'star': (5,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/star/")]),
+        #'triangle': (3, [CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/triangle/")]),
         'v': (2,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/v/")]),
-        'x': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/x/")])
+        #'x': (3,[CsvDatasetExtended(Config.baseDir+"deictic/1dollar-dataset/primitives/x/")])
     }
 
     # Tree
-    tree=Tree(gesture_exp=expressions)
+    #tree=Tree(gesture_exp=expressions)
+    tree = Node.createTree(expressions)
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-    results = Test.onlineTest(tree=tree,
-                              gesture_datasets=gesture_dataset,
-                              perc_completed=100)
-    # show result through confusion matrix
-    results.confusion_matrix.plot()
-    # save result on csv file
-    #results.save(path=None)
+    for perc in [25,50,75,100]:
+        results = Test.onlineTest(tree=tree,
+                                  gesture_datasets=gesture_dataset,
+                                  perc_completed=perc)
+        # show result through confusion matrix
+        results.confusion_matrix.plot()
+        # save result on csv file
+        #results.save(path=None)
 
-def sixtExample():
+def seventhExample():
     import matplotlib.pyplot as plt
     expressions = {
-        'arrow': [Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)],
-        'check': [Point(0,0)  +  Line(2,-2)  +  Line(4,6)]
-    }
-    gestures = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
-    gestures_datasets = {
-        'check': CsvDatasetExtended(Config.baseDir+'deictic/1dollar-dataset/resampled/check/')
+        'gesture_1': [Point(0,0) + Line(1,3)],
+        'gesture_2': [Point(0,0) + Line(1,3) + Line(-1,-4)],
+        'gesture_3': [Point(0,0) + Line(1, 3) + Line(-1, -4) + Line(3,4)]
+        #'gesture_3': [Point(0,0) + Line(1,3) + Line(4,6)]
     }
 
-    for label,dataset in gestures_datasets.items():
-        for sequence in dataset.readDataset():
-            sequence.plot()
-            for gesture_name,hmms in gestures.items():
-                print(gesture_name)
-                for hmm in hmms:
-                    log_probability=Test.findLogProbability(sequence.getPoints(columns=[0,1]),model=hmm)
-                    print(str(log_probability))
-                    #example = hmm.sample()
-                    #x = [item[0] for item in example]
-                    #y = [item[1] for item in example]
-                    #plt.plot(x,y)
-                    #plt.show()
+    #tree = Node.createTree(expressions)
+    #hmms = tree.getModels()
+    #print(hmms)
+
+    #hmms2 = {}
+    #for key,expr in expressions.items():
+    #    for e in expr:
+    #        e.label = key
+    #        Node2(expression=e, dictionary=hmms2)
+
+    for key,expr in expressions.items():
+        for e in expr:
+            print(key)
+            model = ModelExpression.createHmm(expression = e)
+            # debug
+            print("Num_States: " + str(len(model.states)))
+            print("\n")
+
+    #print(hmms2)
+
+def eightExample():
+    exp = Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)
+    from model import CompositeExp
+
+    hmms = []
+    while isinstance(exp,CompositeExp):
+        states = 6#(5-exp.get_numOperands())+6
+        print("Num_states: "+str(states))
+        hmm,states = ModelExpression.createHmm(expression=copy.deepcopy(exp), factory=ClassifierFactory(num_states=states,spu=20))
+        hmms.append(hmm)
+        exp = exp.left
+        print("States: "+str(len(hmm.states)))
+        print("\n\n")
+
 
 # Start example
-fifthExample()
+#fourthExample()
+sixthExample()
+#seventhExample()

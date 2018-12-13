@@ -1,6 +1,77 @@
 import more_itertools as mit
 from gesture import *
 from sys import stdout
+# copy
+import copy
+
+
+class Node2():
+
+    def __init__(self, expression=None, dictionary={}):
+        # check
+        if expression is not None and not isinstance(expression, GestureExp):
+            raise TypeError
+
+        self._expression = copy.deepcopy(expression)
+        if isinstance(self._expression, CompositeExp):
+            self._expression.left.label = self._expression.label
+            Node2(self._expression.left, dictionary)
+            self._expression.right.label = self._expression.label
+            Node2(self._expression.right, dictionary)
+            if not self._expression.label in dictionary:
+                label = self._expression.label+"_part_"+str(self._expression.get_numOperands())
+                dictionary[label] = []
+            dictionary[label].append(ModelExpression.createHmm(copy.deepcopy(expression)))
+
+
+
+class Node():
+
+    def __init__(self, expression=None, label=None, father=None):
+        # check
+        if expression is not None and not isinstance(expression, GestureExp):
+            raise TypeError
+        # initialize parameters
+        self._expression = copy.deepcopy(expression)
+        self._label = label
+        self._hmm = None
+        self._sons = []
+        # create sons
+        if isinstance(self._expression, CompositeExp):
+            if not self._expression.left in father:
+                # left
+                self._sons.append(Node(self._expression.left, label, father))
+            # right
+            self._sons.append(Node(self._expression.right, label, father))
+            # create hmm
+            self._hmm = ModelExpression.createHmm(expression=copy.deepcopy(expression))
+
+    def __contains__(self, expression):
+        if (self._expression is not None and self._expression == expression) or \
+        any([(expression in son) for son in self._sons]):
+            return True
+        return False
+
+    def returnModels(self, dict={}):
+        if isinstance(self._expression, CompositeExp):
+            label = self._label+"_pt_"+str(self._expression.get_numOperands())
+            dict[label] = [self._hmm]
+        for son in self._sons:
+            son.returnModels(dict)
+        return dict
+
+    @staticmethod
+    def createTree(expressions):
+        # check
+
+        tree = Node()
+        for key,expression in expressions.items():
+            for expr in expression:
+                expr.label = key
+                tree._sons.append(Node(expression=expr, label=key, father=tree))
+        return tree
+
+
 
 class Tree(object):
 

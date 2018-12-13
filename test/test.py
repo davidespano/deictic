@@ -14,7 +14,7 @@ from gesture import ModelExpression
 from dataset import CsvDataset, Sequence, CsvDatasetExtended
 # hidden markov model
 from pomegranate import HiddenMarkovModel
-from real_time.tree_test import Tree
+from real_time.tree_test import Tree, Node, Node2
 # namedtuple
 from collections import namedtuple
 import copy
@@ -265,7 +265,7 @@ class Test():
     @classmethod
     def onlineTest(self, tree, gesture_datasets, perc_completed=100, samples=20):
         # gesture hmms #
-        if not isinstance(tree, Tree):
+        if not isinstance(tree, (Tree,Node)):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         # gesture datasets
         try:
@@ -363,6 +363,7 @@ class Test():
             return index_label
         else:
             return index_label, log_probabilities
+
     @staticmethod
     def findLogProbability(sequence, model):
         """

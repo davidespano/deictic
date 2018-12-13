@@ -1,5 +1,6 @@
 # classifier factory
 from gesture.declarativeModel import ClassifierFactory
+from gesture.declarativeModelExt import ClassifierFactoryExt
 # recognizer type
 from model.gestureModel import TypeRecognizer, GestureExp, CompositeExp
 
@@ -31,13 +32,13 @@ class ModelExpression():
         for gesture_label in expressions.keys():
             hmms[gesture_label] = []
             for expression in expressions[gesture_label]:
-                model, states = ModelExpression.createHmm(expression=expression, factory=factory)
+                model = ModelExpression.createHmm(expression=expression, factory=factory)
                 hmms[gesture_label].append(model)
         return hmms
 
 
     @staticmethod
-    def createHmm(expression, factory):
+    def createHmm(expression, factory=ClassifierFactoryExt(num_states=6,spu=20)):#=ClassifierFactory(num_states=6, spu=20)):
         """
             starting from a deictic expression and a classifier factory, that function returns the hmm which implements
             the given expression.
@@ -46,6 +47,5 @@ class ModelExpression():
         :return:
         """
         model,states = factory.createClassifier(expression)
-        factory.plot()
-        return model,states
+        return model
 
