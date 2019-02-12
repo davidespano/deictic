@@ -13,8 +13,8 @@ class DistributionFactory():
     # public methods
     def __init__(self, type=None):
         """
-        :param type: specifies the recognizer type (online or offine) and, consequently, the distribution type.
-        :param chars: at the moment is used only for the online recognizer.
+        :param type: specifies the recognizer type (parsed or offine) and, consequently, the distribution type.
+        :param chars: at the moment is used only for the parsed recognizer.
         """
         self.__function = {
             TypeRecognizer.offline: self.__NormalDistribution,

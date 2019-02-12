@@ -6,6 +6,9 @@ from config import Config
 # imports #
 import numpy
 import random
+import os
+import copy
+import csv
 random.seed()
 
 # todo: tutorial #
@@ -253,8 +256,8 @@ if mode == 7:
         for i in range(0, 10):
             dataset.ten_cross_validation(outputDir+gesture+'/', i, rates, file_array)
             #ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
-########################################## 1-dollar online primitives ##########################################################
-from real_time.tree_test import *
+########################################## 1-dollar parsed primitives ##########################################################
+from real_time.tree import *
 if mode == 8:
     gesture_dataset = {
         'arrow': [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")],
@@ -291,6 +294,6 @@ if mode == 8:
             new_column = numpy.concatenate([numpy.full(shape=(dim[0],1),fill_value=dim[1])
                                             for dim in primitives[file.filename]])
             file.points = numpy.column_stack([file.points, new_column])
-            file.save(Config.baseDir+'deictic/1dollar-dataset/online/'+key+'/')
+            file.save(Config.baseDir+'deictic/1dollar-dataset/parsed/'+key+'/')
 
 

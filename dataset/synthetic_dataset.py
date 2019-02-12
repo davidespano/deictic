@@ -1,6 +1,7 @@
 from dataset import *
 import random
-### Makes synthetic datasets  ###
+
+### Create synthetic datasets  ###
 
 random.seed()
 

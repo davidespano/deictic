@@ -5,7 +5,7 @@ from .geometry import *
 # Kalman filter
 from pykalman import KalmanFilter
 # Parsing
-from real_time.parsing_trajectory.trajectory_parsing import Parsing
+from real_time.g_gene.trajectory_parsing import Parsing
 # math/numpy
 import csv
 import numpy as np
@@ -608,7 +608,7 @@ class ParseSamples(DatasetTransform):
         self.dir=None
     #
     def transform(self, sequence):
-        return Parsing.parsingLine(sequence=sequence[:, [0, 1]]).getLabels()
+        return Parsing.parsingLine(sequence=sequence[:, [0, 1]])
 
 class NormaliseSamples:
 

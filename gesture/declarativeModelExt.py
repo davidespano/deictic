@@ -8,14 +8,10 @@ from gesture import ClassifierFactory, ModelPreprocessor
 
 class ClassifierFactoryExt(ClassifierFactory):
 
-    def createClassifier(self, exp):
-        """
-
-        :param exp:
-        :return:
-        """
+    @staticmethod
+    def normalize(expression):
         # center and normalise the ideal model definition
-        processor = ModelPreprocessor(exp)
+        processor = ModelPreprocessor(expression)
         transform1 = CenteringTransform()
         transform2 = NormaliseLengthTransform(axisMode=True)
         # transform3 = RotateCenterTransform(traslationMode=True)####
@@ -23,16 +19,24 @@ class ClassifierFactoryExt(ClassifierFactory):
         # processor.transforms.addTranform(transform3)####
         processor.transforms.addTranform(transform2)
         processor.preprocess()
-        # exp.plot()
+        return expression
+
+    def createClassifier(self, expression):
+        """
+
+        :param exp:
+        :return:
+        """
+        expression = ClassifierFactoryExt.normalize(expression)
         startPoint = [0, 0]
         self.strokeList = []
         self.stroke = -1
-        self.parseStrokes(exp)
+        self.parseStrokes(expression)
         self.stroke = -1
         # set distance
-        self.distance = exp.get_distance()
-        expType, operands = self.parseExpression(exp, startPoint)
-        return self.createHMM(str(exp), expType, operands)
+        self.distance = expression.get_distance()
+        expType, operands = self.parseExpression(expression, startPoint)
+        return self.createHMM(str(expression), expType, operands)
 
     def parseExpression(self, exp, startPoint, d=False):
         """

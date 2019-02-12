@@ -25,14 +25,13 @@ def plot_confusion_matrix(cm, classes,
     plt.rcParams.update({'font.size': 10})
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
-    plt.colorbar()
+    #plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
 
     if normalize:
         den = cm.sum(axis=1)[:, np.newaxis]
-        print(den)
         cm = cm.astype('float') / den[0]
         print("Normalized confusion matrix")
     else:
@@ -43,8 +42,8 @@ def plot_confusion_matrix(cm, classes,
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         if(cm[i,j] >= 0.01):
-            plt.text(j, i, cm[i,j],
-                     #"{0:.2f}".format(cm[i, j]),
+            plt.text(j, i, #cm[i,j],
+                     "{0:.2f}".format(cm[i, j]),
                      horizontalalignment="center",
                      color="white" if cm[i, j] > thresh else "black")
 
@@ -480,6 +479,15 @@ def opPlot(matrix, names, title):
 #accuracy(deictic_multistroke, 600);
 
 
-plot_confusion_matrix(deictic_unistroke_online, classes=online_uni_class_names, normalize=False,
-                       title='Confusion matrix', cmap=plt.cm.Blues)
-plt.show()
+#plot_confusion_matrix(deictic_unistroke_online, classes=online_uni_class_names, normalize=True,
+#                       title='Confusion matrix', cmap=plt.cm.Blues)
+#plt.show()
+
+from model import *
+
+circle_exp = Point(0, 0) + Arc(3,-3, cw=True) + Arc(-3,-3, cw=True) + Arc(-3,3, cw=True) + Arc(3,3, cw=True)
+circle_exp.plot()
+z_exp = Point(0,0)+Line(2,0)+Line(-2,-3)+Line(2,0)
+z_exp.plot()
+z_exp = Point(0,0)+Line(-2,0)+Line(2,3)+Line(-2,0)
+z_exp.plot()

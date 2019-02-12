@@ -9,7 +9,7 @@ class ModelExpression():
     @staticmethod
     def generatedModels(expressions, type=TypeRecognizer.offline, num_states = 6, spu = 20):
         """
-            Given a deictic expression, this method returns its online or offline hmm model.
+            Given a deictic expression, this method returns its parsed or offline hmm model.
         :param expressions: the deictic expressions which describes the models.
         :param type:
         :param num_states: the number of states of the new model.
@@ -26,7 +26,7 @@ class ModelExpression():
         if not isinstance(spu, (int,float)):
             raise TypeError
         # Classifier factory
-        factory = ClassifierFactory(type=type, num_states=num_states, spu=spu)
+        factory = ClassifierFactoryExt(type=type, num_states=num_states, spu=spu)
         # Create hmms
         hmms = {}
         for gesture_label in expressions.keys():

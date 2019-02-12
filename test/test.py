@@ -14,7 +14,7 @@ from gesture import ModelExpression
 from dataset import CsvDataset, Sequence, CsvDatasetExtended
 # hidden markov model
 from pomegranate import HiddenMarkovModel
-from real_time.tree_test import Tree, Node, Node2
+from real_time.tree import Tree, Node, Node2
 # namedtuple
 from collections import namedtuple
 import copy
@@ -33,12 +33,13 @@ class ConfusionMatrix():
     ### Public methods ###
     def __init__(self, gesture_labels = []):
         # Check parameters
-        if not isinstance(gesture_labels, (list, dict)):
-            raise Exception("gesture_labels must be a list of object.")
-        if isinstance(gesture_labels, dict):
-            gesture_labels = [key for key in gesture_labels]
-        # gesture_labels
-        self.__labels = sorted(gesture_labels)
+        #if not isinstance(gesture_labels, (list, dict)):
+        #    raise Exception("gesture_labels must be a list of object.")
+        #if isinstance(gesture_labels, dict):
+        #    gesture_labels = [key for key in gesture_labels]
+        if not isinstance(gesture_labels, list):
+            raise Exception
+        self.__labels =  sorted(gesture_labels)
         # array (the core of the confusion matrix)
         self.__array = numpy.zeros((len(self.__labels), len(self.__labels)), dtype=int)
         # array (if the sequences have a name it contains, for each model, the list of wrong recognized files)
@@ -109,6 +110,7 @@ class ConfusionMatrix():
         """
             This function prints and plots the confusion matrix.
             Normalization can be applied by setting `normalize=True`.
+        :param percentage:
         :param normalize:
         :param title:
         :param cmap:
@@ -131,7 +133,6 @@ class ConfusionMatrix():
 
         if normalize:
             den = self.__array.sum(axis=1)[:, numpy.newaxis]
-            print(den)
             self.__array = self.__array.astype('float') / den[0]
             print("Normalized confusion matrix")
         else:
@@ -153,7 +154,7 @@ class ConfusionMatrix():
 
     def __add__(self, other):
         """
-            The sum operator allows the developers to add the results of differents iterations (of course, the two objects have to go the same labels).
+            The sum operator allows the developers to add the results of differents iterations (the two objects must have same labels).
         :param other:
         :return:
         """
@@ -230,11 +231,11 @@ class Test():
         if not isinstance(gesture_hmms, dict):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
         # gesture datasets
-        try:
-            gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
-                                 else dataset.readDataset()]
-                              for label,datasets in gesture_datasets.items()}
-        except: raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
+        #try:
+        #    gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
+        #                         else dataset.readDataset()] for label,dataset in gesture_datasets.items()}
+        #except:
+        #    raise Exception("gesture_datasets must be a dictionary of CsvDatasetExtended objects.")
 
         # assigned parameters
         cls.gesture_hmms = gesture_hmms
@@ -242,12 +243,11 @@ class Test():
         # confusion matrix for showing the results
         cls.result = CompareResult(confusion_matrix=ConfusionMatrix(gesture_labels),
                                     log_probabilities={key:[] for key in gesture_labels})
-
         # comparing gesture_hmms
         for gesture_label, datasets in gesture_datasets.items():
             # start comparison for each dataset
             for dataset in datasets:
-                cls.__comparison(sequences=dataset, row_label=gesture_label)
+                cls.__comparison(sequences=dataset.readDataset(), row_label=gesture_label)
         # return comparison results
         return cls.result
     @classmethod
@@ -263,10 +263,14 @@ class Test():
         # start comparison
         return cls.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
     @classmethod
-    def onlineTest(self, tree, gesture_datasets, perc_completed=100, samples=20):
-        # gesture hmms #
-        if not isinstance(tree, (Tree,Node)):
+    def onlineTest(self, gesture_hmms, gesture_datasets, perc_completed=100, best_hmm=1):
+        # check #
+        # gesture hmms
+        #if not isinstance(tree, (Tree,Node)):
+        #    raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
+        if not isinstance(gesture_hmms, dict):
             raise Exception("gesture_hmms must be a dictionary of hidden markov models.")
+        self.gesture_hmms = gesture_hmms
         # gesture datasets
         try:
             gesture_datasets={label:GestureDatasetOnline(num_primitives=item[0],
@@ -274,21 +278,19 @@ class Test():
                                                                    else dataset.readDataset()
                                                                    for dataset in item[1]])
                               for label,item in gesture_datasets.items()}
-            #gesture_datasets={label:[dataset if isinstance(dataset, (numpy.ndarray, list))
-            #                         else dataset.readDataset()]
-            #                  for dataset in datasets
-            #                  for label,datasets in gesture_datasets.items()}
         except: raise Exception("gesture_datasets must be a dictionary of CsvDataset objects.")
-        # perc completed #
+        # perc completed
         if not isinstance(perc_completed, (int,float)):
             raise TypeError
-        # samples #
-        if not isinstance(samples, int):
-            raise TypeError
+        # samples
+        samples = 20
 
-        # assigned parameters
-        self.gesture_hmms = tree.returnModels()
+        # get list of hmms
         gesture_labels = list(self.gesture_hmms.keys())
+        for key in copy.deepcopy(gesture_labels):
+            if isinstance(key, tuple):
+                gesture_labels.remove(key)
+                gesture_labels = gesture_labels + list(itertools.chain(key))
         # confusion matrix for showing the results
         self.result = CompareResult(confusion_matrix=ConfusionMatrix(gesture_labels),
                                       log_probabilities={key:[] for key in gesture_labels})
@@ -313,13 +315,13 @@ class Test():
                     primitive_to_recognize = (sequence.getPoints([-1])[-1])+1
                     row_label = gesture_label+"_pt_"+str(int(primitive_to_recognize[0]))
                     # compare models
-                    self.__comparison(sequences=[sequence], row_label=row_label)
+                    self.__comparison(sequences=[sequence], row_label=row_label, best_hmm=best_hmm)
         # return comparison results
         return self.result
 
     # public and static methods #
     @staticmethod
-    def compare(sequence, gesture_hmms, return_log_probabilities = False):
+    def compare(sequence, gesture_hmms):
         """
             given a sequence, this method computes the log probability for each model and returns the model with the highest norm log probability.
         :param sequence: a sequence of frame which describes an user movement.
@@ -334,9 +336,7 @@ class Test():
 
         # setting parameters
         # Max probability "global"
-        max_norm_log_probability = -sys.maxsize
-        # Model label with the best norm log proability for that sequence
-        index_label = None
+        #max_norm_log_probability = -sys.maxsize
         # Log probability values
         log_probabilities = {}
 
@@ -351,18 +351,9 @@ class Test():
                 if norm_log_probability > local_norm_log_probabilty:
                     local_norm_log_probabilty = norm_log_probability
             # Collect additional data, if necessary (whether additional_data is true)
-            if return_log_probabilities:
-                log_probabilities[gesture_label] = local_norm_log_probabilty
-            # Check which is the best model
-            if (local_norm_log_probabilty > max_norm_log_probability):
-                max_norm_log_probability = local_norm_log_probabilty
-                index_label = gesture_label
-        # Comparison completed, index_label contains the best global model while
-        # log_probabilities the norm log probabilities of each model for the passed sequence.
-        if not return_log_probabilities:
-            return index_label
-        else:
-            return index_label, log_probabilities
+            log_probabilities[gesture_label] = local_norm_log_probabilty
+        # log_probabilities contains the norm log probabilities of each model for the passed sequence.
+        return log_probabilities
 
     @staticmethod
     def findLogProbability(sequence, model):
@@ -372,10 +363,10 @@ class Test():
         :param model:
         :return:
         """
-        # Check parameters
+        # check
         if not isinstance(model, HiddenMarkovModel):
             raise TypeError
-        # Compute sequence's log-probability and its normalized
+        # find log-probability and its normalized
         log_probability = model.log_probability(sequence)
         norm_log_probability = log_probability/len(sequence)
         return norm_log_probability
@@ -389,22 +380,26 @@ class Test():
         return 1
 
     @classmethod
-    def __comparison(self, sequences, row_label):
+    def __comparison(self, sequences, row_label, best_hmm=1):
         """
             given a list of sequence, this method updates the result array based on the comparison of each model.
-        :param result: a ConfusionMatrix object
         :param sequences: a list of sequence frames.
-        :param dataset_label: the list of gesture labels.
+        :param row_label: the list of gesture labels.
         :return:
         """
-        # check sequences
-
         # Get each sequence
         for sequence in sequences:
-            index_label,probabilities = Test.compare(sequence.getPoints(columns=[0,1]),
-                                                     self.gesture_hmms, return_log_probabilities=True)
+            # get log_probabilities obtained from sequence
+            probabilities = Test.compare(sequence.getPoints(columns=[0,1]),self.gesture_hmms)
+            # verify if row_label is contained in the firsts x elements (default, x=1)
+            keys = []
+            for key,value in sorted(probabilities.items(), key=lambda kv: kv[1], reverse=True)[:best_hmm]:
+                if isinstance(key, tuple):
+                    keys=keys+list(itertools.chain(key))
+                else:
+                    keys.append(key)
+            index_label = row_label if row_label in keys else keys[0]
             # Update results
-            if index_label != None:
-                self.result.confusion_matrix.update(row_label=row_label, column_label=index_label,
-                                                      id_sequence=sequence.filename)
-                self.result.log_probabilities[row_label].append((sequence.filename, probabilities))
+            self.result.confusion_matrix.update(row_label=row_label, column_label=index_label,
+                                                  id_sequence=sequence.filename)
+            self.result.log_probabilities[row_label].append((sequence.filename, probabilities))

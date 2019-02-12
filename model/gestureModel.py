@@ -111,6 +111,9 @@ class GestureExp:
         self.get_points(pointList)
         return numpy.array(pointList)
 
+    def set_label(self, label):
+        self.label = label
+
     def clone(self):
         return GestureExp()
 
@@ -162,6 +165,11 @@ class CompositeExp(GestureExp):
 
     def is_composite(self):
         return True
+
+    def set_label(self, label):
+        self.label = label
+        self.left.set_label(label)
+        self.right.set_label(label)
 
     def get_path(self, path, current):
         self.left.get_path(path, current)

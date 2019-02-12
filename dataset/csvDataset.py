@@ -12,13 +12,10 @@ import os
 import copy
 from shutil import copyfile
 # random
-import datetime
 import random
 # HiddenMarkovModel
 from pomegranate import HiddenMarkovModel
-# groupby
-from itertools import groupby
-
+import ast
 
 class DatasetIterator:
 
@@ -286,7 +283,6 @@ class CsvDatasetExtended(CsvDataset):
         if not isinstance(dir, str):
             raise TypeError
         if not os.path.isdir(dir):
-            print(dir)
             raise NotADirectoryError
         # Initialize parameters
         super(CsvDatasetExtended,self).__init__(dir, type)
@@ -301,7 +297,7 @@ class CsvDatasetExtended(CsvDataset):
         if not isinstance(filename, str):
             raise TypeError
         if not os.path.isfile(self.dir+filename):
-            raise FileNotFoundError
+            raise FileNotFoundError(self.dir+filename)
         return Sequence.fromFile(filepath=self.dir+filename, type=self.type)
 
     def readDataset(self):
@@ -374,7 +370,7 @@ class Sequence(object):
     """
     def __init__(self, points, filename=None):
         # check
-        if not isinstance(points, numpy.ndarray):
+        if not isinstance(points, (numpy.ndarray, list)):
             raise TypeError
         # initialize parameters
         self.points = points
@@ -425,7 +421,11 @@ class Sequence(object):
         if not os.path.exists(output_dir):
             # create dir
             os.makedirs(output_dir)
-        numpy.savetxt(output_dir + self.filename, self.points, delimiter=',')
+        #numpy.savetxt(output_dir + self.filename, self.points, delimiter=',')
+        with open(output_dir + self.filename, "w+") as my_csv:
+            csvWriter = csv.writer(my_csv, delimiter=',')
+            csvWriter.writerows(self.points)
+
     def plot(self, dimensions=2):
         """
 
@@ -460,13 +460,13 @@ class Sequence(object):
         """
         # check
         if not isinstance(columns,list):
-            raise TypeError("dimensions must be int!")
+            raise TypeError("dimensions must be a list of integer!")
         # return the sliced array
-        # todo: error in self.points[:,columns]
+        # numbers #
         points = []
         for point in self.points:
             points.append(point[columns])
-        return numpy.array(points) #points #self.points[:, columns]
+        return numpy.array(points)
 
     def getIndexPrimitives(self, col=-1):
         """
@@ -519,11 +519,11 @@ class Sequence(object):
             raise TypeError
         if not os.path.isfile(filepath):
             raise FileNotFoundError
-        # read file
-        with open(filepath, "r") as f:
-            reader = csv.reader(f, delimiter=',')
+        # read file #
+        with open(filepath, "r") as file:
+            reader = csv.reader(file, delimiter=',')#';')
             vals = list(reader)
-            points = numpy.array(vals).astype(type)
+            points=numpy.array(vals).astype(type)
         # get filename
         filename = filepath.split('/')[-1]
         return points, filename

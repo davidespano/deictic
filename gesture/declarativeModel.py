@@ -23,7 +23,7 @@ class ClassifierFactory:
         self.line = Config.trainingDir  # path training files - line
         self.arc_cw = Config.arcClockWiseDir  # path training files - arc clock wise
         self.arc_ccw = Config.arcCounterClockWiseDir  # path training files - arc counter clock wise
-        self.type = type  # (offline or online?)
+        self.type = type  # (offline or parsed?)
         self.states = num_states  # state numbers of model
         self.spu = spu  # samples per unit
         self.scale = 100
@@ -109,10 +109,6 @@ class ClassifierFactory:
             distance = Geometry2D.distance(0,0, exp.dx, exp.dy)
             samples = round(distance * self.spu)
             n_states = round(distance * self.states + 0.5)
-            #### debug
-            print("Expr: "+str(exp))
-            print("Distance: "+str(distance)+" - num_states: "+str(n_states) +" - samples: "+ str(samples))
-            ####
 
             # get samples
             dataset = CsvDataset(self.line)# reads the raw data
@@ -374,7 +370,7 @@ class ClassifierFactory:
                 gaussianY = NormalDistribution(b, self.scale * 0.01)
                 distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
         else:
-            # online
+            # parsed
             distributions = self.__DiscreteDistribution(num_states, distributions)
 
         return topology_factory.forward(name, num_states, distributions)
@@ -434,7 +430,7 @@ class ClassifierFactory:
                     beta += step
                 distributions.append(IndependentComponentsDistribution([gaussianX, gaussianY]))
         else:
-            # online
+            # parsed
             distributions = self.__DiscreteDistribution(num_states, distributions)
 
         return topology_factory.forward(name, num_states, distributions)
@@ -586,7 +582,7 @@ class ModelPreprocessor:
     #     def getInstance(self):
     #         if self.singleton == None:
     #             self.__function= {
-    #                 TypeRecognizer.online: self.__DiscreteDistribution,
+    #                 TypeRecognizer.parsed: self.__DiscreteDistribution,
     #                 TypeRecognizer.offline: self.__NormalDistribution,
     #                 Arc: self.__NormalDistributionArc,
     #                 Line: self.__NormalDistributionLine,

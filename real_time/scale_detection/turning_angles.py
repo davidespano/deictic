@@ -1,7 +1,7 @@
 from dataset import CsvDataset, RemovingFrames, ResampleInSpaceTransform
 from real_time.scale_detection import ArtificialSequence
 from config import Config
-from real_time.parsing_trajectory.trajectory_parsing import MathUtils
+from real_time.g_gene.trajectory_parsing import MathUtils
 from gesture.datasetExpressions import DatasetExpressions
 from model import Point, Line, Arc
 import os
@@ -190,7 +190,7 @@ def test_sara():
 #     dataset.addTransform(transform_kalman)
 #     dataset.applyTransforms(output_dir=output_dir+name+'/')
 #     print(name + ' done!')
-# templates naif #
+# template naif #
 #dictionary = DatasetExpressions.returnExpressions(DatasetExpressions.TypeDataset.unistroke_1dollar)
 # dictionary = {  'circle_2': [(Point(0,0) +Arc(3,3,False)+Arc(-3,3,False))],
 #                'circle_3': [(Point(0,0) +Arc(3,3,False)+Arc(-3,3,False)+Arc(-3,-3,False))],
@@ -230,7 +230,7 @@ def test_sara():
 #### turning angles ####
 none_count = 0
 for name in ['circle']:#os.listdir(output_dir):
-    #### templates ####
+    #### template ####
     dictionary = CsvDataset(filtered_dir+'circle/')
     file = dictionary.readFile("1_medium_circle_01.csv")
     template = Trajectory(file)
