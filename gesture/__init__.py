@@ -1,5 +1,3 @@
-from .declarativeModel import *
-from .declarativeModelExt import *
+from .declarativeModel import ClassifierFactory
 from .datasetExpressions import DatasetExpressions, DatasetFolders, TypeDataset
-from .modellingExpression import ModelExpression
-from .distributionsModel import DistributionFactory
+from .createRecognizer import CreateRecognizer

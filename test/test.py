@@ -10,11 +10,10 @@ import itertools
 # csv
 import csv
 # Deictic
-from gesture import ModelExpression
-from dataset import CsvDataset, Sequence, CsvDatasetExtended
+from gesture import CreateRecognizer
 # hidden markov model
 from pomegranate import HiddenMarkovModel
-from real_time.tree import Tree, Node, Node2
+from online.tree import Tree, Node, Node2
 # namedtuple
 from collections import namedtuple
 import copy
@@ -207,18 +206,18 @@ class ConfusionMatrix():
 class Test():
 
     # public and class methods #
-    @classmethod
-    def offlineTestExpression(cls, gesture_expressions, gesture_datasets):
-        """
-            offlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
-        :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
-        :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
-        :return: comparison results
-        """
-        # creates models
-        gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
-        # start comparison
-        return cls.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
+    # @classmethod
+    # def offlineTestExpression(cls, gesture_expressions, gesture_datasets):
+    #     """
+    #         offlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
+    #     :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
+    #     :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
+    #     :return: comparison results
+    #     """
+    #     # creates models
+    #     gesture_hmms = GenerateModel.generateHMMs(expressions=gesture_expressions)
+    #     # start comparison
+    #     return cls.offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets)
     @classmethod
     def offlineTest(cls, gesture_hmms, gesture_datasets):
         """
@@ -250,18 +249,18 @@ class Test():
                 cls.__comparison(sequences=dataset.readDataset(), row_label=gesture_label)
         # return comparison results
         return cls.result
-    @classmethod
-    def onlineTestExpression(cls, gesture_expressions, gesture_datasets):
-        """
-            onlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
-        :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
-        :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
-        :return: comparison results
-        """
-        # creates models
-        gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
-        # start comparison
-        return cls.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, type=float)
+    # @classmethod
+    # def onlineTestExpression(cls, gesture_expressions, gesture_datasets, best_hmm=1):
+    #     """
+    #         onlineTestExpression creates the models, starting from the passed expressions, and starts the comparison.
+    #     :param gesture_expressions: a dictionary of deictic expressions (key is the gesture label, values are his expressions).
+    #     :param gesture_datasets: is a dictionary of CsvDataset objects (key is the gesture label, value is the linked dataset).
+    #     :return: comparison results
+    #     """
+    #     # creates models
+    #     gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
+    #     # start comparison
+    #     return cls.onlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_datasets, best_hmm=best_hmm)
     @classmethod
     def onlineTest(self, gesture_hmms, gesture_datasets, perc_completed=100, best_hmm=1):
         # check #

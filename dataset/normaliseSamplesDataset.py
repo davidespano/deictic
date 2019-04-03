@@ -5,7 +5,7 @@ from .geometry import *
 # Kalman filter
 from pykalman import KalmanFilter
 # Parsing
-from real_time.g_gene.trajectory_parsing import Parsing
+from online.g_gene.trajectory_parsing import Parsing
 # math/numpy
 import csv
 import numpy as np

@@ -14,10 +14,6 @@ from matplotlib.text import TextPath
 from matplotlib.transforms import Affine2D
 from shlex import shlex
 
-class TypeRecognizer(Enum):
-    online = 0
-    offline = 1
-
 class OpEnum(Enum):
     Undef = -1
     Point = 0

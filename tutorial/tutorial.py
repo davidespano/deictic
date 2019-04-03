@@ -1,12 +1,9 @@
-from gesture import ModelExpression, DatasetExpressions, ClassifierFactory, DatasetFolders, TypeDataset
+from gesture import CreateRecognizer, DatasetExpressions, ClassifierFactory, DatasetFolders, TypeDataset
 from model.gestureModel import Point, Line, Arc
 from dataset import *#CsvDataset, CsvDatasetExtended, Sequence, ResampleInSpaceTransformOnline
-from real_time.tree.recognition import plotCsvFile
 from test import Test
 from config import Config
-from real_time.tree import *
-
-import numpy
+from online.tree import *
 
 
 def firstExample():
@@ -21,7 +18,7 @@ def firstExample():
                 ]
             }
     # create deictic model for swipe_right
-    hmm_swipe_right = ModelExpression.generatedModels(expressions = expressions, num_states = 6, spu = 20)
+    hmm_swipe_right = CreateRecognizer.createHMMs(expressions = expressions, num_states = 6, spu = 20)
     print(hmm_swipe_right)
 
 
@@ -43,7 +40,7 @@ def secondExample():
     # get swipe right and swipe left datasets
     gesture_dataset = None
     # create deictic model for swipe right and left
-    gesture_hmms = ModelExpression.generatedModels(gesture_expressions)
+    gesture_hmms = CreateRecognizer.createHMMs(gesture_expressions)
     # start log-probability-based test
     results = Test.getInstance().offlineTest(gesture_hmms=gesture_hmms, gesture_datasets=gesture_dataset)
     # show result through confusion matrix
@@ -91,6 +88,30 @@ def fourthExample():
     gesture_expressions = DatasetExpressions.returnExpressions(
         selected_dataset=TypeDataset.unistroke_1dollar)
     # get gesture datasets
+    num_primitives = {
+        'arrow':4,
+        'caret':2,
+        'check':2,
+        'circle':4,
+        'delete_mark':3,
+        'left_curly_brace':6,
+        'left_sq_bracket':3,
+        'pigtail':4,
+        'question_mark':4,
+        'rectangle':4,
+        'right_curly_brace':6,
+        'right_sq_bracket':3,
+        'star':5,
+        'triangle':3,
+        'v':2,
+        'x':3
+    }
+    gesture_hmms={}
+    for key, num_primitive in num_primitives.items():
+        print(key)
+        gesture_hmms[key] = [CreateRecognizer.createHMM(expression, num_primitive * 6, 20) for expression in gesture_expressions[key]]
+
+    # get gesture datasets
     gesture_dataset = {
         'arrow': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/arrow/")],
         'caret': [CsvDatasetExtended(Config.baseDir + "deictic/1dollar-dataset/resampled/caret/")],
@@ -111,8 +132,7 @@ def fourthExample():
     }
 
     # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-    results = Test.offlineTestExpression(gesture_expressions=gesture_expressions,
-                                         gesture_datasets=gesture_dataset)
+    results = Test.offlineTest(gesture_hmms=gesture_hmms,gesture_datasets=gesture_dataset)
     # show result through confusion matrix
     results.confusion_matrix.plot()
     # save result on csv file
@@ -127,7 +147,7 @@ def fifthExample():
     # get the gesture expressions which describe 1$ unistroke dataset
     gesture_expressions = DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar)
     # create hmms
-    gesture_hmms = ModelExpression.generatedModels(expressions=gesture_expressions)
+    gesture_hmms = CreateRecognizer.createHMMs(expressions=gesture_expressions)
     # get sequence test (by using the first model of circle for generating a sample)
     sequence_test = gesture_hmms['circle'][0].sample()
     # compare hmms and show the computed log probabilities for each gesture
@@ -192,9 +212,9 @@ def sixthExample():
                 tree._sons.append(Node(expression=expr, father=tree, num_states=num_states))
         hmms = tree.returnModels(dict={})
         # start log-probability-based test (Test will create the gesture hmms from gesture_expressions)
-        for best_hmm in [1,2,3,4]:
+        for best_hmm in [1]:
             print('best: ' + str(best_hmm))
-            for perc in [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]:
+            for perc in [100]:#[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]:
                 results = Test.onlineTest(gesture_hmms=hmms,
                                           gesture_datasets=gesture_dataset,
                                           perc_completed=perc,
@@ -213,98 +233,10 @@ def sixthExample():
         for row in rows:
             writer.writerow(row)
 
-def seventhExample():
-    import matplotlib.pyplot as plt
-    expressions = {
-        'gesture_1': [Point(0,0) + Line(1,3)],
-        'gesture_2': [Point(0,0) + Line(1,3) + Line(-1,-4)],
-        'gesture_3': [Point(0,0) + Line(1, 3) + Line(-1, -4) + Line(3,4)]
-        #'gesture_3': [Point(0,0) + Line(1,3) + Line(4,6)]
-    }
-
-    #tree = Node.createTree(expressions)
-    #hmms = tree.getModels()
-    #print(hmms)
-
-    #hmms2 = {}
-    #for key,expr in expressions.items():
-    #    for e in expr:
-    #        e.label = key
-    #        Node2(expression=e, dictionary=hmms2)
-
-    for key,expr in expressions.items():
-        for e in expr:
-            print(key)
-            model = ModelExpression.createHmm(expression = e)
-            # debug
-            print("Num_States: " + str(len(model.states)))
-            print("\n")
-
-    #print(hmms2)
-
-def eightExample():
-    exp = Point(0,0)  +  Line(6,4)  +  Line(-4,0)  +  Line(5,1)  +  Line(-1,-4)
-    from model import CompositeExp
-
-    hmms = []
-    while isinstance(exp,CompositeExp):
-        states = 6#(5-exp.get_numOperands())+6
-        print("Num_states: "+str(states))
-        hmm,states = ModelExpression.createHmm(expression=copy.deepcopy(exp), factory=ClassifierFactory(num_states=states,spu=20))
-        hmms.append(hmm)
-        exp = exp.left
-        print("States: "+str(len(hmm.states)))
-        print("\n\n")
-
-
 # Start example
 #fourthExample()
-#sixthExample()
-#seventhExample()
+sixthExample()
 
-
-
-# open file and get accuracy
-results = {}
-with open('/home/ale/result.csv', 'r') as csvfile:
-    file = csv.reader(csvfile,delimiter=',')
-    for row in file:
-        if (row[0],row[1]) not in results:
-            results[row[0],row[1]] = []
-        results[row[0], row[1]].append((int(row[2]),float(row[3])))
-# plot graphs
-
-style = {6:('-', ['D2C0B4','8D605C','43413C','A9BABD']),
-         7:('--', ['1B212F','627C9A','B0BCCE','DCE1E7']),
-         8:('-.', ['5C4047','CB5A51','F6AA9D','E5D6CD']),
-         9:(':', ['b2d8d8','66b2b2','008080','006666']),
-         10:('-', ['green','red','blue','purple']),
-         11:('--', ['363b74','673888','c79dd7','4d1b7b']),
-         12:('-.', ['8b5a2b','ffa54f','a0522d','cd8500'])}
-
-style = {1:('-', 'green'),
-         2:('--', 'red'),
-         3:('-.', 'purple'),
-         4:(':', 'blue')}
-import matplotlib.pyplot as plt
-cont = 0
-for key,value in results.items():
-    # get data
-    row1,row2 = list(zip(*value))
-    # plot scatter
-    plt.scatter(row1, row2)
-    #for i in range(0, len(value)):
-    #    plt.annotate(str(i), (row1[i], row2[i]))
-    # plot line
-    line_style = style[int(key[1])]
-    plt.plot(row1, row2, label='States: '+key[0]+' - Bucket: '+key[1], linestyle=line_style[0])
-    cont+=1
-
-plt.ylabel("Accuracy", fontsize=20)
-plt.xlabel("% Completation", fontsize=20)
-plt.legend()
-plt.savefig('/home/ale/Scrivania/result.png',bbox_inches='tight', pad_inches=0)
-plt.show()
 
 
 

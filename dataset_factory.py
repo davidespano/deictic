@@ -152,7 +152,7 @@ def dataset_factory(names, inputDir, outputDir, unistroke_mode = True):
         print("Dataset "+gesture[0]+" completed")
     return
 
-mode = 9
+mode = 2
 n_sample = 20
 
 ########################################## Deictic Dataset ##########################################################
@@ -162,7 +162,7 @@ if mode == 1:
                     ("left_sq_bracket", 3*n_sample), ("right_sq_bracket", 3*n_sample), ("delete_mark", 3*n_sample),
                     ("star", 5*n_sample), ('check', 2*n_sample)
                     }#, ("left", n_sample), ("right", n_sample)
-    dataset_factory(list_gesture, Config.baseDir+'deictic/unica-dataset/raw/', baseDir+'deictic/unica-dataset/resampled/')
+    dataset_factory(list_gesture, Config.baseDir+'deictic/unica-dataset/raw/', Config.baseDir+'deictic/unica-dataset/resampled/')
 
 # 1Dollar
 if mode == 2:
@@ -257,7 +257,7 @@ if mode == 7:
             dataset.ten_cross_validation(outputDir+gesture+'/', i, rates, file_array)
             #ten_cross_validation_factory(list, baseDir+'deictic/mdollar-dataset/resampled/', baseDir+'deictic/mdollar-dataset/ten-cross-validation/')
 ########################################## 1-dollar parsed primitives ##########################################################
-from real_time.tree import *
+from online.tree import *
 if mode == 8:
     gesture_dataset = {
         'arrow': [CsvDatasetExtended(Config.baseDir+"Tree_test/arrow/")],

@@ -1,7 +1,5 @@
 # pomegranate
 import pomegranate
-# types
-from model.gestureModel import TypeRecognizer, OpEnum
 
 
 class DistributionFactory():

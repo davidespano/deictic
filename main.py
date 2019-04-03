@@ -1,6 +1,6 @@
 from dataset import *
 from test import *
-from gesture.modellingExpression import ModelExpression
+from gesture.createRecognizer import CreateRecognizer
 
 
 # Main
@@ -30,9 +30,9 @@ if mode in [-1, 0, 1]:
     elif mode == 0:
         base_dir = 'deictic/1dollar-dataset/resampled/'
         # get the gesture expressions which describe 1$ multistroke dataset
-        gesture_hmms = ModelExpression.generatedModels(expressions=DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar),
-                                                              num_states=n_states,
-                                                              spu=n_samples)
+        gesture_hmms = CreateRecognizer.createHMMs(expressions=DatasetExpressions.returnExpressions(selected_dataset=DatasetExpressions.TypeDataset.unistroke_1dollar),
+                                                   num_states=n_states,
+                                                   spu=n_samples)
         # get gesture datasets
         gesture_dataset = {
             'arrow': [CsvDataset(Config.baseDir +base_dir+ "arrow/")],
